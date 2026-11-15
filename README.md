@@ -15,7 +15,7 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 | `/` | Home: hero, activiteiten, foto's, over ons, shop, oproep sociale media |
 | `/activiteiten`, `/activiteiten/<slug>` | Overzicht + detail per activiteit (uit `data/activiteiten.json`) |
 | `/shop`, `/shop/<slug>` | 4 bestsellers + productpagina met opties en mandje (uit `data/shop.json` + `data/ecwid/producten.json`) |
-| `/blog` | Rubrieken, artikels volgen |
+| `/blog`, `/blog/<slug>` | Tijdlijn met uitgelicht artikel en filter per rubriek, 31 artikels |
 | `/fotos` | Fotogalerij met vergroting |
 | `/over-ons`, `/contact`, `/privacy` | Info. Privacy is een **concept**, na te kijken door het bestuur |
 | `404.html` | Eigen 404-pagina |
@@ -31,7 +31,7 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 
 - `/afrekenen` (één pagina): gegevens, levering (ophalen op activiteit / in Oostham / verzenden €7,50, gratis vanaf €100), steun ons (geen, 10%, 15%, eigen bedrag), opmerking, akkoord privacy. Daarna `/bedankt` met bestelnummer `RC-JJMMDD-XXXXX`.
 - De Worker (`src/index.js`, route `/api/bestelling`) rekent alle prijzen opnieuw uit `src/catalogus.json` (gemaakt door `bouw/build.py`) en stuurt de bestelling naar de Google Sheet. Prijzen uit de browser worden nooit vertrouwd. Spam-val: onzichtbaar veld `website`.
-- Google Sheet **"Rover & Co – Webshop bestellingen"** in Drive KLANTEN → Rover&Co (pieter@susconsult.be). Script: `bouw/apps-script/Bestellingen.gs`, stuurt een meldingsmail naar info@roverandco.be. Dubbels (zelfde bestelnummer) worden geweigerd.
+- Google Sheet **"Rover & Co – Webshop bestellingen"** in Drive KLANTEN → Rover&Co (pieter@susconsult.be). Script: `bouw/apps-script/Bestellingen.gs`, stuurt een meldingsmail naar pieter@roverandco.be. Dubbels (zelfde bestelnummer) worden geweigerd.
 - Cloudflare-variabele (Secret): `APPS_SCRIPT_URL` = web-app-adres van het script. Zonder die variabele toont de site "Bestellen is nog niet gekoppeld".
 - `TESTMODUS = true` in `src/index.js`: elke bestelling is gemarkeerd als test, er wordt niet betaald. Viva komt later tussen "Bestelling plaatsen" en `/bedankt`; SendMyParcel later bij "Verzenden".
 - Inschrijvingen voor activiteiten krijgen een apart formulier (nog te bouwen), niet via het mandje.
@@ -72,4 +72,5 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - `status: concept`: de pagina bestaat, maar met noindex, niet in de sitemap en niet op /blog. Alle concepten staan op `/blog/concepten` (niet gelinkt, noindex). Publiceren = de regel `status: concept` weghalen en opnieuw bouwen.
 - Auteurs: technische en historische artikels onder Dolf Borré, de rest onder Pieter Van Baekel. Een auteursfoto komt in `public/assets/img/auteurs/` en de bestandsnaam in `data/auteurs.json` (veld `foto`). Zolang er geen foto is, tonen we de initialen.
 - Elk artikel heeft bronnen onderaan (`## Bronnen`). Alleen feiten die in een bron staan.
-- Stand: rubriek "Land Rover in België" klaar als concept (cornerstone + 5). Nog te schrijven: Onderhoud, Geschiedenis, Community, Partners.
+- Stand: 31 artikels live in 5 rubrieken (Land Rover in België, Onderhoud, Geschiedenis, Community, Partners).
+- Regels: niets over wetgeving (O-plaat, keuring, bosdecreet, waar je mag rijden), geen claims over hoe Rover & Co rijdt. Dolf Borré schrijft ongeveer 30%, altijd de technische artikels. Info over partners alleen van hun eigen website. Nalees- en meldingsmails gaan naar pieter@roverandco.be.

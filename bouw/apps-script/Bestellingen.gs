@@ -9,7 +9,7 @@
  *  Na elke wijziging aan dit script: Implementeren > Implementaties beheren > nieuwe versie.
  */
 var TABBLAD = 'Bestellingen';
-var MELDING_AAN = 'info@roverandco.be';
+var MELDING_AAN = 'pieter@roverandco.be';
 var KOLOMMEN = ['Besteld op', 'Bestelnummer', 'Test', 'Status', 'Naam', 'E-mail', 'Telefoon', 'Levering', 'Activiteit',
   'Straat', 'Postcode', 'Gemeente', 'Land', 'Artikels', 'Stuks', 'Subtotaal', 'Verzending', 'Donatie', 'Totaal', 'Opmerking', 'Ruwe data'];
 
