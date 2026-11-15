@@ -46,7 +46,7 @@ def img(name, alt, cls="", sizes="100vw", lazy=True, prio=False):
             f'sizes="{sizes}" alt="{e(alt)}"{load}>')
 
 
-def layout(path, title, desc, body, hero=False):
+def layout(path, title, desc, body, hero=False, noindex=False):
     menu = "".join(
         f'<li><a href="{href}"{" aria-current=\"page\"" if path == href or (href != "/" and path.startswith(href + "/")) else ""}>{e(lbl)}</a></li>'
         for lbl, href in site["menu"])
@@ -58,7 +58,7 @@ def layout(path, title, desc, body, hero=False):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(full_title)}</title>
-<meta name="description" content="{e(desc)}">{'<meta name="robots" content="noindex">' if path in ("/afrekenen", "/bedankt", "/404") else ""}
+<meta name="description" content="{e(desc)}">{'<meta name="robots" content="noindex">' if noindex or path in ("/afrekenen", "/bedankt", "/404") else ""}
 <link rel="canonical" href="{canon}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
@@ -133,12 +133,12 @@ def layout(path, title, desc, body, hero=False):
 """
 
 
-def write(path, title, desc, body, hero=False):
+def write(path, title, desc, body, hero=False, noindex=False):
     rel = "index.html" if path == "/" else path.strip("/") + ".html"
     out = os.path.join(PUB, rel)
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    open(out, "w", encoding="utf-8").write(layout(path, title, desc, body, hero))
-    if path not in ("/404", "/afrekenen", "/bedankt"):
+    open(out, "w", encoding="utf-8").write(layout(path, title, desc, body, hero, noindex))
+    if not noindex and path not in ("/404", "/afrekenen", "/bedankt"):
         pages.append(path)
 
 
@@ -330,15 +330,78 @@ for pr in producten:
     write(f"/shop/{pr['slug']}", pr["naam"], " ".join(tekst.split())[:155], body)
 
 # ---------- blog ----------
+# Artikels staan in data/blog/<slug>.md: kop met velden tussen '---', daarna Markdown.
+# status: concept  -> pagina bestaat, maar noindex, niet in sitemap en niet op /blog.
+# Overzicht van concepten (ook noindex, niet gelinkt): /blog/concepten
+import markdown as _md
 RUBRIEKEN = [("Onderhoud", "Praktische artikels om je Land Rover in topvorm te houden."),
              ("Geschiedenis", "Van de Series I uit 1948 tot vandaag."),
              ("Land Rover in België", "Minerva, ABL en de Belgische Land Rover-geschiedenis."),
              ("Community", "Ritverslagen, leden en hun wagens."),
              ("Partners", "De bedrijven en standhouders die ons steunen.")]
-write("/blog", "Blog", "Artikels over Land Rover-onderhoud, geschiedenis, Land Rover in België (Minerva, ABL), community en partners.",
-      banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis en alles rond Land Rover. De eerste artikels verschijnen binnenkort.", "5739", "Zicht over de motorkap op een bospad") +
+AUTEURS = json.load(open(os.path.join(DATA, "auteurs.json"), encoding="utf-8"))
+MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"]
+
+
+def lees_artikel(pad):
+    t = open(pad, encoding="utf-8").read()
+    m = re.match(r"---\n(.*?)\n---\n(.*)", t, re.S)
+    meta = dict(re.findall(r"^(\w+):\s*(.*)$", m.group(1), re.M))
+    meta["slug"] = os.path.basename(pad)[:-3]
+    meta["md"] = m.group(2)
+    return meta
+
+
+def nl_datum(d):
+    j, m, dd = d.split("-")
+    return f"{int(dd)} {MAANDEN[int(m) - 1]} {j}"
+
+
+def auteur_blok(sleutel):
+    a = AUTEURS[sleutel]
+    foto = (f'<img src="/assets/img/auteurs/{a["foto"]}" alt="{e(a["naam"])}" width="64" height="64">' if a.get("foto")
+            else f'<span class="initialen" aria-hidden="true">{e("".join(w[0] for w in a["naam"].split() if w[0].isupper())[:2])}</span>')
+    return f'<div class="auteur">{foto}<div><b>{e(a["naam"])}</b><span>{e(a["rol"])}</span></div></div>'
+
+
+artikels = sorted((lees_artikel(os.path.join(DATA, "blog", f)) for f in os.listdir(os.path.join(DATA, "blog")) if f.endswith(".md")),
+                  key=lambda a: (a["rubriek"], a.get("volgorde", "9")))
+for a in artikels:
+    concept = a.get("status") == "concept"
+    inhoud = _md.markdown(a["md"], extensions=["extra"])
+    woorden = len(re.sub(r"<[^>]+>", " ", inhoud).split())
+    a["woorden"] = woorden
+    a["minuten"] = max(1, round(woorden / 220))
+    body = f"""
+<section class="banner">{img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
+<section><article class="narrow prose blogtekst">
+  {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
+  <div class="byline">{auteur_blok(a['auteur'])}<span>{nl_datum(a['datum'])} · {a['minuten']} min lezen</span></div>
+  <p class="foto-onderschrift">Foto: {e(a['foto_alt'])} (Rover & Co)</p>
+  {inhoud}
+  <p><a class="btn" href="/blog">Alle artikels</a></p>
+</article></section>"""
+    write(f"/blog/{a['slug']}", a["titel"], a["beschrijving"], body, noindex=concept)
+
+gepubliceerd = [a for a in artikels if a.get("status") != "concept"]
+
+
+def kaart(a):
+    return (f'<a class="rubriek blogkaart" href="/blog/{a["slug"]}"><img src="/assets/img/{a["foto"]}-s.webp" alt="{e(a["foto_alt"])}" loading="lazy"><div class="eyebrow">{e(a["rubriek"])}</div>'
+            f'<h3>{e(a["titel"])}</h3><p>{e(a["beschrijving"])}</p><small>{e(AUTEURS[a["auteur"]]["naam"])} · {a["minuten"]} min</small></a>')
+
+
+blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
+for t, d in RUBRIEKEN:
+    lijst = [a for a in gepubliceerd if a["rubriek"] == t]
+    blogbody += f'<section><div class="wrap"><h2>{e(t)}</h2><p>{e(d)}</p><div class="rubrieken">' + (
+        "".join(kaart(a) for a in lijst) or '<div class="rubriek"><div class="eyebrow">Binnenkort</div><p>De eerste artikels verschijnen binnenkort.</p></div>') + "</div></div></section>"
+write("/blog", "Blog", "Artikels over Land Rover-onderhoud, geschiedenis, Land Rover in België (Minerva, ABL), community en partners.", blogbody)
+
+write("/blog/concepten", "Concepten", "Overzicht van de blogconcepten.",
+      banner("Blog", "Concepten ter goedkeuring", "Deze pagina is niet gelinkt en niet zichtbaar voor zoekmachines.") +
       '<section><div class="wrap"><div class="rubrieken">' + "".join(
-          f'<div class="rubriek"><div class="eyebrow">Binnenkort</div><h3>{e(t)}</h3><p>{e(d)}</p></div>' for t, d in RUBRIEKEN) + "</div></div></section>")
+          kaart(a).replace("</small>", f' · {a["woorden"]} woorden</small>') for a in artikels if a.get("status") == "concept") + "</div></div></section>", noindex=True)
 
 # ---------- foto's ----------
 write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",

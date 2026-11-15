@@ -64,3 +64,12 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 
 - Webshop met inschrijvingen en merch, betalen via Viva (Smart Checkout).
 - Eigen database (Cloudflare D1) met producten, klanten en volledige bestelgeschiedenis uit Ecwid, te beheren via een admin-pagina.
+
+## Blog
+
+- Artikels staan in `data/blog/<slug>.md`: een kop met velden tussen `---`, daarna Markdown. `python3 bouw/build.py` maakt er `/blog/<slug>` van.
+- Velden: `titel`, `rubriek`, `volgorde`, `auteur` (sleutel uit `data/auteurs.json`), `datum`, `status`, `beschrijving`, `foto` (naam uit `public/assets/img`), `foto_alt`, optioneel `cornerstone: ja`.
+- `status: concept`: de pagina bestaat, maar met noindex, niet in de sitemap en niet op /blog. Alle concepten staan op `/blog/concepten` (niet gelinkt, noindex). Publiceren = de regel `status: concept` weghalen en opnieuw bouwen.
+- Auteurs: technische en historische artikels onder Dolf Borré, de rest onder Pieter Van Baekel. Een auteursfoto komt in `public/assets/img/auteurs/` en de bestandsnaam in `data/auteurs.json` (veld `foto`). Zolang er geen foto is, tonen we de initialen.
+- Elk artikel heeft bronnen onderaan (`## Bronnen`). Alleen feiten die in een bron staan.
+- Stand: rubriek "Land Rover in België" klaar als concept (cornerstone + 5). Nog te schrijven: Onderhoud, Geschiedenis, Community, Partners.

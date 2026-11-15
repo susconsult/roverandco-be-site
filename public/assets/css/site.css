@@ -240,3 +240,21 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .akkoord input{margin-top:4px;accent-color:var(--green)}
 .hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 @media(max-width:880px){.checkout{grid-template-columns:1fr}.veld2{flex-direction:column;gap:0}}
+.byline{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;font-size:15px;color:var(--muted)}
+.auteur{display:flex;align-items:center;gap:12px}
+.auteur img,.auteur .initialen{width:56px;height:56px;border-radius:50%;object-fit:cover}
+.auteur .initialen{display:grid;place-items:center;background:var(--green,#1F3B2A);color:#ECE6D6;font-weight:800;font-size:18px}
+.auteur b{display:block;color:var(--ink,#1F3B2A);font-size:16px}
+.auteur span{font-size:14px}
+.foto-onderschrift{font-size:14px;color:var(--muted);margin-bottom:24px}
+.blogtekst h2{font-size:36px;margin:36px 0 12px}
+.blogtekst h3{font-size:28px}
+.blogtekst ol{padding-left:22px;margin-bottom:16px}
+.blogtekst li{margin-bottom:6px}
+.blogtekst .bronnen,.blogtekst h2#bronnen+ul{font-size:15px}
+.blogkaart{display:block;color:inherit;text-decoration:none;transition:transform .15s}
+.blogkaart:hover{transform:translateY(-2px)}
+.blogkaart small{display:block;margin-top:10px;color:var(--muted)}
+.blogkaart{padding:0 0 22px;overflow:hidden}
+.blogkaart img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;margin-bottom:16px}
+.blogkaart>:not(img){padding:0 22px}
