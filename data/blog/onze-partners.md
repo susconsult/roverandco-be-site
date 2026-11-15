@@ -58,6 +58,8 @@ Kerkhofs Grondwerken uit Bocholt is een familiebedrijf dat in 1935 opgericht wer
 
 Lees meer in [Partner in de kijker: Kerkhofs Grondwerken uit Bocholt](/blog/partner-kerkhofs-grondwerken).
 
+[[foto: standen | Rally-Defenders op het festivalterrein]]
+
 ## Wat partners bij ons vinden
 
 Wie Rover & Co steunt, steunt een community van Land Rover-liefhebbers. Onze evenementen trekken mensen die van het buitenleven houden, die aan hun wagen sleutelen en die graag samen op pad gaan. Op Wool & Wheels was er bijvoorbeeld een Experience Center met ambachten, standjes met Land Rover-onderdelen en foodtrucks. En op onze site en sociale media brengen we onze partners in beeld, zoals in deze reeks artikels.

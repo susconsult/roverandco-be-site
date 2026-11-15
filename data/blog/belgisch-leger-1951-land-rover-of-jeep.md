@@ -24,6 +24,8 @@ Ondertussen had Matthieu Van Roggen, de baas van Minerva, al contact gelegd met 
 
 In juni 1951 zette het leger beide wagens naast elkaar voor een vergelijkende test: een Series I Land Rover tegen een Willys CJ-3A.
 
+[[foto: blog/inline-06 | Willys-Jeep CJ-3A uit 1951 | Oleg Yunakov, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:1951_Willys-Jeep_CJ-3A_-_01.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Waarom de Land Rover won
 
 De belangrijkste reden lag niet in de techniek, maar in de economie. Volgens de geschiedenissite CJ3B.info koos het leger mee voor de Land Rover omdat dat de Minerva-fabriek in Antwerpen nieuw leven kon geven. Een eigen Belgische productie betekende werk, Belgische onderdelen en minder afhankelijkheid van import.

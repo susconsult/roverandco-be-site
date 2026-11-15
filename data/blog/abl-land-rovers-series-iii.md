@@ -26,6 +26,8 @@ Militaire Land Rovers hebben vaak een elektrisch systeem van 24 volt, met twee b
 
 Andere details waaraan je een ex-Belgische wagen herkent, volgens liefhebbers op het Britse forum HMVF: een NAVO-trekhaak die niet draait, met een trekoog, en een afwijkende verlichting.
 
+[[foto: 815 | Series III Land Rover in de modder]]
+
 ## De Land Rover zonder vierwielaandrijving
 
 Het opvallendste is dat een deel van de Belgische Series III alleen achterwielaandrijving had. Een Land Rover zonder 4x4 klinkt vreemd, maar er zijn meerdere onafhankelijke meldingen van:

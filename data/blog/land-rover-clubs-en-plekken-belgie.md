@@ -36,6 +36,8 @@ Land Rover-liefhebbers trekken graag de grens over, en de clubs in onze buurland
 
 **Land Rover Club Luxembourg** is kleiner, met een veertigtal leden, maar organiseert al jaren uitstappen, ook in België, Frankrijk, Duitsland en Zwitserland.
 
+[[foto: 5644 | Series Land Rover met duim omhoog]]
+
 ## Specialisten
 
 Een goede garage of onderdelenleverancier is minstens even belangrijk als een club. Twee Belgische namen die we tegenkwamen:

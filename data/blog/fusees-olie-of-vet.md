@@ -36,6 +36,8 @@ Deze tips komen van ervaren gebruikers op de forums AULRO, LandyZone en Defender
 2. **Laat de lucht ontsnappen.** Draai een van de bovenste bouten van de fuseepen los, zodat de lucht eruit kan terwijl je het vet erin duwt.
 3. **Ga langzaam.** Wie te snel vult, laat te weinig lucht ontsnappen en krijgt er niet genoeg vet in.
 
+[[foto: 730 | Defender 110 spat door de modder]]
+
 ## Lekt je fusee?
 
 Een beetje vocht rond de afdichting is bij een oude Land Rover niets bijzonders. Een gebruiker op AULRO wijst erop dat een licht vettige laag de chromen bol ook schoon houdt, telkens als de afdichting erover schuift. Maar druipt het, kijk dan de bol en de afdichting na. Volgens een gebruiker op Defender2 lekt er niets als de afdichtingen en de bollen in goede staat zijn.

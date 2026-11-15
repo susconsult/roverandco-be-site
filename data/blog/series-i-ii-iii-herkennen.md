@@ -35,6 +35,8 @@ Onder de kap kwam een nieuwe benzinemotor van 2,25 liter, goed voor 72 pk. Volge
 
 **Zo herken je hem:** de bolle zijkanten onder de ramen, die de Series I niet heeft.
 
+[[foto: blog/inline-13 | Land Rover Series IIA | IFCAR, publiek domein, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_IIA.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Series IIA (1961–1971)
 
 In 1961 nam de Series IIA het over. Hij is volgens Wikipedia moeilijk te onderscheiden van de Series II. Er kwam een dieselmotor van 2,25 liter bij, en na 1967 een benzinemotor van 2,6 liter voor de lange wielbasis.
@@ -57,6 +59,8 @@ Met ongeveer 440.000 exemplaren tussen 1971 en 1985 is de Series III volgens Wik
 Van 1979 tot 1985 was er ook de Stage One V8, met de 3,5-liter V8 van de Range Rover. Die werd teruggeschroefd tot 91 pk, tegenover 135 pk in de Range Rover, en kreeg de permanente vierwielaandrijving van de Range Rover.
 
 **Zo herken je hem:** het kunststof rooster en het dashboard met de meters voor de bestuurder.
+
+[[foto: blog/inline-16 | Land Rover Series III | Novoklimov, CC BY 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_III_CAMEL.jpg" rel="noopener">Wikimedia Commons</a>]]
 
 ## Snel herkennen: een overzicht
 

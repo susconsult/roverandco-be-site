@@ -294,3 +294,7 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .teller input::-webkit-inner-spin-button{appearance:none}
 .teller input{font:inherit;font-weight:700;border:2px solid #cfc8b6;border-radius:10px;background:#fff;-moz-appearance:textfield}
 [data-slot-voor]{margin:16px 0 0}
+.artikelfoto{margin:30px 0}
+.artikelfoto img{width:100%;height:auto;border-radius:var(--r);display:block}
+.artikelfoto figcaption{font-size:13px;color:var(--muted);margin-top:8px}
+.artikelfoto figcaption a{color:inherit}

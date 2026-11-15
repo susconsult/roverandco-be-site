@@ -25,6 +25,8 @@ Wild & Wheels is een evenement voor Land Rovers alleen. Klassiek of modern, Seri
 
 Wie meer wil weten over die familieleden: de Minerva is de Land Rover die tussen 1952 en 1956 in Mortsel gebouwd werd. Lees er meer over in [Minerva: de Land Rover uit Antwerpen](/blog/minerva-land-rover-antwerpen).
 
+[[foto: 905 | Defender met daktent in het bos]]
+
 ## Vier thema's
 
 Wild & Wheels draait rond vier thema's. De concrete activiteiten en demonstraties maken we bekend zodra ze vastliggen.

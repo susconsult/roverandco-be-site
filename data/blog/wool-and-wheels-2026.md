@@ -37,6 +37,8 @@ De dag eindigde met een gezamenlijke barbecue.
 
 Op zondag begon de dag met een Full English Breakfast, met onder meer bonen, worstjes en toast. Daarna volgde de Sunday Drive: een kortere, rustige rit over groene wegen. Die route was grotendeels verhard en helemaal krasvrij, en draaide om greenlaning en genieten van de omgeving.
 
+[[foto: 968 | Colonne Land Rovers op een landweg]]
+
 ## Waarom Wool?
 
 De naam zegt het al: naast de Land Rovers draaide het weekend ook rond schapen en wol. Op het centrale plein stond The Sheep Stell. Die naam verwijst naar de traditionele Schotse *stell*, een omheinde plek waar herders hun schapen samenbrachten. In die open cirkel stonden de demonstraties van de dag op het programma:

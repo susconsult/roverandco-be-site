@@ -119,6 +119,8 @@ Het onderhoudsschema in het handboek van de 300Tdi Defender bevat nog een reeks 
 - **Uitlaat.** Kijk de uitlaat na op lekken en of hij goed vastzit.
 - **Stuurinrichting.** Controleer de bevestiging van de stuurinrichting en de kogelgewrichten van de stangen. Volgens het handboek zijn die kogelgewrichten bij de fabricage voor hun hele levensduur gesmeerd. Ze hebben geen extra vet nodig, tenzij de rubberen hoes los of beschadigd is. Kijk ze wel na op speling, en vaker als je de wagen zwaar gebruikt.
 
+[[foto: 900 | Land Rover in het bos]]
+
 ## De ophanging
 
 ### Series: bladveren

@@ -24,6 +24,8 @@ Rover koos voor Birmabright, een legering van aluminium en magnesium. Volgens Wi
 
 Of de eerste Land Rovers gemaakt werden uit overschotten van vliegtuigplaten, is minder zeker dan vaak verteld wordt. Een kenner op het forum AULRO noemt het een vage kwestie. Wel duidelijk is volgens hem dat de legering alleen beschikbaar was omdat er na de oorlog zoveel bestellingen voor vliegtuigen geannuleerd werden. Rover had tijdens de oorlog ook ervaring opgedaan met het bewerken van aluminium onderdelen voor vliegtuigen.
 
+[[foto: blog/inline-11 | Land Rover Series I van 86 inch uit 1954 | Calreyn88, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:1954_Land_Rover_Series_I_86%22_Utility_Chassis_-_47100402.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Eenvoudige panelen
 
 Aluminium is lichter dan staal en makkelijker te bewerken, schrijft Shannons. Rover hield de panelen zo vlak en eenvoudig mogelijk. Volgens Silodrome werden ze met een stalen frame op het chassis bevestigd. Het chassis zelf was wel van staal: een sterk ladderchassis met kokerprofielen.

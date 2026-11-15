@@ -24,6 +24,8 @@ In 1983 stelde Land Rover de One Ten voor, met een wielbasis van 110 inch (2,79 
 
 **Meer comfort.** In 1984 kreeg de wagen draairamen in plaats van schuiframen.
 
+[[foto: blog/inline-26 | Militaire Land Rover Defender | Jaguar, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Defender_%28military%29.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## De motoren
 
 De Defender kreeg in de loop der jaren een hele reeks motoren. Volgens Wikipedia:

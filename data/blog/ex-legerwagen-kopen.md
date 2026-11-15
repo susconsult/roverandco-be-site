@@ -26,6 +26,8 @@ Welke voertuigen er te koop zijn, verschilt per verkoop. Kijk dus in de catalogu
 
 **Bij particulieren en handelaars.** Minerva's en ex-ABL Series III vind je vandaag vooral in advertenties en bij specialisten. Ze zijn lang geleden uit dienst gegaan en hebben intussen vaak meerdere eigenaars gehad.
 
+[[foto: 870 | Series Land Rover rijdt door de modder]]
+
 ## Bij de bezichtiging
 
 Een legerwagen heeft meestal een zwaar leven gehad. Neem de tijd, kijk onder de wagen en breng iemand mee die Series kent. Dit zijn de punten die de bekende kopersgidsen noemen.

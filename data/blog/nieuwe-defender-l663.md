@@ -32,6 +32,8 @@ Het grootste verschil zit in de bouw. De klassieke Defender had een apart ladder
 
 Ook onder de kap is alles nieuw. Voor het modeljaar 2021 bood Land Rover onder meer zescilinder diesels met mild-hybridtechniek aan, de D200, D250 en D300.
 
+[[foto: 5511 | Nieuwe Defender in het stof op een evenement van Rover & Co]]
+
 ## Wat bleef er over?
 
 Technisch gezien bijna niets. Maar Land Rover verwijst graag naar de geschiedenis. De klassieke getallen bleven: 90, 110 en 130. En bij het 75-jarig bestaan van het merk bracht Land Rover een speciale uitvoering uit van de nieuwe Defender, volledig in Grasmere-groen. Dat was volgens Wikipedia een knipoog naar HUE 166, de eerste Land Rover uit 1948.

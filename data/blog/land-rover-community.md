@@ -35,6 +35,8 @@ Soms komt de hele community samen, en dan wordt het groot.
 
 Lees meer over de plekken waar Land Rover-fans naartoe trekken in [Red Wharf Bay, Dunsfold en Beaulieu: waar Land Rover-fans naartoe trekken](/blog/land-rover-bedevaartsoorden).
 
+[[foto: publiek | Publiek kijkt naar de modderbaan]]
+
 ## Onze eigen evenementen
 
 Rover & Co bestaat sinds 2025. We organiseren ritten, bijeenkomsten en evenementen. We willen bij elk evenement een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parking, maar een dag rond een kerktoren, in het bos of op een terrein waar je anders niet komt.
@@ -76,6 +78,8 @@ Wie zijn Land Rover wil gebruiken waarvoor hij gebouwd is, doet er goed aan eers
 Mag je ook komen met een nieuwe Defender? Natuurlijk. Bij Rover & Co is iedereen welkom, klassiek of nieuw. De nieuwe Defender heeft technisch geen enkel onderdeel gemeen met zijn voorganger, maar de mensen die erin rijden, delen dezelfde liefde voor het buitenleven. Op onze evenementen staan Series, klassieke en nieuwe Defenders naast elkaar.
 
 Ook op Wild & Wheels geldt dat. Klassiek of modern, Series of Defender, Discovery of Range Rover: ze zijn allemaal welkom, net als de familie errond, zoals de Minerva en de Santana.
+
+[[foto: 5498 | Lachende chauffeur in een witte Defender]]
 
 ## Zelf aansluiten
 

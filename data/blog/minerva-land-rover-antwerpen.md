@@ -40,6 +40,8 @@ Een Minerva is in de basis een Series I van 80 inch, maar er zijn duidelijke ver
 
 Onder de motorkap zit de 2-liter benzinemotor van Rover. Motor en aandrijflijn kwamen gewoon uit Engeland.
 
+[[foto: blog/inline-02 | Minerva Land Rover met militaire uitrusting in een museum | Zandcee, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Minerva_Paratrooper_vehicle.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Burgerversies en de 86 inch
 
 In oktober 1953 kondigde Minerva ook een burgerversie aan, met drie zitplaatsen, een neerklapbare achterklep en een aftakas achteraan. In 1954 nam de 86 inch, net als in Engeland, de plaats van de 80 inch in. Daarvan werden er in totaal ongeveer 1.100 gebouwd.

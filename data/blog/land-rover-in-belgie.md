@@ -65,6 +65,8 @@ Minerva probeerde nog een eigen terreinwagen te lanceren, de C-20 en M-20, maar 
 
 Alle details over de Minerva lees je in [Minerva: de Land Rover uit Antwerpen](/blog/minerva-land-rover-antwerpen).
 
+[[foto: blog/inline-03 | Minerva Land Rover in een museum | Zandcee, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Minerva_scout.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Ook bij de rijkswacht
 
 De Minerva reed niet alleen bij het leger. Ook de rijkswacht, de toenmalige Belgische politiedienst, kreeg Minerva's. Volgens het Nederlandse klassiekerblad AutoMotoKlassiek reden ze vanaf 1962 ook in het donkerblauw van de rijkswacht. Volgens Wikipedia hadden de rijkswachtwagens geen stalen, maar een aluminium koetswerk, en de gewone ronde spatborden van de Britse Land Rover. Ook een gerestaureerde rijkswacht-Minerva die bij Classic Driver te koop stond, had aluminium delen.

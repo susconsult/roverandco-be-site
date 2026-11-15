@@ -37,6 +37,8 @@ Om 14.30 uur volgt de wijding. Aansluitend vertrekken we samen voor een rondrit 
 
 Inschrijven doe je via onze pagina [Church of Rover](/activiteiten/church-of-rover).
 
+[[foto: 977 | Colonne Defenders in het bos]]
+
 ## Kerstmeeting: zondag 13 december
 
 Op zondag 13 december sluiten we het jaar af met een Kerstmeeting aan de VVV-toren in Gerhagen. We starten om 14.30 uur.

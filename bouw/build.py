@@ -379,6 +379,14 @@ artikels = sorted((lees_artikel(os.path.join(DATA, "blog", f)) for f in os.listd
 for a in artikels:
     concept = a.get("status") == "concept"
     inhoud = _md.markdown(a["md"], extensions=["extra"])
+    # Afbeelding in de tekst: een eigen regel [[foto: naam | alt-tekst | naamsvermelding (optioneel)]]
+    def _figuur(m):
+        delen = [x.strip() for x in m.group(1).split("|")]
+        naam, alt = delen[0], delen[1]
+        credit = delen[2] if len(delen) > 2 and delen[2] else ""
+        return (f'<figure class="artikelfoto">{img(naam, alt, sizes="(max-width:880px) 100vw, 760px")}'
+                + (f'<figcaption>Foto: {credit}</figcaption>' if credit else "") + "</figure>")
+    inhoud = re.sub(r"<p>\[\[foto:(.*?)\]\]</p>", _figuur, inhoud)
     woorden = len(re.sub(r"<[^>]+>", " ", inhoud).split())
     a["woorden"] = woorden
     a["minuten"] = max(1, round(woorden / 220))

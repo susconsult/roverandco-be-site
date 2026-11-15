@@ -40,6 +40,8 @@ Volgens Wikipedia was de carrosserie gemaakt van Birmabright, een legering van a
 
 De originele Centre Steer bestaat niet meer. Volgens Classic & Sports Car zijn er wel verschillende replica's.
 
+[[foto: blog/inline-20 | HUE 166, de eerste voorproductiewagen van de Land Rover | DeFacto, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_I_1948_%28HUE_166%29.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## Van prototype naar productie
 
 Het stuur in het midden haalde de productie niet. In 1948 stelde Rover de Land Rover voor op het autosalon van Amsterdam. Volgens de Daily Post volgde daarna een eerste productierun van 48 wagens.

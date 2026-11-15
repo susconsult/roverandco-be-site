@@ -54,6 +54,8 @@ Meer over de nieuwe Defender lees je in [De nieuwe Defender: wat bleef er over?]
 
 The Wolfgarage is officieel dealer van BOLT Adventure, voor offroad- en kampeeraccessoires. Daarmee kun je een Defender ombouwen tot een overlandcamper. Volgens de site gaat het onder meer om daktenten (Skylodge), luifels van 270 graden (Skyshield), de GO-tenttrailer, dakdragers en opbergboxen, en grip tracks.
 
+[[foto: 964 | Defender met daktent in een stoffige bosweg]]
+
 ## Meer dan een garage
 
 Op zijn site schrijft The Wolfgarage dat het meer is dan een werkplaats: een plek waar mensen samenkomen rond een gedeelde liefde voor eenvoud, vakmanschap en avontuur. Daar komt Rover & Co vandaan. The Wolfgarage noemt zich een trotse initiatiefnemer van Rover & Co, een Belgische vzw die Land Rover-liefhebbers samenbrengt, en waarvan eventuele opbrengsten terugvloeien naar de community en naar goede doelen. Ons eerste evenement, Wool & Wheels, combineerde Land Rovers, buitenleven en ambacht.

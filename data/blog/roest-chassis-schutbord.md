@@ -45,6 +45,8 @@ Land Rover Monthly raadt aan de vloermatten weg te trekken om de voetruimtes goe
 
 Bij een Defender verouderen de aluminium buitenpanelen van de deuren goed, maar de stalen binnenframes roesten. Dat schrijft Land Rover Monthly. Nieuwe deuren zijn makkelijker te vervangen dan een chassis of een schutbord, maar ze zijn niet goedkoop.
 
+[[foto: 959 | Defenders rijden door het stof]]
+
 ## Voorkomen
 
 Land Rover nam in het onderhoudsschema van de latere Defender 2.2 zelf een punt op om de bodembescherming (Dinitrol) aan te brengen of bij te werken. Dat zegt genoeg: ook de fabrikant rekent erop dat je de onderkant blijft beschermen.

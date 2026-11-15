@@ -35,6 +35,8 @@ Het aluminium bleef, ook toen het duurder werd dan staal, omdat het licht is en 
 
 Lees meer in [Waarom een Land Rover van aluminium is](/blog/waarom-aluminium).
 
+[[foto: blog/inline-21 | Land Rover Series I van 80 inch uit 1948 | Sicnag, CC BY 2.0, via <a href="https://commons.wikimedia.org/wiki/File:1948_Land_Rover_Series_I_80_%2831971696567%29.jpg" rel="noopener">Wikimedia Commons</a>]]
+
 ## 1948: de Series I
 
 In 1948 stelde Rover de Land Rover voor op het autosalon van Amsterdam. Hij was bedoeld voor de boerderij en voor lichte industrie, met een stalen ladderchassis, een aluminium koetswerk, een wielbasis van 80 inch en een benzinemotor van 1,6 liter. Volgens Classics World kon de klant kiezen uit één kleur: groen.
@@ -50,6 +52,8 @@ Het verhaal van de Belgische Land Rovers lees je in ons overzicht [Land Rover in
 ## Een wagen voor legers
 
 De Land Rover werd ook een militaire wagen. Volgens Danish Army Vehicles nam de Royal Air Force in mei 1950 een eerste reeks van 100 wagens van 80 inch in gebruik, en werd de Land Rover in 1958 het standaard lichte voertuig van het Britse leger. Volgens dezelfde bron werd de Land Rover door minstens 140 legers over de hele wereld gebruikt. Voor het Britse leger ontwikkelde Land Rover ook de Lightweight, een lichtere versie die onder een helikopter vervoerd kon worden. Volgens Wikipedia werden er van de IIA- en III-versies samen 37.897 gebouwd, tot 1984.
+
+[[foto: blog/inline-16 | Land Rover Series III | Novoklimov, CC BY 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_III_CAMEL.jpg" rel="noopener">Wikimedia Commons</a>]]
 
 ## 1958 tot 1985: de Series II, IIA en III
 
@@ -74,6 +78,8 @@ Toen Land Rover in 1989 de Discovery uitbracht, werd Land Rover de naam van een 
 In mei 2015 werd de tweemiljoenste Series en Defender gebouwd. Op 29 januari 2016 eindigde de productie in Solihull, met een Defender 90 met softtop als laatste wagen.
 
 Lees meer in [Van One Ten tot Defender (1983–2016)](/blog/van-one-ten-tot-defender).
+
+[[foto: blog/inline-23 | Nieuwe Land Rover Defender op de IAA 2019 | Alexander Migl, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Defender_%28L663%29_at_IAA_2019_IMG_0711.jpg" rel="noopener">Wikimedia Commons</a>]]
 
 ## Na 2016: de nieuwe Defender
 

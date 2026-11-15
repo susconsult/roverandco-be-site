@@ -37,6 +37,8 @@ Kijk ook de rubberen bussen en de bouten na. How a Car Works raadt aan het gewic
 
 Voor een volledige Series heb je volgens bussenfabrikant SuperPro vijf setjes bussen nodig: twee voor de ogen van de voorveren en drie voor de achterveren.
 
+[[foto: 815 | Series III Land Rover in de modder]]
+
 ## Vervangen
 
 Land Rover Monthly is duidelijk: gebarsten of door roest opgezwollen veren moeten vervangen worden. Je kunt losse bladen laten vernieuwen, maar het blad zou zelf altijd voor een volledige nieuwe veer kiezen, en altijd per as, dus links en rechts samen.
