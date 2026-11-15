@@ -2,7 +2,7 @@
 titel: Waarom een Land Rover van aluminium is
 rubriek: Geschiedenis
 volgorde: 2
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: Het aluminium koetswerk van de Land Rover was geen luxe, maar een noodoplossing. Het verhaal van Birmabright, staaltekort en vliegtuigverf.
 foto: 900

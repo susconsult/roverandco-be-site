@@ -2,7 +2,7 @@
 titel: Minerva: de Land Rover uit Antwerpen
 rubriek: Land Rover in België
 volgorde: 1
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: Tussen 1952 en 1956 bouwde Minerva in Mortsel bijna 9.000 Land Rovers onder licentie. Hoe herken je er een, en waarom zien ze er anders uit?
 foto: 870

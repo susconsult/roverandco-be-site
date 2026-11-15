@@ -2,7 +2,7 @@
 titel: 1947: een tekening in het zand van Red Wharf Bay
 rubriek: Geschiedenis
 volgorde: 1
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: De Land Rover begon met een schets in het zand op het Welse eiland Anglesey. Wat weten we over dat verhaal, en over de eerste prototypes?
 foto: 870

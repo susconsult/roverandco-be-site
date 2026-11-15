@@ -5,7 +5,7 @@ volgorde: 0
 cornerstone: ja
 auteur: pieter
 datum: 2026-11-15
-beschrijving: Zonder partners geen evenementen. Een overzicht van de bedrijven die Rover & Co steunen: The Wolfgarage, P&P Hekwerk, EPC Verbeteraars, SUS Consult, Pakawi en Kerkhofs.
+beschrijving: Zonder partners geen evenementen. Een overzicht van de bedrijven die Rover & Co steunen: The Wolfgarage, P&P Hekwerk, EPC Verbeteraars, SUS Consult, Pakawi en Kerkhofs Grondwerken.
 foto: standen
 foto_alt: Rally-Defenders op het festivalterrein
 ---
@@ -18,7 +18,7 @@ In dit overzicht stellen we onze partners voor. Bij elke partner verwijzen we na
 
 Een evenement als Wool & Wheels of Wild & Wheels vraagt veel: een terrein, materiaal, communicatie en mensen die meehelpen. Voor een vzw zonder winstoogmerk is steun van lokale bedrijven onmisbaar.
 
-Onze partners zijn geen grote merken van ver. Het zijn bedrijven uit onze eigen streek, rond Ham, Tessenderlo, Laakdal en Olmen, die Land Rovers, het buitenleven of gewoon onze werking een warm hart toedragen.
+Onze partners zijn geen grote merken van ver. Het zijn bedrijven uit onze eigen streek, rond Ham, Tessenderlo, Laakdal, Olmen en Bocholt, die Land Rovers, het buitenleven of gewoon onze werking een warm hart toedragen.
 
 ## The Wolfgarage
 
@@ -52,9 +52,11 @@ Pakawi in Olmen, vroeger Pakawi Park, is een eigenzinnig dierenpark midden in he
 
 Lees meer in [Partner in de kijker: Pakawi, het dierenpark waar Wild & Wheels plaatsvindt](/blog/partner-pakawi).
 
-## Kerkhofs
+## Kerkhofs Grondwerken
 
-Ook Kerkhofs steunt Rover & Co. Een uitgebreider artikel over Kerkhofs volgt binnenkort.
+Kerkhofs Grondwerken uit Bocholt is een familiebedrijf dat in 1935 opgericht werd door Jan Kerkhofs, en dat in 1997 door de derde generatie overgenomen werd. Het bedrijf doet kleine en middelgrote grondwerken, zoals het uitgraven van kelders en zwembaden en de aanleg van inritten, en transport voor de wegenbouw. Daarnaast verhuurt het containers voor bouwpuin en verkoopt het grind, zand en mengpuin.
+
+Lees meer in [Partner in de kijker: Kerkhofs Grondwerken uit Bocholt](/blog/partner-kerkhofs-grondwerken).
 
 ## Wat partners bij ons vinden
 
@@ -75,6 +77,7 @@ Heb je een Defender die aan restauratie toe is, een poort nodig, plannen om je w
 3. [Partner in de kijker: EPC Verbeteraars uit Ham](/blog/partner-epc-verbeteraars)
 4. [Partner in de kijker: SUS Consult, slimme technologie zonder gedoe](/blog/partner-sus-consult)
 5. [Partner in de kijker: Pakawi, het dierenpark waar Wild & Wheels plaatsvindt](/blog/partner-pakawi)
+6. [Partner in de kijker: Kerkhofs Grondwerken uit Bocholt](/blog/partner-kerkhofs-grondwerken)
 
 ## Bronnen
 
@@ -85,4 +88,5 @@ Heb je een Defender die aan restauratie toe is, een poort nodig, plannen om je w
 - EPC Verbeteraars, [epcverbeteren.be](https://epcverbeteren.be)
 - SUS Consult, [susconsult.be](https://susconsult.be)
 - Pakawi, [pakawipark.be](https://www.pakawipark.be)
+- Kerkhofs Grondwerken, [historie](https://kerkhofsgrondwerken.be/historie.html) en [diensten](https://kerkhofsgrondwerken.be/diensten.html)
 - Wild & Wheels, [wildandwheels.be](https://wildandwheels.be)

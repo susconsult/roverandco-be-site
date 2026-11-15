@@ -2,7 +2,7 @@
 titel: De nieuwe Defender: wat bleef er over?
 rubriek: Geschiedenis
 volgorde: 5
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: In 2019 stelde Land Rover een volledig nieuwe Defender voor, gebouwd in Slovakije. Wat is er anders dan bij de klassieke Defender, en wat bleef?
 foto: 5511

@@ -379,6 +379,7 @@ for a in artikels:
   <div class="byline">{auteur_blok(a['auteur'])}<span>{nl_datum(a['datum'])} · {a['minuten']} min lezen</span></div>
   <p class="foto-onderschrift">Foto: {e(a['foto_alt'])} (Rover & Co)</p>
   {inhoud}
+  <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
   <p><a class="btn" href="/blog">Alle artikels</a></p>
 </article></section>"""
     write(f"/blog/{a['slug']}", a["titel"], a["beschrijving"], body, noindex=concept)
@@ -392,6 +393,7 @@ def kaart(a):
 
 
 blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
+blogbody += f'<section style="padding-bottom:0"><div class="wrap"><div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site["email"]}?subject=Artikel%20voor%20de%20blog">{site["email"]}</a>.</p></div></div></section>' 
 for t, d in RUBRIEKEN:
     lijst = [a for a in gepubliceerd if a["rubriek"] == t]
     blogbody += f'<section><div class="wrap"><h2>{e(t)}</h2><p>{e(d)}</p><div class="rubrieken">' + (

@@ -2,7 +2,7 @@
 titel: Waarom het Belgisch leger in 1951 voor de Land Rover koos en niet voor de Jeep
 rubriek: Land Rover in België
 volgorde: 2
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: In 1951 zocht het Belgisch leger een opvolger voor zijn oorlogsjeeps. Het werd de Land Rover, gebouwd bij Minerva. Maar de jeep verdween niet helemaal.
 foto: 5644

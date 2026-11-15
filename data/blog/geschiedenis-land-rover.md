@@ -3,7 +3,7 @@ titel: De geschiedenis van Land Rover: van tekening in het zand tot Defender
 rubriek: Geschiedenis
 volgorde: 0
 cornerstone: ja
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: Van een schets op een Welsh strand in 1947 tot de laatste Defender in 2016 en de nieuwe uit Slovakije: het volledige verhaal van Land Rover.
 foto: 5644

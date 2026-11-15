@@ -2,7 +2,7 @@
 titel: Van One Ten tot Defender (1983–2016)
 rubriek: Geschiedenis
 volgorde: 4
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: In 1983 kwam de One Ten, later de Defender. Schroefveren, permanente vierwielaandrijving en een reeks motoren, tot de laatste in januari 2016 van de band rolde.
 foto: 5498

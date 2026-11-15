@@ -258,3 +258,7 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .blogkaart{padding:0 0 22px;overflow:hidden}
 .blogkaart img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;margin-bottom:16px}
 .blogkaart>:not(img){padding:0 22px}
+.schrijf-mee{background:var(--green);color:#fff;border-radius:var(--r);padding:24px 26px;margin:36px 0 24px}
+.schrijf-mee h3{color:#fff;font-size:28px;margin:0 0 8px}
+.schrijf-mee p{color:#fff;margin:0}
+.schrijf-mee a{color:#fff;text-decoration:underline}

@@ -3,7 +3,7 @@ titel: Land Rover in België: Minerva, ABL en de Belgische liefde voor de Landy
 rubriek: Land Rover in België
 volgorde: 0
 cornerstone: ja
-auteur: dolf
+auteur: pieter
 datum: 2026-11-15
 beschrijving: Van de Minerva uit Mortsel tot de ex-ABL Series III: het volledige verhaal van de Land Rover in België, en waar je vandaag nog terechtkunt.
 foto: 968
