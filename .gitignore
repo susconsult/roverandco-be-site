@@ -1,0 +1,9 @@
+# Persoonsgegevens horen nooit in deze repo
+*customer*
+*klant*
+*order*
+*bestelling*
+*bestseller*
+.DS_Store
+node_modules/
+.wrangler/
