@@ -346,7 +346,7 @@ MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augu
 def lees_artikel(pad):
     t = open(pad, encoding="utf-8").read()
     m = re.match(r"---\n(.*?)\n---\n(.*)", t, re.S)
-    meta = dict(re.findall(r"^(\w+):\s*(.*)$", m.group(1), re.M))
+    meta = {k: v.strip().strip('"') for k, v in re.findall(r"^(\w+):\s*(.*)$", m.group(1), re.M)}
     meta["slug"] = os.path.basename(pad)[:-3]
     meta["md"] = m.group(2)
     return meta
