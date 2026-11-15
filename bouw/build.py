@@ -333,6 +333,10 @@ def fotoblok(a):
             f'<h2>{e(a.get("fotos_titel", "Sfeerbeelden"))}</h2></div></div>{galerij([tuple(x) for x in a["fotos"]])}</div></section>')
 
 
+def gratis(a):
+    return all(not o.get("prijs") for o in (a.get("inschrijving") or {}).get("onderdelen", [{"prijs": 1}]))
+
+
 def inschrijving_open(a):
     i = a.get("inschrijving")
     return bool(i and i.get("open") and (not i.get("sluit") or i["sluit"] >= date.today().isoformat()))
@@ -343,7 +347,7 @@ for a in alle_acts:
         continue
     if inschrijving_open(a):
         knop = ('<a class="btn btn-solid" href="#inschrijven" style="width:100%;justify-content:center">Inschrijven</a>'
-                '<p class="note">Het formulier staat onderaan deze pagina. Je betaalt veilig online via Viva.</p>')
+                f'<p class="note">Het formulier staat onderaan deze pagina. {"Inschrijven is gratis." if gratis(a) else "Je betaalt veilig online via Viva."}</p>')
     else:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
@@ -715,9 +719,9 @@ for slug, cfg in cat["__inschrijvingen"].items():
         <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
         <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
         <div class="err" data-voor="akkoord"></div>
-        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
+        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
-        <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail.</p>
+        <p class="note">{"Inschrijven is gratis. Daarna krijg je een bevestiging per mail." if gratis(a) else "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."}</p>
       </div>
     </aside>
   </form>

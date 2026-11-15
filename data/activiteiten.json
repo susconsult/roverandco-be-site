@@ -21,6 +21,47 @@
   "affiche": "affiche-church-of-rover"
  },
  {
+  "slug": "rit-tea-on-the-tailgate-kerst",
+  "titel": "Rit naar Tea on the Tailgate Kerst",
+  "datum": "2026-12-18",
+  "datum_label": "Vr 18 dec",
+  "datum_lang": "vrijdag 18 december 2026",
+  "locatie": "Vertrek aan The Wolfgarage, Ham",
+  "uren": "Vertrek 18:00",
+  "kort": "Samen in colonne van The Wolfgarage naar de kersteditie van Tea on the Tailgate in Lille. Gratis, wel even inschrijven.",
+  "kenmerken": [
+   "Gratis",
+   "Vertrek 18:00 aan The Wolfgarage",
+   "Tea on the Tailgate 19:00 tot 22:00"
+  ],
+  "foto": "968",
+  "foto_alt": "Colonne Land Rovers op een landweg",
+  "omschrijving_html": "<p>Tea on the Tailgate houdt een kersteditie in Lille: een gezellige avondmeet voor Land Rover-rijders en liefhebbers. Wij rijden er samen in colonne naartoe.</p><h3>Praktisch</h3><ul><li><strong>Vertrek:</strong> 18:00 aan The Wolfgarage, Olmensesteenweg 105, 3945 Tessenderlo-Ham</li><li><strong>Bestemming:</strong> Tea on the Tailgate Kersteditie, Poeyelheide 13t, Lille</li><li><strong>Meet:</strong> 19:00 tot 22:00</li><li><strong>Prijs:</strong> gratis</li></ul><p>Schrijf je even in, zo weten we met hoeveel wagens we vertrekken.</p>",
+  "inschrijven_url": "",
+  "inschrijven_label": "",
+  "inschrijving": {
+   "open": true,
+   "sluit": "2026-12-18",
+   "wagen": true,
+   "onderdelen": [
+    {
+     "id": "wagen",
+     "naam": "Wagen in de colonne",
+     "prijs": 0,
+     "per": "wagen",
+     "max": 3
+    },
+    {
+     "id": "personen",
+     "naam": "Personen",
+     "prijs": 0,
+     "per": "persoon",
+     "max": 10
+    }
+   ]
+  }
+ },
+ {
   "slug": "wild-and-wheels",
   "titel": "Wild & Wheels",
   "datum": "2027-05-28",

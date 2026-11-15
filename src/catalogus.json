@@ -142,9 +142,33 @@
  },
  "__activiteiten": [
   "Church of Rover (Zo 22 nov)",
+  "Rit naar Tea on the Tailgate Kerst (Vr 18 dec)",
   "Wild & Wheels (28–30 mei)"
  ],
  "__inschrijvingen": {
+  "rit-tea-on-the-tailgate-kerst": {
+   "titel": "Rit naar Tea on the Tailgate Kerst",
+   "datum_label": "Vr 18 dec",
+   "sluit": "2026-12-18",
+   "onderdelen": [
+    {
+     "id": "wagen",
+     "naam": "Wagen in de colonne",
+     "prijs": 0,
+     "per": "wagen",
+     "max": 3
+    },
+    {
+     "id": "personen",
+     "naam": "Personen",
+     "prijs": 0,
+     "per": "persoon",
+     "max": 10
+    }
+   ],
+   "tijdsloten": null,
+   "wagen": true
+  },
   "wild-and-wheels": {
    "titel": "Wild & Wheels",
    "datum_label": "28–30 mei",
