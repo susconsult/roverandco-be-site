@@ -366,7 +366,7 @@ for a in alle_acts:
 # ---------- kalender ----------
 KAL_ANDEREN = json.load(open(os.path.join(ROOT, "data", "kalender.json"), encoding="utf-8"))
 kal_items = [{"club": "Rover & Co", "ons": True, "titel": a["titel"], "datum": a["datum"], "einde": a.get("einde", ""),
-              "label": a["datum_label"], "plaats": a["locatie"], "link": f"/activiteiten/{a['slug']}"} for a in acts]
+              "label": a["datum_label"], "plaats": a["locatie"] + (" · " + a["uren"] if a.get("uren") else ""), "link": f"/activiteiten/{a['slug']}", "org": "Rover & Co VZW", "info": a.get("kort", "")} for a in acts]
 kal_items += [{**k, "ons": False} for k in KAL_ANDEREN]
 kal_data = json.dumps(sorted(kal_items, key=lambda x: x["datum"]), ensure_ascii=False).replace("</", "<\\/")
 kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten en die van andere Land Rover-clubs, op één plek.", "968", "Colonne op een landweg") + f"""
@@ -411,7 +411,7 @@ function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textCon
     var r=el(a.link?"a":"div","kal-item"+(a.ons?" ons":""));if(a.link)r.href=a.link;if(!a.ons&&a.link)r.rel="noopener";
     var dag=el("div","kal-dag");dag.append(el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
     var t=el("div","kal-tekst");t.append(el("strong",null,a.titel));
-    var sub=a.plaats+(a.einde&&a.einde!==a.datum?" · tot "+d(a.einde).getDate()+" "+KORT[d(a.einde).getMonth()]:"");t.append(el("span",null,sub));
+    var sub=a.plaats+(a.einde&&a.einde!==a.datum?" · tot "+d(a.einde).getDate()+" "+KORT[d(a.einde).getMonth()]:"");t.append(el("span",null,sub));if(a.info)t.append(el("p","kal-info",a.info));if(a.org)t.append(el("small","kal-org","Organisatie: "+a.org));
     r.append(dag,t,el("span","kal-club",a.club));lijst.append(r);n++}});
   if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."))}}
 document.querySelectorAll('input[name=kalf]').forEach(function(i){{i.onchange=function(){{filter=i.value;teken()}}}});

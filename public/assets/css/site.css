@@ -344,3 +344,5 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .kal-indienen{background:var(--sand-2)}
 .kal-indienen form{margin-top:16px}
 @media(max-width:600px){.kal-item{display:grid;grid-template-columns:58px 1fr;column-gap:14px;row-gap:6px}.kal-dag{grid-row:span 2}.kal-club{justify-self:start}}
+.kal-info{margin:6px 0 2px;font-size:15px;line-height:1.45;max-width:65ch}
+.kal-org{font-size:13px;color:var(--muted);font-weight:700}
