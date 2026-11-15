@@ -4,7 +4,7 @@ rubriek: Land Rover in België
 volgorde: 4
 auteur: dolf
 datum: 2026-11-15
-beschrijving: Een Minerva of ex-ABL Series III kopen? Waar je ze vindt, waar je op let bij de bezichtiging, en wat de regels voor de O-plaat zijn.
+beschrijving: Een Minerva of ex-ABL Series III kopen? Waar je ze vindt en waar je op let bij de bezichtiging.
 foto: 900
 foto_alt: Land Rover Forward Control in het bos
 ---
@@ -19,21 +19,21 @@ Een oude legerwagen heeft iets wat een burgerversie mist: een verhaal, en vaak e
 - na betaling van de factuur krijg je binnen tien kalenderdagen een afhalingsbon, die je moet tonen bij het afhalen;
 - het afhalen regel je zelf met de militaire eenheid waar het voertuig staat, en je bent verantwoordelijk voor de mensen die je meebrengt.
 
-Oude Land Rovers zul je daar vandaag nog maar zelden tegenkomen. Het gaat meestal om recenter materieel.
+Welke voertuigen er te koop zijn, verschilt per verkoop. Kijk dus in de catalogus.
 
 **Via Fin Shop.** De FOD Financiën verkoopt roerende goederen van de overheid, ook voertuigen, via Fin Shop. Dat kan via een webveiling, een webwinkel met vaste prijzen of een openbare verkoop, in Brussel, Bornem en Gembloux. Let op: loten in een online veiling worden verkocht zonder enige garantie dat ze werken.
 
-**Bij particulieren en handelaars.** Het grootste deel van de Minerva's en ex-ABL Series III vind je vandaag gewoon in advertenties en bij specialisten. Ze zijn lang geleden uit dienst gegaan en hebben intussen vaak meerdere eigenaars gehad.
+**Bij particulieren en handelaars.** Minerva's en ex-ABL Series III vind je vandaag vooral in advertenties en bij specialisten. Ze zijn lang geleden uit dienst gegaan en hebben intussen vaak meerdere eigenaars gehad.
 
 ## Bij de bezichtiging
 
-Een legerwagen heeft meestal een zwaar leven gehad. Neem de tijd, kijk onder de wagen en breng iemand mee die Series kent. Dit zijn de punten die we zelf altijd nakijken.
+Een legerwagen heeft meestal een zwaar leven gehad. Neem de tijd, kijk onder de wagen en breng iemand mee die Series kent. Dit zijn de punten die de bekende kopersgidsen noemen.
 
-**Het chassis.** Een Series-chassis is van staal en roest vooral achteraan, aan de achterste dwarsbalk, en aan de steunen langs de zijkant. Tik met een hamer of schroevendraaier: klinkt het dof of zak je erdoor, dan wordt het duur.
+**Het chassis.** Een Series-chassis is van staal. De bekende roestplekken zijn de steunen onder het schutbord (de *outriggers*), de achterste dwarsbalk en de voorste veerophangingen (de *dumb irons*). Op de bovenkant van de achterste dwarsbalk blijft modder liggen, en daar begint de roest vaak. Krab de modder weg en vertrouw geen dikke laag bodembescherming: daaronder kan het rot zijn.
 
-**Het schutbord.** De stalen wand tussen motor en cabine (de *bulkhead*) roest vaak aan de voetruimtes en onderaan de voorruitstijlen. Herstellen kan, maar het is veel werk.
+**Het schutbord.** De stalen wand tussen motor en cabine (de *bulkhead*) is een beruchte roestplek, vooral aan de voetruimtes, onderaan de deurstijlen en onder de voorruit. Herstellen kan, maar het is duur werk.
 
-**De carrosserie.** Bij een Series III is de carrosserie grotendeels van aluminium. Waar aluminium tegen staal zit, ontstaat corrosie. Bij een Minerva is het hele koetswerk van staal, ook de deuren, dus daar kan het overal roesten.
+**De carrosserie.** De aluminium panelen van een Series roesten niet, maar alles wat van staal is wel. Bij een Minerva is het hele koetswerk van staal, ook de deuren, dus daar kan het overal roesten.
 
 **Vierwielaandrijving.** Een deel van de ex-ABL Series III had alleen achterwielaandrijving. Kijk of er een voorste cardan en een voorste differentieel zitten, en of de hendels voor de tussenbak werken. Een 2WD-versie is een interessant stuk geschiedenis, maar geen terreinwagen. Meer daarover in [ABL-Land Rovers: de Series II en III van het Belgisch leger](/blog/abl-land-rovers-series-iii).
 
@@ -47,18 +47,6 @@ Een legerwagen heeft meestal een zwaar leven gehad. Neem de tijd, kijk onder de 
 
 Kijk eerst of het chassisnummer op de wagen overeenkomt met dat op de documenten. Bij een wagen die rechtstreeks van Defensie of Fin Shop komt, bewaar je de factuur en de afhalingsbon. Die bewijzen dat jij de eigenaar bent.
 
-Een wagen die nooit als burgervoertuig ingeschreven was, moet langs de keuring voor hij de weg op mag. Bel vooraf naar het keuringscentrum en vraag welke documenten ze willen zien. Dat bespaart je een verloren rit.
-
-## Inschrijven met een O-plaat
-
-Een Minerva of Series III is oud genoeg voor een oldtimerinschrijving. Dit zijn de regels volgens de FOD Mobiliteit en de Vlaamse overheid.
-
-- **Leeftijd.** Een O-plaat krijg je voor een voertuig dat meer dan 30 jaar in gebruik is. Eerst moet het langs de oldtimerkeuring. Een voertuig tussen 25 en 30 jaar mag alleen een O-plaat houden of terugkrijgen als het al eerder een O-plaat had.
-- **Periodieke keuring in Vlaanderen.** Van 25 tot en met 29 jaar elk jaar, van 30 tot en met 49 jaar om de twee jaar, en vanaf 50 jaar om de vijf jaar. Een Minerva valt dus in die laatste groep.
-- **Gebruik.** Met een O-plaat mag je niet rijden voor commerciële of professionele doeleinden, en ook niet naar het werk of naar school.
-- **Belastingen.** In Vlaanderen betaal je voor een voertuig van meer dan 30 jaar een vast, laag bedrag aan verkeersbelasting, of het nu een O-plaat heeft of niet.
-
-In Wallonië en Brussel gelden deels andere regels voor de keuring. Kijk dus altijd na wat er geldt in het gewest waar je woont.
 
 ## Ons advies
 
@@ -72,8 +60,9 @@ Dit artikel hoort bij ons overzicht [Land Rover in België: Minerva, ABL en de B
 
 - Defensie, [Algemene verkoopvoorwaarden voor openbare veiling](https://www.mil.be/media/z52pgmr1/sdv20253001merged.pdf) en [procedure voor afhaling](https://www.mil.be/media/ipijvzyf/procedure-abcd.pdf)
 - FOD Financiën, [Fin Shop en Finimmoweb](https://fin.belgium.be/nl/particulieren/meer-diensten/fin-shop-finimmoweb) en [persbericht Fin Shop](https://news.belgium.be/nl/node/38007/pdf) (2024)
-- FOD Mobiliteit en Vervoer, [Een oldtimer inschrijven: O-plaat](https://mobilit.belgium.be/en/node/1277)
-- Vlaamse overheid, [Periodieke oldtimerkeuring](https://www.vlaanderen.be/nl/periodieke-oldtimerkeuring), [Gebruik van een oldtimer](https://www.vlaanderen.be/mobiliteit-en-openbare-werken/auto-en-motor/oldtimers/gebruik-van-een-oldtimer) en [Verkeersbelastingen voor oldtimers](https://www.vlaanderen.be/belastingen-en-begroting/vlaamse-belastingen/verkeersbelastingen/verkeersbelastingen-voor-oldtimers)
+- Goodwood, [Land Rover Series III buyer's guide](https://insurance.goodwood.com/buyers-guide/land-rover-series/) en [Series II buyer's guide](https://insurance.goodwood.com/buyers-guide/land-rover-series-ii/)
+- Classics World, [Land Rover Series I buyer's guide](https://classicsworld.co.uk/guides/land-rover-series-i-buyers-guide/)
+- Land Rover Monthly, [Assess a Ninety or One Ten](https://www.landrovermonthly.co.uk/articles/assess-a-ninety-or-one-ten/)
 - Lloyd Allison, [Minerva Land-Rovers](https://allisons.org/ll/4/Minerva/LandRover/): stalen carrosserie van de Minerva
 - LOF Clutches, [Series Forever](https://lofclutches.com/installers/series-forever/): Belgische onderdelenspecialist voor Series I–III en Minerva
 - HMVF, [Two wheel drive Land Rovers](https://hmvf.co.uk/topic/12790-two-wheel-drive-land-rovers/) (forum): Belgische 2WD Series III

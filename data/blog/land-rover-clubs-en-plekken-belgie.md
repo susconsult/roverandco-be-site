@@ -4,22 +4,22 @@ rubriek: Land Rover in België
 volgorde: 5
 auteur: pieter
 datum: 2026-11-15
-beschrijving: Waar vind je andere Land Rover-rijders in België? Clubs, specialisten, plekken om te rijden en de regels die je moet kennen.
+beschrijving: Waar vind je andere Land Rover-rijders in België? Clubs, specialisten en een plek om te leren rijden in het terrein.
 foto: 977
 foto_alt: Colonne Defenders rijdt door het bos
 ---
 
-Een Land Rover rijd je zelden alleen. Vroeg of laat zoek je mensen die dezelfde wagen hebben, dezelfde problemen kennen en zin hebben om samen te rijden. In België kan dat op verschillende plaatsen. Hier vind je een overzicht van de clubs, de specialisten en de plekken waar je terecht kunt.
+Een Land Rover rijd je zelden alleen. Vroeg of laat zoek je mensen die dezelfde wagen hebben, dezelfde problemen kennen en zin hebben om samen te rijden. In België kan dat op verschillende plaatsen. Hier vind je een overzicht van de clubs en de specialisten, en een plek waar je kunt leren rijden in het terrein.
 
 Ken je een club of plek die hier niet tussen staat? Mail ons op [info@roverandco.be](mailto:info@roverandco.be). Dan vullen we de lijst aan.
 
 ## Clubs in België
 
-**Land Rover Ownersclub Belgium.** De bekendste Belgische Land Rover-club is opgericht op 21 februari 1992. De vzw heet officieel LROCB.be en heeft haar zetel in Buggenhout. De club is er voor eigenaars van alle Land Rover-modellen.
+**Land Rover Ownersclub Belgium.** De bekendste Belgische Land Rover-club is opgericht op 21 februari 1992. De vzw heet officieel LROCB.be en heeft haar zetel in Buggenhout.
 
 **Club Land Rover Wallonie Bruxelles.** In Wallonië en Brussel is er een eigen Land Rover-club, die als vereniging ingeschreven staat in de Kruispuntbank van Ondernemingen.
 
-**Rover & Co.** En dan is er ons eigen Rover & Co, uit Oostham. Wij zijn geen klassieke club met een ledenlijst, maar een vzw die ritten en bijeenkomsten organiseert op plekken waar je anders niet komt. Iedereen met een Land Rover, oud of nieuw, is welkom. Een paar van onze vaste afspraken:
+**Rover & Co.** En dan is er ons eigen Rover & Co, uit Oostham. Wij zijn een vzw die ritten, bijeenkomsten en evenementen organiseert, op plekken waar je anders niet komt. Klassiek of nieuw: iedereen is welkom. Een paar van onze vaste afspraken:
 
 - **Church of Rover:** een Land Rover-meeting aan de kerk van Oostham, met een bezoek aan de kerktoren, een rondrit, een winterbar en vuurkorven;
 - **Kerstmeeting:** een winterse meeting aan de VVV-toren in Gerhagen;
@@ -44,21 +44,13 @@ Een goede garage of onderdelenleverancier is minstens even belangrijk als een cl
 
 Rover & Co heeft ook partners die ons steunen. Over hen lees je meer in de rubriek Partners van onze blog.
 
-## Waar mag je rijden?
+## Leren rijden in het terrein
 
-Hier wringt het schoentje voor veel nieuwe eigenaars. Een Land Rover is gebouwd voor het terrein, maar in België mag je niet zomaar overal rijden.
-
-**In het bos.** Volgens het automagazine Autogids is het in Vlaanderen en Wallonië verboden om met een gemotoriseerd voertuig op boswegen te rijden. Je kunt wel rijden op een privéterrein, met toestemming van de eigenaar, of met een club die uitstappen organiseert en daarvoor de nodige vergunningen heeft.
-
-**In Wallonië** is het verkeer in de bossen gereglementeerd. Wil een organisator een route uitzetten waar 4x4's, motoren of quads door het bos rijden, dan moet hij contact opnemen met het bevoegde kantonnement van het Waalse bosbeheer.
-
-**Op een oefenterrein.** Wie wil leren rijden in het terrein, kan terecht bij de Land Rover Experience Belux in Doornik. Daar rijd je onder begeleiding over rotsige paden, beboste hellingen en door water, in de streek van Namen en Doornik.
-
-**Met een georganiseerde rit.** Dat is meteen de reden waarom clubs en verenigingen zo belangrijk zijn. Een goede organisator regelt de toelatingen en kent de plekken waar je wél mag rijden. Bij onze eigen ritten rijden we op toegelaten wegen of op terreinen waarvoor we toestemming hebben van de eigenaar.
+Wie wil leren rijden in het terrein, kan terecht bij de Land Rover Experience Belux in Doornik. Daar rijd je onder begeleiding over rotsige paden, beboste hellingen en door water, in de streek van Namen en Doornik.
 
 ## Respect voor de omgeving
 
-Wie in het terrein rijdt, is te gast. Blijf op de paden, rijd stapvoets langs wandelaars, fietsers en ruiters, en neem je afval mee. Zo houden we de plekken open voor iedereen, ook voor de volgende rit.
+Wie in de natuur rijdt, is te gast. Rijd stapvoets langs wandelaars, fietsers en ruiters, en neem je afval mee. Zo houden we de plekken open voor iedereen, ook voor de volgende rit.
 
 ## Meer lezen
 
@@ -72,5 +64,3 @@ Dit artikel hoort bij ons overzicht [Land Rover in België: Minerva, ABL en de B
 - Land Rover Club Luxembourg, [Events](https://lrcl.odoo.com/events2000)
 - LOF Clutches, [Series Forever](https://lofclutches.com/installers/series-forever/) en [LRC Motors](https://lofclutches.com/installers/lrc-motors/)
 - Land Rover, [Land Rover Experience Centres in Europa](https://windhoek.landrover.co.za/experience/find-a-centre/europa): Land Rover Experience Belux, Doornik
-- Autogids, [Terreinrijden](https://www.autogids.be/autonieuws/juridisch/terreinrijden.html)
-- Wallonie.be, [Tijdelijke bebakening van een route in het bos aanvragen](https://wallonie.be/nl/demarches/tijdelijke-bebakening-van-een-route-het-bos-aanvragen)

@@ -68,5 +68,6 @@ Dit artikel hoort bij ons overzicht [Land Rover in België: Minerva, ABL en de B
 - Militär Aktuell, [Minerva Landrover: Ikone des Kalten Krieges](https://militaeraktuell.at/minerva-landrover-ikone-des-kalten-krieges/): Minerva als luxemerk, 2.492 wagens in dienst in 1985
 - Bob Morrison, Joint Forces, [Minerva TT: Belgian-built Series One Land Rovers](https://www.joint-forces.com/utility-4x4/70424-minerva-tt-belgian-built-series-one-land-rovers): uitzicht, para-commando's, tweede leven
 - The Dunsfold Collection, [Minerva Field Ambulance joins the Collection](https://dunsfoldcollection.co.uk/minerva-field-ambulance-joins-the-collection/) en [1954 Series I 80-inch Minerva Blindé](https://dunsfoldcollection.co.uk/collection/1954-series-i-80-inch-minerva-blinde/)
+- EMLRA, [Minerva](https://emlra.org/articles/vehicles/minerva): rood-zwart embleem, Mortsel
 - Wikipedia, [Minerva (automobile)](https://en.wikipedia.org/wiki/Minerva_(automobile)): rijkswachtversies
 - Classic Driver, [1951 Land Rover Series 1 (Minerva, rijkswacht)](https://www.classicdriver.com/en/car/land-rover/series-1-3/1951/1116698) (advertentie)

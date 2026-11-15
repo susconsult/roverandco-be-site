@@ -114,15 +114,15 @@ Ook buiten België weet men dat te waarderen. Het Britse Dunsfold Collection, da
 
 ### Zelf een kopen?
 
-Wie vandaag een Minerva of ex-ABL Series III koopt, moet goed kijken. Een legerwagen heeft meestal een zwaar leven gehad. Let op het chassis, het schutbord, de carrosserie, de aandrijving en het 24-voltsysteem. Voor een inschrijving als oldtimer geldt een minimumleeftijd van 30 jaar en een oldtimerkeuring. Met een O-plaat mag je niet naar het werk rijden of de wagen beroepsmatig gebruiken.
+Wie vandaag een Minerva of ex-ABL Series III koopt, moet goed kijken. Een legerwagen heeft meestal een zwaar leven gehad. Let op het chassis, het schutbord, de carrosserie, de aandrijving en het 24-voltsysteem.
 
-Onze volledige checklist en de regels voor de O-plaat vind je in [Een ex-legerwagen kopen: waar let je op?](/blog/ex-legerwagen-kopen)
+Onze volledige checklist vind je in [Een ex-legerwagen kopen: waar let je op?](/blog/ex-legerwagen-kopen)
 
 ### Andere liefhebbers vinden
 
-In België zijn er verschillende Land Rover-clubs, zoals de Land Rover Ownersclub Belgium, opgericht in 1992. Er zijn ook gespecialiseerde garages en onderdelenleveranciers, waaronder Series Forever, dat zich toelegt op Series I tot III en Minerva. Wie in het terrein wil rijden, moet de regels kennen: op boswegen is gemotoriseerd verkeer in Vlaanderen en Wallonië in principe verboden.
+In België zijn er verschillende Land Rover-clubs, zoals de Land Rover Ownersclub Belgium, opgericht in 1992. Er zijn ook gespecialiseerde garages en onderdelenleveranciers, waaronder Series Forever, dat zich toelegt op Series I tot III en Minerva.
 
-Een overzicht van clubs, specialisten en plekken om te rijden vind je in [Land Rover-plekken en -clubs in België](/blog/land-rover-clubs-en-plekken-belgie).
+Een overzicht van clubs en specialisten vind je in [Land Rover-plekken en -clubs in België](/blog/land-rover-clubs-en-plekken-belgie).
 
 ## Waarom die liefde?
 
@@ -152,8 +152,5 @@ Daarnaast is een Land Rover gewoon een wagen waarmee je dingen doet. Je rijdt er
 - Wikipedia, [Minerva (automobile)](https://en.wikipedia.org/wiki/Minerva_(automobile)): rijkswachtversies
 - Classic Driver, [1951 Land Rover Series 1 (Minerva, rijkswacht)](https://www.classicdriver.com/en/car/land-rover/series-1-3/1951/1116698) (advertentie)
 - HMVF, [Two wheel drive Land Rovers](https://hmvf.co.uk/topic/12790-two-wheel-drive-land-rovers/) (forum)
-- FOD Mobiliteit en Vervoer, [Een oldtimer inschrijven: O-plaat](https://mobilit.belgium.be/en/node/1277)
-- Vlaamse overheid, [Gebruik van een oldtimer](https://www.vlaanderen.be/mobiliteit-en-openbare-werken/auto-en-motor/oldtimers/gebruik-van-een-oldtimer)
 - Companyweb, [Land Rover Ownersclub Belgium](https://www.companyweb.be/en/0448389329/land-rover-ownersclub-belgium)
 - LOF Clutches, [Series Forever](https://lofclutches.com/installers/series-forever/)
-- Autogids, [Terreinrijden](https://www.autogids.be/autonieuws/juridisch/terreinrijden.html)

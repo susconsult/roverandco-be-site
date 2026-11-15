@@ -27,13 +27,11 @@ In juni 1951 zette het leger beide wagens naast elkaar voor een vergelijkende te
 
 De belangrijkste reden lag niet in de techniek, maar in de economie. Volgens de geschiedenissite CJ3B.info koos het leger mee voor de Land Rover omdat dat de Minerva-fabriek in Antwerpen nieuw leven kon geven. Een eigen Belgische productie betekende werk, Belgische onderdelen en minder afhankelijkheid van import.
 
-Dat zie je terug in de cijfers. Minerva assembleerde de wagens uit pakketten van Rover, maar bouwde zelf de carrosserie. Volgens de verkoopfolders van Minerva kwam 63 procent van de onderdelen uit België. In oktober 1951 was het akkoord rond, en in mei 1952 vertrokken de eerste pakketten uit Engeland naar Mortsel.
-
-Er speelde ook iets anders mee: de Land Rover was iets groter dan de jeep. Voor een algemene terreinwagen, die mensen, radio's en materiaal moest vervoeren, was dat een voordeel.
+Dat zie je terug in de cijfers. Minerva assembleerde de wagens uit pakketten van Rover, maar bouwde zelf de carrosserie. Volgens de verkoopfolders van Minerva kwam 63 procent van de onderdelen uit België. In oktober 1951 was er een akkoord. In mei 1952 werd het contract getekend en vertrokken de eerste pakketten uit Engeland naar Mortsel.
 
 ## De para's wilden hun jeep houden
 
-Net die grootte was voor één groep een nadeel. Toen het leger in 1952 de jeeps verving door de grotere Minerva, vonden de parachutisten die minder geschikt om snel in te zetten. Ze bleven hun Willys MB's gebruiken en zetten de regering onder druk om nieuwe Willys-jeeps te kopen. Met succes: de para's kregen CJ-3A's.
+Toen het leger in 1952 de jeeps verving door de grotere Minerva, vonden de parachutisten die minder geschikt om snel in te zetten. Ze bleven hun Willys MB's gebruiken en zetten de regering onder druk om nieuwe Willys-jeeps te kopen. Met succes: de para's kregen CJ-3A's.
 
 Die Belgische CJ-3A's hadden een NATO-elektrisch systeem van 24 volt. Ze bleven tot in de jaren zeventig in dienst bij de para's. Pas daarna werden ze vervangen, eerst door de Minerva en later door de VW Iltis, gebouwd door Bombardier.
 
