@@ -5,8 +5,9 @@ volgorde: 4
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Overal in Europa komen Land Rover-rijders samen in clubs. Een overzicht, van de oudste club in Schotland tot onze buren in Nederland en Luxemburg.
-foto: 968
-foto_alt: Colonne Land Rovers op een landweg
+foto: blog/land-rover-clubs-europa
+foto_alt: Land Rover Series III op een bijeenkomst
+foto_credit: ZidaneHartono, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:1977_Land_Rover_Series_III_1CFM515_%40_Trinity_Playing_Fields%2CWaterford.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Waar Land Rovers rijden, ontstaan clubs. Dat is al zo sinds de jaren vijftig. Sommige clubs zijn er voor alle modellen, andere voor één bepaalde generatie. In dit artikel nemen we je mee langs een aantal bekende clubs, van Groot-Brittannië tot bij ons in de Benelux.

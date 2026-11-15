@@ -5,8 +5,9 @@ volgorde: 5
 auteur: pieter
 datum: 2026-11-15
 beschrijving: In 2019 stelde Land Rover een volledig nieuwe Defender voor, gebouwd in Slovakije. Wat is er anders dan bij de klassieke Defender, en wat bleef?
-foto: 5511
-foto_alt: Nieuwe Defender in het stof
+foto: blog/nieuwe-defender-l663
+foto_alt: Nieuwe Land Rover Defender op de IAA 2019
+foto_credit: Alexander Migl, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Defender_%28L663%29_at_IAA_2019_IMG_0467.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Op onze evenementen staan ze naast elkaar: een Series uit de jaren zeventig, een Defender 110 uit de jaren negentig en een gloednieuwe Defender. Ze dragen dezelfde naam, maar ze hebben bijna niets gemeen. In dit artikel lees je hoe de nieuwe Defender ontstond, en wat er van de oude overblijft.

@@ -5,8 +5,9 @@ volgorde: 4
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Een oude Land Rover die een druppel olie verliest, is geen uitzondering. Waar lekken ze meestal, en hoe vind je de bron?
-foto: 5511
-foto_alt: Nieuwe Defender in het stof
+foto: blog/olielekken-land-rover
+foto_alt: Motorruimte met een 300Tdi-motor
+foto_credit: Jozg44, CC BY-SA 3.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_300Tdi_engine.JPG" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een klassieke Land Rover die een paar druppels olie verliest, is geen uitzondering. Onderdelenverkoper Autopartspro noemt olielekken bij oudere Defenders zo goed als onvermijdelijk. Belangrijk is dat je weet waar het vandaan komt, en of het erg is.

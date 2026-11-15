@@ -5,8 +5,9 @@ volgorde: 1
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Tussen 1952 en 1956 bouwde Minerva in Mortsel bijna 9.000 Land Rovers onder licentie. Hoe herken je er een, en waarom zien ze er anders uit?
-foto: 870
-foto_alt: Series Land Rover rijdt door de modder
+foto: blog/minerva-land-rover-antwerpen
+foto_alt: Embleem van een Minerva TT met de tekst Licence Rover
+foto_credit: Joost J. Bakker, CC BY 2.0, via <a href="https://commons.wikimedia.org/wiki/File:Minerva_TT_Land_Rover_%282%29.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Wie op een Belgische Land Rover-meeting rondloopt, ziet ze af en toe staan: een Series I met schuine, hoekige voorspatborden en een smal rooster met een rood-zwart embleem. Dat is geen zelfbouw en geen latere aanpassing. Het is een Minerva, een Land Rover die in de jaren vijftig bij Antwerpen in elkaar werd gezet. In dit artikel lees je waar die wagens vandaan komen en hoe je ze herkent.

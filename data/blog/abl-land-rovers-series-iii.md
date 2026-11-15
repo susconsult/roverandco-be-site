@@ -5,8 +5,9 @@ volgorde: 3
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Na de Minerva reed het Belgisch leger met Series II en III van 88 inch. Opvallend: een deel had alleen achterwielaandrijving. Wat weten we zeker, en wat niet?
-foto: 815
-foto_alt: Series III Land Rover in de modder
+foto: blog/abl-land-rovers-series-iii
+foto_alt: Militaire Land Rover Series III
+foto_credit: Lewis Collard, CC0, via <a href="https://commons.wikimedia.org/wiki/File:Military_Land_Rover_Series_III.JPG" rel="noopener">Wikimedia Commons</a>
 ---
 
 Iedereen kent de Minerva, de Land Rover uit Mortsel. Minder bekend is wat er daarna kwam. Toen de Minerva's oud werden, kocht het Belgisch leger gewone Land Rovers uit Engeland: vooral Series II en III met een korte wielbasis. Een deel daarvan is vandaag een gezochte klassieker, ook omdat er een merkwaardige versie tussen zit.

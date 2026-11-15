@@ -6,8 +6,8 @@ cornerstone: ja
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Zonder partners geen evenementen. Een overzicht van de bedrijven die Rover & Co steunen: The Wolfgarage, P&P Hekwerk, EPC Verbeteraars, SUS Consult, Pakawi en Kerkhofs Grondwerken.
-foto: standen
-foto_alt: Rally-Defenders op het festivalterrein
+foto: 968
+foto_alt: Colonne Land Rovers op een landweg
 ---
 
 Een Land Rover-meeting aan een kerktoren, een weekend in een dierenpark, een roadbook door de Kempen: zulke evenementen organiseer je niet alleen. Rover & Co is een vzw, en eventuele opbrengsten uit onze activiteiten vloeien terug naar de community of naar goede doelen. Dat kan alleen omdat er bedrijven zijn die ons steunen.

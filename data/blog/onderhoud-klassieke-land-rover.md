@@ -6,8 +6,9 @@ cornerstone: ja
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Van de wekelijkse controles tot roest, fusees, cardanassen en bladveren: alles wat je moet weten om een Series of Defender zelf te onderhouden.
-foto: 730
-foto_alt: Defender 110 spat door de modder
+foto: blog/onderhoud-klassieke-land-rover
+foto_alt: Lassen aan het chassis van een Land Rover
+foto_credit: Lewis Collard, vrij te gebruiken met naamsvermelding, via <a href="https://commons.wikimedia.org/wiki/File:MIG_welding_a_Land_Rover_chassis.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een klassieke Land Rover is een wagen waar je zelf aan kunt sleutelen. Haynes schrijft in zijn onderhoudsgids voor de 90, 110 en Defender dat je de meeste onderhoudstaken zelf thuis kunt doen. En volgens Series123 zijn voor de Series de meeste onderdelen nog te krijgen.

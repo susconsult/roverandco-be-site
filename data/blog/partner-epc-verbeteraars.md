@@ -5,8 +5,8 @@ volgorde: 3
 auteur: pieter
 datum: 2026-11-15
 beschrijving: EPC Verbeteraars uit Ham helpt je EPC-score te verbeteren, van analyse tot het nieuwe attest, en regelt ook de keuringen bij koop, verkoop of verhuur.
-foto: 5739
-foto_alt: Zicht over de motorkap op een bospad
+foto: 5577
+foto_alt: Defender 110 op een zandweg
 ---
 
 EPC Verbeteraars uit Ham is een van de partners van Rover & Co. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.

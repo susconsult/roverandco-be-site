@@ -5,8 +5,9 @@ volgorde: 1
 auteur: pieter
 datum: 2026-11-15
 beschrijving: De Land Rover begon met een schets in het zand op het Welse eiland Anglesey. Wat weten we over dat verhaal, en over de eerste prototypes?
-foto: 870
-foto_alt: Series Land Rover rijdt door de modder
+foto: blog/tekening-in-het-zand-1947
+foto_alt: Luchtfoto van Red Wharf Bay op Anglesey
+foto_credit: Aerialpete, CC BY-SA 2.0, via <a href="https://commons.wikimedia.org/wiki/File:Red_Wharf_Bay_and_Benllech%2C_Anglesey.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Elk merk heeft zijn ontstaansverhaal. Dat van de Land Rover is misschien het mooiste: een schets in het zand van een Welsh strand, in 1947. Het verhaal wordt al decennia verteld, en Land Rover zelf vertelt het graag. In dit artikel lees je wat we erover weten.

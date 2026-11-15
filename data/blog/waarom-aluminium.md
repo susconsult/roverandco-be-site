@@ -5,8 +5,9 @@ volgorde: 2
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Het aluminium koetswerk van de Land Rover was geen luxe, maar een noodoplossing. Het verhaal van Birmabright, staaltekort en vliegtuigverf.
-foto: 900
-foto_alt: Land Rover Forward Control in het bos
+foto: blog/waarom-aluminium
+foto_alt: HUE 166, de eerste Land Rover, in het British Motor Museum
+foto_credit: Funck77, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:British_Motor_Museum%2C_HUE_166.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Tik op het spatbord van een Series of een oude Defender, en je hoort het meteen: dat is geen staal. Het koetswerk van een klassieke Land Rover is grotendeels van aluminium. Vandaag zou je dat een luxe noemen, want aluminium is duurder dan staal. Maar in 1948 was het een noodoplossing. In dit artikel lees je waarom.

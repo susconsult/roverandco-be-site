@@ -6,8 +6,9 @@ cornerstone: ja
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Van een schets op een Welsh strand in 1947 tot de laatste Defender in 2016 en de nieuwe uit Slovakije: het volledige verhaal van Land Rover.
-foto: 5644
-foto_alt: Bestuurder in een Series Land Rover steekt zijn duim op
+foto: blog/geschiedenis-land-rover
+foto_alt: Eerste voorproductiewagen van de Land Rover Series I uit 1948
+foto_credit: Land Rover MENA, CC BY 2.0, via <a href="https://commons.wikimedia.org/wiki/File:First_Pre-Production_1948_80-inch_Series_I_%2824100301974%29.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 De Land Rover werd bedacht als tijdelijke oplossing voor een bedrijf in moeilijkheden. Bijna zeventig jaar later rolde de laatste klassieke Defender van de band, na meer dan twee miljoen exemplaren. Ondertussen reed hij op boerderijen en bij legers over de hele wereld, en werd hij zelfs in ons eigen land gebouwd, bij Minerva in Mortsel.

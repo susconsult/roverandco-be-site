@@ -5,8 +5,9 @@ volgorde: 4
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Een Minerva of ex-ABL Series III kopen? Waar je ze vindt en waar je op let bij de bezichtiging.
-foto: 900
-foto_alt: Land Rover Forward Control in het bos
+foto: blog/ex-legerwagen-kopen
+foto_alt: Militaire Land Rover Series III in camouflage
+foto_credit: PH2 Philip Wiggins, US Navy, publiek domein, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_III_Bright_Star_85_front_q.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een oude legerwagen heeft iets wat een burgerversie mist: een verhaal, en vaak een eenvoudige, robuuste techniek. In België gaat het meestal om een Minerva uit de jaren vijftig of een ex-ABL Series III uit de jaren zeventig. Maar een legerverleden betekent ook dat je goed moet kijken voor je koopt. In dit artikel zetten we de belangrijkste punten op een rij.

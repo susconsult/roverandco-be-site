@@ -5,8 +5,9 @@ volgorde: 2
 auteur: pieter
 datum: 2026-11-15
 beschrijving: In 1951 zocht het Belgisch leger een opvolger voor zijn oorlogsjeeps. Het werd de Land Rover, gebouwd bij Minerva. Maar de jeep verdween niet helemaal.
-foto: 5644
-foto_alt: Bestuurder in een Series Land Rover steekt zijn duim op
+foto: blog/belgisch-leger-1951-land-rover-of-jeep
+foto_alt: Willys Jeep CJ-3A uit 1950
+foto_credit: Greg Gjerdingen, CC BY 2.0, via <a href="https://commons.wikimedia.org/wiki/File:1950_Willys_Jeep_CJ-3A_%2821360400616%29.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Begin jaren vijftig reed het Belgisch leger nog grotendeels met wat de oorlog had achtergelaten. Om die te vervangen, lagen er twee kandidaten op tafel: de Amerikaanse Willys-jeep en de Britse Land Rover. Het werd de Land Rover. Toch is het verhaal minder zwart-wit dan de titel doet vermoeden, want ook de jeep bleef nog jaren rijden.

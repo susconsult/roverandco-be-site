@@ -5,8 +5,9 @@ volgorde: 5
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Van het strand waar de Land Rover bedacht werd tot een museum met meer dan 130 wagens: de plekken waar Land Rover-liefhebbers graag naartoe gaan.
-foto: 964
-foto_alt: Defender met daktent in een stoffige bosweg
+foto: blog/land-rover-bedevaartsoorden
+foto_alt: Land Rover Series IIA Forest Rover uit 1964 in een museum
+foto_credit: andreboeni, CC BY 2.0, via <a href="https://commons.wikimedia.org/wiki/File:Land-Rover_Series_IIA_%22Forest_Rover%22_%281964%29.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Elke passie heeft haar bedevaartsoorden. Voor Land Rover-liefhebbers liggen de meeste in Groot-Brittannië, waar het allemaal begon. Met een Land Rover is het een mooie reis: over het Kanaal, en dan de weg op naar Wales of het zuiden van Engeland. In dit artikel zetten we de bekendste plekken op een rij.

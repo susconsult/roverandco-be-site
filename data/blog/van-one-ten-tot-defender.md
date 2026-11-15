@@ -5,8 +5,9 @@ volgorde: 4
 auteur: pieter
 datum: 2026-11-15
 beschrijving: In 1983 kwam de One Ten, later de Defender. Schroefveren, permanente vierwielaandrijving en een reeks motoren, tot de laatste in januari 2016 van de band rolde.
-foto: 5498
-foto_alt: Lachende chauffeur in een witte Defender
+foto: blog/van-one-ten-tot-defender
+foto_alt: Land Rover Defender 110 Tdi uit 1991
+foto_credit: OSX, publiek domein, via <a href="https://commons.wikimedia.org/wiki/File:1991_Land_Rover_Defender_110_Tdi_5-door_wagon_%282015-11-13%29_01.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Wie vandaag aan een Land Rover denkt, ziet meestal een Defender voor zich. Maar die naam bestaat pas sinds 1990. Daarvoor heette hij gewoon One Ten, Ninety of One Two Seven. In dit artikel lees je hoe de opvolger van de Series ontstond, en hoe hij na meer dan dertig jaar afscheid nam.

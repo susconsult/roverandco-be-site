@@ -5,8 +5,9 @@ volgorde: 5
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Waar vind je andere Land Rover-rijders in België? Clubs, specialisten en een plek om te leren rijden in het terrein.
-foto: 977
-foto_alt: Colonne Defenders rijdt door het bos
+foto: blog/land-rover-clubs-en-plekken-belgie
+foto_alt: Minerva Land Rover-ambulance in een museum
+foto_credit: Rama, CC BY-SA 2.0 FR, via <a href="https://commons.wikimedia.org/wiki/File:Minerva_Land_Rover_IMG_1547.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een Land Rover rijd je zelden alleen. Vroeg of laat zoek je mensen die dezelfde wagen hebben, dezelfde problemen kennen en zin hebben om samen te rijden. In België kan dat op verschillende plaatsen. Hier vind je een overzicht van de clubs en de specialisten, en een plek waar je kunt leren rijden in het terrein.

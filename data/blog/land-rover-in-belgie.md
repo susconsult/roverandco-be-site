@@ -6,8 +6,9 @@ cornerstone: ja
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Van de Minerva uit Mortsel tot de ex-ABL Series III: het volledige verhaal van de Land Rover in België, en waar je vandaag nog terechtkunt.
-foto: 968
-foto_alt: Colonne Land Rovers op een landweg
+foto: blog/land-rover-in-belgie
+foto_alt: Minerva Land Rover
+foto_credit: Calreyn88, CC BY-SA 4.0, via <a href="https://commons.wikimedia.org/wiki/File:Minerva_Land_Rover_3.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Weinig landen hebben zo'n eigen band met de Land Rover als België. Een Britse wagen, zou je denken. Maar in de jaren vijftig werden er bij Antwerpen bijna 9.000 Land Rovers gebouwd, met een Belgisch stalen koetswerk en een embleem dat je nergens anders vindt. Het Belgisch leger reed er meer dan dertig jaar mee. En nog altijd duiken die wagens op bij verzamelaars, op meetings en in advertenties, tot in de Verenigde Staten.

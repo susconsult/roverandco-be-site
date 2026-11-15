@@ -5,8 +5,9 @@ volgorde: 5
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Een Series Land Rover rijdt op bladveren. Hoe zie je dat ze versleten zijn, en waar let je op bij het vervangen?
-foto: 815
-foto_alt: Series III Land Rover in de modder
+foto: blog/bladveren-series-nakijken
+foto_alt: Land Rover uit 1963 op een onverharde weg
+foto_credit: Lewis Collard, CC BY 3.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_%281963%29_on_green_lane.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een Series Land Rover, van de Series I tot de Series III, rijdt op bladveren: pakketten van gebogen stalen bladen, vooraan en achteraan. De latere 90 en 110, de Defender, hebben schroefveren. Bladveren zijn eenvoudig en sterk, maar ze slijten wel. In dit artikel lees je hoe je dat ziet.

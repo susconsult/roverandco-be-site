@@ -5,8 +5,9 @@ volgorde: 2
 auteur: dolf
 datum: 2026-11-15
 beschrijving: De fuseehuizen vooraan een Land Rover zijn gevuld met olie of met speciaal vet. Wat is het verschil, en waar let je op bij het bijvullen?
-foto: 959
-foto_alt: Defenders rijden door het stof
+foto: blog/fusees-olie-of-vet
+foto_alt: Defender vol modder na een rit in het terrein
+foto_credit: AliV, CC BY-SA 3.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Defender_covered_with_mud_after_driving_in_rough_terrain.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Wie onder de voorkant van een Series, Defender, Discovery 1 of Range Rover Classic kijkt, ziet aan elk wiel een grote, glanzende bol. Dat is de fusee, in het Engels de *swivel*. Binnenin zit de homokineet die het voorwiel aandrijft, en de lagers waarop het wiel draait als je stuurt. Dat geheel moet gesmeerd blijven. Maar waarmee: olie of vet? In dit artikel zetten we op een rij wat de bronnen zeggen.

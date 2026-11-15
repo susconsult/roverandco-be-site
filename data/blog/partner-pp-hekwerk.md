@@ -5,8 +5,8 @@ volgorde: 2
 auteur: pieter
 datum: 2026-11-15
 beschrijving: P&P Hekwerk plaatst poorten, afsluitingen en hekwerk op maat, voor woningen en bedrijven. Wat begon in een carport, werd een bedrijf met een tiental medewerkers.
-foto: 968
-foto_alt: Colonne Land Rovers op een landweg
+foto: 5739
+foto_alt: Zicht over de motorkap op een bospad
 ---
 
 Een terrein voor een evenement heeft altijd een begin en een einde. Waar het ophoudt, staat vaak een hek. Dat is meteen het vak van P&P Hekwerk, een van de partners van Rover & Co. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.

@@ -5,8 +5,9 @@ volgorde: 3
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Van 1948 tot 1985 bouwde Land Rover de Series. Hoe zie je het verschil tussen een Series I, II, IIA en III? Wielbases, motoren en details.
-foto: 815
-foto_alt: Series III Land Rover in de modder
+foto: blog/series-i-ii-iii-herkennen
+foto_alt: Twee Land Rover Series II naast elkaar
+foto_credit: ArildV, CC BY-SA 3.0, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_II.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Tussen 1948 en 1985 bouwde Land Rover de wagens die we vandaag de Series noemen: de Series I, II, IIA en III. Voor een buitenstaander lijken ze sterk op elkaar. Wie goed kijkt, ziet de verschillen. In dit artikel zetten we ze op een rij, op basis van de geschiedenis die Wikipedia en andere bronnen beschrijven.

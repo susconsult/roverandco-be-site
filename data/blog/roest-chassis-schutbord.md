@@ -5,8 +5,9 @@ volgorde: 1
 auteur: dolf
 datum: 2026-11-15
 beschrijving: Het koetswerk van een Land Rover is van aluminium, maar het chassis en het schutbord zijn van staal. Dit zijn de plekken waar roest begint.
-foto: 5577
-foto_alt: Defender 110 op een zandweg
+foto: blog/roest-chassis-schutbord
+foto_alt: Kaal chassis van een Land Rover Series III
+foto_credit: Lewis Collard, publiek domein, via <a href="https://commons.wikimedia.org/wiki/File:Land_Rover_Series_III_chassis.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een klassieke Land Rover heeft de naam dat hij niet roest. Dat klopt maar half. De meeste carrosseriepanelen zijn van aluminium, maar het chassis, het schutbord en een reeks andere dragende delen zijn van staal. En dat staal roest wel, vaak van binnen naar buiten en op plekken die je niet meteen ziet. In dit artikel lees je waar je moet kijken.

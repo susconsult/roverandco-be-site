@@ -5,8 +5,9 @@ volgorde: 3
 auteur: dolf
 datum: 2026-11-15
 beschrijving: De cardanassen van een Land Rover hebben smeernippels die vaak vergeten worden. Waar zitten ze, en hoe smeer je ze goed?
-foto: 905
-foto_alt: Defender met daktent in het bos
+foto: blog/cardanassen-smeren
+foto_alt: Cardanas met kruiskoppelingen
+foto_credit: Panoha, CC BY-SA 3.0, via <a href="https://commons.wikimedia.org/wiki/File:Universal_joints_shaft.jpg" rel="noopener">Wikimedia Commons</a>
 ---
 
 Een Land Rover met vierwielaandrijving heeft twee cardanassen: een naar de achteras en een naar de vooras. Ze brengen de kracht van de tussenbak naar de assen. Omdat de assen op en neer veren, moeten die cardanassen kunnen buigen en van lengte veranderen. Dat gebeurt met kruiskoppelingen en een schuifstuk. En die moeten gesmeerd worden. Het is een klein werk, maar het wordt vaak vergeten.
