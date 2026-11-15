@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Afrekenen | Rover &amp; Co</title>
+<meta name="description" content="Rond je bestelling bij Rover &amp; Co af."><meta name="robots" content="noindex">
+<link rel="canonical" href="https://roverandco.be/afrekenen">
+<meta property="og:title" content="Afrekenen | Rover &amp; Co">
+<meta property="og:description" content="Rond je bestelling bij Rover &amp; Co af.">
+<meta property="og:image" content="https://roverandco.be/assets/img/964.webp">
+<meta property="og:locale" content="nl_BE">
+<link rel="icon" href="/favicon.png">
+<link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/site.css?v=2026-11-15">
+</head>
+<body class="no-hero">
+<a class="sr-only" href="#inhoud">Naar de inhoud</a>
+<header class="site">
+  <div class="wrap nav">
+    <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="84" height="84"></a>
+    <ul class="menu" id="menu"><li><a href="/activiteiten">Activiteiten</a></li><li><a href="/shop">Shop</a></li><li><a href="/blog">Blog</a></li><li><a href="/fotos">Foto&#x27;s</a></li><li><a href="/over-ons">Over ons</a></li><li><a href="/contact">Contact</a></li></ul>
+    <div class="nav-right">
+      <button class="cart-btn" type="button" aria-label="Winkelmandje openen" data-open-cart>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+        <span class="cart-count">0</span>
+      </button>
+      <button class="burger" type="button" aria-label="Menu" aria-controls="menu" aria-expanded="false">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main id="inhoud">
+<section class="banner"><div class="wrap"><div class="eyebrow">Shop</div><h1>Afrekenen</h1></div></section>
+<section><div class="wrap">
+  <div class="testbanner" role="note"><strong>Testomgeving.</strong> Bestellingen worden bewaard maar zijn nog niet echt: er wordt niets aangerekend en niets verstuurd.</div>
+  <form id="checkout-form" class="checkout" novalidate data-verzendkost="7.5" data-gratis-vanaf="100">
+    <div class="co-main">
+      <div class="co-leeg" id="co-leeg" hidden><p>Je mandje is leeg.</p><a class="btn btn-solid" href="/shop">Naar de shop</a></div>
+      <fieldset class="co-blok"><legend><span>1</span> Jouw gegevens</legend>
+        <div class="veld"><label for="naam">Voor- en achternaam</label><input id="naam" name="naam" autocomplete="name" required><div class="err" data-voor="naam"></div></div>
+        <div class="veld2">
+          <div class="veld"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div>
+          <div class="veld"><label for="telefoon">Telefoon</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required><div class="err" data-voor="telefoon"></div></div>
+        </div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>2</span> Levering</legend>
+        <label class="keuze"><input type="radio" name="levering" value="activiteit" checked><span><b>Ophalen op een activiteit</b><small>Gratis</small></span></label>
+        <div class="sub" data-toon="activiteit"><label for="activiteit">Op welke activiteit?</label><select id="activiteit" name="activiteit"><option value="Church of Rover (Zo 22 nov)">Church of Rover (Zo 22 nov)</option><option value="Kerstmeeting (Zo 13 dec)">Kerstmeeting (Zo 13 dec)</option></select><div class="err" data-voor="activiteit"></div></div>
+        <label class="keuze"><input type="radio" name="levering" value="oostham"><span><b>Ophalen in Oostham</b><small>Gratis, op afspraak. Olmensesteenweg 105, 3945 Oostham</small></span></label>
+        <label class="keuze"><input type="radio" name="levering" value="verzenden"><span><b>Verzenden</b><small>€7,50 · gratis vanaf €100</small></span></label>
+        <div class="sub" data-toon="verzenden" hidden>
+          <div class="veld"><label for="straat">Straat en nummer</label><input id="straat" name="straat" autocomplete="street-address"><div class="err" data-voor="straat"></div></div>
+          <div class="veld2">
+            <div class="veld"><label for="postcode">Postcode</label><input id="postcode" name="postcode" autocomplete="postal-code"><div class="err" data-voor="postcode"></div></div>
+            <div class="veld"><label for="gemeente">Gemeente</label><input id="gemeente" name="gemeente" autocomplete="address-level2"><div class="err" data-voor="gemeente"></div></div>
+          </div>
+          <div class="veld"><label for="land">Land</label><select id="land" name="land" autocomplete="country"><option value="BE">België</option><option value="NL">Nederland</option></select></div>
+        </div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>3</span> Steun ons <small>(optioneel)</small></legend>
+        <p class="note" style="margin:0 0 12px">Een extra bedrag gaat volledig naar de werking van de vzw.</p>
+        <div class="chips">
+          <label><input type="radio" name="donatie" value="geen" checked><span>Geen</span></label>
+          <label><input type="radio" name="donatie" value="10"><span>10%</span></label>
+          <label><input type="radio" name="donatie" value="15"><span>15%</span></label>
+          <label><input type="radio" name="donatie" value="eigen"><span>Eigen bedrag</span></label>
+        </div>
+        <div class="sub" data-toon="eigen" hidden><label for="donatie_bedrag">Bedrag in euro</label><input id="donatie_bedrag" name="donatie_bedrag" type="number" min="1" step="1" inputmode="decimal"><div class="err" data-voor="donatie_bedrag"></div></div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>4</span> Opmerking <small>(optioneel)</small></legend>
+        <div class="veld"><label for="opmerking" class="sr-only">Opmerking</label><textarea id="opmerking" name="opmerking" rows="3"></textarea></div>
+      </fieldset>
+      <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    </div>
+    <aside class="co-side">
+      <div class="card">
+        <h3>Overzicht</h3>
+        <div id="co-lijnen"></div>
+        <ul class="facts">
+          <li><span>Subtotaal</span><span id="co-subtotaal">€0,00</span></li>
+          <li><span>Verzending</span><span id="co-verzending">€0,00</span></li>
+          <li><span>Steun</span><span id="co-donatie">€0,00</span></li>
+          <li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li>
+        </ul>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
+        <div class="err" data-voor="akkoord"></div>
+        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Bestelling plaatsen</button>
+        <div class="err" id="co-fout" role="alert"></div>
+        <p class="note">Online betalen via Viva volgt later. In deze testfase wordt niets aangerekend.</p>
+      </div>
+    </aside>
+  </form>
+</div></section>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="110" height="110" loading="lazy"></a>
+        <p>Land Rover-liefhebbers samen, op plekken waar je anders niet komt.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p><a href="mailto:info@roverandco.be">info@roverandco.be</a></p>
+        <p><a href="tel:+32477387272">+32 477 38 72 72</a></p>
+        <p>Olmensesteenweg 105<br>3945 Oostham</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul><li><a href="/activiteiten">Activiteiten</a></li><li><a href="/shop">Shop</a></li><li><a href="/blog">Blog</a></li><li><a href="/fotos">Foto&#x27;s</a></li><li><a href="/over-ons">Over ons</a></li><li><a href="/contact">Contact</a></li></ul>
+      </div>
+      <div>
+        <h4>Volg ons</h4>
+        <ul><li><a href="https://www.instagram.com/roverandco.be/" rel="noopener">Instagram</a></li><li><a href="https://www.facebook.com/roverandcobe/" rel="noopener">Facebook</a></li></ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>Rover &amp; Co VZW · BE 1032.450.083 · <a href="/privacy">Privacy</a></span>
+      <span>Made with love by <a href="https://susconsult.be" rel="noopener">SUS Consult</a></span>
+    </div>
+  </div>
+</footer>
+<div class="drawer-bg" data-close-cart></div>
+<aside class="drawer" aria-label="Winkelmandje">
+  <div class="drawer-h"><h2>Je mandje</h2><button type="button" data-close-cart aria-label="Mandje sluiten">×</button></div>
+  <div class="lines" id="lines"></div>
+  <div class="drawer-f">
+    <div class="total"><span>Totaal</span><span id="total">€0,00</span></div>
+    <a class="btn btn-solid" id="checkout" href="/afrekenen" style="width:100%;justify-content:center">Afrekenen</a>
+  </div>
+</aside>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten">×</button><img alt=""></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/assets/js/site.js?v=2026-11-15" defer></script>
+</body>
+</html>

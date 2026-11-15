@@ -211,3 +211,32 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .toast.show{transform:translateX(-50%);visibility:visible}
 .toast{visibility:hidden}
 .sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* afrekenen */
+.testbanner{background:#FFF6D6;color:#5A4500;border-radius:12px;padding:12px 16px;margin-bottom:24px;font-size:15px}
+.checkout{display:grid;grid-template-columns:1.5fr 1fr;gap:40px;align-items:start}
+.co-blok{border:0;background:var(--white);border-radius:var(--r);padding:24px;margin-bottom:18px;min-width:0}
+.co-blok legend{font-family:var(--head);font-weight:900;font-size:28px;text-transform:uppercase;display:flex;align-items:center;gap:10px;float:left;width:100%;margin-bottom:16px}
+.co-blok legend span{background:var(--green);color:#fff;width:32px;height:32px;border-radius:50%;display:grid;place-items:center;font-size:18px}
+.co-blok legend small{font-family:var(--body);font-weight:500;font-size:14px;text-transform:none;color:var(--muted)}
+.co-blok legend+*{clear:both}
+.veld{margin-bottom:12px;flex:1;min-width:0}
+.veld label,.sub>label{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.veld input,.veld textarea,.sub input,.sub select,.veld select{width:100%;font:inherit;padding:12px 14px;border:2px solid #cfc8b6;border-radius:10px;background:#fff}
+.veld input:focus,.veld textarea:focus,.sub input:focus,.sub select:focus{outline:none;border-color:var(--green)}
+.veld input[aria-invalid=true],.sub input[aria-invalid=true]{border-color:#A32D2D}
+.veld2{display:flex;gap:12px}
+.keuze{display:flex;gap:12px;align-items:flex-start;padding:14px;border:2px solid #e5dfcf;border-radius:12px;margin-bottom:10px;cursor:pointer}
+.keuze:has(input:checked){border-color:var(--green);background:#F3F7F2}
+.keuze input{margin-top:5px;accent-color:var(--green)}
+.keuze b{display:block}
+.keuze small{color:var(--muted)}
+.sub{margin:0 0 14px 28px}
+.co-side .card{top:100px}
+.co-lijn{display:flex;justify-content:space-between;gap:10px;padding:8px 0;font-size:15px;border-bottom:1px solid #eee}
+.co-lijn small{display:block;color:var(--muted)}
+.co-totaal{font-weight:800;font-size:20px}
+.akkoord{display:flex;gap:10px;align-items:flex-start;font-size:15px;margin:6px 0 4px}
+.akkoord input{margin-top:4px;accent-color:var(--green)}
+.hp{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+@media(max-width:880px){.checkout{grid-template-columns:1fr}.veld2{flex-direction:column;gap:0}}

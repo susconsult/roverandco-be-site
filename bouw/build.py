@@ -33,8 +33,8 @@ def eur(n):
 
 def schoon_html(h):
     """Ecwid-omschrijving opkuisen: inline stijlen, lege alinea's en spans weg."""
-    h = re.sub(r'\s(style|class)="[^"]*"', "", h)
-    h = re.sub(r"</?span[^>]*>", "", h)
+    h = re.sub(r"</?span\b[^>]*>", "", h)
+    h = re.sub(r"<(?!a\b)(\w+)\b[^>]*>", r"<\1>", h)  # alle attributen weg, behalve bij links
     h = re.sub(r"<p>\s*(<br>)?\s*</p>", "", h)
     return h
 
@@ -58,7 +58,7 @@ def layout(path, title, desc, body, hero=False):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>{e(full_title)}</title>
-<meta name="description" content="{e(desc)}">
+<meta name="description" content="{e(desc)}">{'<meta name="robots" content="noindex">' if path in ("/afrekenen", "/bedankt", "/404") else ""}
 <link rel="canonical" href="{canon}">
 <meta property="og:title" content="{e(full_title)}">
 <meta property="og:description" content="{e(desc)}">
@@ -122,8 +122,7 @@ def layout(path, title, desc, body, hero=False):
   <div class="lines" id="lines"></div>
   <div class="drawer-f">
     <div class="total"><span>Totaal</span><span id="total">€0,00</span></div>
-    <button class="btn btn-solid" id="checkout" type="button" style="width:100%;justify-content:center">Afrekenen</button>
-    <p class="note" style="text-align:center">Online betalen via Viva komt binnenkort.</p>
+    <a class="btn btn-solid" id="checkout" href="/afrekenen" style="width:100%;justify-content:center">Afrekenen</a>
   </div>
 </aside>
 <div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten">×</button><img alt=""></div>
@@ -139,7 +138,7 @@ def write(path, title, desc, body, hero=False):
     out = os.path.join(PUB, rel)
     os.makedirs(os.path.dirname(out), exist_ok=True)
     open(out, "w", encoding="utf-8").write(layout(path, title, desc, body, hero))
-    if path != "/404":
+    if path not in ("/404", "/afrekenen", "/bedankt"):
         pages.append(path)
 
 
@@ -387,6 +386,91 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
 write("/404", "Pagina niet gevonden", "Deze pagina bestaat niet.",
       banner("404", "Verkeerde afslag", "Deze pagina bestaat niet (meer).", None) +
       '<section><div class="narrow"><a class="btn btn-solid" href="/">Terug naar home</a></div></section>')
+
+# ---------- catalogus voor de Worker (prijscontrole) ----------
+VANDAAG = date.today().isoformat()
+komend = [a for a in acts if a["datum"] and a["datum"] >= VANDAAG]
+cat = {pr["slug"]: {"naam": pr["naam"], "prijs": pr["prijs"],
+                    "opties": [{"naam": o["naam"], "verplicht": o["verplicht"],
+                                "waarden": [{"waarde": v["waarde"], "meerprijs": prijs_float(v["meerprijs"])} for v in o["waarden"]]}
+                               for o in pr["opties"]]} for pr in producten}
+cat["__activiteiten"] = [f'{a["titel"]} ({a["datum_label"]})' for a in komend]
+os.makedirs(os.path.join(ROOT, "src"), exist_ok=True)
+json.dump(cat, open(os.path.join(ROOT, "src", "catalogus.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+# ---------- afrekenen ----------
+act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])
+afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
+<section><div class="wrap">
+  <div class="testbanner" role="note"><strong>Testomgeving.</strong> Bestellingen worden bewaard maar zijn nog niet echt: er wordt niets aangerekend en niets verstuurd.</div>
+  <form id="checkout-form" class="checkout" novalidate data-verzendkost="7.5" data-gratis-vanaf="100">
+    <div class="co-main">
+      <div class="co-leeg" id="co-leeg" hidden><p>Je mandje is leeg.</p><a class="btn btn-solid" href="/shop">Naar de shop</a></div>
+      <fieldset class="co-blok"><legend><span>1</span> Jouw gegevens</legend>
+        <div class="veld"><label for="naam">Voor- en achternaam</label><input id="naam" name="naam" autocomplete="name" required><div class="err" data-voor="naam"></div></div>
+        <div class="veld2">
+          <div class="veld"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div>
+          <div class="veld"><label for="telefoon">Telefoon</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required><div class="err" data-voor="telefoon"></div></div>
+        </div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>2</span> Levering</legend>
+        <label class="keuze"><input type="radio" name="levering" value="activiteit" checked><span><b>Ophalen op een activiteit</b><small>Gratis</small></span></label>
+        <div class="sub" data-toon="activiteit"><label for="activiteit">Op welke activiteit?</label><select id="activiteit" name="activiteit">{act_opts}</select><div class="err" data-voor="activiteit"></div></div>
+        <label class="keuze"><input type="radio" name="levering" value="oostham"><span><b>Ophalen in Oostham</b><small>Gratis, op afspraak. Olmensesteenweg 105, 3945 Oostham</small></span></label>
+        <label class="keuze"><input type="radio" name="levering" value="verzenden"><span><b>Verzenden</b><small>€7,50 · gratis vanaf €100</small></span></label>
+        <div class="sub" data-toon="verzenden" hidden>
+          <div class="veld"><label for="straat">Straat en nummer</label><input id="straat" name="straat" autocomplete="street-address"><div class="err" data-voor="straat"></div></div>
+          <div class="veld2">
+            <div class="veld"><label for="postcode">Postcode</label><input id="postcode" name="postcode" autocomplete="postal-code"><div class="err" data-voor="postcode"></div></div>
+            <div class="veld"><label for="gemeente">Gemeente</label><input id="gemeente" name="gemeente" autocomplete="address-level2"><div class="err" data-voor="gemeente"></div></div>
+          </div>
+          <div class="veld"><label for="land">Land</label><select id="land" name="land" autocomplete="country"><option value="BE">België</option><option value="NL">Nederland</option></select></div>
+        </div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>3</span> Steun ons <small>(optioneel)</small></legend>
+        <p class="note" style="margin:0 0 12px">Een extra bedrag gaat volledig naar de werking van de vzw.</p>
+        <div class="chips">
+          <label><input type="radio" name="donatie" value="geen" checked><span>Geen</span></label>
+          <label><input type="radio" name="donatie" value="10"><span>10%</span></label>
+          <label><input type="radio" name="donatie" value="15"><span>15%</span></label>
+          <label><input type="radio" name="donatie" value="eigen"><span>Eigen bedrag</span></label>
+        </div>
+        <div class="sub" data-toon="eigen" hidden><label for="donatie_bedrag">Bedrag in euro</label><input id="donatie_bedrag" name="donatie_bedrag" type="number" min="1" step="1" inputmode="decimal"><div class="err" data-voor="donatie_bedrag"></div></div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>4</span> Opmerking <small>(optioneel)</small></legend>
+        <div class="veld"><label for="opmerking" class="sr-only">Opmerking</label><textarea id="opmerking" name="opmerking" rows="3"></textarea></div>
+      </fieldset>
+      <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    </div>
+    <aside class="co-side">
+      <div class="card">
+        <h3>Overzicht</h3>
+        <div id="co-lijnen"></div>
+        <ul class="facts">
+          <li><span>Subtotaal</span><span id="co-subtotaal">€0,00</span></li>
+          <li><span>Verzending</span><span id="co-verzending">€0,00</span></li>
+          <li><span>Steun</span><span id="co-donatie">€0,00</span></li>
+          <li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li>
+        </ul>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
+        <div class="err" data-voor="akkoord"></div>
+        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Bestelling plaatsen</button>
+        <div class="err" id="co-fout" role="alert"></div>
+        <p class="note">Online betalen via Viva volgt later. In deze testfase wordt niets aangerekend.</p>
+      </div>
+    </aside>
+  </form>
+</div></section>"""
+write("/afrekenen", "Afrekenen", "Rond je bestelling bij Rover & Co af.", afrekenen)
+
+write("/bedankt", "Bedankt", "Bedankt voor je bestelling bij Rover & Co.",
+      banner("Bestelling ontvangen", "Bedankt!", "", None) + """
+<section><div class="narrow prose">
+  <div class="testbanner" role="note"><strong>Testbestelling.</strong> Er werd niets aangerekend.</div>
+  <p>We hebben je bestelling goed ontvangen. Je bestelnummer is <strong id="bedankt-nr">–</strong>.</p>
+  <p>We nemen contact met je op over het ophalen of verzenden. Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je bestelnummer.</p>
+  <p><a class="btn btn-solid" href="/">Terug naar home</a></p>
+</div></section>""")
 
 # ---------- sitemap + robots ----------
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \

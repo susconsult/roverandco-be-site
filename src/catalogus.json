@@ -1,0 +1,147 @@
+{
+ "rover-co-t-shirt": {
+  "naam": "Rover & Co T-shirt",
+  "prijs": 20.0,
+  "opties": [
+   {
+    "naam": "Maat",
+    "verplicht": true,
+    "waarden": [
+     {
+      "waarde": "XS",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "S",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "M",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "L",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XL",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XXL",
+      "meerprijs": 0.0
+     }
+    ]
+   }
+  ]
+ },
+ "built-for-the-wild-t-shirt": {
+  "naam": "Built for the Wild T-shirt",
+  "prijs": 25.0,
+  "opties": [
+   {
+    "naam": "Maat",
+    "verplicht": true,
+    "waarden": [
+     {
+      "waarde": "XS",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "S",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "M",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "L",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XL",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XXL",
+      "meerprijs": 0.0
+     }
+    ]
+   },
+   {
+    "naam": "Kleur",
+    "verplicht": true,
+    "waarden": [
+     {
+      "waarde": "Beige",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "Army",
+      "meerprijs": 0.0
+     }
+    ]
+   }
+  ]
+ },
+ "life-is-better-in-low-range-t-shirt": {
+  "naam": "Life Is Better In Low Range T-shirt",
+  "prijs": 25.0,
+  "opties": [
+   {
+    "naam": "Maat",
+    "verplicht": true,
+    "waarden": [
+     {
+      "waarde": "XS",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "S",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "M",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "L",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XL",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "XXL",
+      "meerprijs": 0.0
+     }
+    ]
+   },
+   {
+    "naam": "Kleur",
+    "verplicht": true,
+    "waarden": [
+     {
+      "waarde": "Beige",
+      "meerprijs": 0.0
+     },
+     {
+      "waarde": "Army",
+      "meerprijs": 0.0
+     }
+    ]
+   }
+  ]
+ },
+ "emaille-mok": {
+  "naam": "Rover & Co emaille mok",
+  "prijs": 15.0,
+  "opties": []
+ },
+ "__activiteiten": [
+  "Church of Rover (Zo 22 nov)",
+  "Kerstmeeting (Zo 13 dec)"
+ ]
+}

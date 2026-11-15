@@ -27,9 +27,18 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - CSS: `public/assets/css/site.css`, JS: `public/assets/js/site.js`. Lettertypes (Big Shoulders Display, Manrope) staan zelf op de site, dus geen Google Fonts en geen cookiebanner nodig.
 - Huisregel logo: de wolfjes zijn altijd licht. Logo = `public/assets/img/logo-licht.webp` (600 × 600, vector ontbreekt nog).
 
+## Bestellen (testmodus)
+
+- `/afrekenen` (één pagina): gegevens, levering (ophalen op activiteit / in Oostham / verzenden €7,50, gratis vanaf €100), steun ons (geen, 10%, 15%, eigen bedrag), opmerking, akkoord privacy. Daarna `/bedankt` met bestelnummer `RC-JJMMDD-XXXXX`.
+- De Worker (`src/index.js`, route `/api/bestelling`) rekent alle prijzen opnieuw uit `src/catalogus.json` (gemaakt door `bouw/build.py`) en stuurt de bestelling naar de Google Sheet. Prijzen uit de browser worden nooit vertrouwd. Spam-val: onzichtbaar veld `website`.
+- Google Sheet **"Rover & Co – Webshop bestellingen"** in Drive KLANTEN → Rover&Co (pieter@susconsult.be). Script: `bouw/apps-script/Bestellingen.gs`, stuurt een meldingsmail naar info@roverandco.be. Dubbels (zelfde bestelnummer) worden geweigerd.
+- Cloudflare-variabele (Secret): `APPS_SCRIPT_URL` = web-app-adres van het script. Zonder die variabele toont de site "Bestellen is nog niet gekoppeld".
+- `TESTMODUS = true` in `src/index.js`: elke bestelling is gemarkeerd als test, er wordt niet betaald. Viva komt later tussen "Bestelling plaatsen" en `/bedankt`; SendMyParcel later bij "Verzenden".
+- Inschrijvingen voor activiteiten krijgen een apart formulier (nog te bouwen), niet via het mandje.
+
 ## Wat (nog) niet werkt
 
-- **Afrekenen:** het mandje werkt (bewaard in de browser), maar betalen nog niet. De knop meldt dat Viva binnenkort komt.
+- **Betalen:** geen online betaling, alleen testbestellingen.
 - **Inschrijven:** de knop bij Church of Rover verwijst naar de huidige Ecwid-shop. Zodra roverandco.be naar deze site verhuist, werkt die link niet meer en moet de eigen inschrijving klaar zijn.
 - Geen contactformulier, geen meetscripts.
 
