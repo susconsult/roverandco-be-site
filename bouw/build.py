@@ -376,9 +376,10 @@ for a in artikels:
 <section class="banner">{img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
 <section><article class="narrow prose blogtekst">
   {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
-  <div class="byline">{auteur_blok(a['auteur'])}<span>{nl_datum(a['datum'])} · {a['minuten']} min lezen</span></div>
+  <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>
   <p class="foto-onderschrift">Foto: {e(a['foto_alt'])} (Rover & Co)</p>
   {inhoud}
+  <div class="auteur-onder"><span class="auteur-label">Geschreven door</span>{auteur_blok(a['auteur'])}</div>
   <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
   <p><a class="btn" href="/blog">Alle artikels</a></p>
 </article></section>"""

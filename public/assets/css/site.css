@@ -278,3 +278,6 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .chip{border:1px solid var(--green);background:transparent;color:var(--green);border-radius:999px;padding:8px 14px;font:600 14px var(--body);cursor:pointer}
 .chip.actief{background:var(--green);color:#fff}
 .blogkaart-groot[hidden]{display:none}
+.artikel-meta{font-size:15px;color:var(--muted);margin-bottom:4px}
+.auteur-onder{border-top:1px solid var(--sand-2);margin-top:40px;padding-top:22px}
+.auteur-label{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
