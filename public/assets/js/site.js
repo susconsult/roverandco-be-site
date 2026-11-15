@@ -248,10 +248,10 @@
           if (res && res.ok === true) {
             try { sessionStorage.setItem(NRKEY, res.nummer); sessionStorage.setItem("rc-terug", location.pathname); } catch (x) {}
             if (res.betalen) { location.href = res.betalen; return; }
-            location.href = "/bedankt?nr=" + encodeURIComponent(res.nummer) + "&soort=inschrijving" + (res.test ? "&test=1" : "");
+            location.href = "/bedankt?nr=" + encodeURIComponent(res.nummer) + "&soort=inschrijving" + (res.test ? "&test=1" : res.gratis ? "&gratis=1" : "");
           } else {
             foutEl.textContent = (res && res.fout) || "Er ging iets mis. Probeer opnieuw.";
-            (res && res.velden || []).forEach(function (v) { if (v === "tijdslot") ifout("tijdslot", "Kies een ander tijdslot"); });
+            (res && res.velden || []).forEach(function (v) { if (v === "tijdslot") ifout("tijdslot", "Kies een ander tijdslot"); if (v === "aantal" && res.fout) ifout("aantal", res.fout); });
             knop.disabled = false; knop.textContent = label;
           }
         })
@@ -264,7 +264,7 @@
   var bd = document.getElementById("bedankt");
   if (bd) {
     var q = new URLSearchParams(location.search), bnr = q.get("nr") || "", soort = q.get("soort");
-    var staat = q.get("test") ? "test" : q.get("status") === "verwerking" ? "verwerking" : bnr ? "betaald" : "verwerking";
+    var staat = q.get("test") ? "test" : q.get("gratis") ? "bevestigd" : q.get("status") === "verwerking" ? "verwerking" : bnr ? "betaald" : "verwerking";
     bd.querySelectorAll("[data-toon-als]").forEach(function (el) { el.hidden = el.dataset.toonAls !== staat; });
     bd.querySelectorAll(".bedankt-nr").forEach(function (el) { el.textContent = bnr || "–"; });
     bd.querySelectorAll("[data-met-nr]").forEach(function (el) { el.hidden = !bnr; });

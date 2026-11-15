@@ -142,9 +142,98 @@
  },
  "__activiteiten": [
   "Church of Rover (Zo 22 nov)",
-  "Kerstmeeting (Zo 13 dec)"
+  "Kerstmeeting (Zo 13 dec)",
+  "Wild & Wheels (28–30 mei)"
  ],
  "__inschrijvingen": {
+  "kerstmeeting": {
+   "titel": "Kerstmeeting",
+   "datum_label": "Zo 13 dec",
+   "sluit": "2026-12-13",
+   "onderdelen": [
+    {
+     "id": "deelname",
+     "naam": "Deelname met je Land Rover",
+     "prijs": 0,
+     "per": "wagen",
+     "max": 5
+    },
+    {
+     "id": "kofferbak",
+     "naam": "Standplaats kofferbakverkoop",
+     "prijs": 5,
+     "per": "wagen",
+     "max": 1,
+     "beperkt": true,
+     "uitleg": "Met sticker die toont dat je mag verkopen"
+    }
+   ],
+   "tijdsloten": null,
+   "wagen": true
+  },
+  "wild-and-wheels": {
+   "titel": "Wild & Wheels",
+   "datum_label": "28–30 mei",
+   "sluit": "2027-05-28",
+   "onderdelen": [
+    {
+     "id": "camping",
+     "naam": "Camping weekend",
+     "prijs": 70,
+     "per": "wagen",
+     "max": 10,
+     "melding_vanaf": 100,
+     "uitleg": "Vrijdag 18:00 tot zondag 18:00"
+    },
+    {
+     "id": "track",
+     "naam": "Offroad-track weekend",
+     "prijs": 40,
+     "per": "wagen",
+     "max": 10,
+     "melding_vanaf": 100
+    },
+    {
+     "id": "roadbook",
+     "naam": "Roadbook zaterdag",
+     "prijs": 35,
+     "per": "wagen",
+     "max": 10,
+     "capaciteit": 50
+    },
+    {
+     "id": "sundaydrive",
+     "naam": "Sunday Drive",
+     "prijs": 25,
+     "per": "wagen",
+     "max": 10,
+     "capaciteit": 50
+    },
+    {
+     "id": "bbq",
+     "naam": "Barbecue zaterdag (volwassene)",
+     "prijs": 25,
+     "per": "persoon",
+     "max": 20
+    },
+    {
+     "id": "bbq_veg",
+     "naam": "Barbecue zaterdag vegetarisch (volwassene)",
+     "prijs": 25,
+     "per": "persoon",
+     "max": 20
+    },
+    {
+     "id": "bbq_kind",
+     "naam": "Barbecue zaterdag (kind 3 tot 11 jaar)",
+     "prijs": 15,
+     "per": "persoon",
+     "max": 20
+    }
+   ],
+   "tijdsloten": null,
+   "wagen": true
+  },
   "testinschrijving": {
    "titel": "Testinschrijving",
    "datum_label": "test",

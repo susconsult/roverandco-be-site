@@ -8,14 +8,16 @@
 // - Alle andere adressen: statische bestanden uit public/.
 //
 // Secrets in Cloudflare (geen waarden in deze repo):
-//   APPS_SCRIPT_URL, VIVA_CLIENT_ID, VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY
+//   APPS_SCRIPT_URL, VIVA_CLIENT_ID, VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY,
+//   RESEND_API_KEY (bevestigingsmail naar de klant vanaf noreply@roverandco.be)
 //   Optioneel: VIVA_OMGEVING = "demo" (anders live).
 // Zolang VIVA_CLIENT_ID / VIVA_CLIENT_SECRET / VIVA_SOURCE_CODE ontbreken: testmodus, er wordt niet betaald.
 import catalogus from "./catalogus.json";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
-const BETAALTIJD_SEC = 900; // 15 minuten om te betalen; zo lang blijft een plaats in een tijdslot vastgehouden
+const BETAALTIJD_SEC = 900;
+const AFZENDER = "Rover & Co VZW <noreply@roverandco.be>"; // 15 minuten om te betalen; zo lang blijft een plaats in een tijdslot vastgehouden
 
 const json = (data, status = 200) =>
   new Response(JSON.stringify(data), { status, headers: { "content-type": "application/json; charset=utf-8" } });
@@ -102,6 +104,25 @@ async function vivaTransactie(env, id) {
   return { orderCode: orderCodeUit(ruw), statusId: d.statusId, bedrag: Number(d.amount), ref: d.merchantTrns || "" };
 }
 
+/* ---------------- Klantmail via Resend ---------------- */
+
+async function stuurKlantmail(env, m) {
+  if (!m || !env.RESEND_API_KEY) return;
+  let status;
+  try {
+    const r = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `bevestiging-${m.nummer}` },
+      body: JSON.stringify({ from: AFZENDER, to: [m.aan], subject: m.onderwerp, text: m.tekst }),
+    });
+    const d = await r.json().catch(() => ({}));
+    status = r.ok && d.id ? `verstuurd ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC (Resend ${d.id})` : `fout bij Resend (${r.status}): ${d.message || ""}`;
+  } catch (e) {
+    status = "fout bij Resend: geen verbinding";
+  }
+  await script(env, "mailstatus", { soort: m.soort, nummer: m.nummer, status });
+}
+
 /* ---------------- Google Sheet (Apps Script) ---------------- */
 
 async function script(env, actie, data) {
@@ -180,6 +201,11 @@ function controleerInschrijving(b) {
     const aantal = geheel(b.aantallen?.[o.id], 0, o.max || 20);
     if (aantal > 0) lijnen.push({ id: o.id, naam: o.naam, per: o.per, aantal, prijs: o.prijs, lijn: r2(o.prijs * aantal) });
   }
+  // capaciteit (harde grens over alle inschrijvingen) en meldingsgrens per onderdeel, gecontroleerd in de sheet
+  const limieten = lijnen.map((l) => {
+    const o = cfg.onderdelen.find((x) => x.id === l.id);
+    return { id: l.id, naam: l.naam, per: l.per, aantal: l.aantal, capaciteit: o.capaciteit || 0, melding: o.melding_vanaf || 0 };
+  }).filter((l) => l.capaciteit || l.melding);
   if (!lijnen.length) fouten.push("aantal");
 
   let tijdslot = "", slot_personen = 0;
@@ -198,7 +224,7 @@ function controleerInschrijving(b) {
     fouten,
     record: {
       klant, activiteit: slug, activiteit_titel: `${cfg.titel} (${cfg.datum_label})`, lijnen, tijdslot, slot_personen,
-      max_per_slot: cfg.tijdsloten?.max_per_slot || 0, wagen, totaal: r2(lijnen.reduce((s, x) => s + x.lijn, 0)), opmerking: tekst(b.opmerking, 1000),
+      max_per_slot: cfg.tijdsloten?.max_per_slot || 0, limieten, wagen, totaal: r2(lijnen.reduce((s, x) => s + x.lijn, 0)), opmerking: tekst(b.opmerking, 1000),
     },
   };
 }
@@ -224,13 +250,17 @@ async function plaats(request, env, soort) {
   const nr = nummerOk(S.prefix, b.nummer) ? b.nummer : nieuwNummer(S.prefix); // zelfde nummer bij opnieuw proberen = geen dubbel
   const metBetaling = betaal && res.record.totaal > 0;
   const status = metBetaling ? "Wacht op betaling" : betaal ? "Bevestigd (gratis)" : "Test (niet betaald)";
-  const payload = { ...res.record, soort, nummer: nr, test: !betaal, status, aangemaakt: new Date().toISOString(), betaaltijd_min: BETAALTIJD_SEC / 60, site: new URL(request.url).origin };
+  const payload = { ...res.record, soort, nummer: nr, test: !betaal, status, aangemaakt: new Date().toISOString(), betaaltijd_min: BETAALTIJD_SEC / 60, site: new URL(request.url).origin, resend: !!env.RESEND_API_KEY };
 
   const fout = "Dit kon niet bewaard worden. Probeer opnieuw.";
   const a = await script(env, "nieuw", payload);
+  if (a?.fout === "vol" && a.onderdeel) return json({ ok: false, fout: `${a.onderdeel} is volzet. Pas je keuze aan.`, velden: ["aantal"] }, 409);
   if (a?.fout === "vol") return json({ ok: false, fout: "Dit tijdslot is intussen volzet. Kies een ander tijdslot.", velden: ["tijdslot"] }, 409);
   if (!a || a.ok !== true || a.nummer !== nr) return json({ ok: false, fout }, 502);
-  if (a.betaald || !metBetaling) return json({ ok: true, nummer: nr, klaar: true, test: !betaal });
+  if (a.betaald || !metBetaling) {
+    await stuurKlantmail(env, a.mail);
+    return json({ ok: true, nummer: nr, klaar: true, test: !betaal, gratis: betaal && !a.betaald });
+  }
 
   let code;
   try {
@@ -248,8 +278,9 @@ async function verwerkBetaling(env, transactieId) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transactieId || "")) return { ok: false, status: "onbekend" };
   const tr = await vivaTransactie(env, transactieId);
   if (tr.statusId !== "F") return { ok: false, status: tr.statusId, nummer: tr.ref };
-  const a = await script(env, "betaald", { ordercode: tr.orderCode, transactie: transactieId, bedrag: tr.bedrag, ref: tr.ref });
+  const a = await script(env, "betaald", { ordercode: tr.orderCode, transactie: transactieId, bedrag: tr.bedrag, ref: tr.ref, resend: !!env.RESEND_API_KEY });
   if (!a || a.ok !== true) throw new Error("Sheet niet bijgewerkt");
+  await stuurKlantmail(env, a.mail);
   return { ok: true, nummer: a.nummer, soort: a.soort };
 }
 

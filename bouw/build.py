@@ -535,7 +535,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
     ts = cfg["tijdsloten"]
     rijen = "".join(f"""
         <div class="ins-rij" data-onderdeel="{e(o['id'])}" data-prijs="{o['prijs']}">
-          <div><b>{e(o['naam'])}</b><small>{eur(o['prijs'])} {PER.get(o['per'], '')}</small></div>
+          <div><b>{e(o['naam'])}</b><small>{(eur(o['prijs']) + ' ' + PER.get(o['per'], '')) if o['prijs'] else 'Gratis'}{' · Beperkte plaatsen' if o.get('beperkt') or o.get('capaciteit') else ''}</small>{f'<small class="uitleg">{e(o["uitleg"])}</small>' if o.get('uitleg') else ''}</div>
           <div class="teller"><button type="button" data-min aria-label="Minder {e(o['naam'])}">−</button>
             <input type="number" name="aantal_{e(o['id'])}" value="0" min="0" max="{o.get('max', 20)}" inputmode="numeric" aria-label="Aantal {e(o['naam'])}">
             <button type="button" data-plus aria-label="Meer {e(o['naam'])}">+</button></div>
@@ -660,6 +660,7 @@ write("/bedankt", "Bedankt", "Bedankt voor je bestelling of inschrijving bij Rov
   <div class="testbanner" role="note" data-toon-als="test" hidden><strong>Test.</strong> Er werd niets aangerekend.</div>
   <p data-toon-als="betaald" hidden>Je betaling is gelukt. Je nummer is <strong class="bedankt-nr">–</strong>. Je krijgt zo meteen een bevestiging per mail.</p>
   <p data-toon-als="verwerking" hidden>We hebben je betaling nog niet definitief binnen. Dat kan een paar minuten duren. Zodra ze binnen is, krijg je een bevestiging per mail.<span data-met-nr> Je nummer is <strong class="bedankt-nr">–</strong>.</span></p>
+  <p data-toon-als="bevestigd" hidden>Je inschrijving is bevestigd. Je nummer is <strong class="bedankt-nr">–</strong>. Je krijgt zo meteen een bevestiging per mail.</p>
   <p data-toon-als="test" hidden>We hebben je gegevens goed ontvangen. Je nummer is <strong class="bedankt-nr">–</strong>.</p>
   <p>Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je nummer.</p>
   <p><a class="btn btn-solid" href="/">Terug naar home</a></p>
