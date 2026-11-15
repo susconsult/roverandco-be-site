@@ -1,5 +1,5 @@
 ---
-titel: "De geschiedenis van Land Rover: van tekening in het zand tot Defender"
+titel: De geschiedenis van Land Rover: van tekening in het zand tot Defender
 rubriek: Geschiedenis
 volgorde: 0
 cornerstone: ja

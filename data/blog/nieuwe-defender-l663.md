@@ -1,5 +1,5 @@
 ---
-titel: "De nieuwe Defender: wat bleef er over?"
+titel: De nieuwe Defender: wat bleef er over?
 rubriek: Geschiedenis
 volgorde: 5
 auteur: dolf
