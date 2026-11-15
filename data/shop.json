@@ -1,0 +1,9 @@
+{
+  "_uitleg": "Welke Ecwid-producten in de nieuwe shop staan. Gegevens (prijs, opties, foto's, omschrijving) komen uit data/ecwid/producten.json. Volgorde = volgorde in de shop.",
+  "producten": [
+    {"ecwid_id": "808849568", "slug": "rover-co-t-shirt", "naam": "Rover & Co T-shirt", "categorie": "T-shirt", "lint": "Bestseller"},
+    {"ecwid_id": "838163687", "slug": "built-for-the-wild-t-shirt", "naam": "Built for the Wild T-shirt", "categorie": "T-shirt", "lint": ""},
+    {"ecwid_id": "838163735", "slug": "life-is-better-in-low-range-t-shirt", "naam": "Life Is Better In Low Range T-shirt", "categorie": "T-shirt", "lint": ""},
+    {"ecwid_id": "823309530", "slug": "emaille-mok", "naam": "Rover & Co emaille mok", "categorie": "Mok", "lint": ""}
+  ]
+}

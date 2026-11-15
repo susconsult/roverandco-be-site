@@ -1,0 +1,19 @@
+{
+  "naam": "Rover & Co VZW",
+  "domein": "https://roverandco.be",
+  "ondernemingsnummer": "BE 1032.450.083",
+  "adres": ["Olmensesteenweg 105", "3945 Oostham"],
+  "email": "info@roverandco.be",
+  "telefoon": "+32 477 38 72 72",
+  "telefoon_link": "+32477387272",
+  "facebook": "https://www.facebook.com/roverandcobe/",
+  "instagram": "https://www.instagram.com/roverandco.be/",
+  "menu": [
+    ["Activiteiten", "/activiteiten"],
+    ["Shop", "/shop"],
+    ["Blog", "/blog"],
+    ["Foto's", "/fotos"],
+    ["Over ons", "/over-ons"],
+    ["Contact", "/contact"]
+  ]
+}
