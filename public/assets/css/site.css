@@ -281,3 +281,4 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .artikel-meta{font-size:15px;color:var(--muted);margin-bottom:4px}
 .auteur-onder{border-top:1px solid var(--sand-2);margin-top:40px;padding-top:22px}
 .auteur-label{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
+.fotocredit{font-size:13px;color:var(--muted);margin-top:28px}
