@@ -296,6 +296,15 @@ def aftellen(a):
 EVENT_BODY = {}
 
 
+def affiche(a):
+    """Affiche van de activiteit (veld 'affiche' = naam onder /assets/img/), klik = groot."""
+    n = a.get("affiche")
+    if not n:
+        return ""
+    return (f'<button type="button" class="affiche" data-full="/assets/img/{n}.webp" aria-label="Affiche groot bekijken">'
+            f'<img src="/assets/img/{n}-s.webp" alt="Affiche {e(a["titel"])}" loading="lazy"></button>')
+
+
 def fotoblok(a):
     """Fotogalerij op de activiteitpagina, uit het veld 'fotos' ([naam, alt] onder /assets/img/)."""
     if not a.get("fotos"):
@@ -322,11 +331,11 @@ for a in alle_acts:
     body = banner(a["datum_lang"], a["titel"], a["kort"], a["foto"], a["foto_alt"]) + aftellen(a) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
-  <aside class="card"><h3>In het kort</h3><ul class="facts">
+  <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">
     <li><span>Datum</span><span>{e(a['datum_lang'])}</span></li>
     <li><span>Locatie</span><span>{e(a['locatie'])}</span></li>
     {f"<li><span>Uur</span><span>{e(a['uren'])}</span></li>" if a['uren'] else ''}
-  </ul>{knop}</aside>
+  </ul>{knop}</aside>{affiche(a)}</div>
 </div></section>"""
     body += fotoblok(a)
     if inschrijving_open(a):

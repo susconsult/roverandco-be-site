@@ -314,3 +314,8 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 
 /* inschrijfformulier op de eventpagina */
 .inschrijf-sec{scroll-margin-top:84px}
+.ev-side{display:flex;flex-direction:column;gap:18px}
+.ev-side .card{position:static}
+.affiche{display:block;border:0;padding:0;background:none;cursor:zoom-in;width:100%}
+.affiche img{display:block;width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
+@media(max-width:880px){.ev-side{position:static}.affiche{max-width:420px;margin:0 auto}}
