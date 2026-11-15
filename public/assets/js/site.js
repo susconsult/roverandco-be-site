@@ -165,7 +165,7 @@
         try { sessionStorage.setItem("rc-bestelnr", nr); } catch (x) {}
       }
       var payload = {
-        bestelnummer: nr,
+        nummer: nr,
         klant: { naam: waarde("naam"), email: waarde("email"), telefoon: waarde("telefoon") },
         artikels: cart.map(function (l) { return { id: l.id, keuzes: l.keuzes || {}, aantal: l.aantal }; }),
         levering: { type: lev, activiteit: waarde("activiteit"), straat: waarde("straat"), postcode: waarde("postcode"), gemeente: waarde("gemeente"), land: waarde("land") },
@@ -177,21 +177,107 @@
       fetch("/api/bestelling", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
         .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
         .then(function (res) {
-          if (res && res.ok === true) {
-            cart = []; save();
-            try { sessionStorage.removeItem("rc-bestelnr"); sessionStorage.setItem("rc-laatste", res.bestelnummer); } catch (x) {}
-            location.href = "/bedankt";
+          if (res && res.ok === true && res.betalen) {
+            try { sessionStorage.setItem("rc-terug", "/afrekenen"); } catch (x) {}
+            location.href = res.betalen; // naar Viva; het mandje blijft staan tot de betaling gelukt is
+          } else if (res && res.ok === true) {
+            location.href = "/bedankt?nr=" + encodeURIComponent(res.nummer) + "&soort=bestelling" + (res.test ? "&test=1" : "");
           } else {
             foutEl.textContent = (res && res.fout) || "Er ging iets mis. Probeer opnieuw.";
-            knop.disabled = false; knop.textContent = "Bestelling plaatsen";
+            knop.disabled = false; knop.textContent = "Verder naar betalen";
           }
         })
-        .catch(function () { foutEl.textContent = "Geen verbinding. Probeer opnieuw."; knop.disabled = false; knop.textContent = "Bestelling plaatsen"; });
+        .catch(function () { foutEl.textContent = "Geen verbinding. Probeer opnieuw."; knop.disabled = false; knop.textContent = "Verder naar betalen"; });
     });
     toon();
   }
-  var bnr = document.getElementById("bedankt-nr");
-  if (bnr) { try { bnr.textContent = sessionStorage.getItem("rc-laatste") || "–"; } catch (x) {} }
+  /* ---------- inschrijven ---------- */
+  var ins = document.getElementById("inschrijf-form");
+  if (ins) {
+    var slug = ins.dataset.slug, NRKEY = "rc-nr-" + slug;
+    var iw = function (n) { var el = ins.elements[n]; return el ? (el.value || "").trim() : ""; };
+    function rijen() { return Array.prototype.slice.call(ins.querySelectorAll(".ins-rij")); }
+    function aantal(r) { var i = r.querySelector("input"); var n = parseInt(i.value, 10) || 0; return Math.min(parseInt(i.max, 10) || 20, Math.max(0, n)); }
+    function itoon() {
+      var tot = 0, html = "";
+      rijen().forEach(function (r) {
+        var n = aantal(r), p = parseFloat(r.dataset.prijs);
+        if (n > 0) { tot += n * p; html += '<div class="co-lijn"><span>' + n + " × " + esc(r.querySelector("b").textContent) + "</span><b>" + eur(n * p) + "</b></div>"; }
+        var slot = ins.querySelector('[data-slot-voor="' + r.dataset.onderdeel + '"]'); if (slot) slot.hidden = n === 0;
+      });
+      document.getElementById("co-lijnen").innerHTML = html;
+      document.getElementById("co-totaal").textContent = eur(Math.round(tot * 100) / 100);
+      document.getElementById("co-knop").textContent = tot > 0 ? "Verder naar betalen" : "Inschrijven";
+    }
+    function ifout(veld, msg) { var el = ins.querySelector('.err[data-voor="' + veld + '"]'); if (el) el.textContent = msg; }
+    ins.addEventListener("click", function (e) {
+      var b = e.target.closest("[data-min],[data-plus]"); if (!b) return;
+      var i = b.parentNode.querySelector("input"), n = parseInt(i.value, 10) || 0;
+      i.value = Math.min(parseInt(i.max, 10) || 20, Math.max(0, n + (b.hasAttribute("data-plus") ? 1 : -1)));
+      var er = ins.querySelector('.err[data-voor="aantal"]'); if (er) er.textContent = "";
+      itoon();
+    });
+    ins.addEventListener("input", function (e) { var el = ins.querySelector('.err[data-voor="' + e.target.name + '"]'); if (el) el.textContent = ""; itoon(); });
+    ins.addEventListener("change", itoon);
+    ins.addEventListener("submit", function (e) {
+      e.preventDefault();
+      ins.querySelectorAll(".err").forEach(function (x) { x.textContent = ""; });
+      var ok = true;
+      if (iw("naam").length < 2) { ifout("naam", "Vul je naam in"); ok = false; }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(iw("email"))) { ifout("email", "Vul een geldig e-mailadres in"); ok = false; }
+      if (iw("telefoon").replace(/\D/g, "").length < 8) { ifout("telefoon", "Vul een geldig telefoonnummer in"); ok = false; }
+      var aantallen = {}, iets = false;
+      rijen().forEach(function (r) { var n = aantal(r); aantallen[r.dataset.onderdeel] = n; if (n > 0) iets = true; });
+      if (!iets) { ifout("aantal", "Kies minstens één onderdeel"); ok = false; }
+      var slotVak = ins.querySelector("[data-slot-voor]");
+      if (slotVak && !slotVak.hidden && !iw("tijdslot")) { ifout("tijdslot", "Kies een tijdslot"); ok = false; }
+      if (!document.getElementById("akkoord").checked) { ifout("akkoord", "Vink dit aan om in te schrijven"); ok = false; }
+      if (!ok) { var eerste = ins.querySelector(".err:not(:empty)"); if (eerste) eerste.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+      var nr = ""; try { nr = sessionStorage.getItem(NRKEY) || ""; } catch (x) {}
+      var payload = {
+        nummer: nr, activiteit: slug,
+        klant: { naam: iw("naam"), email: iw("email"), telefoon: iw("telefoon") },
+        aantallen: aantallen, tijdslot: slotVak && !slotVak.hidden ? iw("tijdslot") : "",
+        wagen: iw("wagen"), opmerking: iw("opmerking"), akkoord: true, website: iw("website")
+      };
+      var knop = document.getElementById("co-knop"), foutEl = document.getElementById("co-fout"), label = knop.textContent;
+      knop.disabled = true; knop.textContent = "Bezig…";
+      fetch("/api/inschrijving", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify(payload) })
+        .then(function (r) { return r.json().catch(function () { return { ok: false }; }); })
+        .then(function (res) {
+          if (res && res.ok === true) {
+            try { sessionStorage.setItem(NRKEY, res.nummer); sessionStorage.setItem("rc-terug", location.pathname); } catch (x) {}
+            if (res.betalen) { location.href = res.betalen; return; }
+            location.href = "/bedankt?nr=" + encodeURIComponent(res.nummer) + "&soort=inschrijving" + (res.test ? "&test=1" : "");
+          } else {
+            foutEl.textContent = (res && res.fout) || "Er ging iets mis. Probeer opnieuw.";
+            (res && res.velden || []).forEach(function (v) { if (v === "tijdslot") ifout("tijdslot", "Kies een ander tijdslot"); });
+            knop.disabled = false; knop.textContent = label;
+          }
+        })
+        .catch(function () { foutEl.textContent = "Geen verbinding. Probeer opnieuw."; knop.disabled = false; knop.textContent = label; });
+    });
+    itoon();
+  }
+
+  /* ---------- bedankt / betaling mislukt ---------- */
+  var bd = document.getElementById("bedankt");
+  if (bd) {
+    var q = new URLSearchParams(location.search), bnr = q.get("nr") || "", soort = q.get("soort");
+    var staat = q.get("test") ? "test" : q.get("status") === "verwerking" ? "verwerking" : bnr ? "betaald" : "verwerking";
+    bd.querySelectorAll("[data-toon-als]").forEach(function (el) { el.hidden = el.dataset.toonAls !== staat; });
+    bd.querySelectorAll(".bedankt-nr").forEach(function (el) { el.textContent = bnr || "–"; });
+    bd.querySelectorAll("[data-met-nr]").forEach(function (el) { el.hidden = !bnr; });
+    if (staat !== "verwerking") {
+      try {
+        if (soort === "bestelling") { cart = []; save(); sessionStorage.removeItem("rc-bestelnr"); }
+        if (soort === "inschrijving") Object.keys(sessionStorage).forEach(function (k) { if (k.indexOf("rc-nr-") === 0) sessionStorage.removeItem(k); });
+        sessionStorage.removeItem("rc-terug");
+      } catch (x) {}
+    }
+  }
+  var opn = document.getElementById("opnieuw");
+  if (opn) { try { var t = sessionStorage.getItem("rc-terug"); if (t && t.charAt(0) === "/") opn.href = t; } catch (x) {} }
 
   render();
 })();

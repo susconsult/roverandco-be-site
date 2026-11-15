@@ -4,10 +4,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Bedankt | Rover &amp; Co</title>
-<meta name="description" content="Bedankt voor je bestelling bij Rover &amp; Co."><meta name="robots" content="noindex">
+<meta name="description" content="Bedankt voor je bestelling of inschrijving bij Rover &amp; Co."><meta name="robots" content="noindex">
 <link rel="canonical" href="https://roverandco.be/bedankt">
 <meta property="og:title" content="Bedankt | Rover &amp; Co">
-<meta property="og:description" content="Bedankt voor je bestelling bij Rover &amp; Co.">
+<meta property="og:description" content="Bedankt voor je bestelling of inschrijving bij Rover &amp; Co.">
 <meta property="og:image" content="https://roverandco.be/assets/img/964.webp">
 <meta property="og:locale" content="nl_BE">
 <link rel="icon" href="/favicon.png">
@@ -32,11 +32,13 @@
   </div>
 </header>
 <main id="inhoud">
-<section class="banner"><div class="wrap"><div class="eyebrow">Bestelling ontvangen</div><h1>Bedankt!</h1></div></section>
-<section><div class="narrow prose">
-  <div class="testbanner" role="note"><strong>Testbestelling.</strong> Er werd niets aangerekend.</div>
-  <p>We hebben je bestelling goed ontvangen. Je bestelnummer is <strong id="bedankt-nr">–</strong>.</p>
-  <p>We nemen contact met je op over het ophalen of verzenden. Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je bestelnummer.</p>
+<section class="banner"><div class="wrap"><div class="eyebrow">Rover &amp; Co</div><h1>Bedankt!</h1></div></section>
+<section><div class="narrow prose" id="bedankt" data-status="">
+  <div class="testbanner" role="note" data-toon-als="test" hidden><strong>Test.</strong> Er werd niets aangerekend.</div>
+  <p data-toon-als="betaald" hidden>Je betaling is gelukt. Je nummer is <strong class="bedankt-nr">–</strong>. Je krijgt zo meteen een bevestiging per mail.</p>
+  <p data-toon-als="verwerking" hidden>We hebben je betaling nog niet definitief binnen. Dat kan een paar minuten duren. Zodra ze binnen is, krijg je een bevestiging per mail.<span data-met-nr> Je nummer is <strong class="bedankt-nr">–</strong>.</span></p>
+  <p data-toon-als="test" hidden>We hebben je gegevens goed ontvangen. Je nummer is <strong class="bedankt-nr">–</strong>.</p>
+  <p>Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je nummer.</p>
   <p><a class="btn btn-solid" href="/">Terug naar home</a></p>
 </div></section>
 </main>

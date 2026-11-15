@@ -143,5 +143,38 @@
  "__activiteiten": [
   "Church of Rover (Zo 22 nov)",
   "Kerstmeeting (Zo 13 dec)"
- ]
+ ],
+ "__inschrijvingen": {
+  "testinschrijving": {
+   "titel": "Testinschrijving",
+   "datum_label": "test",
+   "sluit": "",
+   "onderdelen": [
+    {
+     "id": "deelname",
+     "naam": "Testdeelname",
+     "prijs": 1,
+     "per": "persoon",
+     "max": 2
+    },
+    {
+     "id": "roadbook",
+     "naam": "Test-roadbook",
+     "prijs": 0.5,
+     "per": "wagen",
+     "max": 1
+    }
+   ],
+   "tijdsloten": {
+    "onderdeel": "deelname",
+    "slots": [
+     "10:00",
+     "10:10",
+     "10:20"
+    ],
+    "max_per_slot": 2
+   },
+   "wagen": true
+  }
+ }
 }

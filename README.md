@@ -27,19 +27,28 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - CSS: `public/assets/css/site.css`, JS: `public/assets/js/site.js`. Lettertypes (Big Shoulders Display, Manrope) staan zelf op de site, dus geen Google Fonts en geen cookiebanner nodig.
 - Huisregel logo: de wolfjes zijn altijd licht. Logo = `public/assets/img/logo-licht.webp` (600 × 600, vector ontbreekt nog).
 
-## Bestellen (testmodus)
+## Bestellen en inschrijven (betalen via Viva Smart Checkout)
 
-- `/afrekenen` (één pagina): gegevens, levering (ophalen op activiteit / in Oostham / verzenden €7,50, gratis vanaf €100), steun ons (geen, 10%, 15%, eigen bedrag), opmerking, akkoord privacy. Daarna `/bedankt` met bestelnummer `RC-JJMMDD-XXXXX`.
-- De Worker (`src/index.js`, route `/api/bestelling`) rekent alle prijzen opnieuw uit `src/catalogus.json` (gemaakt door `bouw/build.py`) en stuurt de bestelling naar de Google Sheet. Prijzen uit de browser worden nooit vertrouwd. Spam-val: onzichtbaar veld `website`.
-- Google Sheet **"Rover & Co – Webshop bestellingen"** in Drive KLANTEN → Rover&Co (pieter@susconsult.be). Script: `bouw/apps-script/Bestellingen.gs`, stuurt een meldingsmail naar pieter@roverandco.be. Dubbels (zelfde bestelnummer) worden geweigerd.
-- Cloudflare-variabele (Secret): `APPS_SCRIPT_URL` = web-app-adres van het script. Zonder die variabele toont de site "Bestellen is nog niet gekoppeld".
-- `TESTMODUS = true` in `src/index.js`: elke bestelling is gemarkeerd als test, er wordt niet betaald. Viva komt later tussen "Bestelling plaatsen" en `/bedankt`; SendMyParcel later bij "Verzenden".
-- Inschrijvingen voor activiteiten krijgen een apart formulier (nog te bouwen), niet via het mandje.
+**Flow (shop én activiteiten):** formulier → Worker herrekent de prijs en bewaart eerst in de sheet ("Wacht op betaling") → Viva-betaalorder → bezoeker betaalt op Viva → terug op `/betaald` → Worker vraagt bij Viva na of er echt betaald is (status F, bedrag, ordernummer) → sheet "Betaald" → mail naar klant + melding naar pieter@roverandco.be → `/bedankt`. Viva stuurt ook een webhook naar `/api/viva/webhook` als vangnet (als de browser sluit voor de terugkeer). Opnieuw verwerken is veilig: niets gebeurt dubbel.
+
+- **Shop:** `/afrekenen` (één pagina): gegevens, levering (ophalen op activiteit / in Oostham / verzenden €7,50, gratis vanaf €100), steun (geen, 10%, 15%, eigen bedrag), opmerking, privacy. Nummer `RC-JJMMDD-XXXXX`. Het mandje blijft staan tot de betaling gelukt is.
+- **Inschrijven:** `/activiteiten/<slug>/inschrijven`, alleen voor activiteiten met een blok `inschrijving` in `data/activiteiten.json` (`open`, `sluit`, `onderdelen` met `prijs` en `per` persoon/wagen/stuk en `max`, optioneel `tijdsloten` met `max_per_slot`, optioneel `wagen`). Nummer `RI-JJMMDD-XXXXX`. Een plaats in een tijdslot wordt 15 minuten vastgehouden tijdens het betalen.
+- **Testactiviteit:** `/activiteiten/testinschrijving` (verborgen, noindex, nergens gelinkt, €1 + €0,50) om live te testen. Weghalen na de test: het blok uit `data/activiteiten.json` en opnieuw bouwen.
+- `/betaling-mislukt`: bij annuleren of mislukken, met knop terug naar het formulier.
+- Prijzen uit de browser worden nooit vertrouwd (`src/catalogus.json`, gemaakt door `bouw/build.py`). Spam-val: onzichtbaar veld `website`.
+- **Testmodus:** zolang de Viva-Secrets ontbreken, wordt niet betaald en is alles gemarkeerd als test (alleen melding naar Pieter, geen mail naar de klant).
+
+**Google Sheet** "Rover & Co – Webshop bestellingen" in Drive KLANTEN → Rover&Co (pieter@susconsult.be), tabbladen *Bestellingen* en *Inschrijvingen* (maakt het script zelf). Script: `bouw/apps-script/Bestellingen.gs`. Na elke wijziging: nieuwe versie van de implementatie publiceren.
+- Bevestiging naar de klant vertrekt van **noreply@roverandco.be** (naam "Rover & Co VZW", antwoorden naar info@roverandco.be). Dat adres moet in Gmail van pieter@susconsult.be als "Verzenden als" staan; anders gaat er geen klantmail en staat de reden in de kolom *Mail klant*.
+
+**Cloudflare-Secrets** (Worker → Settings → Variables and Secrets): `APPS_SCRIPT_URL`, `VIVA_CLIENT_ID`, `VIVA_CLIENT_SECRET` (Smart Checkout-gegevens), `VIVA_SOURCE_CODE` (4 cijfers van de betaalbron), `VIVA_WEBHOOK_KEY`. Optioneel `VIVA_OMGEVING` = `demo`.
+
+**In Viva** (live account Rover & Co VZW): betaalbron met domein van de site, succes-URL `betaald`, fout-URL `betaling-mislukt`; webhook "Transaction Payment Created" naar `/api/viva/webhook`. Bij de verhuis naar roverandco.be: domein in de betaalbron en het webhookadres aanpassen.
 
 ## Wat (nog) niet werkt
 
-- **Betalen:** geen online betaling, alleen testbestellingen.
-- **Inschrijven:** de knop bij Church of Rover verwijst naar de huidige Ecwid-shop. Zodra roverandco.be naar deze site verhuist, werkt die link niet meer en moet de eigen inschrijving klaar zijn.
+- **Betalen:** gebouwd, wacht op de Viva-Secrets en een live test.
+- **Inschrijven:** Church of Rover blijft via de huidige Ecwid-shop (gekozen door Pieter). Nieuwe activiteiten krijgen een blok `inschrijving`.
 - Geen contactformulier, geen meetscripts.
 
 ## Wat staat waar

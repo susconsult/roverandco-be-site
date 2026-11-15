@@ -14,7 +14,8 @@ PUB = os.path.join(ROOT, "public")
 DATA = os.path.join(ROOT, "data")
 
 site = json.load(open(os.path.join(DATA, "site.json"), encoding="utf-8"))
-acts = json.load(open(os.path.join(DATA, "activiteiten.json"), encoding="utf-8"))
+alle_acts = json.load(open(os.path.join(DATA, "activiteiten.json"), encoding="utf-8"))
+acts = [a for a in alle_acts if not a.get("verborgen")]  # verborgen = testactiviteit: niet in lijsten, noindex
 shop = json.load(open(os.path.join(DATA, "shop.json"), encoding="utf-8"))["producten"]
 ecwid = {p["ecwid_id"]: p for p in json.load(open(os.path.join(DATA, "ecwid", "producten.json"), encoding="utf-8"))}
 VERSIE = date.today().isoformat()
@@ -274,12 +275,21 @@ write("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rove
       banner("Activiteiten", "Rij mee", "Elke activiteit is een belevenis op een bijzondere plek. Schrijf je in en rij mee.", "977", "Colonne Defenders in het bos") +
       f'<section><div class="wrap"><div class="ev-list">{"".join(ev_card(a, True) for a in acts)}</div></div></section>')
 
-for a in acts:
+def inschrijving_open(a):
+    i = a.get("inschrijving")
+    return bool(i and i.get("open") and (not i.get("sluit") or i["sluit"] >= date.today().isoformat()))
+
+
+for a in alle_acts:
     if a.get("extern_url"):
         continue
-    knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
+    if inschrijving_open(a):
+        knop = (f'<a class="btn btn-solid" href="/activiteiten/{a["slug"]}/inschrijven" style="width:100%;justify-content:center">Inschrijven</a>'
+                '<p class="note">Je betaalt veilig online via Viva.</p>')
+    else:
+      knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
-           f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>'
+           f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>' if a["inschrijven_label"] else ""
     body = banner(a["datum_lang"], a["titel"], a["kort"], a["foto"], a["foto_alt"]) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
@@ -289,7 +299,7 @@ for a in acts:
     {f"<li><span>Uur</span><span>{e(a['uren'])}</span></li>" if a['uren'] else ''}
   </ul>{knop}</aside>
 </div></section>"""
-    write(f"/activiteiten/{a['slug']}", a["titel"], f"{a['titel']}: {a['kort']}", body)
+    write(f"/activiteiten/{a['slug']}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
 
 # ---------- shop ----------
 write("/shop", "Shop", "Merch van Rover & Co: T-shirts en emaille mok. Met elke aankoop steun je de vereniging.",
@@ -486,14 +496,80 @@ cat = {pr["slug"]: {"naam": pr["naam"], "prijs": pr["prijs"],
                                 "waarden": [{"waarde": v["waarde"], "meerprijs": prijs_float(v["meerprijs"])} for v in o["waarden"]]}
                                for o in pr["opties"]]} for pr in producten}
 cat["__activiteiten"] = [f'{a["titel"]} ({a["datum_label"]})' for a in komend]
+cat["__inschrijvingen"] = {
+    a["slug"]: {"titel": a["titel"], "datum_label": a["datum_label"], "sluit": a["inschrijving"].get("sluit") or a["datum"],
+                "onderdelen": a["inschrijving"]["onderdelen"], "tijdsloten": a["inschrijving"].get("tijdsloten"),
+                "wagen": bool(a["inschrijving"].get("wagen"))}
+    for a in alle_acts if inschrijving_open(a)}
 os.makedirs(os.path.join(ROOT, "src"), exist_ok=True)
 json.dump(cat, open(os.path.join(ROOT, "src", "catalogus.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+
+# ---------- inschrijven per activiteit ----------
+PER = {"persoon": "per persoon", "wagen": "per wagen", "stuk": "per stuk"}
+for slug, cfg in cat["__inschrijvingen"].items():
+    a = next(x for x in alle_acts if x["slug"] == slug)
+    ts = cfg["tijdsloten"]
+    rijen = "".join(f"""
+        <div class="ins-rij" data-onderdeel="{e(o['id'])}" data-prijs="{o['prijs']}">
+          <div><b>{e(o['naam'])}</b><small>{eur(o['prijs'])} {PER.get(o['per'], '')}</small></div>
+          <div class="teller"><button type="button" data-min aria-label="Minder {e(o['naam'])}">−</button>
+            <input type="number" name="aantal_{e(o['id'])}" value="0" min="0" max="{o.get('max', 20)}" inputmode="numeric" aria-label="Aantal {e(o['naam'])}">
+            <button type="button" data-plus aria-label="Meer {e(o['naam'])}">+</button></div>
+        </div>""" for o in cfg["onderdelen"])
+    slot_html = ""
+    if ts:
+        opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in ts["slots"])
+        slot_html = f"""
+        <div class="sub" data-slot-voor="{e(ts['onderdeel'])}" hidden><label for="tijdslot">Kies je tijdslot</label>
+          <select id="tijdslot" name="tijdslot"><option value="">Kies een tijdslot</option>{opts}</select><div class="err" data-voor="tijdslot"></div></div>"""
+    wagen_html = """
+      <fieldset class="co-blok"><legend><span>3</span> Je Land Rover <small>(optioneel)</small></legend>
+        <div class="veld"><label for="wagen">Met welke Land Rover kom je?</label><input id="wagen" name="wagen" placeholder="Bv. Defender 110, 1998"></div>
+      </fieldset>""" if cfg["wagen"] else ""
+    nr_opm = 4 if cfg["wagen"] else 3
+    body = banner(a["datum_lang"], f"Inschrijven: {a['titel']}", a["kort"], None) + f"""
+<section><div class="wrap">
+  <form id="inschrijf-form" class="checkout" novalidate data-slug="{e(slug)}">
+    <div class="co-main">
+      <fieldset class="co-blok"><legend><span>1</span> Jouw gegevens</legend>
+        <div class="veld"><label for="naam">Voor- en achternaam</label><input id="naam" name="naam" autocomplete="name" required><div class="err" data-voor="naam"></div></div>
+        <div class="veld2">
+          <div class="veld"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div>
+          <div class="veld"><label for="telefoon">Telefoon</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required><div class="err" data-voor="telefoon"></div></div>
+        </div>
+      </fieldset>
+      <fieldset class="co-blok"><legend><span>2</span> Waarvoor schrijf je in?</legend>{rijen}
+        <div class="err" data-voor="aantal"></div>{slot_html}
+      </fieldset>{wagen_html}
+      <fieldset class="co-blok"><legend><span>{nr_opm}</span> Opmerking <small>(optioneel)</small></legend>
+        <div class="veld"><label for="opmerking" class="sr-only">Opmerking</label><textarea id="opmerking" name="opmerking" rows="3"></textarea></div>
+      </fieldset>
+      <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    </div>
+    <aside class="co-side">
+      <div class="card">
+        <h3>Overzicht</h3>
+        <ul class="facts">
+          <li><span>Activiteit</span><span>{e(a['titel'])}</span></li>
+          <li><span>Datum</span><span>{e(a['datum_lang'])}</span></li>
+        </ul>
+        <div id="co-lijnen"></div>
+        <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
+        <div class="err" data-voor="akkoord"></div>
+        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
+        <div class="err" id="co-fout" role="alert"></div>
+        <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail.</p>
+      </div>
+    </aside>
+  </form>
+</div></section>"""
+    write(f"/activiteiten/{slug}/inschrijven", f"Inschrijven: {a['titel']}", f"Schrijf je in voor {a['titel']} van Rover & Co.", body, noindex=True)
 
 # ---------- afrekenen ----------
 act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])
 afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
 <section><div class="wrap">
-  <div class="testbanner" role="note"><strong>Testomgeving.</strong> Bestellingen worden bewaard maar zijn nog niet echt: er wordt niets aangerekend en niets verstuurd.</div>
   <form id="checkout-form" class="checkout" novalidate data-verzendkost="7.5" data-gratis-vanaf="100">
     <div class="co-main">
       <div class="co-leeg" id="co-leeg" hidden><p>Je mandje is leeg.</p><a class="btn btn-solid" href="/shop">Naar de shop</a></div>
@@ -545,23 +621,34 @@ afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
         </ul>
         <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
         <div class="err" data-voor="akkoord"></div>
-        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Bestelling plaatsen</button>
+        <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>
-        <p class="note">Online betalen via Viva volgt later. In deze testfase wordt niets aangerekend.</p>
+        <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail.</p>
       </div>
     </aside>
   </form>
 </div></section>"""
 write("/afrekenen", "Afrekenen", "Rond je bestelling bij Rover & Co af.", afrekenen)
 
-write("/bedankt", "Bedankt", "Bedankt voor je bestelling bij Rover & Co.",
-      banner("Bestelling ontvangen", "Bedankt!", "", None) + """
-<section><div class="narrow prose">
-  <div class="testbanner" role="note"><strong>Testbestelling.</strong> Er werd niets aangerekend.</div>
-  <p>We hebben je bestelling goed ontvangen. Je bestelnummer is <strong id="bedankt-nr">–</strong>.</p>
-  <p>We nemen contact met je op over het ophalen of verzenden. Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je bestelnummer.</p>
+write("/bedankt", "Bedankt", "Bedankt voor je bestelling of inschrijving bij Rover & Co.",
+      banner("Rover & Co", "Bedankt!", "", None) + """
+<section><div class="narrow prose" id="bedankt" data-status="">
+  <div class="testbanner" role="note" data-toon-als="test" hidden><strong>Test.</strong> Er werd niets aangerekend.</div>
+  <p data-toon-als="betaald" hidden>Je betaling is gelukt. Je nummer is <strong class="bedankt-nr">–</strong>. Je krijgt zo meteen een bevestiging per mail.</p>
+  <p data-toon-als="verwerking" hidden>We hebben je betaling nog niet definitief binnen. Dat kan een paar minuten duren. Zodra ze binnen is, krijg je een bevestiging per mail.<span data-met-nr> Je nummer is <strong class="bedankt-nr">–</strong>.</span></p>
+  <p data-toon-als="test" hidden>We hebben je gegevens goed ontvangen. Je nummer is <strong class="bedankt-nr">–</strong>.</p>
+  <p>Vragen? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a> en vermeld je nummer.</p>
   <p><a class="btn btn-solid" href="/">Terug naar home</a></p>
-</div></section>""")
+</div></section>""", noindex=True)
+
+write("/betaling-mislukt", "Betaling niet gelukt", "De betaling bij Rover & Co is niet gelukt.",
+      banner("Rover & Co", "Betaling niet gelukt", "", None) + """
+<section><div class="narrow prose">
+  <p>Je betaling is niet gelukt of je hebt ze geannuleerd. Er is niets aangerekend.</p>
+  <p>Je gegevens staan nog klaar. Je kan het meteen opnieuw proberen.</p>
+  <p><a class="btn btn-solid" id="opnieuw" href="/afrekenen">Opnieuw proberen</a></p>
+  <p>Lukt het niet? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a>.</p>
+</div></section>""", noindex=True)
 
 # ---------- sitemap + robots ----------
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
