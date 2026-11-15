@@ -1,3 +1,8 @@
+# Testadres (workers.dev) nooit indexeren; roverandco.be zelf wel.
+https://roverandco-be-site.pieter-2d7.workers.dev/*
+  X-Robots-Tag: noindex, nofollow
+
+# Inschrijfpagina's nooit indexeren (ook op roverandco.be).
 /activiteiten/*/inschrijven
   X-Robots-Tag: noindex, nofollow
 /activiteiten/*/inschrijven/
