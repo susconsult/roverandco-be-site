@@ -5,7 +5,6 @@ volgorde: 0
 cornerstone: ja
 auteur: dolf
 datum: 2026-11-15
-status: concept
 beschrijving: Van de Minerva uit Mortsel tot de ex-ABL Series III: het volledige verhaal van de Land Rover in België, en waar je vandaag nog terechtkunt.
 foto: 968
 foto_alt: Colonne Land Rovers op een landweg

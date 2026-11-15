@@ -4,7 +4,6 @@ rubriek: Land Rover in België
 volgorde: 1
 auteur: dolf
 datum: 2026-11-15
-status: concept
 beschrijving: Tussen 1952 en 1956 bouwde Minerva in Mortsel bijna 9.000 Land Rovers onder licentie. Hoe herken je er een, en waarom zien ze er anders uit?
 foto: 870
 foto_alt: Series Land Rover rijdt door de modder

@@ -4,7 +4,6 @@ rubriek: Land Rover in België
 volgorde: 3
 auteur: dolf
 datum: 2026-11-15
-status: concept
 beschrijving: Na de Minerva reed het Belgisch leger met Series II en III van 88 inch. Opvallend: een deel had alleen achterwielaandrijving. Wat weten we zeker, en wat niet?
 foto: 815
 foto_alt: Series III Land Rover in de modder

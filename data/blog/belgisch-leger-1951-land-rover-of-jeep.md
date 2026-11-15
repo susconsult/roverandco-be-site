@@ -4,7 +4,6 @@ rubriek: Land Rover in België
 volgorde: 2
 auteur: dolf
 datum: 2026-11-15
-status: concept
 beschrijving: In 1951 zocht het Belgisch leger een opvolger voor zijn oorlogsjeeps. Het werd de Land Rover, gebouwd bij Minerva. Maar de jeep verdween niet helemaal.
 foto: 5644
 foto_alt: Bestuurder in een Series Land Rover steekt zijn duim op

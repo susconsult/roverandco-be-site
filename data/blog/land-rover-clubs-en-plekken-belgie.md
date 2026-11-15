@@ -4,7 +4,6 @@ rubriek: Land Rover in België
 volgorde: 5
 auteur: pieter
 datum: 2026-11-15
-status: concept
 beschrijving: Waar vind je andere Land Rover-rijders in België? Clubs, specialisten, plekken om te rijden en de regels die je moet kennen.
 foto: 977
 foto_alt: Colonne Defenders rijdt door het bos

@@ -4,7 +4,6 @@ rubriek: Land Rover in België
 volgorde: 4
 auteur: dolf
 datum: 2026-11-15
-status: concept
 beschrijving: Een Minerva of ex-ABL Series III kopen? Waar je ze vindt, waar je op let bij de bezichtiging, en wat de regels voor de O-plaat zijn.
 foto: 900
 foto_alt: Land Rover Forward Control in het bos
