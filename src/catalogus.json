@@ -142,35 +142,9 @@
  },
  "__activiteiten": [
   "Church of Rover (Zo 22 nov)",
-  "Kerstmeeting (Zo 13 dec)",
   "Wild & Wheels (28–30 mei)"
  ],
  "__inschrijvingen": {
-  "kerstmeeting": {
-   "titel": "Kerstmeeting",
-   "datum_label": "Zo 13 dec",
-   "sluit": "2026-12-13",
-   "onderdelen": [
-    {
-     "id": "deelname",
-     "naam": "Deelname met je Land Rover",
-     "prijs": 0,
-     "per": "wagen",
-     "max": 5
-    },
-    {
-     "id": "kofferbak",
-     "naam": "Standplaats kofferbakverkoop",
-     "prijs": 5,
-     "per": "wagen",
-     "max": 1,
-     "beperkt": true,
-     "uitleg": "Met sticker die toont dat je mag verkopen"
-    }
-   ],
-   "tijdsloten": null,
-   "wagen": true
-  },
   "wild-and-wheels": {
    "titel": "Wild & Wheels",
    "datum_label": "28–30 mei",

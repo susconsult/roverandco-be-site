@@ -271,7 +271,7 @@ home = f"""
 write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen op plekken waar je anders niet komt. Activiteiten, ritten en merch.", home, hero=True)
 
 # ---------- activiteiten ----------
-write("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rover & Co: Church of Rover, kerstmeeting, Wild & Wheels.",
+write("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rover & Co: Church of Rover en Wild & Wheels.",
       banner("Activiteiten", "Rij mee", "Elke activiteit is een belevenis op een bijzondere plek. Schrijf je in en rij mee.", "977", "Colonne Defenders in het bos") +
       f'<section><div class="wrap"><div class="ev-list">{"".join(ev_card(a, True) for a in acts)}</div></div></section>')
 
@@ -293,6 +293,17 @@ def aftellen(a):
             '</section>')
 
 
+EVENT_BODY = {}
+
+
+def fotoblok(a):
+    """Fotogalerij op de activiteitpagina, uit het veld 'fotos' ([naam, alt] onder /assets/img/)."""
+    if not a.get("fotos"):
+        return ""
+    return (f'<section class="gallery-sec"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Foto\'s</div>'
+            f'<h2>{e(a.get("fotos_titel", "Sfeerbeelden"))}</h2></div></div>{galerij([tuple(x) for x in a["fotos"]])}</div></section>')
+
+
 def inschrijving_open(a):
     i = a.get("inschrijving")
     return bool(i and i.get("open") and (not i.get("sluit") or i["sluit"] >= date.today().isoformat()))
@@ -302,8 +313,8 @@ for a in alle_acts:
     if a.get("extern_url"):
         continue
     if inschrijving_open(a):
-        knop = (f'<a class="btn btn-solid" href="/activiteiten/{a["slug"]}/inschrijven" style="width:100%;justify-content:center">Inschrijven</a>'
-                '<p class="note">Je betaalt veilig online via Viva.</p>')
+        knop = ('<a class="btn btn-solid" href="#inschrijven" style="width:100%;justify-content:center">Inschrijven</a>'
+                '<p class="note">Het formulier staat onderaan deze pagina. Je betaalt veilig online via Viva.</p>')
     else:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
@@ -317,6 +328,10 @@ for a in alle_acts:
     {f"<li><span>Uur</span><span>{e(a['uren'])}</span></li>" if a['uren'] else ''}
   </ul>{knop}</aside>
 </div></section>"""
+    body += fotoblok(a)
+    if inschrijving_open(a):
+        EVENT_BODY[a["slug"]] = body  # wordt geschreven samen met het inschrijfformulier (zie onder)
+        continue
     write(f"/activiteiten/{a['slug']}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
 
 # ---------- shop ----------
@@ -569,8 +584,9 @@ for slug, cfg in cat["__inschrijvingen"].items():
         <div class="veld"><label for="wagen">Met welke Land Rover kom je?</label><input id="wagen" name="wagen" placeholder="Bv. Defender 110, 1998"></div>
       </fieldset>""" if cfg["wagen"] else ""
     nr_opm = 4 if cfg["wagen"] else 3
-    body = banner(a["datum_lang"], f"Inschrijven: {a['titel']}", a["kort"], None) + f"""
-<section><div class="wrap">
+    body = EVENT_BODY[slug] + f"""
+<section id="inschrijven" class="inschrijf-sec"><div class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Inschrijven</div><h2>Schrijf je in voor {e(a['titel'])}</h2></div></div>
   <form id="inschrijf-form" class="checkout" novalidate data-slug="{e(slug)}">
     <div class="co-main">
       <fieldset class="co-blok"><legend><span>1</span> Jouw gegevens</legend>
@@ -606,7 +622,16 @@ for slug, cfg in cat["__inschrijvingen"].items():
     </aside>
   </form>
 </div></section>"""
-    write(f"/activiteiten/{slug}/inschrijven", f"Inschrijven: {a['titel']}", f"Schrijf je in voor {a['titel']} van Rover & Co.", body, noindex=True)
+    write(f"/activiteiten/{slug}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
+    # Oud adres /inschrijven blijft werken: doorsturen naar het formulier op de eventpagina.
+    doel = f"/activiteiten/{slug}#inschrijven"
+    out = os.path.join(PUB, "activiteiten", slug, "inschrijven.html")
+    os.makedirs(os.path.dirname(out), exist_ok=True)
+    open(out, "w", encoding="utf-8").write(
+        f'<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="robots" content="noindex">'
+        f'<meta http-equiv="refresh" content="0; url={doel}"><link rel="canonical" href="{site["domein"]}/activiteiten/{slug}">'
+        f'<title>Inschrijven: {e(a["titel"])}</title><script>location.replace("{doel}")</script></head>'
+        f'<body><a href="{doel}">Naar het inschrijfformulier</a></body></html>')
 
 # ---------- afrekenen ----------
 act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])

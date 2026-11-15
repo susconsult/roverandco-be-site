@@ -311,3 +311,6 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .ct-vak span{font-size:13px;opacity:.85}
 @media(max-width:520px){.ct-vak{min-width:0;flex:1;padding:8px 6px}}
 .aftellen[hidden],.ct-vakken[hidden]{display:none}
+
+/* inschrijfformulier op de eventpagina */
+.inschrijf-sec{scroll-margin-top:84px}

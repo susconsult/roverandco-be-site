@@ -39,7 +39,7 @@
   "inschrijven_url": "",
   "inschrijven_label": "",
   "inschrijving": {
-   "open": true,
+   "open": false,
    "sluit": "2026-12-13",
    "wagen": true,
    "onderdelen": [
@@ -60,7 +60,8 @@
      "uitleg": "Met sticker die toont dat je mag verkopen"
     }
    ]
-  }
+  },
+  "verborgen": true
  },
  {
   "slug": "wild-and-wheels",
@@ -145,7 +146,58 @@
   "aftellen": {
    "start": "2027-05-28T18:00:00+02:00",
    "einde": "2027-05-30T18:00:00+02:00"
-  }
+  },
+  "fotos": [
+   [
+    "ww-colonne-weg",
+    "Colonne Land Rovers op een landweg"
+   ],
+   [
+    "ww-giraffen",
+    "Twee giraffen in Pakawi Park"
+   ],
+   [
+    "ww-series-modder",
+    "Land Rover Series door de modder"
+   ],
+   [
+    "ww-daktenten",
+    "Defenders met daktenten op de camping"
+   ],
+   [
+    "ww-olifant",
+    "Olifant in Pakawi Park"
+   ],
+   [
+    "ww-koppel-dak",
+    "Koppel op het dak van hun Land Rover"
+   ],
+   [
+    "ww-modder-spat",
+    "Defender spat door de modder"
+   ],
+   [
+    "ww-maki",
+    "Ringstaartmaki's in het gras"
+   ],
+   [
+    "ww-rij-landys",
+    "Rij Defenders op het terrein"
+   ],
+   [
+    "ww-camping-bord",
+    "Campingbord naast een groene Defender"
+   ],
+   [
+    "ww-kraanvogel",
+    "Kroonkraanvogel in Pakawi Park"
+   ],
+   [
+    "ww-bar",
+    "Bezoekers aan de bar op het festivalterrein"
+   ]
+  ],
+  "fotos_titel": "Vorige editie en Pakawi Park"
  },
  {
   "slug": "testinschrijving",
