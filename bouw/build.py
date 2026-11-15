@@ -390,18 +390,7 @@ for a in artikels:
     woorden = len(re.sub(r"<[^>]+>", " ", inhoud).split())
     a["woorden"] = woorden
     a["minuten"] = max(1, round(woorden / 220))
-    body = f"""
-<section class="banner">{img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
-<section><article class="narrow prose blogtekst">
-  {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
-  <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>
-  {inhoud}
-  {f'<p class="fotocredit">Foto bovenaan: {a["foto_credit"]}</p>' if a.get('foto_credit') else ''}
-  <div class="auteur-onder"><span class="auteur-label">Geschreven door</span>{auteur_blok(a['auteur'])}</div>
-  <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
-  <p><a class="btn" href="/blog">Alle artikels</a></p>
-</article></section>"""
-    write(f"/blog/{a['slug']}", a["titel"], a["beschrijving"], body, noindex=concept)
+    a["html"] = inhoud
 
 gepubliceerd = [a for a in artikels if a.get("status") != "concept"]
 
@@ -411,6 +400,33 @@ def kaart(a, groot=False):
             f'<img src="/assets/img/{a["foto"]}{"" if groot else "-s"}.webp" alt="{e(a["foto_alt"])}" loading="{"eager" if groot else "lazy"}">'
             f'<div class="bk-tekst"><div class="eyebrow">{e(a["rubriek"])}</div><h3>{e(a["titel"])}</h3><p>{e(a["beschrijving"])}</p>'
             f'<small>{e(AUTEURS[a["auteur"]]["naam"])} · {nl_datum(a["datum"])} · {a["minuten"]} min lezen</small></div></a>')
+
+
+def gerelateerd(a, n=3):
+    """Drie artikels onderaan: eerst uit dezelfde rubriek, dan aangevuld met andere rubrieken."""
+    zelfde = [x for x in gepubliceerd if x is not a and x["rubriek"] == a["rubriek"]]
+    zelfde.sort(key=lambda x: int(x.get("volgorde", 9)))
+    eigen = int(a.get("volgorde", 9))
+    zelfde = [x for x in zelfde if int(x.get("volgorde", 9)) > eigen] + [x for x in zelfde if int(x.get("volgorde", 9)) <= eigen]
+    anders = [x for x in gepubliceerd if x is not a and x["rubriek"] != a["rubriek"] and x.get("cornerstone") == "ja"]
+    return (zelfde + anders)[:n]
+
+
+for a in artikels:
+    concept = a.get("status") == "concept"
+    body = f"""
+<section class="banner">{img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
+<section><article class="narrow prose blogtekst">
+  {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
+  <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>
+  {a['html']}
+  {f'<p class="fotocredit">Foto bovenaan: {a["foto_credit"]}</p>' if a.get('foto_credit') else ''}
+  <div class="auteur-onder"><span class="auteur-label">Geschreven door</span>{auteur_blok(a['auteur'])}</div>
+  <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
+  <p><a class="btn" href="/blog">Alle artikels</a></p>
+</article></section>
+<section class="gerelateerd"><div class="wrap"><h2>Lees ook</h2><div class="blogfeed">{"".join(kaart(x) for x in gerelateerd(a))}</div></div></section>"""
+    write(f"/blog/{a['slug']}", a["titel"], a["beschrijving"], body, noindex=(a.get("status") == "concept"))
 
 
 # Een echte blog: één tijdlijn, nieuwste eerst. Bij dezelfde datum wisselen de rubrieken elkaar af.
