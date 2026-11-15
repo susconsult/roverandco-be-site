@@ -275,6 +275,24 @@ write("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rove
       banner("Activiteiten", "Rij mee", "Elke activiteit is een belevenis op een bijzondere plek. Schrijf je in en rij mee.", "977", "Colonne Defenders in het bos") +
       f'<section><div class="wrap"><div class="ev-list">{"".join(ev_card(a, True) for a in acts)}</div></div></section>')
 
+def aftellen(a):
+    """Countdown-balk onder de banner, als de activiteit een 'aftellen'-veld heeft (start/einde met tijdzone)."""
+    c = a.get("aftellen")
+    if not c:
+        return ""
+    vak = lambda k, l: f'<div class="ct-vak"><b data-ct="{k}">0</b><span>{l}</span></div>'
+    return (f'<section class="aftellen" data-start="{e(c["start"])}" data-einde="{e(c.get("einde", c["start"]))}">'
+            f'<div class="wrap ct-in"><p class="ct-titel">Nog even geduld tot {e(a["titel"])}</p>'
+            f'<div class="ct-vakken">{vak("d", "dagen")}{vak("u", "uren")}{vak("m", "minuten")}{vak("s", "seconden")}</div></div>'
+            '<script>(function(){var el=document.currentScript.parentNode,s=Date.parse(el.dataset.start),n=Date.parse(el.dataset.einde),'
+            't=el.querySelector(".ct-titel"),v=el.querySelector(".ct-vakken");function z(){var nu=Date.now(),r=s-nu;'
+            'if(nu>=n){el.hidden=true;return}if(r<=0){t.textContent="Het is zover: we zijn bezig!";v.hidden=true;return}'
+            'var d=Math.floor(r/864e5),u=Math.floor(r/36e5)%24,m=Math.floor(r/6e4)%60,c=Math.floor(r/1e3)%60;'
+            'el.querySelector("[data-ct=d]").textContent=d;el.querySelector("[data-ct=u]").textContent=u;'
+            'el.querySelector("[data-ct=m]").textContent=m;el.querySelector("[data-ct=s]").textContent=c;setTimeout(z,1000)}z()})();</script>'
+            '</section>')
+
+
 def inschrijving_open(a):
     i = a.get("inschrijving")
     return bool(i and i.get("open") and (not i.get("sluit") or i["sluit"] >= date.today().isoformat()))
@@ -290,7 +308,7 @@ for a in alle_acts:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
            f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>' if a["inschrijven_label"] else ""
-    body = banner(a["datum_lang"], a["titel"], a["kort"], a["foto"], a["foto_alt"]) + f"""
+    body = banner(a["datum_lang"], a["titel"], a["kort"], a["foto"], a["foto_alt"]) + aftellen(a) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
   <aside class="card"><h3>In het kort</h3><ul class="facts">
