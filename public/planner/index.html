@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Terreinplanner · Rover &amp; Co</title>
+<link rel="icon" href="/favicon.png">
+<style>
+@font-face{font-family:"Manrope";font-weight:400;font-display:swap;src:url(/assets/fonts/manrope-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Manrope";font-weight:700;font-display:swap;src:url(/assets/fonts/manrope-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Big Shoulders Display";font-weight:800;font-display:swap;src:url(/assets/fonts/big-shoulders-display-latin-800-normal.woff2) format("woff2")}
+:root{--green:#1F3B2A;--green2:#2C5A3D;--light:#9FC5A8;--sand:#ECE6D6;--sand2:#DED5BF;--ink:#141815;--muted:#5B625C;--panel:#fff;--line:#DED5BF;--sel:#2e6fb3;--danger:#b3392f}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0}
+body{font-family:Manrope,system-ui,sans-serif;font-size:15px;color:var(--ink);background:var(--sand);display:flex;flex-direction:column;overflow:hidden}
+button{font:inherit;cursor:pointer}
+.top{background:var(--green);color:#fff;display:flex;align-items:center;gap:10px;padding:8px max(12px,env(safe-area-inset-right)) 8px max(12px,env(safe-area-inset-left));padding-top:max(8px,env(safe-area-inset-top));flex-shrink:0}
+.top h1{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:800;font-size:1.45rem;margin:0;letter-spacing:.01em;white-space:nowrap}
+.top .save{font-size:.75rem;opacity:.85;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tbtn{background:transparent;border:1.5px solid rgba(255,255,255,.4);color:#fff;border-radius:8px;height:38px;min-width:38px;padding:0 10px;display:inline-flex;align-items:center;justify-content:center;gap:6px;font-weight:700}
+.tbtn svg{width:20px;height:20px}
+.tbtn:disabled{opacity:.35}
+.app{flex:1;display:flex;min-height:0;position:relative}
+.mapwrap{flex:1;position:relative;min-width:0;background:#141a14;overflow:hidden;touch-action:none}
+svg#map{width:100%;height:100%;display:block;user-select:none;-webkit-user-select:none}
+.zoom{position:absolute;right:max(10px,env(safe-area-inset-right));top:10px;display:flex;flex-direction:column;gap:6px}
+.zoom button{width:44px;height:44px;border-radius:10px;border:0;background:#fff;color:var(--ink);font-size:1.4rem;font-weight:700;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.bar{position:absolute;left:50%;transform:translateX(-50%);bottom:12px;background:var(--green);color:#fff;border-radius:12px;padding:10px 12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;max-width:calc(100% - 20px);box-shadow:0 2px 10px rgba(0,0,0,.35);font-weight:700}
+.bar button{border:0;border-radius:8px;padding:10px 16px;font-weight:700;background:var(--light);color:var(--green)}
+.bar button.ghost{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,.5)}
+.coords{position:absolute;left:10px;bottom:10px;background:rgba(15,20,15,.75);color:#fff;font-size:12px;padding:4px 8px;border-radius:6px;pointer-events:none;font-variant-numeric:tabular-nums}
+.panel{width:330px;flex-shrink:0;background:var(--panel);border-left:1px solid var(--line);overflow-y:auto}
+.sec{padding:14px 16px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:10px}
+.sec h2{font-size:.75rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:0;font-weight:700}
+.tiles{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.tile{border:1.5px solid var(--line);background:#fff;border-radius:10px;padding:10px;display:flex;align-items:center;gap:10px;text-align:left;min-height:54px;color:var(--ink)}
+.tile:active{background:var(--sand)}
+.tile .sw{width:22px;height:22px;border-radius:5px;flex-shrink:0;border:1px solid rgba(0,0,0,.25)}
+.tile b{display:block;font-size:.92rem;line-height:1.2}
+.tile small{display:block;color:var(--muted);font-size:.75rem}
+.field{display:flex;flex-direction:column;gap:4px;flex:1;min-width:0}
+.field label{font-size:.8rem;color:var(--muted);font-weight:700}
+input,select{font:inherit;font-size:16px;padding:10px;border:1.5px solid var(--line);border-radius:8px;background:#fff;color:var(--ink);width:100%}
+.row{display:flex;gap:8px}
+.btn{border:1.5px solid var(--line);background:#fff;color:var(--ink);border-radius:8px;padding:11px 12px;font-weight:700;text-align:center}
+.btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.btn.danger{color:var(--danger);border-color:#e4b9b5}
+.btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.swatches{display:flex;gap:8px;flex-wrap:wrap}
+.swatch{width:34px;height:34px;border-radius:8px;border:3px solid transparent;padding:0}
+.swatch.on{border-color:var(--ink)}
+.layer{display:flex;align-items:center;gap:4px;font-weight:700}
+.layer .nm{flex:1}
+.ico{width:38px;height:38px;border:0;background:transparent;color:var(--muted);border-radius:8px;display:grid;place-items:center}
+.ico svg{width:20px;height:20px}
+.ico.off{opacity:.3}
+.ico.lockon{color:var(--danger)}
+.children{display:flex;flex-direction:column;margin:0 0 6px 10px}
+.child{display:flex;justify-content:space-between;gap:8px;padding:8px;border-radius:8px;border:0;background:transparent;color:var(--ink);text-align:left;font-weight:600}
+.child.on{background:#e3eefa;color:var(--sel)}
+.child .dim{font-size:.75rem;color:var(--muted);white-space:nowrap}
+.note{font-size:.85rem;color:var(--muted);margin:0;line-height:1.4}
+.confirm{display:flex;gap:8px;align-items:center;grid-column:1/-1}
+.confirm .btn{flex:1}
+.bottomnav{display:none}
+[hidden]{display:none!important}
+@media (max-width:820px){
+  .panel{position:absolute;left:0;right:0;bottom:0;width:auto;max-height:58%;border-left:0;border-top:1px solid var(--line);border-radius:14px 14px 0 0;box-shadow:0 -4px 16px rgba(0,0,0,.25);z-index:5}
+  .panel.closed{display:none}
+  body.phone .sec{display:none}
+  body.phone #panel.editing{max-height:44%}
+  body.phone .sec.show{display:flex}
+  .coords{display:none}
+  .bottomnav{display:grid;grid-template-columns:repeat(4,1fr);background:var(--green);padding-bottom:env(safe-area-inset-bottom);flex-shrink:0}
+  .bottomnav button{background:transparent;border:0;color:#fff;padding:9px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;font-weight:700;font-size:.78rem}
+  .bottomnav button svg{width:24px;height:24px}
+  .bottomnav button.on{color:var(--light)}
+  .bottomnav button:disabled{opacity:.35}
+  .top .desk{display:none}
+  .bar{bottom:12px}
+}
+</style>
+</head>
+<body>
+<header class="top">
+  <h1>Terreinplanner</h1>
+  <span class="save" id="saveState">laden…</span>
+  <button class="tbtn desk" id="undoBtn" title="Ongedaan maken" aria-label="Ongedaan maken"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg></button>
+  <button class="tbtn desk" id="redoBtn" title="Opnieuw" aria-label="Opnieuw"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 14 5-5-5-5"/><path d="M20 9H9a5 5 0 0 0 0 10h3"/></svg></button>
+  <button class="tbtn desk" id="pdfTop">PDF</button>
+</header>
+
+<div class="app">
+  <div class="mapwrap" id="wrap">
+    <svg id="map" xmlns="http://www.w3.org/2000/svg">
+      <rect id="paper" x="0" y="0" fill="#f4f3ee"/>
+      <image id="photo" href="/planner/kaart.jpg" x="0" y="0" preserveAspectRatio="none"/>
+      <g id="grid"></g><g id="items"></g><g id="draft"></g><g id="handles"></g>
+    </svg>
+    <div class="zoom"><button id="zin" aria-label="Inzoomen">+</button><button id="zout" aria-label="Uitzoomen">−</button><button id="zfit" aria-label="Alles tonen" style="font-size:1rem">⤢</button></div>
+    <div class="coords" id="coords">x – · y –</div>
+    <div class="bar" id="drawBar" hidden><span id="drawTxt"></span><button id="drawOk">Klaar</button><button class="ghost" id="drawCancel">Annuleren</button></div>
+  </div>
+
+  <aside class="panel" id="panel">
+    <section class="sec" id="secEdit" data-view="edit">
+      <h2>Geselecteerd</h2>
+      <div class="field"><label for="pName">Naam</label><input id="pName" type="text"></div>
+      <div class="row" id="fRect"><div class="field"><label for="pW">Breedte (m)</label><input id="pW" type="number" inputmode="decimal" step="0.5" min="0.2"></div><div class="field"><label for="pL">Lengte (m)</label><input id="pL" type="number" inputmode="decimal" step="0.5" min="0.2"></div></div>
+      <div class="row" id="fOne"><div class="field"><label for="pD" id="pDlab">Diameter (m)</label><input id="pD" type="number" inputmode="decimal" step="0.5" min="0.2"></div></div>
+      <div class="btns" id="rotBtns"><button class="btn" id="rotL">⟲ Draai links</button><button class="btn" id="rotR">⟳ Draai rechts</button></div>
+      <div class="swatches" id="swatches" aria-label="Kleur"></div>
+      <p class="note" id="pInfo"></p>
+      <div class="btns" id="actBtns">
+        <button class="btn" id="fwdBtn">Naar voren</button><button class="btn" id="backBtn">Naar achteren</button>
+        <button class="btn" id="dupBtn">Kopie maken</button><div id="delArea" style="display:contents"></div>
+      </div>
+      <div class="field"><label for="pLayer">Laag</label><select id="pLayer"><option value="elementen">Elementen</option><option value="zones">Zones</option><option value="bestaand">Bestaand</option></select></div>
+      <button class="btn primary" id="doneBtn">Klaar</button>
+    </section>
+
+    <section class="sec" id="secAdd" data-view="add">
+      <h2>Toevoegen</h2>
+      <p class="note">Tik op iets: het komt in het midden van de kaart. Daarna versleep je het met je vinger of muis.</p>
+      <div class="tiles" id="lib"></div>
+      <h2 style="margin-top:6px">Zelf tekenen</h2>
+      <div class="tiles">
+        <button class="tile" id="drawZone"><span class="sw" style="background:#7a4fb3"></span><span><b>Zone</b><small>tik de hoeken</small></span></button>
+        <button class="tile" id="drawPath"><span class="sw" style="background:#7d837a"></span><span><b>Pad / weg</b><small>tik de punten</small></span></button>
+      </div>
+    </section>
+
+    <section class="sec" id="secLayers" data-view="layers">
+      <h2>Lagen</h2>
+      <div id="layers"></div>
+    </section>
+
+    <section class="sec" id="secMore" data-view="more">
+      <h2>Meer</h2>
+      <div class="btns">
+        <button class="btn primary" id="pdfBtn">PDF (A3)</button>
+        <button class="btn" id="pngBtn">Afbeelding</button>
+        <button class="btn" id="measureBtn">Afstand meten</button>
+        <button class="btn" id="gridBtn">Raster aan</button>
+      </div>
+      <p class="note" id="exportMsg">De PDF is A3 staand, met legende, schaal en datum. Verborgen lagen komen er niet in.</p>
+      <details><summary class="note" style="cursor:pointer">Schaal</summary>
+        <p class="note" id="scaleTxt" style="margin-top:6px"></p>
+        <button class="btn" id="calBtn" style="margin-top:8px;width:100%">Opnieuw ijken</button>
+        <div id="calForm" hidden style="margin-top:8px">
+          <div class="field"><label for="calM">Echte afstand tussen je 2 punten (m)</label><input id="calM" type="number" inputmode="decimal" step="0.1" min="1"></div>
+          <button class="btn primary" id="calOk" style="margin-top:8px;width:100%">Schaal opslaan</button>
+        </div>
+      </details>
+      <a class="btn" href="/planner/afmelden" style="text-decoration:none">Afmelden</a>
+    </section>
+  </aside>
+</div>
+
+<nav class="bottomnav" aria-label="Menu">
+  <button data-open="add"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>Toevoegen</button>
+  <button data-open="layers"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5z"/><path d="m3 13 9 5 9-5"/></svg>Lagen</button>
+  <button id="undoNav"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>Terug</button>
+  <button data-open="more"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>Meer</button>
+</nav>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+const IMG_W=1240, IMG_H=1754, DEFAULT_MPP=0.3672;
+const COLORS={groen:"#2f7d43",oranje:"#e07a26",rood:"#c43d33",blauw:"#2e6fb3",geel:"#e0b72a",bruin:"#9a6a35",paars:"#7a4fb3",grijs:"#7d837a",wit:"#f2f2f2",zwart:"#222222"};
+const ZONES=["camping","offroad","basecamp","zone"];
+const LAYERS={bestaand:"Bestaand",zones:"Zones",elementen:"Elementen"};
+const LIB=[
+  {label:"Standhouder",kind:"stand",shape:"rect",w:6,l:3,color:"blauw"},
+  {label:"Sailcloth tent",kind:"tent",shape:"rect",w:25,l:14,color:"groen"},
+  {label:"Foodtruck",kind:"foodtruck",shape:"rect",w:7,l:2.5,color:"oranje"},
+  {label:"Bar",kind:"bar",shape:"rect",w:6,l:3,color:"oranje"},
+  {label:"Toiletblok",kind:"toilet",shape:"rect",w:6,l:2.5,color:"grijs"},
+  {label:"Kampvuur",kind:"vuur",shape:"circle",w:5,l:5,color:"rood"},
+  {label:"Poort / uitgang",kind:"poort",shape:"rect",w:4,l:1,color:"rood"},
+  {label:"Gator-start",kind:"gator",shape:"circle",w:3,l:3,color:"geel"},
+  {label:"Rechthoek",kind:"vrij",shape:"rect",w:10,l:5,color:"wit"},
+  {label:"Tekst",kind:"tekst",shape:"text",w:4,l:4,color:"wit"}
+];
+const ICON={eye:'<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/>',unlock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 7.5-2"/>',photo:'<rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10" r="2"/><path d="m21 16-5-5-8 8"/>',text:'<path d="M5 6V4h14v2"/><path d="M12 4v16"/><path d="M9 20h6"/>',up:'<path d="m6 15 6-6 6 6"/>',down:'<path d="m6 9 6 6 6-6"/>'};
+const svgIcon=n=>`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${ICON[n]}</svg>`;
+
+const $=id=>document.getElementById(id);
+const NS="http://www.w3.org/2000/svg";
+const svg=$("map"),photo=$("photo"),gItems=$("items"),gGrid=$("grid"),gDraft=$("draft"),gH=$("handles");
+const coarse=matchMedia("(pointer:coarse)").matches;
+const phoneMq=matchMedia("(max-width:820px)");
+
+let mpp=DEFAULT_MPP,items={},selected=null,tool="select",snap=false,showPhoto=true,showLabels=false;
+let layerOn={bestaand:true,zones:true,elementen:true},layerLock={bestaand:true,zones:false,elementen:false};
+let layerOrder=["elementen","zones","bestaand"];
+try{const v=JSON.parse(localStorage.getItem("planner-lagen")||"null");if(v){Object.assign(layerOn,v.on||{});Object.assign(layerLock,v.lock||{});if(v.photo===false)showPhoto=false;if(v.labels===true)showLabels=true;}}catch(e){}
+let vb={x:0,y:0,w:1,h:1},fitW=1,act=null,draft=null,measurePts=[],calPts=[],view=null;
+let undoStack=[],redoStack=[];
+try{const h=JSON.parse(sessionStorage.getItem("planner-historiek")||"null");if(h&&Array.isArray(h.u)){undoStack=h.u;redoStack=h.r||[];}}catch(e){}
+const pending=new Set();
+
+/* helpers */
+const imgW=()=>IMG_W*mpp,imgH=()=>IMG_H*mpp,px2m=v=>v*mpp,m2px=v=>v/mpp;
+const fmt=v=>(Math.round(v*10)/10).toLocaleString("nl-BE",{maximumFractionDigits:1});
+const r1=v=>Math.round(v*10)/10;
+const unit=()=>vb.w/(svg.getBoundingClientRect().width||1);
+const layerOf=it=>it.layer||(it.kind==="bestaand"?"bestaand":(ZONES.includes(it.kind)||it.shape==="poly")?"zones":"elementen");
+const vis=it=>layerOn[layerOf(it)]!==false;
+const locked=it=>!!layerLock[layerOf(it)];
+const rank=k=>layerOrder.length-1-layerOrder.indexOf(k);
+const zOf=it=>it.z||0;
+const stackCmp=(a,b)=>(rank(layerOf(a))-rank(layerOf(b)))||(zOf(a)-zOf(b));
+const sn=v=>snap?Math.round(v):v;
+function el(t,a){const n=document.createElementNS(NS,t);for(const k in a)n.setAttribute(k,a[k]);return n;}
+function toM(e){const p=svg.createSVGPoint();p.x=e.clientX;p.y=e.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+function toLocal(it,X,Y){const a=(it.r||0)*Math.PI/180,dx=m2px(X)-it.px,dy=m2px(Y)-it.py;return[dx*Math.cos(a)+dy*Math.sin(a),-dx*Math.sin(a)+dy*Math.cos(a)];}
+function toWorld(it,lx,ly){const a=(it.r||0)*Math.PI/180;return[px2m(it.px+lx*Math.cos(a)-ly*Math.sin(a)),px2m(it.py+lx*Math.sin(a)+ly*Math.cos(a))];}
+const newId=()=>"i"+Date.now().toString(36)+Math.random().toString(36).slice(2,6);
+function saveLayers(){try{localStorage.setItem("planner-lagen",JSON.stringify({on:layerOn,lock:layerLock,photo:showPhoto,labels:showLabels}));}catch(e){}}
+function saveHist(){try{sessionStorage.setItem("planner-historiek",JSON.stringify({u:undoStack.slice(-40),r:redoStack.slice(-40)}));}catch(e){}}
+function wantLabel(it,fs,sel,forExport){if(sel||it.shape==="text")return true;if(!showLabels&&!forExport)return false;if(layerOf(it)==="bestaand"||it.shape==="line")return false;if(it.shape==="poly")return true;return (it.name||"").length*fs*.58<=Math.max(it.w,it.l)*1.05;}
+
+/* view */
+function applyImage(){for(const n of [photo,$("paper")]){n.setAttribute("width",imgW());n.setAttribute("height",imgH());}photo.style.display=showPhoto?"":"none";}
+function setVB(){svg.setAttribute("viewBox",`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);}
+function fit(){const r=svg.getBoundingClientRect(),ar=r.width/Math.max(r.height,1);let w=imgW(),h=imgH();if(w/h>ar)h=w/ar;else w=h*ar;vb={x:(imgW()-w)/2,y:(imgH()-h)/2,w,h};fitW=w;setVB();drawAll();}
+function zoomAt(f,cx,cy){const nw=vb.w*f;if(nw<5||nw>fitW*4)return;vb.x=cx-(cx-vb.x)*f;vb.y=cy-(cy-vb.y)*f;vb.w*=f;vb.h*=f;setVB();drawAll();}
+
+/* drawing */
+function shapeEl(it,u,sel){
+  const fill=COLORS[it.color]||"#fff",zone=layerOf(it)==="zones"||it.shape==="poly";
+  const st={stroke:sel?"#fff":(zone?fill:"#111"),"stroke-width":(sel?3:zone?2:1.2)*u};
+  if(it.shape==="line"){const pl=(it.pts||[]).map(q=>px2m(q[0])+","+px2m(q[1])).join(" "),g=el("g",{});
+    if(sel)g.append(el("polyline",{points:pl,fill:"none",stroke:"#fff","stroke-width":it.w+6*u,"stroke-linejoin":"round","stroke-linecap":"round"}));
+    g.append(el("polyline",{points:pl,fill:"none",stroke:fill,"stroke-opacity":.9,"stroke-width":Math.max(it.w,(coarse?8:2)*u),"stroke-linejoin":"round","stroke-linecap":"round"}));return g;}
+  if(it.shape==="poly")return el("polygon",{points:(it.pts||[]).map(q=>px2m(q[0])+","+px2m(q[1])).join(" "),fill,"fill-opacity":.3,...st});
+  if(it.shape==="circle")return el("circle",{r:it.w/2,fill,"fill-opacity":.8,...st});
+  if(it.shape==="text")return el("g",{});
+  return el("rect",{x:-it.w/2,y:-it.l/2,width:it.w,height:it.l,fill,"fill-opacity":.8,...st});
+}
+function labelEl(it,u){const isT=it.shape==="text";const fs=isT?it.w:(it.shape==="poly"||it.shape==="line")?14*u:Math.max(12*u,Math.min(it.w,it.l)*.18);
+  const t=el("text",{x:0,y:0,"text-anchor":"middle","dominant-baseline":"middle","font-size":fs,"font-family":"Manrope,system-ui,sans-serif","font-weight":700,fill:isT?(COLORS[it.color]||"#fff"):"#fff",stroke:"#111","stroke-width":fs*(isT?.12:.2),"paint-order":"stroke",transform:isT?"":`rotate(${-(it.r||0)})`,"pointer-events":isT?"auto":"none"});
+  t.textContent=it.name||"";return t;}
+function drawItems(){
+  gItems.textContent="";const u=unit();
+  for(const [id,it] of Object.entries(items).filter(([,it])=>vis(it)).sort((a,b)=>stackCmp(a[1],b[1]))){
+    const sel=id===selected,lk=locked(it);
+    const g=el("g",{transform:`translate(${px2m(it.px)} ${px2m(it.py)}) rotate(${it.r||0})`,"data-id":id,style:lk?"pointer-events:none":"cursor:move"});
+    g.append(shapeEl(it,u,sel));const lb=labelEl(it,u);if(wantLabel(it,+lb.getAttribute("font-size"),sel))g.append(lb);gItems.append(g);
+  }
+  drawHandles();
+}
+function drawHandles(){
+  gH.textContent="";const it=items[selected];if(!it||!vis(it)||locked(it)||tool!=="select")return;const u=unit(),hs=(coarse?13:8)*u;
+  const H=(x,y,a)=>gH.append(el("circle",{cx:x,cy:y,r:hs,fill:"#fff",stroke:"#2e6fb3","stroke-width":2*u,...a}));
+  if(it.shape==="poly"||it.shape==="line")(it.pts||[]).forEach((q,i)=>{const [x,y]=toWorld(it,q[0],q[1]);H(x,y,{"data-h":"vtx","data-i":i});});
+  if(it.shape==="rect"){const hw=m2px(it.w/2),hl=m2px(it.l/2);[[-1,-1],[1,-1],[1,1],[-1,1]].forEach(([sx,sy],i)=>{const [x,y]=toWorld(it,sx*hw,sy*hl);
+    gH.append(el("rect",{x:x-hs*.8,y:y-hs*.8,width:hs*1.6,height:hs*1.6,fill:"#fff",stroke:"#2e6fb3","stroke-width":2*u,"data-h":"rs","data-i":i}));});}
+  if(it.shape==="circle"){const [x,y]=toWorld(it,m2px(it.w/2),0);H(x,y,{"data-h":"rad"});}
+}
+function drawGrid(){gGrid.textContent="";if(!snap)return;const u=unit(),c=showPhoto?"#fff":"#556",step=vb.w>250?10:vb.w>80?5:1;
+  for(let x=0;x<=imgW();x+=step)gGrid.append(el("line",{x1:x,y1:0,x2:x,y2:imgH(),stroke:c,"stroke-opacity":x%50===0?.5:.18,"stroke-width":u}));
+  for(let y=0;y<=imgH();y+=step)gGrid.append(el("line",{x1:0,y1:y,x2:imgW(),y2:y,stroke:c,"stroke-opacity":y%50===0?.5:.18,"stroke-width":u}));}
+function drawDraft(){
+  gDraft.textContent="";const u=unit();
+  if(draft){const s=draft.pts.map(p=>p.x+","+p.y).join(" ");
+    if(draft.type==="poly"&&draft.pts.length>2)gDraft.append(el("polygon",{points:s,fill:"#2e6fb3","fill-opacity":.2,stroke:"none"}));
+    gDraft.append(el("polyline",{points:s,fill:"none",stroke:"#6aa8ea","stroke-width":3*u,"stroke-dasharray":`${8*u} ${5*u}`}));
+    draft.pts.forEach(p=>gDraft.append(el("circle",{cx:p.x,cy:p.y,r:(coarse?8:5)*u,fill:"#fff",stroke:"#2e6fb3","stroke-width":2*u})));}
+  const pts=tool==="calibrate"?calPts:tool==="measure"?measurePts:[],col=tool==="calibrate"?"#4fc3f7":"#ffd23f";
+  pts.forEach(p=>gDraft.append(el("circle",{cx:p.x,cy:p.y,r:(coarse?8:5)*u,fill:col,stroke:"#111","stroke-width":u})));
+  if(pts.length===2){const [a,b]=pts;gDraft.append(el("line",{x1:a.x,y1:a.y,x2:b.x,y2:b.y,stroke:col,"stroke-width":3*u,"stroke-dasharray":`${8*u} ${5*u}`}));
+    if(tool==="measure"){const d=Math.hypot(b.x-a.x,b.y-a.y),fs=16*u,t=el("text",{x:(a.x+b.x)/2,y:(a.y+b.y)/2-12*u,"text-anchor":"middle","font-size":fs,"font-family":"Manrope,sans-serif","font-weight":700,fill:"#fff",stroke:"#111","stroke-width":fs*.2,"paint-order":"stroke"});t.textContent=`${fmt(d)} m`;gDraft.append(t);$("drawTxt").textContent=`Afstand: ${fmt(d)} m`;}}
+}
+function drawAll(){drawGrid();drawItems();drawDraft();}
+
+/* metrics */
+function lineLen(it){const P=it.pts||[];let L=0;for(let i=1;i<P.length;i++)L+=Math.hypot(P[i][0]-P[i-1][0],P[i][1]-P[i-1][1]);return L*mpp;}
+function area(it){if(it.shape==="poly"){const P=it.pts||[];let a=0;for(let i=0;i<P.length;i++){const [x1,y1]=P[i],[x2,y2]=P[(i+1)%P.length];a+=x1*y2-x2*y1;}return Math.abs(a)/2*mpp*mpp;}return it.shape==="circle"?Math.PI*(it.w/2)**2:it.shape==="rect"?it.w*it.l:0;}
+function dims(it){return it.shape==="line"?`${fmt(lineLen(it))} m`:it.shape==="poly"?`${fmt(area(it))} m²`:it.shape==="circle"?`Ø ${fmt(it.w)} m`:it.shape==="text"?"tekst":`${fmt(it.w)}×${fmt(it.l)} m`;}
+
+/* server */
+const setSave=t=>$("saveState").textContent=t;
+async function api(method,path,body){
+  const r=await fetch(path,{method,headers:body!==undefined?{"content-type":"application/json"}:{},body:body!==undefined?JSON.stringify(body):undefined,credentials:"same-origin",cache:"no-store"});
+  if(r.status===401){location.href="/planner/login";throw new Error("login");}
+  if(!r.ok)throw new Error("http "+r.status);return r.json();}
+const saveTimers={};
+function persist(id){pending.add(id);clearTimeout(saveTimers[id]);setSave("opslaan…");saveTimers[id]=setTimeout(async()=>{
+  try{if(items[id])await api("PUT","/api/planner/items/"+encodeURIComponent(id),items[id]);setSave("opgeslagen");}catch(e){setSave("niet opgeslagen, controleer je internet");}finally{pending.delete(id);}},350);}
+async function delDoc(id){try{await api("DELETE","/api/planner/items/"+encodeURIComponent(id));setSave("opgeslagen");}catch(e){setSave("verwijderen mislukt");}}
+async function saveSetting(k,v){try{await api("PUT","/api/planner/settings/"+k,v);}catch(e){}}
+let since=0;
+async function pull(){
+  try{const d=await api("GET","/api/planner/data"+(since?"?since="+since:""));since=d.now;
+    let changed=false;
+    for(const [id,v] of Object.entries(d.items||{})){if(pending.has(id)||(act&&act.id===id))continue;
+      if(v===null){if(items[id]){delete items[id];changed=true;}}else if(JSON.stringify(items[id])!==JSON.stringify(v)){items[id]=v;changed=true;}}
+    const s=d.settings||{};
+    if(typeof s.mpp==="number"&&s.mpp>0&&Math.abs(s.mpp-mpp)>1e-9){mpp=s.mpp;applyImage();renderScale();fit();changed=true;}
+    if(Array.isArray(s.order)&&s.order.length===3&&s.order.join()!==layerOrder.join()){layerOrder=[...s.order];changed=true;}
+    if(selected&&!items[selected])selected=null;
+    if(changed)refresh();if(!pending.size&&$("saveState").textContent.startsWith("laden"))setSave("klaar");
+  }catch(e){if(e.message!=="login")setSave("geen verbinding");}
+}
+
+/* history */
+function checkpoint(){undoStack.push(JSON.stringify(items));if(undoStack.length>60)undoStack.shift();redoStack=[];saveHist();}
+function syncDiff(prev){for(const id of new Set([...Object.keys(prev),...Object.keys(items)])){if(!items[id])delDoc(id);else if(JSON.stringify(prev[id])!==JSON.stringify(items[id]))persist(id);}}
+function undo(){if(!undoStack.length)return;const prev=items;redoStack.push(JSON.stringify(items));items=JSON.parse(undoStack.pop());if(selected&&!items[selected])selected=null;syncDiff(prev);saveHist();refresh();}
+function redo(){if(!redoStack.length)return;const prev=items;undoStack.push(JSON.stringify(items));items=JSON.parse(redoStack.pop());if(selected&&!items[selected])selected=null;syncDiff(prev);saveHist();refresh();}
+function refresh(){renderInspector();renderLayers();drawAll();for(const b of [$("undoBtn"),$("undoNav")])b.disabled=!undoStack.length;$("redoBtn").disabled=!redoStack.length;}
+
+/* panel views (phone = one section in a sheet) */
+const isPhone=()=>phoneMq.matches;
+function openView(v){view=v;document.body.classList.toggle("phone",isPhone());
+  document.querySelectorAll(".sec").forEach(s=>s.classList.toggle("show",s.dataset.view===v));
+  document.querySelectorAll(".bottomnav [data-open]").forEach(b=>b.classList.toggle("on",b.dataset.open===v));
+  $("panel").classList.toggle("closed",isPhone()&&!v);$("panel").classList.toggle("editing",v==="edit");}
+document.querySelectorAll(".bottomnav [data-open]").forEach(b=>b.onclick=()=>openView(view===b.dataset.open?null:b.dataset.open));
+phoneMq.addEventListener("change",()=>{openView(view);setTimeout(()=>{fit();},50);});
+
+/* inspector */
+function renderInspector(){
+  const it=items[selected];$("secEdit").hidden=!it&&!isPhone();
+  if(!it){if(view==="edit")openView(null);return;}
+  const set=(id,v)=>{if(document.activeElement!==$(id))$(id).value=v;};
+  set("pName",it.name||"");set("pLayer",layerOf(it));set("pW",it.w);set("pL",it.l);set("pD",it.w);
+  $("fRect").hidden=it.shape!=="rect";$("fOne").hidden=!(it.shape==="circle"||it.shape==="line"||it.shape==="text");
+  $("rotBtns").hidden=it.shape==="circle";
+  $("pDlab").textContent=it.shape==="line"?"Breedte weg (m)":it.shape==="text"?"Tekstgrootte (m)":"Diameter (m)";
+  $("swatches").querySelectorAll(".swatch").forEach(s=>s.classList.toggle("on",s.dataset.c===it.color));
+  const lk=locked(it);
+  $("pInfo").textContent=(it.shape==="line"?`Lengte ${fmt(lineLen(it))} m`:it.shape==="text"?"":`Oppervlakte ${fmt(area(it))} m²`)+(lk?" · deze laag staat op slot (zie Lagen)":"")+((it.shape==="poly"||it.shape==="line")&&!lk?" · sleep de witte bolletjes om de vorm te veranderen":"");
+  document.querySelectorAll("#secEdit input,#secEdit .swatch,#rotBtns button,#actBtns button").forEach(x=>x.disabled=lk);
+  resetDel(lk);
+}
+Object.entries(COLORS).forEach(([k,v])=>{const b=document.createElement("button");b.className="swatch";b.dataset.c=k;b.style.background=v;b.title=k;b.setAttribute("aria-label",k);
+  b.onclick=()=>{const it=items[selected];if(!it||locked(it))return;checkpoint();it.color=k;persist(selected);refresh();};$("swatches").append(b);});
+let editCp=false;
+function onEdit(){const it=items[selected];if(!it||locked(it))return;if(!editCp){checkpoint();editCp=true;}
+  const num=(id,min)=>{const v=parseFloat(String($(id).value).replace(",","."));return isFinite(v)&&v>=min?v:null;};
+  it.name=$("pName").value;
+  if(it.shape==="rect"){const w=num("pW",.2),l=num("pL",.2);if(w)it.w=w;if(l)it.l=l;}else{const d=num("pD",.2);if(d){it.w=d;it.l=d;}}
+  persist(selected);renderLayers();drawItems();}
+["pName","pW","pL","pD"].forEach(id=>{$(id).addEventListener("input",onEdit);$(id).addEventListener("blur",()=>editCp=false);});
+function rotate(d){const it=items[selected];if(!it||locked(it))return;checkpoint();it.r=(((it.r||0)+d)%360+360)%360;persist(selected);refresh();}
+$("rotL").onclick=()=>rotate(-15);$("rotR").onclick=()=>rotate(15);
+$("pLayer").onchange=()=>{const it=items[selected];if(!it)return;checkpoint();it.layer=$("pLayer").value;persist(selected);refresh();};
+$("dupBtn").onclick=duplicate;
+function duplicate(){const it=items[selected];if(!it)return;const c=JSON.parse(JSON.stringify(it));c.px+=m2px(4);c.py+=m2px(4);if(layerOf(c)==="bestaand")c.layer="elementen";addItem(c);}
+function restack(dir){const it=items[selected];if(!it||locked(it))return;const zs=Object.values(items).filter(o=>o!==it&&layerOf(o)===layerOf(it)).map(zOf);
+  checkpoint();it.z=dir>0?(zs.length?Math.max(...zs)+1:1):(zs.length?Math.min(...zs)-1:-1);persist(selected);refresh();}
+$("fwdBtn").onclick=()=>restack(1);$("backBtn").onclick=()=>restack(-1);
+$("doneBtn").onclick=()=>{selected=null;refresh();openView(null);};
+function resetDel(lk){const a=$("delArea");a.textContent="";const b=document.createElement("button");b.className="btn danger";b.textContent="Verwijderen";b.disabled=!!lk;
+  b.onclick=()=>{a.textContent="";const c=document.createElement("div");c.className="confirm";const y=document.createElement("button");y.className="btn danger";y.textContent="Ja, verwijderen";y.onclick=removeSelected;
+    const n=document.createElement("button");n.className="btn";n.textContent="Nee";n.onclick=()=>resetDel(false);c.append(y,n);a.append(c);};a.append(b);}
+function removeSelected(){const id=selected;if(!id||!items[id]||locked(items[id]))return;checkpoint();delete items[id];selected=null;delDoc(id);refresh();openView(null);}
+function select(id,center){selected=id;refresh();if(isPhone()&&id){openView("edit");requestAnimationFrame(()=>ensureVisible(id));}
+  if(center&&items[id]){const it=items[id];vb.x=px2m(it.px)-vb.w/2;vb.y=px2m(it.py)-vb.h/2;setVB();drawAll();}}
+
+/* layers */
+function moveLayer(k,d){const i=layerOrder.indexOf(k),j=i+d;if(j<0||j>=layerOrder.length)return;[layerOrder[i],layerOrder[j]]=[layerOrder[j],layerOrder[i]];saveSetting("order",layerOrder);refresh();}
+function renderLayers(){
+  const L=$("layers");L.textContent="";
+  const row=(name,icon,on,onEye,extra)=>{const r=document.createElement("div");r.className="layer";
+    const e=document.createElement("button");e.className="ico"+(on?"":" off");e.innerHTML=svgIcon(icon);e.setAttribute("aria-label",(on?"Verberg ":"Toon ")+name);e.onclick=onEye;
+    const n=document.createElement("span");n.className="nm";n.textContent=name;r.append(e,n);if(extra)extra(r);L.append(r);};
+  row("Luchtfoto","photo",showPhoto,()=>{showPhoto=!showPhoto;applyImage();saveLayers();renderLayers();drawGrid();});
+  row("Namen op kaart","text",showLabels,()=>{showLabels=!showLabels;saveLayers();refresh();});
+  layerOrder.forEach((k,idx)=>{
+    row(LAYERS[k],"eye",layerOn[k],()=>{layerOn[k]=!layerOn[k];saveLayers();if(selected&&items[selected]&&!vis(items[selected]))selected=null;refresh();},r=>{
+      const mk=(ic,lbl,fn,dis)=>{const b=document.createElement("button");b.className="ico";b.innerHTML=svgIcon(ic);b.setAttribute("aria-label",lbl);b.title=lbl;if(dis){b.disabled=true;b.style.opacity=".2";}b.onclick=fn;return b;};
+      r.append(mk("up",LAYERS[k]+" hoger leggen",()=>moveLayer(k,-1),idx===0),mk("down",LAYERS[k]+" lager leggen",()=>moveLayer(k,1),idx===layerOrder.length-1));
+      const l=mk(layerLock[k]?"lock":"unlock",layerLock[k]?"Ontgrendelen":"Vergrendelen",()=>{layerLock[k]=!layerLock[k];saveLayers();refresh();});if(layerLock[k])l.classList.add("lockon");r.append(l);});
+    const box=document.createElement("div");box.className="children";
+    Object.entries(items).filter(([,it])=>layerOf(it)===k).sort((a,b)=>(zOf(b[1])-zOf(a[1]))||(a[1].name||"").localeCompare(b[1].name||"")).forEach(([id,it])=>{
+      const b=document.createElement("button");b.className="child"+(id===selected?" on":"");if(!layerOn[k])b.style.opacity=".45";
+      const n=document.createElement("span");n.textContent=it.name||"(zonder naam)";const d=document.createElement("span");d.className="dim";d.textContent=dims(it);b.append(n,d);
+      b.onclick=()=>select(id,true);box.append(b);});
+    L.append(box);});
+}
+
+/* add */
+function visibleBottom(){const r=svg.getBoundingClientRect();if(!isPhone())return r.bottom;const pr=$("panel").getBoundingClientRect();return $("panel").classList.contains("closed")?r.bottom:Math.min(r.bottom,pr.top);}
+function viewCenter(){const r=svg.getBoundingClientRect(),u=unit();const sy=isPhone()?(r.top+Math.min(r.height,r.height*.56))/2+r.top/2:r.top+r.height/2;return{x:vb.x+vb.w/2,y:vb.y+(Math.min(sy,r.top+r.height*.28+40)-r.top)*u};}
+function ensureVisible(id){const it=items[id];if(!it||!isPhone())return;const r=svg.getBoundingClientRect(),u=unit(),bottom=visibleBottom()-30,top=r.top+20;
+  const sy=r.top+(px2m(it.py)-vb.y)/u;if(sy>bottom||sy<top){vb.y=px2m(it.py)-((top+bottom)/2-r.top)*u;setVB();drawAll();}}
+function addItem(it){checkpoint();const id=newId();items[id]=it;persist(id);select(id,false);return id;}
+LIB.forEach(o=>{const b=document.createElement("button");b.className="tile";
+  const sw=document.createElement("span");sw.className="sw";sw.style.background=COLORS[o.color];if(o.shape==="circle")sw.style.borderRadius="50%";
+  const t=document.createElement("span");const bb=document.createElement("b");bb.textContent=o.label;const sm=document.createElement("small");sm.textContent=o.shape==="circle"?`Ø ${fmt(o.w)} m`:o.shape==="text"?"label op de kaart":`${fmt(o.w)} × ${fmt(o.l)} m`;t.append(bb,sm);b.append(sw,t);
+  b.onclick=()=>{const c=viewCenter();const n=Object.values(items).filter(i=>i.kind===o.kind).length;
+    addItem({kind:o.kind,layer:"elementen",name:o.shape==="text"?"Tekst":o.kind==="stand"?"Stand "+(n+1):o.label,shape:o.shape,w:o.w,l:o.l,r:0,color:o.color,px:r1(m2px(c.x)),py:r1(m2px(c.y))});};
+  $("lib").append(b);});
+
+/* drawing modes */
+function setTool(t){tool=t;if(t!=="poly"&&t!=="line")draft=null;if(t!=="measure")measurePts=[];if(t!=="calibrate"){calPts=[];$("calForm").hidden=true;}
+  const bar=$("drawBar");bar.hidden=t==="select";
+  $("drawOk").hidden=!(t==="poly"||t==="line");
+  $("drawTxt").textContent=t==="poly"?"Tik de hoeken van de zone":t==="line"?"Tik de punten van het pad":t==="measure"?"Tik twee punten":t==="calibrate"?"Tik twee punten met een gekende afstand":"";
+  $("drawCancel").textContent=t==="measure"?"Sluiten":"Annuleren";
+  svg.style.cursor=t==="select"?"default":"crosshair";drawAll();}
+$("drawZone").onclick=()=>{selected=null;draft={type:"poly",pts:[]};setTool("poly");openView(null);};
+$("drawPath").onclick=()=>{selected=null;draft={type:"line",pts:[]};setTool("line");openView(null);};
+$("drawOk").onclick=finishDraft;
+$("drawCancel").onclick=()=>{draft=null;setTool("select");};
+function finishDraft(){if(!draft)return;const P=draft.pts,isPoly=draft.type==="poly";
+  if(P.length<(isPoly?3:2)){$("drawTxt").textContent=isPoly?"Tik minstens 3 hoeken":"Tik minstens 2 punten";return;}
+  const cx=P.reduce((s,p)=>s+p.x,0)/P.length,cy=P.reduce((s,p)=>s+p.y,0)/P.length,pc=[m2px(cx),m2px(cy)];
+  const it={kind:isPoly?"zone":"weg",layer:isPoly?"zones":"elementen",name:isPoly?"Nieuwe zone":"Nieuw pad",shape:draft.type,w:isPoly?0:4,l:isPoly?0:4,r:0,color:isPoly?"paars":"grijs",px:r1(pc[0]),py:r1(pc[1]),pts:P.map(p=>[r1(m2px(p.x)-pc[0]),r1(m2px(p.y)-pc[1])])};
+  draft=null;setTool("select");addItem(it);}
+$("measureBtn").onclick=()=>{setTool("measure");openView(null);};
+$("gridBtn").onclick=()=>{snap=!snap;$("gridBtn").textContent=snap?"Raster uit":"Raster aan";drawGrid();};
+$("calBtn").onclick=()=>{setTool("calibrate");openView(null);};
+$("calOk").onclick=()=>{const real=parseFloat(String($("calM").value).replace(",","."));if(calPts.length!==2||!(real>0))return;const [a,b]=calPts;mpp=real/(Math.hypot(b.x-a.x,b.y-a.y)/mpp);applyImage();renderScale();setTool("select");fit();saveSetting("mpp",mpp);};
+function renderScale(){$("scaleTxt").textContent=`1 pixel van de luchtfoto = ${(mpp*100).toFixed(1)} cm. Geijkt op de schaalbalk van Geopunt. Meet je ter plaatse een afstand na, dan kan je hier opnieuw ijken.`;}
+
+/* pointer */
+const pointers=new Map();let pinch=null,downAt=null;
+svg.addEventListener("pointerdown",e=>{
+  svg.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={d:Math.hypot(a.x-b.x,a.y-b.y),mx:(a.x+b.x)/2,my:(a.y+b.y)/2};if(act&&act.moved===false&&act.type!=="pan")undoStack.pop();act=null;return;}
+  const p=toM(e),X=sn(p.x),Y=sn(p.y);downAt={x:e.clientX,y:e.clientY,t:Date.now()};
+  if(tool==="measure"||tool==="calibrate"||tool==="poly"||tool==="line"){act={type:"tap",x:X,y:Y,sx:e.clientX,sy:e.clientY,vx:vb.x,vy:vb.y};return;}
+  const h=e.target.getAttribute&&e.target.getAttribute("data-h");
+  if(h&&items[selected]){checkpoint();act={type:h,i:+(e.target.getAttribute("data-i")||0),id:selected,moved:false};return;}
+  const g=e.target.closest&&e.target.closest("[data-id]");
+  if(g){const id=g.getAttribute("data-id"),it=items[id];if(selected!==id)select(id,false);
+    checkpoint();act={type:"move",id,ox:p.x-px2m(it.px),oy:p.y-px2m(it.py),moved:false};return;}
+  act={type:"pan",sx:e.clientX,sy:e.clientY,vx:vb.x,vy:vb.y,moved:false};
+});
+svg.addEventListener("pointermove",e=>{
+  const p=toM(e);$("coords").textContent=`x ${fmt(p.x)} m · y ${fmt(p.y)} m`;
+  if(pointers.has(e.pointerId))pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(pinch&&pointers.size===2){const [a,b]=[...pointers.values()],d=Math.hypot(a.x-b.x,a.y-b.y),mx=(a.x+b.x)/2,my=(a.y+b.y)/2,u=unit();
+    vb.x-=(mx-pinch.mx)*u;vb.y-=(my-pinch.my)*u;pinch.mx=mx;pinch.my=my;const c=toM({clientX:mx,clientY:my});zoomAt(pinch.d/d,c.x,c.y);pinch.d=d;return;}
+  if(!act)return;
+  const X=sn(p.x),Y=sn(p.y),it=items[act.id];
+  if(act.type==="tap"||act.type==="pan"){const dist=Math.hypot(e.clientX-act.sx,e.clientY-act.sy);if(act.type==="tap"&&dist<8)return;
+    if(act.type==="tap")act.type="pan";const u=unit();vb.x=act.vx-(e.clientX-act.sx)*u;vb.y=act.vy-(e.clientY-act.sy)*u;act.moved=true;setVB();return;}
+  if(!it)return;
+  if(act.type==="move"){it.px=m2px(sn(p.x-act.ox));it.py=m2px(sn(p.y-act.oy));}
+  else if(act.type==="vtx"&&it.pts){it.pts[act.i]=toLocal(it,X,Y).map(r1);}
+  else if(act.type==="rs"){const [lx,ly]=toLocal(it,X,Y);it.w=Math.max(.2,r1(Math.abs(px2m(lx))*2));it.l=Math.max(.2,r1(Math.abs(px2m(ly))*2));}
+  else if(act.type==="rad"){it.w=it.l=Math.max(.2,r1(Math.hypot(X-px2m(it.px),Y-px2m(it.py))*2));}
+  act.moved=true;drawItems();if(act.type!=="move")renderInspector();
+});
+function up(e){
+  pointers.delete(e.pointerId);if(pointers.size<2)pinch=null;if(!act)return;const a=act;act=null;
+  if(a.type==="tap"){
+    if(tool==="measure"){if(measurePts.length>=2)measurePts=[];measurePts.push({x:a.x,y:a.y});drawDraft();}
+    else if(tool==="calibrate"){if(calPts.length>=2)calPts=[];calPts.push({x:a.x,y:a.y});drawDraft();if(calPts.length===2){openView("more");document.querySelector("#secMore details").open=true;$("calForm").hidden=false;}}
+    else if(draft){draft.pts.push({x:a.x,y:a.y});drawDraft();}
+    return;}
+  if(a.type==="pan"){if(!a.moved&&selected){selected=null;refresh();if(view==="edit")openView(null);}return;}
+  if(!a.moved){undoStack.pop();saveHist();return;}
+  const it=items[a.id];if(it){it.px=r1(it.px);it.py=r1(it.py);persist(a.id);refresh();}
+}
+svg.addEventListener("pointerup",up);svg.addEventListener("pointercancel",up);
+svg.addEventListener("dblclick",e=>{
+  if(tool==="poly"||tool==="line"){if(draft&&draft.pts.length>1){const a=draft.pts.at(-1),b=draft.pts.at(-2);if(Math.hypot(a.x-b.x,a.y-b.y)<.05)draft.pts.pop();}finishDraft();return;}
+  if(tool!=="select")return;const it=items[selected];if(!it||!it.pts||locked(it))return;
+  const h=e.target.getAttribute&&e.target.getAttribute("data-h");
+  if(h==="vtx"){if(it.pts.length>(it.shape==="poly"?3:2)){checkpoint();it.pts.splice(+e.target.getAttribute("data-i"),1);persist(selected);refresh();}return;}
+  const g=e.target.closest&&e.target.closest("[data-id]");if(!g||g.getAttribute("data-id")!==selected)return;
+  const p=toM(e),q=toLocal(it,p.x,p.y),P=it.pts,n=it.shape==="poly"?P.length:P.length-1;let best=1e18,bi=0;
+  for(let i=0;i<n;i++){const A=P[i],B=P[(i+1)%P.length],vx=B[0]-A[0],vy=B[1]-A[1],L=vx*vx+vy*vy||1,t=Math.max(0,Math.min(1,((q[0]-A[0])*vx+(q[1]-A[1])*vy)/L)),d=Math.hypot(A[0]+t*vx-q[0],A[1]+t*vy-q[1]);if(d<best){best=d;bi=i;}}
+  checkpoint();P.splice(bi+1,0,q.map(r1));persist(selected);refresh();
+});
+svg.addEventListener("wheel",e=>{e.preventDefault();const p=toM(e),dy=Math.max(-60,Math.min(60,e.deltaMode===1?e.deltaY*16:e.deltaY));zoomAt(Math.exp(dy*.0012),p.x,p.y);},{passive:false});
+$("zin").onclick=()=>zoomAt(.75,vb.x+vb.w/2,vb.y+vb.h/2);$("zout").onclick=()=>zoomAt(1/.75,vb.x+vb.w/2,vb.y+vb.h/2);$("zfit").onclick=fit;
+window.addEventListener("resize",()=>{const r=svg.getBoundingClientRect(),cx=vb.x+vb.w/2,cy=vb.y+vb.h/2;vb.h=vb.w*r.height/Math.max(r.width,1);vb.y=cy-vb.h/2;vb.x=cx-vb.w/2;setVB();drawAll();});
+
+/* keyboard (desktop) */
+document.addEventListener("keydown",e=>{
+  const typing=/INPUT|SELECT|TEXTAREA/.test(document.activeElement.tagName),k=e.key.toLowerCase();
+  if(e.key==="Escape"){draft=null;setTool("select");if(typing)document.activeElement.blur();return;}
+  if(typing)return;
+  if((e.ctrlKey||e.metaKey)&&k==="z"){e.preventDefault();e.shiftKey?redo():undo();return;}
+  if((e.ctrlKey||e.metaKey)&&k==="y"){e.preventDefault();redo();return;}
+  if(e.key==="Enter"&&draft){finishDraft();return;}
+  if((e.key==="Delete"||e.key==="Backspace")&&selected){e.preventDefault();removeSelected();return;}
+  if(e.key.startsWith("Arrow")&&selected&&items[selected]&&!locked(items[selected])){e.preventDefault();const it=items[selected],s=m2px(e.shiftKey?5:.5);checkpoint();
+    if(e.key==="ArrowLeft")it.px-=s;if(e.key==="ArrowRight")it.px+=s;if(e.key==="ArrowUp")it.py-=s;if(e.key==="ArrowDown")it.py+=s;it.px=r1(it.px);it.py=r1(it.py);persist(selected);drawItems();}
+});
+$("undoBtn").onclick=undo;$("undoNav").onclick=undo;$("redoBtn").onclick=redo;
+
+/* export */
+function loadImg(){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src="/planner/kaart.jpg";});}
+async function renderCanvas(){
+  const S=2,img=await loadImg(),c=document.createElement("canvas");c.width=IMG_W*S;c.height=IMG_H*S;const x=c.getContext("2d");
+  if(showPhoto)x.drawImage(img,0,0,c.width,c.height);else{x.fillStyle="#f4f3ee";x.fillRect(0,0,c.width,c.height);}
+  const k=S/mpp;
+  for(const it of Object.values(items).filter(vis).sort(stackCmp)){
+    const col=COLORS[it.color]||"#fff",zone=layerOf(it)==="zones"||it.shape==="poly";
+    x.save();x.translate(it.px*S,it.py*S);x.rotate((it.r||0)*Math.PI/180);x.beginPath();
+    if(it.shape==="line"){x.globalAlpha=.9;x.strokeStyle=col;x.lineWidth=Math.max(it.w*k,2*S);x.lineJoin=x.lineCap="round";(it.pts||[]).forEach((q,i)=>i?x.lineTo(q[0]*S,q[1]*S):x.moveTo(q[0]*S,q[1]*S));x.stroke();x.globalAlpha=1;}
+    else if(it.shape!=="text"){if(it.shape==="poly"){(it.pts||[]).forEach((q,i)=>i?x.lineTo(q[0]*S,q[1]*S):x.moveTo(q[0]*S,q[1]*S));x.closePath();}
+      else if(it.shape==="circle")x.arc(0,0,it.w/2*k,0,Math.PI*2);else x.rect(-it.w/2*k,-it.l/2*k,it.w*k,it.l*k);
+      x.fillStyle=col;x.globalAlpha=zone?.3:.8;x.fill();x.globalAlpha=1;x.strokeStyle=zone?col:"#111";x.lineWidth=(zone?2:1.5)*S;x.stroke();}
+    const isT=it.shape==="text";if(!isT)x.rotate(-(it.r||0)*Math.PI/180);
+    const fs=isT?it.w*k:(it.shape==="poly"||it.shape==="line")?13*S:Math.max(11*S,Math.min(it.w,it.l)*k*.16);
+    if(!wantLabel(it,fs/k,false,true)){x.restore();continue;}
+    x.font=`700 ${fs}px Manrope, Helvetica, sans-serif`;x.textAlign="center";x.textBaseline="middle";x.lineJoin="round";
+    x.lineWidth=fs*(isT?.14:.22);x.strokeStyle="#111";x.strokeText(it.name||"",0,0);x.fillStyle=isT?col:"#fff";x.fillText(it.name||"",0,0);x.restore();}
+  return c;
+}
+function download(name,blob){const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},2000);$("exportMsg").textContent="Gedownload: "+name;}
+const stamp=()=>new Date().toISOString().slice(0,10);
+$("pngBtn").onclick=async()=>{$("exportMsg").textContent="Afbeelding maken…";const c=await renderCanvas();c.toBlob(b=>download(`wild-wheels-terreinplan-${stamp()}.png`,b),"image/png");};
+async function makePdf(){
+  if(!window.jspdf){$("exportMsg").textContent="PDF lukt niet (geen internet?). Probeer Afbeelding.";return;}
+  $("exportMsg").textContent="PDF maken…";const c=await renderCanvas(),pdf=new window.jspdf.jsPDF({orientation:"portrait",unit:"mm",format:"a3"}),PW=297,PH=420,M=12;
+  pdf.setFillColor(31,59,42);pdf.rect(0,0,PW,30,"F");pdf.setTextColor(255,255,255);pdf.setFont("helvetica","bold");pdf.setFontSize(22);pdf.text("Wild & Wheels 2027 — Terreinplan",M,15);
+  pdf.setFont("helvetica","normal");pdf.setFontSize(10.5);pdf.text("Pakawi Park, Balen-Olmen  ·  Rover & Co VZW  ·  Concept ter bespreking  ·  "+new Date().toLocaleDateString("nl-BE"),M,23);
+  let mapW=PW-2*M-8-62,mapH=mapW*IMG_H/IMG_W;const maxH=PH-30-8-M-10;if(mapH>maxH){mapH=maxH;mapW=mapH*IMG_W/IMG_H;}const mx=M,my=38;
+  pdf.addImage(c.toDataURL("image/jpeg",.9),"JPEG",mx,my,mapW,mapH);pdf.setDrawColor(20,24,21);pdf.setLineWidth(.3);pdf.rect(mx,my,mapW,mapH);
+  const lx=mx+mapW+8,lw=PW-M-lx;let y=my+4;pdf.setTextColor(20,24,21);
+  for(const k of layerOrder){const its=Object.values(items).filter(it=>layerOf(it)===k&&vis(it)&&it.shape!=="text").sort((a,b)=>(a.name||"").localeCompare(b.name||"",undefined,{numeric:true}));if(!its.length)continue;
+    pdf.setFont("helvetica","bold");pdf.setFontSize(10.5);pdf.text(LAYERS[k],lx,y);y+=6;pdf.setFontSize(8.5);
+    for(const it of its){if(y>my+mapH-42)break;const hex=(COLORS[it.color]||"#ffffff").slice(1),rgb=[0,2,4].map(i=>parseInt(hex.substr(i,2),16));pdf.setFillColor(...rgb);pdf.setDrawColor(20,24,21);
+      if(it.shape==="line"){pdf.setDrawColor(...rgb);pdf.setLineWidth(1.6);pdf.line(lx,y-1.2,lx+5,y-1.2);pdf.setLineWidth(.3);pdf.setDrawColor(20,24,21);}else if(it.shape==="circle")pdf.circle(lx+2.5,y-1.2,2.3,"FD");else pdf.rect(lx,y-3.5,5,4.5,"FD");
+      pdf.setFont("helvetica","bold");pdf.text(pdf.splitTextToSize(it.name||"",lw-8)[0]||"",lx+8,y);pdf.setFont("helvetica","normal");pdf.setTextColor(91,98,92);
+      pdf.text(it.shape==="line"?`${fmt(lineLen(it))} m lang · ${fmt(it.w)} m breed`:it.shape==="poly"?`${fmt(area(it))} m²`:`${dims(it)} · ${fmt(area(it))} m²`,lx+8,y+4);pdf.setTextColor(20,24,21);y+=10;}
+    y+=3;}
+  const den=Math.round((IMG_W*mpp*1000)/mapW/50)*50;let fy=my+mapH-30;pdf.setFont("helvetica","bold");pdf.setFontSize(10);pdf.text("Schaal",lx,fy);
+  pdf.setFont("helvetica","normal");pdf.setFontSize(8.5);fy+=5;pdf.text(`± 1:${den.toLocaleString("nl-BE")} op A3`,lx,fy);fy+=4;const bar=50*1000/den;
+  for(let i=0;i<5;i++){pdf.setFillColor(...(i%2?[255,255,255]:[20,24,21]));pdf.rect(lx+i*bar/5,fy,bar/5,2,"FD");}
+  {const nx=lx+lw-6,ny=fy-14;pdf.setFillColor(20,24,21);pdf.triangle(nx,ny-8,nx-3,ny,nx+3,ny,"F");pdf.setFont("helvetica","bold");pdf.text("N",nx,ny+5,{align:"center"});pdf.setFont("helvetica","normal");}
+  pdf.text("0",lx,fy+6);pdf.text("50 m",lx+bar,fy+6,{align:"right"});pdf.setFontSize(7.5);pdf.setTextColor(91,98,92);
+  pdf.text("Alle maten in meter. Ter plaatse controleren vóór opbouw.",M,PH-M+2);pdf.text("Ondergrond: Geopunt Vlaanderen (orthofoto, GRB)",PW-M,PH-M+2,{align:"right"});
+  download(`wild-wheels-terreinplan-${stamp()}.pdf`,pdf.output("blob"));
+}
+$("pdfBtn").onclick=makePdf;$("pdfTop").onclick=makePdf;
+
+/* boot */
+applyImage();renderScale();openView(null);setTool("select");refresh();fit();
+pull();setInterval(()=>{if(!document.hidden&&!act)pull();},4000);
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)pull();});
+</script>
+</body>
+</html>

@@ -84,3 +84,11 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - Elk artikel heeft bronnen onderaan (`## Bronnen`). Alleen feiten die in een bron staan.
 - Stand: 31 artikels live in 5 rubrieken (Land Rover in België, Onderhoud, Geschiedenis, Community, Partners).
 - Regels: niets over wetgeving (O-plaat, keuring, bosdecreet, waar je mag rijden), geen claims over hoe Rover & Co rijdt. Dolf Borré schrijft ongeveer 30%, altijd de technische artikels. Info over partners alleen van hun eigen website. Nalees- en meldingsmails gaan naar pieter@roverandco.be.
+
+## Terreinplanner (/planner)
+
+- Tekenprogramma voor het Wild & Wheels-terrein (Pakawi Park), achter een login. Niet geïndexeerd (meta noindex, header `X-Robots-Tag`, `Disallow: /planner` in robots.txt).
+- Pagina: `public/planner/index.html` + luchtfoto `public/planner/kaart.jpg` (Geopunt-export, 1 px = 0,3672 m). Wordt enkel geserveerd met geldige sessie (Worker eerst, zie `run_worker_first`).
+- Worker: `src/planner.js` (login, sessies, API `/api/planner/...`).
+- Opslag: D1-database `roverandco-planner` (binding `PLANNER_DB`). Tabellen: `items` (objecten als JSON, `deleted`-vlag), `settings` (`mpp`, `order`), `users` (PBKDF2-hash, nooit het wachtwoord), `sessions` (365 dagen).
+- Gebruiker toevoegen of wachtwoord wijzigen: nieuwe rij in `users` met salt + PBKDF2-SHA256-hash (100 000 iteraties).

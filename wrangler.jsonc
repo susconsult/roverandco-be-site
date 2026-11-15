@@ -7,9 +7,12 @@
     "binding": "ASSETS",
     "html_handling": "auto-trailing-slash",
     "not_found_handling": "404-page",
-    "run_worker_first": ["/api/*", "/betaald"]
+    "run_worker_first": ["/api/*", "/betaald", "/planner", "/planner/*"]
   },
   // Secrets staan in het Cloudflare-dashboard (niet hier): APPS_SCRIPT_URL, VIVA_CLIENT_ID,
   // VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY. Optioneel VIVA_OMGEVING = "demo".
+  "d1_databases": [
+    { "binding": "PLANNER_DB", "database_name": "roverandco-planner", "database_id": "2f299f3c-3aad-4e03-bf59-251ed2201c97" }
+  ],
   "keep_vars": true
 }

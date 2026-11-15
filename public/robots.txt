@@ -1,3 +1,4 @@
 User-agent: *
 Allow: /
+Disallow: /planner
 Sitemap: https://roverandco.be/sitemap.xml
