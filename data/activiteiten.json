@@ -20,50 +20,6 @@
   "inschrijven_label": "Inschrijven"
  },
  {
-  "slug": "kerstmeeting",
-  "titel": "Kerstmeeting",
-  "datum": "2026-12-13",
-  "datum_label": "Zo 13 dec",
-  "datum_lang": "zondag 13 december 2026",
-  "locatie": "VVV-toren Gerhagen",
-  "uren": "Start 14:30",
-  "kort": "Winterse Land Rover-meeting aan de VVV-toren in Gerhagen. Versier je Land Rover met kerstverlichting.",
-  "kenmerken": [
-   "Gratis deelname",
-   "Kofferbakverkoop €5",
-   "Start 14:30"
-  ],
-  "foto": "977",
-  "foto_alt": "Colonne Defenders in het bos",
-  "omschrijving_html": "<p>Op zondag 13 december sluiten we het jaar af met een kerstmeeting aan de VVV-toren in Gerhagen. We starten om 14:30.</p><p>Versier je Land Rover met kerstverlichting en maak er samen een gezellige winterse namiddag van.</p><h3>Kofferbakverkoop</h3><p>Wil je iets verkopen uit je koffer? Een standplaats kost €5. Je krijgt een sticker die toont dat je mag verkopen. Er zijn beperkte plaatsen.</p><h3>Praktisch</h3><ul><li>Deelnemen is gratis, maar schrijf je wel even in</li><li>Inschrijven kan tot de dag zelf</li><li>Kofferbakverkoop: €5 per standplaats</li></ul>",
-  "inschrijven_url": "",
-  "inschrijven_label": "",
-  "inschrijving": {
-   "open": false,
-   "sluit": "2026-12-13",
-   "wagen": true,
-   "onderdelen": [
-    {
-     "id": "deelname",
-     "naam": "Deelname met je Land Rover",
-     "prijs": 0,
-     "per": "wagen",
-     "max": 5
-    },
-    {
-     "id": "kofferbak",
-     "naam": "Standplaats kofferbakverkoop",
-     "prijs": 5,
-     "per": "wagen",
-     "max": 1,
-     "beperkt": true,
-     "uitleg": "Met sticker die toont dat je mag verkopen"
-    }
-   ]
-  },
-  "verborgen": true
- },
- {
   "slug": "wild-and-wheels",
   "titel": "Wild & Wheels",
   "datum": "2027-05-28",
