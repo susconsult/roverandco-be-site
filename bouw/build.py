@@ -402,17 +402,22 @@ kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten 
 <script>(function(){{
 var basis=JSON.parse(document.getElementById("kal-data").textContent),lijst=document.getElementById("kal-lijst"),filter="alles",alle=basis.slice();
 var MAANDEN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
-var KORT=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+var KORT=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];var DAGEN=["zo","ma","di","wo","do","vr","za"],grid;
+var PIN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>';
+var KAL='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="16" rx="2" fill="none" stroke="currentColor" stroke-width="2"/><path d="M3 10h18M8 3v4M16 3v4" stroke="currentColor" stroke-width="2"/></svg>';
 function el(t,c,x){{var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}}
 function d(s){{var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}}
 function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
   alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons")===!!a.ons)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
-    var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;lijst.append(el("h3","kal-maand",m))}}
-    var r=el(a.link?"a":"div","kal-item"+(a.ons?" ons":""));if(a.link)r.href=a.link;if(!a.ons&&a.link)r.rel="noopener";
-    var dag=el("div","kal-dag");dag.append(el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
-    var t=el("div","kal-tekst");t.append(el("strong",null,a.titel));
-    var sub=a.plaats+(a.einde&&a.einde!==a.datum?" · tot "+d(a.einde).getDate()+" "+KORT[d(a.einde).getMonth()]:"");t.append(el("span",null,sub));if(a.info)t.append(el("p","kal-info",a.info));if(a.org)t.append(el("small","kal-org","Organisatie: "+a.org));
-    r.append(dag,t,el("span","kal-club",a.club));lijst.append(r);n++}});
+    var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;var blok=el("div","kal-blok");blok.append(el("h3","kal-maand",m));grid=el("div","kal-grid");blok.append(grid);lijst.append(blok)}}
+    var r=el(a.link?"a":"div","kal-kaart"+(a.ons?" ons":""));if(a.link){{r.href=a.link;if(!a.ons)r.rel="noopener"}}
+    var dag=el("div","kal-datum");dag.append(el("span","kal-wd",DAGEN[dt.getDay()]),el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
+    var b=el("div","kal-body");b.append(el("div","kal-org",a.org||a.club),el("h4","kal-titel",a.titel));
+    var meta=el("ul","kal-meta");var li=el("li");li.innerHTML=PIN;li.append(a.plaats);meta.append(li);
+    if(a.einde&&a.einde!==a.datum){{var e=d(a.einde),li2=el("li");li2.innerHTML=KAL;li2.append(dt.getDate()+" "+KORT[dt.getMonth()]+" – "+e.getDate()+" "+KORT[e.getMonth()]);meta.append(li2)}}
+    b.append(meta);if(a.info)b.append(el("p","kal-info",a.info));
+    if(a.link)b.append(el("span","kal-meer",a.ons?"Info en inschrijven →":"Meer info bij "+a.club+" ↗"));
+    r.append(dag,b);grid.append(r);n++}});
   if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."))}}
 document.querySelectorAll('input[name=kalf]').forEach(function(i){{i.onchange=function(){{filter=i.value;teken()}}}});
 teken();
