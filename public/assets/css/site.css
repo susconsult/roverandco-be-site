@@ -282,3 +282,6 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .auteur-onder{border-top:1px solid var(--sand-2);margin-top:40px;padding-top:22px}
 .auteur-label{display:block;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin-bottom:10px}
 .fotocredit{font-size:13px;color:var(--muted);margin-top:28px}
+.blogkaart .bk-tekst{padding:20px 24px 24px}
+@media(min-width:880px){.blogkaart.blogkaart-groot .bk-tekst{padding:40px}}
+.blogfilter{margin-top:8px}
