@@ -262,3 +262,19 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .schrijf-mee h3{color:#fff;font-size:28px;margin:0 0 8px}
 .schrijf-mee p{color:#fff;margin:0}
 .schrijf-mee a{color:#fff;text-decoration:underline}
+.blogkaart{display:flex;flex-direction:column;background:var(--white);border-radius:var(--r);overflow:hidden;color:inherit;text-decoration:none;transition:transform .15s,box-shadow .15s;padding:0}
+.blogkaart:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.blogkaart img{width:100%;aspect-ratio:3/2;object-fit:cover;display:block;margin:0}
+.blogkaart>:not(img){padding:0}
+.bk-tekst{padding:18px 22px 22px}
+.bk-tekst h3{font-size:26px;margin:4px 0 8px}
+.bk-tekst p{color:var(--muted);margin:0 0 10px}
+.bk-tekst small{color:var(--muted)}
+.blogkaart-groot{margin-bottom:34px}
+@media(min-width:880px){.blogkaart-groot{display:grid;grid-template-columns:1.4fr 1fr}.blogkaart-groot img{height:100%;aspect-ratio:auto;min-height:340px}.blogkaart-groot .bk-tekst{padding:36px;align-self:center}.blogkaart-groot h3{font-size:40px}}
+.blogfeed{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:22px}
+.blogfeed .blogkaart[hidden]{display:none}
+.blogfilter{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 22px}
+.chip{border:1px solid var(--green);background:transparent;color:var(--green);border-radius:999px;padding:8px 14px;font:600 14px var(--body);cursor:pointer}
+.chip.actief{background:var(--green);color:#fff}
+.blogkaart-groot[hidden]{display:none}

@@ -387,17 +387,42 @@ for a in artikels:
 gepubliceerd = [a for a in artikels if a.get("status") != "concept"]
 
 
-def kaart(a):
-    return (f'<a class="rubriek blogkaart" href="/blog/{a["slug"]}"><img src="/assets/img/{a["foto"]}-s.webp" alt="{e(a["foto_alt"])}" loading="lazy"><div class="eyebrow">{e(a["rubriek"])}</div>'
-            f'<h3>{e(a["titel"])}</h3><p>{e(a["beschrijving"])}</p><small>{e(AUTEURS[a["auteur"]]["naam"])} · {a["minuten"]} min</small></a>')
+def kaart(a, groot=False):
+    return (f'<a class="blogkaart{" blogkaart-groot" if groot else ""}" href="/blog/{a["slug"]}" data-rubriek="{e(a["rubriek"])}">'
+            f'<img src="/assets/img/{a["foto"]}{"" if groot else "-s"}.webp" alt="{e(a["foto_alt"])}" loading="{"eager" if groot else "lazy"}">'
+            f'<div class="bk-tekst"><div class="eyebrow">{e(a["rubriek"])}</div><h3>{e(a["titel"])}</h3><p>{e(a["beschrijving"])}</p>'
+            f'<small>{e(AUTEURS[a["auteur"]]["naam"])} · {nl_datum(a["datum"])} · {a["minuten"]} min lezen</small></div></a>')
 
 
-blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
-blogbody += f'<section style="padding-bottom:0"><div class="wrap"><div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site["email"]}?subject=Artikel%20voor%20de%20blog">{site["email"]}</a>.</p></div></div></section>' 
-for t, d in RUBRIEKEN:
-    lijst = [a for a in gepubliceerd if a["rubriek"] == t]
-    blogbody += f'<section><div class="wrap"><h2>{e(t)}</h2><p>{e(d)}</p><div class="rubrieken">' + (
-        "".join(kaart(a) for a in lijst) or '<div class="rubriek"><div class="eyebrow">Binnenkort</div><p>De eerste artikels verschijnen binnenkort.</p></div>') + "</div></div></section>"
+# Een echte blog: één tijdlijn, nieuwste eerst. Bij dezelfde datum wisselen de rubrieken elkaar af.
+def blogvolgorde(lijst):
+    uit = []
+    for d in sorted({a["datum"] for a in lijst}, reverse=True):
+        dag = [a for a in lijst if a["datum"] == d]
+        per = [sorted([a for a in dag if a["rubriek"] == r], key=lambda a: int(a.get("volgorde", 9))) for r, _ in RUBRIEKEN]
+        for i in range(max((len(x) for x in per), default=0)):
+            uit += [x[i] for x in per if i < len(x)]
+    return uit
+
+
+feed = blogvolgorde(gepubliceerd)
+chips = '<button type="button" class="chip actief" data-filter="">Alles</button>' + "".join(
+    f'<button type="button" class="chip" data-filter="{e(r)}">{e(r)}</button>' for r, _ in RUBRIEKEN)
+blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis, verhalen en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
+blogbody += '<section><div class="wrap">'
+if feed:
+    blogbody += kaart(feed[0], groot=True)
+blogbody += f'<div class="blogfilter" role="group" aria-label="Filter op onderwerp">{chips}</div>'
+blogbody += '<div class="blogfeed">' + "".join(kaart(a) for a in feed[1:]) + '</div>'
+blogbody += f'<div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site["email"]}?subject=Artikel%20voor%20de%20blog">{site["email"]}</a>.</p></div>'
+blogbody += """</div></section>
+<script>
+document.querySelectorAll('.blogfilter .chip').forEach(function(b){b.addEventListener('click',function(){
+  var f=b.getAttribute('data-filter');
+  document.querySelectorAll('.blogfilter .chip').forEach(function(x){x.classList.toggle('actief',x===b)});
+  document.querySelectorAll('.blogfeed .blogkaart, .blogkaart-groot').forEach(function(k){k.hidden=!!f&&k.getAttribute('data-rubriek')!==f});
+})});
+</script>"""
 write("/blog", "Blog", "Artikels over Land Rover-onderhoud, geschiedenis, Land Rover in België (Minerva, ABL), community en partners.", blogbody)
 
 write("/blog/concepten", "Concepten", "Overzicht van de blogconcepten.",
