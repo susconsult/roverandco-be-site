@@ -216,14 +216,22 @@ def weetje_blok():
     data = json.dumps([{"t": w["tekst"], "b": w["bron"]} for w in WEETJES], ensure_ascii=False).replace("</", "<\\/")
     eerste = WEETJES[0]
     return (f'<section class="weetje-sec"><div class="wrap"><div class="weetje">'
-            f'<div class="eyebrow">Wist je dat?</div><p class="weetje-tekst">{e(eerste["tekst"])}</p>'
+            f'<div class="eyebrow">Wist je dat?</div><div class="weetje-vak"><p class="weetje-tekst">{e(eerste["tekst"])}</p>'
+            '<div class="weetje-denk" aria-hidden="true"><svg class="weetje-wiel" viewBox="0 0 48 48"><circle cx="24" cy="24" r="21" fill="none" stroke="currentColor" stroke-width="6" stroke-dasharray="7 4"/>'
+            '<circle cx="24" cy="24" r="11" fill="none" stroke="currentColor" stroke-width="3"/><circle cx="24" cy="24" r="3.5" fill="currentColor"/>'
+            '<path d="M24 13v7M24 28v7M13 24h7M28 24h7" stroke="currentColor" stroke-width="2.5"/></svg>'
+            '<span class="weetje-denktekst">Even in de archieven duiken<i>.</i><i>.</i><i>.</i></span></div></div>'
             f'<div class="weetje-voet"><a class="weetje-bron" href="{e(eerste["bron"])}" rel="noopener">Bron: Wikipedia</a>'
             f'<button type="button" class="btn btn-white weetje-knop">Volgend weetje</button></div></div></div>'
             f'<script type="application/json" class="weetjes-data">{data}</script>'
             '<script>(function(){var s=document.currentScript.parentNode,d=JSON.parse(s.querySelector(".weetjes-data").textContent),'
             'p=s.querySelector(".weetje-tekst"),b=s.querySelector(".weetje-bron"),i=Math.floor(Math.random()*d.length);'
             'function toon(){p.textContent=d[i].t;b.href=d[i].b}toon();'
-            's.querySelector(".weetje-knop").onclick=function(){var n=i;while(d.length>1&&n===i)n=Math.floor(Math.random()*d.length);i=n;toon()}})();</script>'
+            'var w=s.querySelector(".weetje"),k=s.querySelector(".weetje-knop"),T=["Even in de archieven duiken","Even onder de motorkap kijken","Even in het werkplaatsboek bladeren","Even de oude roadbooks nalezen"];'
+            'k.onclick=function(){if(w.classList.contains("denkt"))return;var n=i;while(d.length>1&&n===i)n=Math.floor(Math.random()*d.length);i=n;'
+            's.querySelector(".weetje-denktekst").firstChild.nodeValue=T[Math.floor(Math.random()*T.length)];'
+            'var snel=matchMedia("(prefers-reduced-motion: reduce)").matches;w.classList.add("denkt");k.disabled=true;'
+            'setTimeout(function(){toon();w.classList.remove("denkt");w.classList.add("nieuw");k.disabled=false;setTimeout(function(){w.classList.remove("nieuw")},700)},snel?150:1300)}})();</script>'
             '</section>')
 
 

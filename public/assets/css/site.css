@@ -352,3 +352,21 @@ a.kal-kaart:hover .kal-meer{text-decoration:underline}
 .kal-indienen{background:var(--sand-2)}
 .kal-indienen form{margin-top:16px}
 @media(max-width:600px){.kal-item{display:grid;grid-template-columns:58px 1fr;column-gap:14px;row-gap:6px}.kal-dag{grid-row:span 2}.kal-club{justify-self:start}}
+/* weetje: nadenk-animatie */
+.weetje-vak{position:relative;min-height:2.7em}
+.weetje-vak .weetje-tekst{transition:opacity .25s,transform .25s}
+.weetje-denk{position:absolute;inset:0;display:flex;align-items:center;gap:14px;opacity:0;pointer-events:none;transition:opacity .2s;color:#fff;font-weight:700;font-size:clamp(17px,2vw,21px)}
+.weetje-wiel{width:46px;height:46px;flex:0 0 46px;color:var(--green-light)}
+.weetje-denktekst i{font-style:normal;display:inline-block}
+.weetje.denkt .weetje-tekst{opacity:0;transform:translateY(-6px)}
+.weetje.denkt .weetje-denk{opacity:1}
+.weetje.denkt .weetje-wiel{animation:weetje-rol 1.3s cubic-bezier(.45,.05,.55,.95) both}
+.weetje.denkt .weetje-denktekst i{animation:weetje-punt 1s infinite}
+.weetje.denkt .weetje-denktekst i:nth-child(2){animation-delay:.15s}
+.weetje.denkt .weetje-denktekst i:nth-child(3){animation-delay:.3s}
+.weetje.nieuw .weetje-tekst{animation:weetje-in .55s cubic-bezier(.2,.8,.2,1) both}
+.weetje-knop:disabled{opacity:.6;cursor:wait}
+@keyframes weetje-rol{0%{transform:translateX(-30px) rotate(-200deg);opacity:0}25%{opacity:1}100%{transform:translateX(0) rotate(360deg)}}
+@keyframes weetje-punt{0%,60%,100%{transform:translateY(0);opacity:.4}30%{transform:translateY(-6px);opacity:1}}
+@keyframes weetje-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.weetje.denkt .weetje-wiel,.weetje.denkt .weetje-denktekst i,.weetje.nieuw .weetje-tekst{animation:none}}
