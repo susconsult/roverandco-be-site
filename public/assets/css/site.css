@@ -319,3 +319,28 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .affiche{display:block;border:0;padding:0;background:none;cursor:zoom-in;width:100%}
 .affiche img{display:block;width:100%;border-radius:12px;box-shadow:0 6px 24px rgba(0,0,0,.18)}
 @media(max-width:880px){.ev-side{position:static}.affiche{max-width:420px;margin:0 auto}}
+
+/* wist je dat */
+.weetje-sec{padding-block:20px}
+.weetje{background:var(--green);color:#fff;border-radius:var(--r);padding:clamp(22px,4vw,40px);max-width:900px;margin:0 auto}
+.weetje .eyebrow{color:var(--green-light)}
+.weetje-tekst{font-size:clamp(20px,2.4vw,27px);font-weight:700;line-height:1.35;margin:10px 0 18px;min-height:2.7em}
+.weetje-voet{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.weetje-bron{color:var(--green-light);font-size:14px}
+/* kalender */
+.kal-filter{margin-bottom:22px}
+.kal-lijst{display:flex;flex-direction:column;gap:10px;margin-bottom:18px}
+.kal-maand{font-size:26px;margin:18px 0 4px;text-transform:capitalize}
+.kal-item{display:flex;align-items:center;gap:16px;background:var(--white);border-radius:var(--r);padding:12px 16px;color:inherit;text-decoration:none;border:2px solid transparent}
+.kal-item:hover{border-color:var(--green-light)}
+.kal-item.ons{border-left:6px solid var(--green)}
+.kal-dag{width:58px;flex-shrink:0;text-align:center;line-height:1}
+.kal-dag b{display:block;font-family:"Big Shoulders Display",Impact,sans-serif;font-size:32px}
+.kal-dag span{font-size:13px;text-transform:uppercase;font-weight:700;color:var(--muted)}
+.kal-tekst{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.kal-tekst span{color:var(--muted);font-size:14px}
+.kal-club{font-size:12px;font-weight:700;padding:4px 10px;border-radius:999px;background:var(--sand);white-space:nowrap}
+.kal-item.ons .kal-club{background:var(--green);color:#fff}
+.kal-indienen{background:var(--sand-2)}
+.kal-indienen form{margin-top:16px}
+@media(max-width:600px){.kal-item{display:grid;grid-template-columns:58px 1fr;column-gap:14px;row-gap:6px}.kal-dag{grid-row:span 2}.kal-club{justify-self:start}}

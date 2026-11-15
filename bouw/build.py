@@ -208,6 +208,25 @@ def galerij(items):
         for n, a in items) + "</div>"
 
 
+WEETJES = json.load(open(os.path.join(ROOT, "data", "weetjes.json"), encoding="utf-8"))
+
+
+def weetje_blok():
+    """Wist-je-datje: willekeurig weetje uit data/weetjes.json, knop voor het volgende. Elk weetje heeft een bron."""
+    data = json.dumps([{"t": w["tekst"], "b": w["bron"]} for w in WEETJES], ensure_ascii=False).replace("</", "<\\/")
+    eerste = WEETJES[0]
+    return (f'<section class="weetje-sec"><div class="wrap"><div class="weetje">'
+            f'<div class="eyebrow">Wist je dat?</div><p class="weetje-tekst">{e(eerste["tekst"])}</p>'
+            f'<div class="weetje-voet"><a class="weetje-bron" href="{e(eerste["bron"])}" rel="noopener">Bron: Wikipedia</a>'
+            f'<button type="button" class="btn btn-white weetje-knop">Volgend weetje</button></div></div></div>'
+            f'<script type="application/json" class="weetjes-data">{data}</script>'
+            '<script>(function(){var s=document.currentScript.parentNode,d=JSON.parse(s.querySelector(".weetjes-data").textContent),'
+            'p=s.querySelector(".weetje-tekst"),b=s.querySelector(".weetje-bron"),i=Math.floor(Math.random()*d.length);'
+            'function toon(){p.textContent=d[i].t;b.href=d[i].b}toon();'
+            's.querySelector(".weetje-knop").onclick=function(){var n=i;while(d.length>1&&n===i)n=Math.floor(Math.random()*d.length);i=n;toon()}})();</script>'
+            '</section>')
+
+
 OVER_TEKST = ("Rover & Co is een Belgische vzw die Land Rover-liefhebbers samenbrengt. Met ritten, bijeenkomsten en evenementen "
               "maken we ruimte voor ontmoeting, avontuur en het delen van ervaringen. Het draait niet alleen om de wagens, "
               "maar vooral om de mensen, de verhalen en de community eromheen.")
@@ -228,10 +247,11 @@ home = f"""
 <div class="strip" aria-hidden="true"><div class="strip-track">{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts) * 2}<span>Series · Defender · Discovery · Range Rover</span>·{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts)}<span>Series · Defender · Discovery · Range Rover</span>·</div></div>
 <section>
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><div class="ctas"><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a><a href="/kalender" class="btn">Kalender</a></div></div>
     <div class="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
   </div>
 </section>
+{weetje_blok()}
 <section class="gallery-sec">
   <div class="wrap">
     <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
@@ -342,6 +362,71 @@ for a in alle_acts:
         EVENT_BODY[a["slug"]] = body  # wordt geschreven samen met het inschrijfformulier (zie onder)
         continue
     write(f"/activiteiten/{a['slug']}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
+
+# ---------- kalender ----------
+KAL_ANDEREN = json.load(open(os.path.join(ROOT, "data", "kalender.json"), encoding="utf-8"))
+kal_items = [{"club": "Rover & Co", "ons": True, "titel": a["titel"], "datum": a["datum"], "einde": a.get("einde", ""),
+              "label": a["datum_label"], "plaats": a["locatie"], "link": f"/activiteiten/{a['slug']}"} for a in acts]
+kal_items += [{**k, "ons": False} for k in KAL_ANDEREN]
+kal_data = json.dumps(sorted(kal_items, key=lambda x: x["datum"]), ensure_ascii=False).replace("</", "<\\/")
+kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten en die van andere Land Rover-clubs, op één plek.", "968", "Colonne op een landweg") + f"""
+<section><div class="wrap">
+  <div class="chips kal-filter" role="radiogroup" aria-label="Toon">
+    <label><input type="radio" name="kalf" value="alles" checked><span>Alles</span></label>
+    <label><input type="radio" name="kalf" value="ons"><span>Rover &amp; Co</span></label>
+    <label><input type="radio" name="kalf" value="clubs"><span>Andere clubs</span></label>
+  </div>
+  <div id="kal-lijst" class="kal-lijst" aria-live="polite"></div>
+  <p class="note">Bij activiteiten van andere clubs gebeuren info en inschrijving bij de club zelf. Klik door naar hun pagina.</p>
+</div></section>
+<section class="kal-indienen" id="indienen"><div class="wrap narrow">
+  <div class="eyebrow">Indienen</div><h2>Staat jouw activiteit er niet bij?</h2>
+  <p>Organiseer je met je club een Land Rover-activiteit? Laat het ons weten. We bekijken elke inzending en zetten ze daarna op de kalender.</p>
+  <form id="kal-form" class="co-blok" novalidate>
+    <div class="veld2"><div class="veld"><label for="k-club">Club of organisator</label><input id="k-club" name="club" required><div class="err" data-voor="club"></div></div>
+      <div class="veld"><label for="k-titel">Naam van de activiteit</label><input id="k-titel" name="titel" required><div class="err" data-voor="titel"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-datum">Datum</label><input id="k-datum" name="datum" type="date" required><div class="err" data-voor="datum"></div></div>
+      <div class="veld"><label for="k-einde">Einddatum <small>(optioneel)</small></label><input id="k-einde" name="einde" type="date"><div class="err" data-voor="einde"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-plaats">Plaats</label><input id="k-plaats" name="plaats" required><div class="err" data-voor="plaats"></div></div>
+      <div class="veld"><label for="k-link">Link met meer info <small>(optioneel)</small></label><input id="k-link" name="link" type="url" placeholder="https://"><div class="err" data-voor="link"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-naam">Jouw naam <small>(optioneel)</small></label><input id="k-naam" name="naam" autocomplete="name"></div>
+      <div class="veld"><label for="k-email">Jouw e-mailadres</label><input id="k-email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div></div>
+    <div class="veld"><label for="k-opm">Opmerking <small>(optioneel)</small></label><textarea id="k-opm" name="opmerking" rows="3"></textarea></div>
+    <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <button class="btn btn-solid" type="submit" id="k-knop">Activiteit indienen</button>
+    <div class="err" id="k-fout" role="alert"></div>
+  </form>
+  <div class="co-blok" id="k-bedankt" hidden><h3>Bedankt!</h3><p>We bekijken je activiteit en zetten ze daarna op de kalender.</p></div>
+</div></section>
+<script type="application/json" id="kal-data">{kal_data}</script>
+<script>(function(){{
+var basis=JSON.parse(document.getElementById("kal-data").textContent),lijst=document.getElementById("kal-lijst"),filter="alles",alle=basis.slice();
+var MAANDEN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+var KORT=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+function el(t,c,x){{var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}}
+function d(s){{var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}}
+function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
+  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons")===!!a.ons)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
+    var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;lijst.append(el("h3","kal-maand",m))}}
+    var r=el(a.link?"a":"div","kal-item"+(a.ons?" ons":""));if(a.link)r.href=a.link;if(!a.ons&&a.link)r.rel="noopener";
+    var dag=el("div","kal-dag");dag.append(el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
+    var t=el("div","kal-tekst");t.append(el("strong",null,a.titel));
+    var sub=a.plaats+(a.einde&&a.einde!==a.datum?" · tot "+d(a.einde).getDate()+" "+KORT[d(a.einde).getMonth()]:"");t.append(el("span",null,sub));
+    r.append(dag,t,el("span","kal-club",a.club));lijst.append(r);n++}});
+  if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."))}}
+document.querySelectorAll('input[name=kalf]').forEach(function(i){{i.onchange=function(){{filter=i.value;teken()}}}});
+teken();
+fetch("/api/kalender").then(function(r){{return r.json()}}).then(function(j){{if(j&&j.items){{alle=basis.concat(j.items.map(function(x){{x.ons=false;return x}}));teken()}}}}).catch(function(){{}});
+var f=document.getElementById("kal-form");
+f.addEventListener("submit",function(ev){{ev.preventDefault();var fd=new FormData(f),o={{}};fd.forEach(function(v,k){{o[k]=v}});
+  f.querySelectorAll(".err").forEach(function(x){{x.textContent=""}});var knop=document.getElementById("k-knop");knop.disabled=true;
+  fetch("/api/kalender",{{method:"POST",headers:{{"content-type":"application/json"}},body:JSON.stringify(o)}}).then(function(r){{return r.json()}}).then(function(j){{
+    knop.disabled=false;if(j.ok){{f.hidden=true;document.getElementById("k-bedankt").hidden=false;return}}
+    var M={{club:"Vul de club in.",titel:"Vul de naam van de activiteit in.",datum:"Kies een datum vanaf vandaag.",einde:"De einddatum ligt voor de startdatum.",plaats:"Vul de plaats in.",link:"Dat is geen geldige link (begin met https://).",email:"Vul een geldig e-mailadres in."}};
+    (j.fouten||[]).forEach(function(k){{var x=f.querySelector('.err[data-voor="'+k+'"]');if(x)x.textContent=M[k]||"Kijk dit veld na."}});
+    if(!j.fouten)document.getElementById("k-fout").textContent=j.fout||"Er ging iets mis. Probeer het opnieuw."}}).catch(function(){{knop.disabled=false;document.getElementById("k-fout").textContent="Geen verbinding. Probeer het opnieuw."}})}});
+}})();</script>"""
+write("/kalender", "Kalender", "Land Rover-kalender: activiteiten van Rover & Co en andere clubs in België en Nederland. Dien ook je eigen activiteit in.", kalender)
 
 # ---------- shop ----------
 write("/shop", "Shop", "Merch van Rover & Co: T-shirts en emaille mok. Met elke aankoop steun je de vereniging.",
@@ -467,6 +552,7 @@ for a in artikels:
   <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
   <p><a class="btn" href="/blog">Alle artikels</a></p>
 </article></section>
+{weetje_blok()}
 <section class="gerelateerd"><div class="wrap"><h2>Lees ook</h2><div class="blogfeed">{"".join(kaart(x) for x in gerelateerd(a))}</div></div></section>"""
     write(f"/blog/{a['slug']}", a["titel"], a["beschrijving"], body, noindex=(a.get("status") == "concept"))
 

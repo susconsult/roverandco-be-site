@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kalender | Rover &amp; Co</title>
+<meta name="description" content="Land Rover-kalender: activiteiten van Rover &amp; Co en andere clubs in België en Nederland. Dien ook je eigen activiteit in.">
+<link rel="canonical" href="https://roverandco.be/kalender">
+<meta property="og:title" content="Kalender | Rover &amp; Co">
+<meta property="og:description" content="Land Rover-kalender: activiteiten van Rover &amp; Co en andere clubs in België en Nederland. Dien ook je eigen activiteit in.">
+<meta property="og:image" content="https://roverandco.be/assets/img/964.webp">
+<meta property="og:locale" content="nl_BE">
+<link rel="icon" href="/favicon.png">
+<link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href="/assets/css/site.css?v=2026-11-15">
+</head>
+<body class="no-hero">
+<a class="sr-only" href="#inhoud">Naar de inhoud</a>
+<header class="site">
+  <div class="wrap nav">
+    <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="84" height="84"></a>
+    <ul class="menu" id="menu"><li><a href="/activiteiten">Activiteiten</a></li><li><a href="/kalender" aria-current="page">Kalender</a></li><li><a href="/shop">Shop</a></li><li><a href="/blog">Blog</a></li><li><a href="/fotos">Foto&#x27;s</a></li><li><a href="/over-ons">Over ons</a></li><li><a href="/contact">Contact</a></li></ul>
+    <div class="nav-right">
+      <button class="cart-btn" type="button" aria-label="Winkelmandje openen" data-open-cart>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+        <span class="cart-count">0</span>
+      </button>
+      <button class="burger" type="button" aria-label="Menu" aria-controls="menu" aria-expanded="false">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+<main id="inhoud">
+<section class="banner"><img src="/assets/img/968-s.webp" srcset="/assets/img/968-s.webp 800w, /assets/img/968.webp 1600w" sizes="100vw" alt="Colonne op een landweg" fetchpriority="high"><div class="wrap"><div class="eyebrow">Kalender</div><h1>Wat staat er op de planning</h1><p>Onze activiteiten en die van andere Land Rover-clubs, op één plek.</p></div></section>
+<section><div class="wrap">
+  <div class="chips kal-filter" role="radiogroup" aria-label="Toon">
+    <label><input type="radio" name="kalf" value="alles" checked><span>Alles</span></label>
+    <label><input type="radio" name="kalf" value="ons"><span>Rover &amp; Co</span></label>
+    <label><input type="radio" name="kalf" value="clubs"><span>Andere clubs</span></label>
+  </div>
+  <div id="kal-lijst" class="kal-lijst" aria-live="polite"></div>
+  <p class="note">Bij activiteiten van andere clubs gebeuren info en inschrijving bij de club zelf. Klik door naar hun pagina.</p>
+</div></section>
+<section class="kal-indienen" id="indienen"><div class="wrap narrow">
+  <div class="eyebrow">Indienen</div><h2>Staat jouw activiteit er niet bij?</h2>
+  <p>Organiseer je met je club een Land Rover-activiteit? Laat het ons weten. We bekijken elke inzending en zetten ze daarna op de kalender.</p>
+  <form id="kal-form" class="co-blok" novalidate>
+    <div class="veld2"><div class="veld"><label for="k-club">Club of organisator</label><input id="k-club" name="club" required><div class="err" data-voor="club"></div></div>
+      <div class="veld"><label for="k-titel">Naam van de activiteit</label><input id="k-titel" name="titel" required><div class="err" data-voor="titel"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-datum">Datum</label><input id="k-datum" name="datum" type="date" required><div class="err" data-voor="datum"></div></div>
+      <div class="veld"><label for="k-einde">Einddatum <small>(optioneel)</small></label><input id="k-einde" name="einde" type="date"><div class="err" data-voor="einde"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-plaats">Plaats</label><input id="k-plaats" name="plaats" required><div class="err" data-voor="plaats"></div></div>
+      <div class="veld"><label for="k-link">Link met meer info <small>(optioneel)</small></label><input id="k-link" name="link" type="url" placeholder="https://"><div class="err" data-voor="link"></div></div></div>
+    <div class="veld2"><div class="veld"><label for="k-naam">Jouw naam <small>(optioneel)</small></label><input id="k-naam" name="naam" autocomplete="name"></div>
+      <div class="veld"><label for="k-email">Jouw e-mailadres</label><input id="k-email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div></div>
+    <div class="veld"><label for="k-opm">Opmerking <small>(optioneel)</small></label><textarea id="k-opm" name="opmerking" rows="3"></textarea></div>
+    <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+    <button class="btn btn-solid" type="submit" id="k-knop">Activiteit indienen</button>
+    <div class="err" id="k-fout" role="alert"></div>
+  </form>
+  <div class="co-blok" id="k-bedankt" hidden><h3>Bedankt!</h3><p>We bekijken je activiteit en zetten ze daarna op de kalender.</p></div>
+</div></section>
+<script type="application/json" id="kal-data">[{"club": "Rover & Co", "ons": true, "titel": "Church of Rover", "datum": "2026-11-22", "einde": "", "label": "Zo 22 nov", "plaats": "Kerk van Oostham", "link": "/activiteiten/church-of-rover"}, {"club": "Xrover Belgium", "titel": "Roadbook", "datum": "2026-11-29", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Xrover Belgium", "titel": "Kerstroadbook", "datum": "2026-12-26", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Xrover Belgium", "titel": "Nieuwjaarsreceptie", "datum": "2027-01-16", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Xrover Belgium", "titel": "Valentijnsroadbook", "datum": "2027-02-21", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Xrover Belgium", "titel": "Paasbrunch", "datum": "2027-03-21", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Rover & Co", "ons": true, "titel": "Wild & Wheels", "datum": "2027-05-28", "einde": "", "label": "28–30 mei", "plaats": "Pakawi Park, Olmen", "link": "/activiteiten/wild-and-wheels"}, {"club": "Xrover Belgium", "titel": "Halloween roadbook", "datum": "2027-10-24", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}, {"club": "Xrover Belgium", "titel": "Kerstroadbook", "datum": "2027-12-26", "plaats": "Zie de agenda van Xrover", "link": "https://xrover.be/agenda/", "ons": false}]</script>
+<script>(function(){
+var basis=JSON.parse(document.getElementById("kal-data").textContent),lijst=document.getElementById("kal-lijst"),filter="alles",alle=basis.slice();
+var MAANDEN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
+var KORT=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];
+function el(t,c,x){var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}
+function d(s){var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}
+function teken(){var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
+  alle.filter(function(a){return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons")===!!a.ons)}).sort(function(a,b){return a.datum<b.datum?-1:1}).forEach(function(a){
+    var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){maand=m;lijst.append(el("h3","kal-maand",m))}
+    var r=el(a.link?"a":"div","kal-item"+(a.ons?" ons":""));if(a.link)r.href=a.link;if(!a.ons&&a.link)r.rel="noopener";
+    var dag=el("div","kal-dag");dag.append(el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
+    var t=el("div","kal-tekst");t.append(el("strong",null,a.titel));
+    var sub=a.plaats+(a.einde&&a.einde!==a.datum?" · tot "+d(a.einde).getDate()+" "+KORT[d(a.einde).getMonth()]:"");t.append(el("span",null,sub));
+    r.append(dag,t,el("span","kal-club",a.club));lijst.append(r);n++});
+  if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."))}
+document.querySelectorAll('input[name=kalf]').forEach(function(i){i.onchange=function(){filter=i.value;teken()}});
+teken();
+fetch("/api/kalender").then(function(r){return r.json()}).then(function(j){if(j&&j.items){alle=basis.concat(j.items.map(function(x){x.ons=false;return x}));teken()}}).catch(function(){});
+var f=document.getElementById("kal-form");
+f.addEventListener("submit",function(ev){ev.preventDefault();var fd=new FormData(f),o={};fd.forEach(function(v,k){o[k]=v});
+  f.querySelectorAll(".err").forEach(function(x){x.textContent=""});var knop=document.getElementById("k-knop");knop.disabled=true;
+  fetch("/api/kalender",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(o)}).then(function(r){return r.json()}).then(function(j){
+    knop.disabled=false;if(j.ok){f.hidden=true;document.getElementById("k-bedankt").hidden=false;return}
+    var M={club:"Vul de club in.",titel:"Vul de naam van de activiteit in.",datum:"Kies een datum vanaf vandaag.",einde:"De einddatum ligt voor de startdatum.",plaats:"Vul de plaats in.",link:"Dat is geen geldige link (begin met https://).",email:"Vul een geldig e-mailadres in."};
+    (j.fouten||[]).forEach(function(k){var x=f.querySelector('.err[data-voor="'+k+'"]');if(x)x.textContent=M[k]||"Kijk dit veld na."});
+    if(!j.fouten)document.getElementById("k-fout").textContent=j.fout||"Er ging iets mis. Probeer het opnieuw."}).catch(function(){knop.disabled=false;document.getElementById("k-fout").textContent="Geen verbinding. Probeer het opnieuw."})});
+})();</script>
+</main>
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <div>
+        <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="110" height="110" loading="lazy"></a>
+        <p>Land Rover-liefhebbers samen, op plekken waar je anders niet komt.</p>
+      </div>
+      <div>
+        <h4>Contact</h4>
+        <p><a href="mailto:info@roverandco.be">info@roverandco.be</a></p>
+        <p><a href="tel:+32477387272">+32 477 38 72 72</a></p>
+        <p>Olmensesteenweg 105<br>3945 Oostham</p>
+      </div>
+      <div>
+        <h4>Site</h4>
+        <ul><li><a href="/activiteiten">Activiteiten</a></li><li><a href="/kalender">Kalender</a></li><li><a href="/shop">Shop</a></li><li><a href="/blog">Blog</a></li><li><a href="/fotos">Foto&#x27;s</a></li><li><a href="/over-ons">Over ons</a></li><li><a href="/contact">Contact</a></li></ul>
+      </div>
+      <div>
+        <h4>Volg ons</h4>
+        <ul><li><a href="https://www.instagram.com/roverandco.be/" rel="noopener">Instagram</a></li><li><a href="https://www.facebook.com/roverandcobe/" rel="noopener">Facebook</a></li></ul>
+      </div>
+    </div>
+    <div class="legal">
+      <span>Rover &amp; Co VZW · BE 1032.450.083 · <a href="/privacy">Privacy</a></span>
+      <span>Made with love by <a href="https://susconsult.be" rel="noopener">SUS Consult</a></span>
+    </div>
+  </div>
+</footer>
+<div class="drawer-bg" data-close-cart></div>
+<aside class="drawer" aria-label="Winkelmandje">
+  <div class="drawer-h"><h2>Je mandje</h2><button type="button" data-close-cart aria-label="Mandje sluiten">×</button></div>
+  <div class="lines" id="lines"></div>
+  <div class="drawer-f">
+    <div class="total"><span>Totaal</span><span id="total">€0,00</span></div>
+    <a class="btn btn-solid" id="checkout" href="/afrekenen" style="width:100%;justify-content:center">Afrekenen</a>
+  </div>
+</aside>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten">×</button><img alt=""></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="/assets/js/site.js?v=2026-11-15" defer></script>
+</body>
+</html>

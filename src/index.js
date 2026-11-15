@@ -6,6 +6,7 @@
 // - /betaald          : terugkeer uit Viva (succes-URL). De Worker vraagt bij Viva na of er echt betaald is.
 // - /api/viva/webhook : melding van Viva (Transaction Payment Created), vangnet als de browser sluit.
 // - /planner, /api/planner/* : terreinplanner achter login (zie src/planner.js)
+// - /api/kalender     : activiteiten van andere clubs indienen/goedkeuren/ophalen (zie src/kalender.js)
 // - Alle andere adressen: statische bestanden uit public/.
 //
 // Secrets in Cloudflare (geen waarden in deze repo):
@@ -15,6 +16,7 @@
 // Zolang VIVA_CLIENT_ID / VIVA_CLIENT_SECRET / VIVA_SOURCE_CODE ontbreken: testmodus, er wordt niet betaald.
 import catalogus from "./catalogus.json";
 import { planner } from "./planner.js";
+import { kalender } from "./kalender.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
@@ -320,6 +322,8 @@ export default {
     const p = url.pathname;
     const pl = await planner(request, env, url);
     if (pl) return pl;
+    const kal = await kalender(request, env, url);
+    if (kal) return kal;
     if (p === "/api/bestelling" || p === "/api/inschrijving") {
       if (request.method !== "POST") return json({ ok: false, fout: "Alleen POST." }, 405);
       return plaats(request, env, p === "/api/bestelling" ? "bestelling" : "inschrijving");

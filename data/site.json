@@ -10,6 +10,7 @@
   "instagram": "https://www.instagram.com/roverandco.be/",
   "menu": [
     ["Activiteiten", "/activiteiten"],
+    ["Kalender", "/kalender"],
     ["Shop", "/shop"],
     ["Blog", "/blog"],
     ["Foto's", "/fotos"],
