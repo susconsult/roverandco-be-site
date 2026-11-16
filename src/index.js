@@ -1,16 +1,17 @@
 // Worker voor roverandco.be
 // - /api/bestelling   : bestelling uit de shop (prijzen opnieuw berekend uit src/catalogus.json)
 // - /api/inschrijving : inschrijving voor een activiteit (prijzen en tijdsloten uit src/catalogus.json)
-//   Beide: eerst bewaren in de Google Sheet (Apps Script, APPS_SCRIPT_URL), dan een Viva-betaalorder
+//   Beide: eerst bewaren in de database (D1, binding SHOP_DB, zie src/opslag.js), dan een Viva-betaalorder
 //   maken en de bezoeker naar Viva Smart Checkout sturen.
 // - /betaald          : terugkeer uit Viva (succes-URL). De Worker vraagt bij Viva na of er echt betaald is.
 // - /api/viva/webhook : melding van Viva (Transaction Payment Created), vangnet als de browser sluit.
 // - /planner, /api/planner/* : terreinplanner achter login (zie src/planner.js)
 // - /api/kalender     : activiteiten van andere clubs indienen/goedkeuren/ophalen (zie src/kalender.js)
+// - /beheer         : bestellingen en inschrijvingen beheren, achter Cloudflare Access (zie src/beheer.js)
 // - Alle andere adressen: statische bestanden uit public/.
 //
 // Secrets in Cloudflare (geen waarden in deze repo):
-//   APPS_SCRIPT_URL, VIVA_CLIENT_ID, VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY,
+//   VIVA_CLIENT_ID, VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY,
 //   VIVA_MERCHANT_ID + VIVA_API_KEY (alternatief voor VIVA_WEBHOOK_KEY: de Worker haalt de sleutel zelf op),
 //   RESEND_API_KEY (bevestigingsmail naar de klant vanaf noreply@roverandco.be)
 //   Optioneel: VIVA_OMGEVING = "demo" (anders live).
@@ -18,6 +19,8 @@
 import catalogus from "./catalogus.json";
 import { planner } from "./planner.js";
 import { kalender } from "./kalender.js";
+import { opslag } from "./opslag.js";
+import { beheer } from "./beheer.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
@@ -125,20 +128,7 @@ async function stuurKlantmail(env, m) {
   } catch (e) {
     status = "fout bij Resend: geen verbinding";
   }
-  await script(env, "mailstatus", { soort: m.soort, nummer: m.nummer, status });
-}
-
-/* ---------------- Google Sheet (Apps Script) ---------------- */
-
-async function script(env, actie, data) {
-  try {
-    const r = await fetch(env.APPS_SCRIPT_URL, {
-      method: "POST", headers: { "content-type": "text/plain" }, body: JSON.stringify({ actie, ...data }), redirect: "follow",
-    });
-    return await r.json();
-  } catch {
-    return null;
-  }
+  await opslag(env, "mailstatus", { soort: m.soort, nummer: m.nummer, status });
 }
 
 /* ---------------- Shop: bestelling ---------------- */
@@ -249,7 +239,7 @@ async function plaats(request, env, soort) {
   const res = S.controleer(b);
   if (res.fouten.includes("gesloten")) return json({ ok: false, fout: "De inschrijvingen voor deze activiteit zijn afgesloten." }, 422);
   if (res.fouten.length) return json({ ok: false, fout: "Controleer je gegevens.", velden: res.fouten }, 422);
-  if (!env.APPS_SCRIPT_URL) return json({ ok: false, fout: "Dit is nog niet gekoppeld. Probeer later opnieuw." }, 503);
+  if (!env.SHOP_DB) return json({ ok: false, fout: "Dit is nog niet gekoppeld. Probeer later opnieuw." }, 503);
 
   const betaal = vivaActief(env);
   const nr = nummerOk(S.prefix, b.nummer) ? b.nummer : nieuwNummer(S.prefix); // zelfde nummer bij opnieuw proberen = geen dubbel
@@ -258,7 +248,7 @@ async function plaats(request, env, soort) {
   const payload = { ...res.record, soort, nummer: nr, test: !betaal, status, aangemaakt: new Date().toISOString(), betaaltijd_min: BETAALTIJD_SEC / 60, site: new URL(request.url).origin, resend: !!env.RESEND_API_KEY };
 
   const fout = "Dit kon niet bewaard worden. Probeer opnieuw.";
-  const a = await script(env, "nieuw", payload);
+  const a = await opslag(env, "nieuw", payload);
   if (a?.fout === "vol" && a.onderdeel) return json({ ok: false, fout: `${a.onderdeel} is volzet. Pas je keuze aan.`, velden: ["aantal"] }, 409);
   if (a?.fout === "vol") return json({ ok: false, fout: "Dit tijdslot is intussen volzet. Kies een ander tijdslot.", velden: ["tijdslot"] }, 409);
   if (!a || a.ok !== true || a.nummer !== nr) return json({ ok: false, fout }, 502);
@@ -273,7 +263,7 @@ async function plaats(request, env, soort) {
   } catch {
     return json({ ok: false, fout: "Betalen lukt nu even niet. Je gegevens zijn bewaard, probeer zo meteen opnieuw." }, 502);
   }
-  const c = await script(env, "ordercode", { soort, nummer: nr, ordercode: code });
+  const c = await opslag(env, "ordercode", { soort, nummer: nr, ordercode: code });
   if (!c || c.ok !== true) return json({ ok: false, fout }, 502);
   return json({ ok: true, nummer: nr, betalen: vivaAdressen(env).checkout + code });
 }
@@ -283,7 +273,7 @@ async function verwerkBetaling(env, transactieId) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transactieId || "")) return { ok: false, status: "onbekend" };
   const tr = await vivaTransactie(env, transactieId);
   if (tr.statusId !== "F") return { ok: false, status: tr.statusId, nummer: tr.ref };
-  const a = await script(env, "betaald", { ordercode: tr.orderCode, transactie: transactieId, bedrag: tr.bedrag, ref: tr.ref, resend: !!env.RESEND_API_KEY });
+  const a = await opslag(env, "betaald", { ordercode: tr.orderCode, transactie: transactieId, bedrag: tr.bedrag, ref: tr.ref, resend: !!env.RESEND_API_KEY });
   if (!a || a.ok !== true) throw new Error("Sheet niet bijgewerkt");
   await stuurKlantmail(env, a.mail);
   return { ok: true, nummer: a.nummer, soort: a.soort };
@@ -333,6 +323,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const p = url.pathname;
+    const bh = await beheer(request, env, url);
+    if (bh) return bh;
     const pl = await planner(request, env, url);
     if (pl) return pl;
     const kal = await kalender(request, env, url);

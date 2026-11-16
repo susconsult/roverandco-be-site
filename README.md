@@ -39,10 +39,10 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - Prijzen uit de browser worden nooit vertrouwd (`src/catalogus.json`, gemaakt door `bouw/build.py`). Spam-val: onzichtbaar veld `website`.
 - **Testmodus:** zolang de Viva-Secrets ontbreken, wordt niet betaald en is alles gemarkeerd als test (alleen melding naar Pieter, geen mail naar de klant).
 
-**Google Sheet** "Rover & Co – Webshop bestellingen" in Drive KLANTEN → Rover&Co (pieter@susconsult.be), tabbladen *Bestellingen* en *Inschrijvingen* (maakt het script zelf). Script: `bouw/apps-script/Bestellingen.gs`. Na elke wijziging: nieuwe versie van de implementatie publiceren.
+**Database** D1 `roverandco-shop` (binding `SHOP_DB`, schema `bouw/db/schema-shop.sql`): tabel `registraties` met alle bestellingen en inschrijvingen. Code: `src/opslag.js`. Beheer op `/beheer` (`src/beheer.js`), alleen via Cloudflare Access; de Worker controleert zelf het Access-token. Meldingen naar pieter@roverandco.be via Resend.
 - Bevestiging naar de klant: de Worker stuurt ze via **Resend** vanaf **noreply@roverandco.be** (naam "Rover & Co VZW", geen antwoordadres; in de mail staat "Vragen? Mail naar info@roverandco.be"). Het script maakt de tekst, de Worker verstuurt, het resultaat staat in de kolom *Mail klant*. Zonder `RESEND_API_KEY` gaat er geen klantmail.
 
-**Cloudflare-Secrets** (Worker → Settings → Variables and Secrets): `APPS_SCRIPT_URL`, `VIVA_CLIENT_ID`, `VIVA_CLIENT_SECRET` (Smart Checkout-gegevens), `VIVA_SOURCE_CODE` (4 cijfers van de betaalbron), `VIVA_WEBHOOK_KEY`, `RESEND_API_KEY` (Resend-account van Rover & Co, domein roverandco.be geverifieerd). Optioneel `VIVA_OMGEVING` = `demo`.
+**Cloudflare-variabelen** (Worker → Settings → Variables and Secrets): `VIVA_CLIENT_ID`, `VIVA_CLIENT_SECRET`, `VIVA_SOURCE_CODE` (2267), `VIVA_MERCHANT_ID` + `VIVA_API_KEY` (de Worker haalt de webhook-sleutel zelf op, zoals in het DVHP-portaal), `RESEND_API_KEY` (Resend-account van Rover & Co, domein roverandco.be geverifieerd), `ACCESS_TEAM_DOMAIN` + `ACCESS_AUD` (Cloudflare Access voor /beheer), optioneel `BEHEER_EMAILS` (standaard pieter@roverandco.be) en `VIVA_OMGEVING` = `demo`.
 
 **In Viva** (live account Rover & Co VZW): betaalbron met domein van de site, succes-URL `betaald`, fout-URL `betaling-mislukt`; webhook "Transaction Payment Created" naar `/api/viva/webhook`. Bij de verhuis naar roverandco.be: domein in de betaalbron en het webhookadres aanpassen.
 
