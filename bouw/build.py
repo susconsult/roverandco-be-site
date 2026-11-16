@@ -40,8 +40,10 @@ def schoon_html(h):
     return h
 
 
-def img(name, alt, cls="", sizes="100vw", lazy=True, prio=False):
+def img(name, alt, cls="", sizes="100vw", lazy=True, prio=False, pos=None):
     attrs = f'class="{cls}" ' if cls else ""
+    if pos:
+        attrs += f'style="object-position:{pos}" '
     load = ' fetchpriority="high"' if prio else (' loading="lazy"' if lazy else "")
     return (f'<img {attrs}src="/assets/img/{name}-s.webp" srcset="/assets/img/{name}-s.webp 800w, /assets/img/{name}.webp 1600w" '
             f'sizes="{sizes}" alt="{e(alt)}"{load}>')
@@ -143,8 +145,8 @@ def write(path, title, desc, body, hero=False, noindex=False):
         pages.append(path)
 
 
-def banner(eyebrow, title, intro="", foto=None, alt=""):
-    pic = img(foto, alt, prio=True) if foto else ""
+def banner(eyebrow, title, intro="", foto=None, alt="", pos=None):
+    pic = img(foto, alt, prio=True, pos=pos) if foto else ""
     return f'<section class="banner">{pic}<div class="wrap"><div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
 
 
@@ -190,7 +192,7 @@ def ev_card(a, big=False):
     meta = "".join(f"<span>{e(k)}</span>" for k in a["kenmerken"])
     extra = (f'<p>{e(a["kort"])}</p><div class="ev-meta">{meta}</div>'
              f'<span class="btn btn-white">{"Inschrijven" if a["inschrijven_url"] else "Meer info"}</span>') if big else f'<div class="ev-meta" style="margin:6px 0 0">{meta}</div>'
-    return (f'<a href="{href}" class="ev"{ext}>{img(a["foto"], a["foto_alt"], sizes="(max-width:880px) 100vw, 50vw")}'
+    return (f'<a href="{href}" class="ev"{ext}>{img(a["foto"], a["foto_alt"], sizes="(max-width:880px) 100vw, 50vw", pos=a.get("foto_pos"))}'
             f'<div class="ev-body"><span class="ev-date">{e(a["datum_label"])}</span><h3>{e(a["titel"])}</h3>{extra}</div></a>')
 
 
@@ -360,7 +362,7 @@ for a in alle_acts:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
            f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>' if a["inschrijven_label"] else ""
-    body = banner(a["datum_lang"], a["titel"], a["kort"], a["foto"], a["foto_alt"]) + aftellen(a) + f"""
+    body = banner(a["datum_lang"], a["titel"], a["kort"], a.get("banner_foto", a["foto"]), a["foto_alt"], a.get("foto_pos")) + aftellen(a) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">
@@ -370,6 +372,8 @@ for a in alle_acts:
   </ul>{knop}</aside>{affiche(a)}</div>
 </div></section>"""
     body += fotoblok(a)
+    if a.get("foto_credit"):
+        body += f'<section style="padding-top:0"><div class="wrap"><p class="fotocredit">Foto bovenaan: {a["foto_credit"]}</p></div></section>'
     if inschrijving_open(a):
         EVENT_BODY[a["slug"]] = body  # wordt geschreven samen met het inschrijfformulier (zie onder)
         continue
