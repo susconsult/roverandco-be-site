@@ -331,7 +331,12 @@ footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .weetje-voet{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .weetje-bron{color:var(--green-light);font-size:14px}
 /* kalender */
-.kal-filter{margin-bottom:22px}
+.kal-filter{display:flex;flex-wrap:wrap;align-items:center;gap:10px 18px;margin-bottom:26px;padding-bottom:14px;border-bottom:1px solid #d9d2bf}
+.kf{display:inline-flex;align-items:center;gap:8px;font-size:14px}
+.kf-l{color:#6b6656;font-weight:600}
+.kf select{width:auto;min-width:0;min-height:0;-webkit-appearance:none;appearance:none;font:inherit;font-size:14px;font-weight:700;color:var(--green);background:transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' fill='none' stroke='%231F3B2A' stroke-width='1.6'/%3E%3C/svg%3E") no-repeat right 2px center;border:0;border-bottom:1px solid transparent;padding:4px 16px 4px 0;cursor:pointer}
+.kf select:hover,.kf select:focus{border-bottom-color:var(--green);outline:0}
+.kf-n{margin-left:auto;font-size:13px;color:#6b6656}
 .kal-lijst{display:flex;flex-direction:column;gap:30px;margin-bottom:22px}
 .kal-maand{font-size:28px;margin:0 0 12px;text-transform:capitalize}
 .kal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,420px),1fr));gap:14px}

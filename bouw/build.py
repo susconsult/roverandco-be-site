@@ -387,13 +387,12 @@ kal_items += [{**k, "ons": False} for k in KAL_ANDEREN]
 kal_data = json.dumps(sorted(kal_items, key=lambda x: x["datum"]), ensure_ascii=False).replace("</", "<\\/")
 kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten, andere Land Rover-clubs, 4x4-dagen, beurzen en overland, op één plek.", "968", "Colonne op een landweg") + f"""
 <section><div class="wrap">
-  <div class="chips kal-filter" role="radiogroup" aria-label="Toon">
-    <label><input type="radio" name="kalf" value="alles" checked><span>Alles</span></label>
-    <label><input type="radio" name="kalf" value="ons"><span>Rover &amp; Co</span></label>
-    <label><input type="radio" name="kalf" value="club"><span>Land Rover-clubs</span></label>
-    <label><input type="radio" name="kalf" value="4x4"><span>4x4 en offroad</span></label>
-    <label><input type="radio" name="kalf" value="beurs"><span>Beurzen en shows</span></label>
-    <label><input type="radio" name="kalf" value="overland"><span>Overland en kamperen</span></label>
+  <div class="kal-filter" role="group" aria-label="Filter de kalender">
+    <label class="kf"><span class="kf-l">Soort</span><select id="kf-soort">
+      <option value="alles">Alles</option><option value="ons">Rover &amp; Co</option><option value="club">Land Rover-clubs</option>
+      <option value="4x4">4x4 en offroad</option><option value="beurs">Beurzen en shows</option><option value="overland">Overland en kamperen</option></select></label>
+    <label class="kf"><span class="kf-l">Wanneer</span><select id="kf-maand"><option value="">Alle data</option></select></label>
+    <span class="kf-n" id="kf-n" aria-live="polite"></span>
   </div>
   <div id="kal-lijst" class="kal-lijst" aria-live="polite"></div>
   <p class="note">Bij activiteiten van andere clubs gebeuren info en inschrijving bij de club zelf. Klik door naar hun pagina.</p>
@@ -420,7 +419,7 @@ kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten,
 </div></section>
 <script type="application/json" id="kal-data">{kal_data}</script>
 <script>(function(){{
-var basis=JSON.parse(document.getElementById("kal-data").textContent),lijst=document.getElementById("kal-lijst"),filter="alles",alle=basis.slice();
+var basis=JSON.parse(document.getElementById("kal-data").textContent),lijst=document.getElementById("kal-lijst"),filter="alles",maandF="",alle=basis.slice();
 var MAANDEN=["januari","februari","maart","april","mei","juni","juli","augustus","september","oktober","november","december"];
 var KORT=["jan","feb","mrt","apr","mei","jun","jul","aug","sep","okt","nov","dec"];var DAGEN=["zo","ma","di","wo","do","vr","za"],grid;
 var PIN='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s7-6.2 7-12a7 7 0 1 0-14 0c0 5.8 7 12 7 12z" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="12" cy="10" r="2.5" fill="currentColor"/></svg>';
@@ -428,7 +427,7 @@ var KAL='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18
 function el(t,c,x){{var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}}
 function d(s){{var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}}
 function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
-  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons"?a.ons:(a.soort||"club")===filter))}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
+  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons"?a.ons:(a.soort||"club")===filter))&&(!maandF||a.datum.slice(0,7)<=maandF&&(a.einde||a.datum).slice(0,7)>=maandF)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
     var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;var blok=el("div","kal-blok");blok.append(el("h3","kal-maand",m));grid=el("div","kal-grid");blok.append(grid);lijst.append(blok)}}
     var r=el(a.link?"a":"div","kal-kaart"+(a.ons?" ons":""));if(a.link){{r.href=a.link;if(!a.ons)r.rel="noopener"}}
     var dag=el("div","kal-datum");dag.append(el("span","kal-wd",DAGEN[dt.getDay()]),el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
@@ -438,10 +437,14 @@ function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textCon
     b.append(meta);if(a.info)b.append(el("p","kal-info",a.info));
     if(a.link)b.append(el("span","kal-meer",a.ons?"Info en inschrijven →":"Meer info bij "+a.club+" ↗"));
     r.append(dag,b);grid.append(r);n++}});
-  if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."))}}
-document.querySelectorAll('input[name=kalf]').forEach(function(i){{i.onchange=function(){{filter=i.value;teken()}}}});
-teken();
-fetch("/api/kalender").then(function(r){{return r.json()}}).then(function(j){{if(j&&j.items){{alle=basis.concat(j.items.map(function(x){{x.ons=false;return x}}));teken()}}}}).catch(function(){{}});
+  if(!n)lijst.append(el("p","note","Geen activiteiten gevonden."));document.getElementById("kf-n").textContent=n+(n===1?" activiteit":" activiteiten")}}
+function maanden(){{var sel=document.getElementById("kf-maand"),v=sel.value,vd=new Date(),nu=vd.getFullYear()+"-"+String(vd.getMonth()+1).padStart(2,"0"),m={{}};
+  alle.forEach(function(a){{var k=a.datum.slice(0,7),e=(a.einde||a.datum).slice(0,7);while(k<=e){{if(k>=nu)m[k]=1;var y=+k.slice(0,4),mm=+k.slice(5)+1;if(mm>12){{mm=1;y++}}k=y+"-"+String(mm).padStart(2,"0")}}}});
+  sel.length=1;Object.keys(m).sort().forEach(function(k){{var o=document.createElement("option");o.value=k;o.textContent=MAANDEN[+k.slice(5)-1]+" "+k.slice(0,4);sel.append(o)}});sel.value=v}}
+document.getElementById("kf-soort").onchange=function(){{filter=this.value;teken()}};
+document.getElementById("kf-maand").onchange=function(){{maandF=this.value;teken()}};
+maanden();teken();
+fetch("/api/kalender").then(function(r){{return r.json()}}).then(function(j){{if(j&&j.items){{alle=basis.concat(j.items.map(function(x){{x.ons=false;return x}}));maanden();teken()}}}}).catch(function(){{}});
 var f=document.getElementById("kal-form");
 f.addEventListener("submit",function(ev){{ev.preventDefault();var fd=new FormData(f),o={{}};fd.forEach(function(v,k){{o[k]=v}});
   f.querySelectorAll(".err").forEach(function(x){{x.textContent=""}});var knop=document.getElementById("k-knop");knop.disabled=true;
