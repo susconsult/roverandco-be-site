@@ -780,7 +780,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
-        <p class="note">{"Inschrijven is gratis. Daarna krijg je een bevestiging per mail." if gratis(a) else "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."}</p>
+        <p class="note">{"Inschrijven is gratis. Daarna krijg je een bevestiging per mail." if gratis(a) else "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."}</p>{'' if gratis(a) else '<p class="betaal-met">Betalen via '+'<img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13">'+'</p>'}
       </div>
     </aside>
   </form>
@@ -854,6 +854,7 @@ afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>
         <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail.</p>
+        <p class="betaal-met">Betalen via <img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13"></p>
       </div>
     </aside>
   </form>
