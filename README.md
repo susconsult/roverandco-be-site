@@ -77,7 +77,7 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 
 ## Ledenfoto's
 
-- Map `public/assets/img/leden/`: 63 foto's die leden in november 2026 vrijwillig via WhatsApp gaven om te gebruiken (`lid-01` tot `lid-63`, telkens een `.webp` van 1600 px en een `-s.webp` van 800 px).
+- Map `public/assets/img/leden/`: 75 foto's die leden in november 2026 vrijwillig via WhatsApp gaven om te gebruiken (`lid-01` tot `lid-75`, telkens een `.webp` van 1600 px en een `-s.webp` van 800 px).
 - Mag gebruikt worden op de site, in blogs en op sociale media. Vermelding: "Foto: lid Rover & Co". Nummerplaten blijven zichtbaar (beslist door Pieter).
 - Een selectie staat al op de site onder een eigen naam in `public/assets/img/` (`leden-*`): kerstrit, Church-banner, galerij Wild & Wheels.
 - Voor een blogfoto: kopieer de gekozen foto naar `public/assets/img/blog/` (dat doet het blogfoto-gesprek).
