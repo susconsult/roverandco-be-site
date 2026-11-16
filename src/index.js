@@ -11,6 +11,7 @@
 //
 // Secrets in Cloudflare (geen waarden in deze repo):
 //   APPS_SCRIPT_URL, VIVA_CLIENT_ID, VIVA_CLIENT_SECRET, VIVA_SOURCE_CODE, VIVA_WEBHOOK_KEY,
+//   VIVA_MERCHANT_ID + VIVA_API_KEY (alternatief voor VIVA_WEBHOOK_KEY: de Worker haalt de sleutel zelf op),
 //   RESEND_API_KEY (bevestigingsmail naar de klant vanaf noreply@roverandco.be)
 //   Optioneel: VIVA_OMGEVING = "demo" (anders live).
 // Zolang VIVA_CLIENT_ID / VIVA_CLIENT_SECRET / VIVA_SOURCE_CODE ontbreken: testmodus, er wordt niet betaald.
@@ -301,9 +302,21 @@ async function terugUitViva(url, env) {
   }
 }
 
+async function webhookSleutel(env) {
+  // Vaste sleutel als die er is, anders zelf ophalen bij Viva met Merchant ID + API Key.
+  if (env.VIVA_WEBHOOK_KEY && env.VIVA_WEBHOOK_KEY !== "xxx") return env.VIVA_WEBHOOK_KEY;
+  if (!env.VIVA_MERCHANT_ID || !env.VIVA_API_KEY) return "";
+  const basis = env.VIVA_OMGEVING === "demo" ? "https://demo.vivapayments.com" : "https://www.vivapayments.com";
+  const r = await fetch(basis + "/api/messages/config/token", {
+    headers: { authorization: "Basic " + btoa(`${env.VIVA_MERCHANT_ID}:${env.VIVA_API_KEY}`) },
+  });
+  if (!r.ok) return "";
+  return (await r.json()).Key || "";
+}
+
 async function webhook(request, env) {
   // Viva controleert het adres eerst met een GET en verwacht de sleutel terug.
-  if (request.method === "GET") return json({ Key: env.VIVA_WEBHOOK_KEY || "" });
+  if (request.method === "GET") return json({ Key: await webhookSleutel(env) });
   if (request.method !== "POST") return json({ ok: false }, 405);
   let d;
   try { d = JSON.parse(await request.text()); } catch { return json({ ok: false }, 400); }
