@@ -17,8 +17,6 @@ SUS Consult zorgt voor alles wat met communicatie en technologie te maken heeft.
 
 Op de evenementen zelf zorgen ze voor de technologie die je niet ziet, maar die wel moet werken: het netwerk, de Bancontact-terminals en de kassasystemen. Kortom: alles wat er achter een festival zit om het vlot te laten draaien. Het bedrijf uit Ham is een van de partners van Rover & Co. Onderaan de site van Wild & Wheels staat het er ook: made with love by SUS Consult. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
 
-Eerlijk is eerlijk: de schrijver van dit artikel is ook de oprichter van SUS Consult. Daarom houden we het bij wat er op hun eigen site staat.
-
 ## Slimme technologie, zonder gedoe
 
 Dat is de slogan van SUS Consult. Het bedrijf richt zich op IT, netwerk en online zichtbaarheid voor bedrijven die vooruit willen, met één vast aanspreekpunt van begin tot eind.
