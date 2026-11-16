@@ -1,57 +1,106 @@
-// /beheer: bestellingen en inschrijvingen bekijken en afhandelen. Enkel achter Cloudflare Access.
-// Nodig in Cloudflare (Variables): ACCESS_TEAM_DOMAIN (bv. https://roverandco.cloudflareaccess.com),
-// ACCESS_AUD (Application Audience tag van de Access-app) en optioneel BEHEER_EMAILS (komma-lijst; standaard pieter@roverandco.be).
-// De Worker controleert zelf het Access-token (handtekening, audience, vervaldatum, e-mail): zonder geldig token geen toegang.
+// /beheer: bestellingen en inschrijvingen bekijken en afhandelen.
+// Login met een code per mail (via Resend): e-mail invullen -> code van 6 cijfers (10 min geldig, max 5 pogingen)
+// -> sessie van 30 dagen in een cookie (HttpOnly, Secure, alleen voor /beheer).
+// Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 
-const html = (body, status = 200) => new Response(body, {
-  status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow" },
+const html = (body, status = 200, extra = {}) => new Response(body, {
+  status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
 });
 const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const datum = (iso) => iso ? new Date(iso).toLocaleString("nl-BE", { timeZone: "Europe/Brussels", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
-/* ---------------- Cloudflare Access ---------------- */
+/* ---------------- login met code per mail ---------------- */
 
-const b64url = (s) => Uint8Array.from(atob(s.replace(/-/g, "+").replace(/_/g, "/").padEnd(Math.ceil(s.length / 4) * 4, "=")), (c) => c.charCodeAt(0));
-let certs = { tot: 0, keys: [] };
-
-async function sleutels(team) {
-  if (Date.now() < certs.tot) return certs.keys;
-  const r = await fetch(`${team}/cdn-cgi/access/certs`);
-  const d = await r.json();
-  certs = { tot: Date.now() + 3600_000, keys: d.keys || [] };
-  return certs.keys;
+const COOKIE = "rc_beheer";
+const SESSIE_DAGEN = 30;
+const toegelaten = (env) => (env.BEHEER_EMAILS || "pieter@roverandco.be").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
+async function hash(s) {
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s));
+  return [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
 }
-
 function cookie(request, naam) {
   const m = (request.headers.get("cookie") || "").match(new RegExp(`(?:^|;\\s*)${naam}=([^;]+)`));
   return m ? m[1] : null;
 }
 
 async function wie(request, env) {
-  const team = (env.ACCESS_TEAM_DOMAIN || "").replace(/\/$/, "");
-  if (!team || !env.ACCESS_AUD) return { fout: "niet-ingesteld" };
-  const token = request.headers.get("cf-access-jwt-assertion") || cookie(request, "CF_Authorization");
-  if (!token) return { fout: "geen-token" };
-  const [h, p, s] = token.split(".");
-  if (!h || !p || !s) return { fout: "token" };
-  try {
-    const kop = JSON.parse(new TextDecoder().decode(b64url(h)));
-    const inhoud = JSON.parse(new TextDecoder().decode(b64url(p)));
-    const jwk = (await sleutels(team)).find((k) => k.kid === kop.kid);
-    if (!jwk || kop.alg !== "RS256") return { fout: "sleutel" };
-    const key = await crypto.subtle.importKey("jwk", jwk, { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" }, false, ["verify"]);
-    const ok = await crypto.subtle.verify("RSASSA-PKCS1-v1_5", key, b64url(s), new TextEncoder().encode(`${h}.${p}`));
-    if (!ok) return { fout: "handtekening" };
-    const aud = Array.isArray(inhoud.aud) ? inhoud.aud : [inhoud.aud];
-    if (!aud.includes(env.ACCESS_AUD) || inhoud.iss !== team || !(inhoud.exp * 1000 > Date.now())) return { fout: "token-ongeldig" };
-    const toegelaten = (env.BEHEER_EMAILS || "pieter@roverandco.be").toLowerCase().split(",").map((x) => x.trim());
-    const email = String(inhoud.email || "").toLowerCase();
-    if (!toegelaten.includes(email)) return { fout: "geen-toegang", email };
-    return { email };
-  } catch {
-    return { fout: "token" };
+  const token = cookie(request, COOKIE);
+  if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
+  const r = await env.SHOP_DB.prepare("SELECT email, verloopt FROM beheer_sessies WHERE token_hash = ?").bind(await hash(token)).first();
+  if (!r || r.verloopt < Date.now() || !toegelaten(env).includes(r.email)) return null;
+  return { email: r.email };
+}
+
+async function stuurCode(env, email, code) {
+  const r = await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
+    body: JSON.stringify({
+      from: "Rover & Co VZW <noreply@roverandco.be>", to: [email], subject: `Je code voor het beheer: ${code}`,
+      text: `Je code om in te loggen op het beheer van Rover & Co: ${code}\n\nDe code is 10 minuten geldig. Heb je dit niet gevraagd? Dan mag je deze mail negeren.`,
+    }),
+  });
+  return r.ok;
+}
+
+const loginPagina = (stap, { email = "", melding = "" } = {}) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>Inloggen – Beheer Rover &amp; Co</title><style>${STIJL}
+.login{max-width:380px;margin:60px auto}.login input{width:100%;margin:6px 0 12px}.login button{width:100%}</style></head><body>
+<header><a href="/beheer">Rover &amp; Co beheer</a></header><main><form class="kaart login" method="post" action="/beheer/login">
+<h2>Inloggen</h2>${melding ? `<p>${esc(melding)}</p>` : ""}
+${stap === "code"
+    ? `<input type="hidden" name="email" value="${esc(email)}"><label>Code uit je mail<input name="code" inputmode="numeric" autocomplete="one-time-code" pattern="[0-9]{6}" maxlength="6" required autofocus></label><button>Inloggen</button>
+       <p><a href="/beheer/login">Andere e-mail of nieuwe code</a></p>`
+    : `<label>E-mailadres<input type="email" name="email" autocomplete="email" required autofocus></label><button>Stuur me een code</button>`}
+</form></main></body></html>`);
+
+async function login(request, env, url) {
+  if (request.method !== "POST") return loginPagina("email");
+  const origin = request.headers.get("origin");
+  if (origin && origin !== url.origin) return html("Geweigerd.", 403);
+  const f = await request.formData();
+  const email = String(f.get("email") || "").trim().toLowerCase().slice(0, 160);
+  const code = String(f.get("code") || "").trim();
+  const nu = Date.now();
+
+  if (!code) {
+    // Stap 1: code sturen. Altijd hetzelfde antwoord, zodat niemand kan afleiden wie toegang heeft.
+    if (toegelaten(env).includes(email)) {
+      if (!env.RESEND_API_KEY) return loginPagina("email", { melding: "Mails versturen is nog niet ingesteld (RESEND_API_KEY ontbreekt)." });
+      const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM beheer_codes WHERE email = ? AND aangemaakt > ?").bind(email, nu - 15 * 60_000).first();
+      if ((recent?.n || 0) < 3) {
+        const nieuw = String(crypto.getRandomValues(new Uint32Array(1))[0] % 1_000_000).padStart(6, "0");
+        await env.SHOP_DB.prepare("DELETE FROM beheer_codes WHERE verloopt < ?").bind(nu).run();
+        await env.SHOP_DB.prepare("INSERT INTO beheer_codes (email, code_hash, aangemaakt, verloopt) VALUES (?, ?, ?, ?)")
+          .bind(email, await hash(email + ":" + nieuw), nu, nu + 10 * 60_000).run();
+        await stuurCode(env, email, nieuw);
+      }
+    }
+    return loginPagina("code", { email, melding: "Als dit adres toegang heeft, staat er nu een code in je mailbox." });
   }
+
+  // Stap 2: code controleren.
+  const rij = await env.SHOP_DB.prepare("SELECT rowid id, code_hash, pogingen FROM beheer_codes WHERE email = ? AND verloopt > ? ORDER BY aangemaakt DESC LIMIT 1").bind(email, nu).first();
+  if (!rij || rij.pogingen >= 5) return loginPagina("email", { melding: "De code is verlopen of te vaak fout ingegeven. Vraag een nieuwe code." });
+  if (rij.code_hash !== await hash(email + ":" + code)) {
+    await env.SHOP_DB.prepare("UPDATE beheer_codes SET pogingen = pogingen + 1 WHERE rowid = ?").bind(rij.id).run();
+    return loginPagina("code", { email, melding: "Die code klopt niet." });
+  }
+  await env.SHOP_DB.prepare("DELETE FROM beheer_codes WHERE email = ?").bind(email).run();
+  const token = [...crypto.getRandomValues(new Uint8Array(32))].map((b) => b.toString(16).padStart(2, "0")).join("");
+  await env.SHOP_DB.prepare("DELETE FROM beheer_sessies WHERE verloopt < ?").bind(nu).run();
+  await env.SHOP_DB.prepare("INSERT INTO beheer_sessies (token_hash, email, verloopt) VALUES (?, ?, ?)").bind(await hash(token), email, nu + SESSIE_DAGEN * 86400_000).run();
+  return new Response(null, { status: 303, headers: {
+    location: "/beheer", "cache-control": "no-store",
+    "set-cookie": `${COOKIE}=${token}; Path=/beheer; Max-Age=${SESSIE_DAGEN * 86400}; HttpOnly; Secure; SameSite=Lax`,
+  } });
+}
+
+async function uitloggen(request, env) {
+  const token = cookie(request, COOKIE);
+  if (token) await env.SHOP_DB.prepare("DELETE FROM beheer_sessies WHERE token_hash = ?").bind(await hash(token)).run();
+  return new Response(null, { status: 303, headers: { location: "/beheer/login", "set-cookie": `${COOKIE}=; Path=/beheer; Max-Age=0; HttpOnly; Secure; SameSite=Lax` } });
 }
 
 /* ---------------- opmaak ---------------- */
@@ -83,7 +132,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 
 const pagina = (titel, inhoud, email) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>${esc(titel)} – Beheer Rover &amp; Co</title><style>${STIJL}</style></head><body>
-<header><a href="/beheer">Rover &amp; Co beheer</a><small>${esc(email || "")}</small></header><main>${inhoud}</main></body></html>`);
+<header><a href="/beheer">Rover &amp; Co beheer</a><small>${esc(email || "")} · <a href="/beheer/uitloggen" style="font-weight:400">Uitloggen</a></small></header><main>${inhoud}</main></body></html>`);
 
 function badge(status) {
   const s = String(status);
@@ -221,10 +270,10 @@ export async function beheer(request, env, url) {
   const p = url.pathname;
   if (p !== "/beheer" && !p.startsWith("/beheer/")) return null;
   if (!env.SHOP_DB) return html("Database ontbreekt.", 500);
+  if (p === "/beheer/login") return login(request, env, url);
+  if (p === "/beheer/uitloggen") return uitloggen(request, env);
   const w = await wie(request, env);
-  if (w.fout === "niet-ingesteld") return html("<p>Het beheer is nog niet gekoppeld aan Cloudflare Access.</p>", 503);
-  if (w.fout === "geen-toegang") return html(`<p>${esc(w.email)} heeft geen toegang tot het beheer.</p>`, 403);
-  if (w.fout) return html("<p>Geen toegang. Log in via Cloudflare Access.</p>", 403);
+  if (!w) return new Response(null, { status: 303, headers: { location: "/beheer/login", "cache-control": "no-store" } });
 
   if (request.method === "POST") {
     // Alleen formulieren van het beheer zelf.
