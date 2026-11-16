@@ -114,7 +114,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
       </div>
     </div>
     <div class="legal">
-      <span>{e(site['naam'])} · {site['ondernemingsnummer']} · <a href="/privacy">Privacy</a></span>
+      <span>{e(site['naam'])} · {site['ondernemingsnummer']} · <a href="/voorwaarden">Voorwaarden</a> · <a href="/privacy">Privacy</a></span>
       <span>Made with love by <a href="https://susconsult.be" rel="noopener">SUS Consult</a></span>
     </div>
   </div>
@@ -658,15 +658,49 @@ write("/contact", "Contact", "Contacteer Rover & Co VZW in Oostham: e-mail, tele
   <div class="rubriek"><h3>Volg ons</h3><p><a href="{site['instagram']}" rel="noopener">Instagram</a><br><a href="{site['facebook']}" rel="noopener">Facebook</a></p></div>
 </div></section>""")
 
-# ---------- privacy (concept) ----------
+# ---------- algemene voorwaarden ----------
+write("/voorwaarden", "Algemene voorwaarden", "Algemene voorwaarden van Rover & Co VZW voor de webshop en inschrijvingen.",
+      banner("Voorwaarden", "Algemene voorwaarden", "", None) + f"""
+<section><div class="narrow prose">
+  <h2>Wie zijn we</h2>
+  <p>{e(site['naam'])}, {', '.join(site['adres'])} · {site['ondernemingsnummer']} · <a href="mailto:{site['email']}">{site['email']}</a> · <a href="tel:{site['telefoon_link']}">{site['telefoon']}</a></p>
+  <h2>Bestellen en betalen</h2>
+  <p>Je bestelling of inschrijving is definitief zodra de betaling via Viva gelukt is. Je krijgt een bevestiging per mail. Alle prijzen staan in euro.</p>
+  <h2>Levering</h2>
+  <ul>
+    <li>Ophalen op een activiteit: gratis.</li>
+    <li>Ophalen in Oostham: gratis, op afspraak.</li>
+    <li>Verzenden: €7,50, gratis vanaf €100. Wij kiezen de vervoerder. We versturen je bestelling zo snel mogelijk en uiterlijk binnen 30 dagen.</li>
+  </ul>
+  <h2>Herroepen en retour (shopartikelen)</h2>
+  <p>Je hebt 14 dagen na ontvangst om zonder opgave van reden af te zien van je aankoop. Laat het ons weten via <a href="mailto:{site['email']}">{site['email']}</a> en stuur of breng het artikel ongebruikt terug binnen 14 dagen na je bericht. De kosten om het terug te sturen zijn voor jou.</p>
+  <p>We betalen alles terug, ook de verzendkost en een eventuele gift, binnen 14 dagen nadat we je bericht krijgen. We mogen wachten met terugbetalen tot we het artikel terug hebben.</p>
+  <h2>Inschrijvingen voor activiteiten</h2>
+  <p>Een inschrijving voor een activiteit op een vaste datum kan je niet herroepen en wordt niet terugbetaald. Je mag je inschrijving wel doorgeven aan iemand anders: mail ons de naam van de nieuwe deelnemer.</p>
+  <p>Gaat een activiteit niet door door een beslissing van ons, dan betalen we je inschrijving terug.</p>
+  <h2>Vragen en klachten</h2>
+  <p>Mail naar <a href="mailto:{site['email']}">{site['email']}</a>. We antwoorden zo snel mogelijk.</p>
+</div></section>""")
+
+# ---------- privacy ----------
 write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
       banner("Privacy", "Privacyverklaring", "", None) + f"""
 <section><div class="narrow prose">
-  <p><strong>Concept, nog na te kijken door het bestuur.</strong></p>
   <p>{e(site['naam'])} ({site['ondernemingsnummer']}, {', '.join(site['adres'])}) is verantwoordelijk voor de gegevens die je ons bezorgt.</p>
+  <h2>Wat we gebruiken en waarom</h2>
   <p>We gebruiken je naam, e-mailadres, telefoonnummer en adres alleen om je inschrijving of bestelling af te handelen en je te contacteren over onze activiteiten. We verkopen je gegevens niet.</p>
+  <h2>Wie helpt ons daarbij</h2>
+  <ul>
+    <li>Betalingen verlopen via Viva. Wij zien je kaartgegevens niet.</li>
+    <li>Bestellingen en inschrijvingen bewaren we in een Google-spreadsheet van Rover & Co.</li>
+    <li>Bevestigingsmails versturen we via Resend.</li>
+  </ul>
+  <h2>Hoe lang</h2>
+  <p>We bewaren bestel- en betaalgegevens zo lang als de wettelijke boekhoudplicht vraagt.</p>
+  <h2>Cookies</h2>
   <p>Deze website plaatst geen tracking- of advertentiecookies. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
-  <p>Je kan je gegevens altijd opvragen, laten aanpassen of laten verwijderen via <a href="mailto:{site['email']}">{site['email']}</a>.</p>
+  <h2>Jouw rechten</h2>
+  <p>Je kan je gegevens altijd opvragen, laten aanpassen of laten verwijderen via <a href="mailto:{site['email']}">{site['email']}</a>. Ben je niet tevreden, dan kan je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
 </div></section>""")
 
 # ---------- 404 ----------
@@ -742,7 +776,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
         </ul>
         <div id="co-lijnen"></div>
         <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
@@ -815,7 +849,7 @@ afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
           <li><span>Steun</span><span id="co-donatie">€0,00</span></li>
           <li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li>
         </ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/privacy">privacyverklaring</a>.</label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>
