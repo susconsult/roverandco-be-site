@@ -9,6 +9,15 @@
   "info": "Praatavond van de club, met meer uitleg over de komende activiteiten."
  },
  {
+  "club": "Lost & Found",
+  "titel": "Lost & Found: 4x4-tour en afterparty",
+  "datum": "2026-11-21",
+  "plaats": "Camping de Soetelaer, Sint-Margriete · tour 8u–17u, afterparty 19u–3u",
+  "link": "https://www.tickettailor.com/events/lostandfound/2409671",
+  "org": "Lost & Found, met Vicious Offroad",
+  "info": "Eerste editie: overdag een 4x4-tour, 's avonds een afterparty met dj's, bar en foodtrucks. Tickets via Ticket Tailor."
+ },
+ {
   "club": "Xrover Belgium",
   "titel": "Roadbook",
   "datum": "2026-11-29",
@@ -34,6 +43,15 @@
   "link": "https://www.facebook.com/events/1794085608291378/",
   "org": "LROCB – Land Rover Owners Club Belgium",
   "info": "Jaarlijks Sinterklaasfeest. Start met koffie en ontbijtkoek in de werkplaats van D&G in Oosterzele, einde in Essene. Geef bij inschrijving op hoeveel kinderen onder 12 jaar meekomen. Evenement voor leden van de LROCB-groep."
+ },
+ {
+  "club": "LRCH",
+  "titel": "Kerstrit",
+  "datum": "2026-12-13",
+  "plaats": "Veluwe (NL)",
+  "link": "https://www.lrch.nl/evenementen/agenda/kerstrit-2026",
+  "org": "LRCH – Land Rover Club Holland",
+  "info": "Kerstrit van de All Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
  },
  {
   "club": "Tea on the Tailgate",
@@ -63,6 +81,24 @@
   "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
  },
  {
+  "club": "LRCH",
+  "titel": "Allroadrit 1 – Snertrit",
+  "datum": "2027-01-24",
+  "plaats": "Nederland, plaats volgt",
+  "link": "https://www.lrch.nl/evenementen/agenda/allroadrit-1-2027-snertrit",
+  "org": "LRCH – Land Rover Club Holland",
+  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
+ },
+ {
+  "club": "LRCH",
+  "titel": "Offroad dag 1 – Heerde",
+  "datum": "2027-02-07",
+  "plaats": "Kamperweg, Heerde (NL)",
+  "link": "https://www.lrch.nl/evenementen/agenda/offroad-dag-1-2027-heerde",
+  "org": "LRCH – Land Rover Club Holland",
+  "info": "Offroaddag van de Off Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
+ },
+ {
   "club": "LROCB",
   "titel": "Valentijnsweekend",
   "datum": "2027-02-13",
@@ -89,51 +125,6 @@
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
   "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
- },
- {
-  "club": "Xrover Belgium",
-  "titel": "Halloween roadbook",
-  "datum": "2027-10-24",
-  "plaats": "Zie de agenda van Xrover",
-  "link": "https://xrover.be/agenda/",
-  "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
- },
- {
-  "club": "Xrover Belgium",
-  "titel": "Kerstroadbook",
-  "datum": "2027-12-26",
-  "plaats": "Zie de agenda van Xrover",
-  "link": "https://xrover.be/agenda/",
-  "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
- },
- {
-  "club": "LRCH",
-  "titel": "Kerstrit",
-  "datum": "2026-12-13",
-  "plaats": "Veluwe (NL)",
-  "link": "https://www.lrch.nl/evenementen/agenda/kerstrit-2026",
-  "org": "LRCH – Land Rover Club Holland",
-  "info": "Kerstrit van de All Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
- },
- {
-  "club": "LRCH",
-  "titel": "Allroadrit 1 – Snertrit",
-  "datum": "2027-01-24",
-  "plaats": "Nederland, plaats volgt",
-  "link": "https://www.lrch.nl/evenementen/agenda/allroadrit-1-2027-snertrit",
-  "org": "LRCH – Land Rover Club Holland",
-  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
- },
- {
-  "club": "LRCH",
-  "titel": "Offroad dag 1 – Heerde",
-  "datum": "2027-02-07",
-  "plaats": "Kamperweg, Heerde (NL)",
-  "link": "https://www.lrch.nl/evenementen/agenda/offroad-dag-1-2027-heerde",
-  "org": "LRCH – Land Rover Club Holland",
-  "info": "Offroaddag van de Off Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
  },
  {
   "club": "LRCH",
@@ -179,5 +170,23 @@
   "link": "https://www.lrch.nl/evenementen/agenda/buitenland-special-2027-ahoj-lrch-jede-do-ceska",
   "org": "LRCH – Land Rover Club Holland",
   "info": "Meerdaagse buitenlandreis van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
+ },
+ {
+  "club": "Xrover Belgium",
+  "titel": "Halloween roadbook",
+  "datum": "2027-10-24",
+  "plaats": "Zie de agenda van Xrover",
+  "link": "https://xrover.be/agenda/",
+  "org": "Xrover Belgium",
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+ },
+ {
+  "club": "Xrover Belgium",
+  "titel": "Kerstroadbook",
+  "datum": "2027-12-26",
+  "plaats": "Zie de agenda van Xrover",
+  "link": "https://xrover.be/agenda/",
+  "org": "Xrover Belgium",
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
  }
 ]
