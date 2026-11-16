@@ -31,6 +31,16 @@
   "soort": "4x4"
  },
  {
+  "club": "4x4 Drenthe",
+  "soort": "4x4",
+  "titel": "Offroaddag",
+  "datum": "2026-11-21",
+  "plaats": "Ruiterweg, Havelterberg (NL) · 10u–16u",
+  "link": "https://terrein.nu/event/evenement-van-4x4-drenthe/",
+  "org": "4x4 Drenthe",
+  "info": "Vrij rijden op het terrein, ook voor niet-leden. Inschrijven via de site van de organisator."
+ },
+ {
   "club": "H.E.L.M. Kempen",
   "soort": "4x4",
   "titel": "Rondrit",
@@ -61,6 +71,16 @@
   "soort": "club"
  },
  {
+  "club": "ANVT",
+  "soort": "4x4",
+  "titel": "Offroaddag Heerde",
+  "datum": "2026-11-29",
+  "plaats": "MSV-NOV, Kamperweg 78c, Heerde (NL) · 10u–16u",
+  "link": "https://terrein.nu/event/evenement-van-de-anvt-3/",
+  "org": "ANVT",
+  "info": "Vrij rijden. Leden gratis, niet-leden €50."
+ },
+ {
   "club": "LROCB",
   "titel": "Sinterklaasfeest",
   "datum": "2026-12-05",
@@ -69,6 +89,26 @@
   "org": "LROCB – Land Rover Owners Club Belgium",
   "info": "Jaarlijks Sinterklaasfeest. Start met koffie en ontbijtkoek in de werkplaats van D&G in Oosterzele, einde in Essene. Geef bij inschrijving op hoeveel kinderen onder 12 jaar meekomen. Evenement voor leden van de LROCB-groep.",
   "soort": "club"
+ },
+ {
+  "club": "Hannibal Off-road",
+  "soort": "4x4",
+  "titel": "Hannibal Wintertreffen",
+  "datum": "2026-12-06",
+  "plaats": "MSV-NOV, Kamperweg 78c, Heerde (NL) · 9u–16u",
+  "link": "https://terrein.nu/event/hannibal-wintertreffen/",
+  "org": "Hannibal Off-road",
+  "info": "Offroaddag in de winter. Vooraf inschrijven is verplicht."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Offroaddag Oss",
+  "datum": "2026-12-06",
+  "plaats": "Circuit de Witte Ruysheuvel, Aengelbertlaan 60, Oss (NL) · 10u–16u",
+  "link": "https://terrein.nu/event/off-road-evenement-van-jeebee-12/",
+  "org": "Jeebee",
+  "info": "Vrij rijden op het circuit. Voorwaarden en inschrijven via de organisator."
  },
  {
   "club": "LRCH",
@@ -89,6 +129,16 @@
   "link": "https://www.adventureclub.be/en/p/agenda",
   "org": "Adventure Club LR",
   "info": "Kersteditie met een 4x4-roadbook in België, door een club van Land Rover-liefhebbers."
+ },
+ {
+  "club": "ANVT",
+  "soort": "4x4",
+  "titel": "Offroaddag Boxmeer",
+  "datum": "2026-12-13",
+  "plaats": "Circuit 't Snepke, Rijkevoortseweg, Boxmeer (NL) · 12u–16u",
+  "link": "https://terrein.nu/event/evenement-van-de-anvt-4/",
+  "org": "ANVT",
+  "info": "Vrij rijden. Voorwaarden voor leden en niet-leden bij de ANVT."
  },
  {
   "club": "Tea on the Tailgate",
@@ -252,6 +302,17 @@
   "org": "LRCH – Land Rover Club Holland",
   "info": "Meerdaagse buitenlandreis van de LRCH. Info, voorwaarden en inschrijving via hun agenda.",
   "soort": "club"
+ },
+ {
+  "club": "LRCH",
+  "soort": "beurs",
+  "titel": "Dé 4x4 Vakantiebeurs",
+  "datum": "2027-10-09",
+  "einde": "2027-10-10",
+  "plaats": "WaterGoed, Tielsestraat 129, Valburg (NL)",
+  "link": "https://www.4x4vakantiebeurs.nl/",
+  "org": "LRCH – Land Rover Club Holland",
+  "info": "22e editie van de beurs voor 4x4-reizen, daktenten en uitrusting. Alle merken welkom."
  },
  {
   "club": "Xrover Belgium",
