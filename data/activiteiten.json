@@ -20,8 +20,8 @@
     "inschrijven_label": "Inschrijven",
     "affiche": "affiche-church-of-rover",
     "foto_pos": "50% 74%",
-    "banner_foto": "870",
-    "banner_pos": "50% 50%",
+    "banner_foto": "leden-vuur-avond",
+    "banner_pos": "50% 55%",
     "banner_groen": true
   },
   {
@@ -38,8 +38,8 @@
       "Vertrek 18:00 aan The Wolfgarage",
       "Tea on the Tailgate 19:00 tot 22:00"
     ],
-    "foto": "winter-series-sneeuw",
-    "foto_alt": "Groene Land Rover Series in de sneeuw",
+    "foto": "leden-freelander-sneeuw",
+    "foto_alt": "Zilveren Land Rover Freelander op een besneeuwde bosweg",
     "omschrijving_html": "<p>Tea on the Tailgate houdt een kersteditie in Lille: een gezellige avondmeet voor Land Rover-rijders en liefhebbers. Wij rijden er samen in colonne naartoe.</p><h3>Praktisch</h3><ul><li><strong>Vertrek:</strong> 18:00 aan The Wolfgarage, Olmensesteenweg 105, 3945 Tessenderlo-Ham</li><li><strong>Bestemming:</strong> Tea on the Tailgate Kersteditie, Poeyelheide 13t, Lille</li><li><strong>Meet:</strong> 19:00 tot 22:00</li><li><strong>Prijs:</strong> gratis</li></ul><p>Schrijf je even in, zo weten we met hoeveel wagens we vertrekken.</p>",
     "inschrijven_url": "",
     "inschrijven_label": "",
@@ -64,7 +64,8 @@
         }
       ]
     },
-    "foto_credit": "<a href=\"https://commons.wikimedia.org/wiki/File:Land_Rover_in_snow,_2026_Midwinter_Storm,_Asheville,_North_Carolina.jpg\" rel=\"noopener\">anoldent</a>, <a href=\"https://creativecommons.org/licenses/by-sa/4.0/\" rel=\"noopener\">CC BY-SA 4.0</a>, via Wikimedia Commons"
+    "foto_credit": "lid Rover & Co",
+    "foto_pos": "50% 62%"
   },
   {
     "slug": "wild-and-wheels",
@@ -152,6 +153,30 @@
     },
     "fotos": [
       [
+        "leden-daktenten-rij",
+        "Defenders met daktenten op een kampeerterrein"
+      ],
+      [
+        "leden-zonsondergang",
+        "Defender met daktent bij zonsondergang"
+      ],
+      [
+        "leden-track-rood",
+        "Rode Defender 90 op een zandheuvel"
+      ],
+      [
+        "leden-vuur-hond",
+        "Defender met daktent, vuurschaal en border collie"
+      ],
+      [
+        "leden-lightweight-110",
+        "Gele Lightweight naast een zilveren Defender 110"
+      ],
+      [
+        "leden-daktent-rivier",
+        "Defender met groene daktent aan de rivier"
+      ],
+      [
         "ww-colonne-weg",
         "Colonne Land Rovers op een landweg"
       ],
@@ -200,7 +225,7 @@
         "Bezoekers aan de bar op het festivalterrein"
       ]
     ],
-    "fotos_titel": "Vorige editie en Pakawi Park"
+    "fotos_titel": "Foto's van leden, vorige editie en Pakawi Park"
   },
   {
     "slug": "testinschrijving",
