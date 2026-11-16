@@ -382,15 +382,18 @@ for a in alle_acts:
 # ---------- kalender ----------
 KAL_ANDEREN = json.load(open(os.path.join(ROOT, "data", "kalender.json"), encoding="utf-8"))
 kal_items = [{"club": "Rover & Co", "ons": True, "titel": a["titel"], "datum": a["datum"], "einde": a.get("einde", ""),
-              "label": a["datum_label"], "plaats": a["locatie"] + (" · " + a["uren"] if a.get("uren") else ""), "link": f"/activiteiten/{a['slug']}", "org": "Rover & Co VZW", "info": a.get("kort", "")} for a in acts]
+              "label": a["datum_label"], "plaats": a["locatie"] + (" · " + a["uren"] if a.get("uren") else ""), "link": f"/activiteiten/{a['slug']}", "org": "Rover & Co VZW", "soort": "club", "info": a.get("kort", "")} for a in acts]
 kal_items += [{**k, "ons": False} for k in KAL_ANDEREN]
 kal_data = json.dumps(sorted(kal_items, key=lambda x: x["datum"]), ensure_ascii=False).replace("</", "<\\/")
-kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten en die van andere Land Rover-clubs, op één plek.", "968", "Colonne op een landweg") + f"""
+kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten, andere Land Rover-clubs, 4x4-dagen, beurzen en overland, op één plek.", "968", "Colonne op een landweg") + f"""
 <section><div class="wrap">
   <div class="chips kal-filter" role="radiogroup" aria-label="Toon">
     <label><input type="radio" name="kalf" value="alles" checked><span>Alles</span></label>
     <label><input type="radio" name="kalf" value="ons"><span>Rover &amp; Co</span></label>
-    <label><input type="radio" name="kalf" value="clubs"><span>Andere clubs</span></label>
+    <label><input type="radio" name="kalf" value="club"><span>Land Rover-clubs</span></label>
+    <label><input type="radio" name="kalf" value="4x4"><span>4x4 en offroad</span></label>
+    <label><input type="radio" name="kalf" value="beurs"><span>Beurzen en shows</span></label>
+    <label><input type="radio" name="kalf" value="overland"><span>Overland en kamperen</span></label>
   </div>
   <div id="kal-lijst" class="kal-lijst" aria-live="polite"></div>
   <p class="note">Bij activiteiten van andere clubs gebeuren info en inschrijving bij de club zelf. Klik door naar hun pagina.</p>
@@ -407,6 +410,7 @@ kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten 
       <div class="veld"><label for="k-link">Link met meer info <small>(optioneel)</small></label><input id="k-link" name="link" type="url" placeholder="https://"><div class="err" data-voor="link"></div></div></div>
     <div class="veld2"><div class="veld"><label for="k-naam">Jouw naam <small>(optioneel)</small></label><input id="k-naam" name="naam" autocomplete="name"></div>
       <div class="veld"><label for="k-email">Jouw e-mailadres</label><input id="k-email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div></div>
+    <div class="veld"><label for="k-soort">Soort activiteit</label><select id="k-soort" name="soort"><option value="club">Land Rover-club</option><option value="4x4">4x4 en offroad</option><option value="beurs">Beurs of show</option><option value="overland">Overland en kamperen</option></select></div>
     <div class="veld"><label for="k-opm">Opmerking <small>(optioneel)</small></label><textarea id="k-opm" name="opmerking" rows="3"></textarea></div>
     <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
     <button class="btn btn-solid" type="submit" id="k-knop">Activiteit indienen</button>
@@ -424,7 +428,7 @@ var KAL='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18
 function el(t,c,x){{var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}}
 function d(s){{var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}}
 function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
-  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons")===!!a.ons)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
+  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons"?a.ons:(a.soort||"club")===filter))}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
     var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;var blok=el("div","kal-blok");blok.append(el("h3","kal-maand",m));grid=el("div","kal-grid");blok.append(grid);lijst.append(blok)}}
     var r=el(a.link?"a":"div","kal-kaart"+(a.ons?" ons":""));if(a.link){{r.href=a.link;if(!a.ons)r.rel="noopener"}}
     var dag=el("div","kal-datum");dag.append(el("span","kal-wd",DAGEN[dt.getDay()]),el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));

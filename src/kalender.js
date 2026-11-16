@@ -30,7 +30,7 @@ async function indienen(request, env) {
   if (t(d.website)) return kjson({ ok: true }); // spam-val
   const a = {
     club: t(d.club, 100), titel: t(d.titel, 120), datum: t(d.datum, 10), einde: t(d.einde, 10),
-    plaats: t(d.plaats, 120), link: t(d.link, 300), naam: t(d.naam, 100), email: t(d.email, 160).toLowerCase(), opmerking: t(d.opmerking, 1000),
+    plaats: t(d.plaats, 120), link: t(d.link, 300), soort: ["club", "4x4", "beurs", "overland"].includes(d.soort) ? d.soort : "club", naam: t(d.naam, 100), email: t(d.email, 160).toLowerCase(), opmerking: t(d.opmerking, 1000),
   };
   const fouten = [];
   if (a.club.length < 2) fouten.push("club");
@@ -55,7 +55,7 @@ async function indienen(request, env) {
     const basis = new URL(request.url).origin + `/api/kalender/beslis?id=${id}&t=${token}`;
     const tekst = [
       "Nieuwe activiteit ingediend voor de kalender:", "",
-      `Club: ${a.club}`, `Activiteit: ${a.titel}`, `Datum: ${a.datum}${a.einde ? " tot " + a.einde : ""}`, `Plaats: ${a.plaats}`,
+      `Club: ${a.club}`, `Activiteit: ${a.titel}`, `Datum: ${a.datum}${a.einde ? " tot " + a.einde : ""}`, `Plaats: ${a.plaats}`, `Soort: ${a.soort}`,
       `Link: ${a.link || "-"}`, `Ingediend door: ${a.naam || "-"} <${a.email}>`, `Opmerking: ${a.opmerking || "-"}`, "",
       `Goedkeuren (komt meteen op de kalender): ${basis}&actie=ok`, `Weigeren: ${basis}&actie=nee`,
     ].join("\n");
@@ -86,7 +86,7 @@ async function lijst(env) {
   const rijen = (await env.PLANNER_DB.prepare("SELECT id, data FROM kalender WHERE status = 'ok'").all()).results;
   const items = rijen.map((r) => {
     const a = JSON.parse(r.data);
-    return { id: r.id, club: a.club, titel: a.titel, datum: a.datum, einde: a.einde || "", plaats: a.plaats, link: a.link };
+    return { id: r.id, club: a.club, titel: a.titel, datum: a.datum, einde: a.einde || "", plaats: a.plaats, link: a.link, soort: a.soort || "club" };
   }).filter((a) => (a.einde || a.datum) >= vandaag);
   return new Response(JSON.stringify({ ok: true, items }), { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "public, max-age=60" } });
 }

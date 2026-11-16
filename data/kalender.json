@@ -6,7 +6,19 @@
   "plaats": "Kantine SK Heffen, Mechelen · 20u",
   "link": "https://www.facebook.com/events/1813501826591536/",
   "org": "LROCB – Land Rover Owners Club Belgium",
-  "info": "Praatavond van de club, met meer uitleg over de komende activiteiten."
+  "info": "Praatavond van de club, met meer uitleg over de komende activiteiten.",
+  "soort": "club"
+ },
+ {
+  "club": "InterClassics",
+  "soort": "beurs",
+  "titel": "InterClassics Brussels",
+  "datum": "2026-11-20",
+  "einde": "2026-11-22",
+  "plaats": "Brussels Expo, Brussel",
+  "link": "https://interclassics.events/interclassics-brussels",
+  "org": "InterClassics (MECC Maastricht)",
+  "info": "De grootste klassiekerbeurs van de Benelux, met oldtimers, youngtimers, onderdelen en automobilia."
  },
  {
   "club": "Lost & Found",
@@ -15,7 +27,18 @@
   "plaats": "Camping de Soetelaer, Sint-Margriete · tour 8u–17u, afterparty 19u–3u",
   "link": "https://www.tickettailor.com/events/lostandfound/2409671",
   "org": "Lost & Found, met Vicious Offroad",
-  "info": "Eerste editie: overdag een 4x4-tour, 's avonds een afterparty met dj's, bar en foodtrucks. Tickets via Ticket Tailor."
+  "info": "Eerste editie: overdag een 4x4-tour, 's avonds een afterparty met dj's, bar en foodtrucks. Tickets via Ticket Tailor.",
+  "soort": "4x4"
+ },
+ {
+  "club": "H.E.L.M. Kempen",
+  "soort": "4x4",
+  "titel": "Rondrit",
+  "datum": "2026-11-22",
+  "plaats": "Glosso Circuit, Schotelven 143, Arendonk",
+  "link": "https://www.helm-kempen.be/kalender/",
+  "org": "H.E.L.M. Kempen",
+  "info": "Offroad-rondrit, enkel voor leden van de club."
  },
  {
   "club": "Xrover Belgium",
@@ -24,7 +47,8 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  },
  {
   "club": "Tea on the Tailgate",
@@ -33,7 +57,8 @@
   "plaats": "Kasteel van Tillegem, Brugge · 11u–17u",
   "link": "https://teaonthetailgate.co.uk/event/belgium-kasteel-van-tielen/",
   "org": "Tea on the Tailgate",
-  "info": "Informele meet voor Land Rover-rijders en liefhebbers. Iedereen is welkom, ook wie (nog) geen Land Rover heeft."
+  "info": "Informele meet voor Land Rover-rijders en liefhebbers. Iedereen is welkom, ook wie (nog) geen Land Rover heeft.",
+  "soort": "club"
  },
  {
   "club": "LROCB",
@@ -42,7 +67,8 @@
   "plaats": "Aardeweg 2, Oosterzele · vanaf 10u",
   "link": "https://www.facebook.com/events/1794085608291378/",
   "org": "LROCB – Land Rover Owners Club Belgium",
-  "info": "Jaarlijks Sinterklaasfeest. Start met koffie en ontbijtkoek in de werkplaats van D&G in Oosterzele, einde in Essene. Geef bij inschrijving op hoeveel kinderen onder 12 jaar meekomen. Evenement voor leden van de LROCB-groep."
+  "info": "Jaarlijks Sinterklaasfeest. Start met koffie en ontbijtkoek in de werkplaats van D&G in Oosterzele, einde in Essene. Geef bij inschrijving op hoeveel kinderen onder 12 jaar meekomen. Evenement voor leden van de LROCB-groep.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -51,7 +77,18 @@
   "plaats": "Veluwe (NL)",
   "link": "https://www.lrch.nl/evenementen/agenda/kerstrit-2026",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Kerstrit van de All Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Kerstrit van de All Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
+ },
+ {
+  "club": "Adventure Club LR",
+  "soort": "club",
+  "titel": "Special Kerst Event 4x4-roadbook",
+  "datum": "2026-12-13",
+  "plaats": "België, zie de site van Adventure Club",
+  "link": "https://www.adventureclub.be/en/p/agenda",
+  "org": "Adventure Club LR",
+  "info": "Kersteditie met een 4x4-roadbook in België, door een club van Land Rover-liefhebbers."
  },
  {
   "club": "Tea on the Tailgate",
@@ -60,7 +97,8 @@
   "plaats": "Poeyelheide 13t, Lille · 19u–22u",
   "link": "https://teaonthetailgate.co.uk/event/belgium-kerst-editie/",
   "org": "Tea on the Tailgate",
-  "info": "Kerstmeet op vrijdagavond. Inschrijven via de pagina van Tea on the Tailgate."
+  "info": "Kerstmeet op vrijdagavond. Inschrijven via de pagina van Tea on the Tailgate.",
+  "soort": "club"
  },
  {
   "club": "Xrover Belgium",
@@ -69,7 +107,19 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
+ },
+ {
+  "club": "InterClassics",
+  "soort": "beurs",
+  "titel": "InterClassics Maastricht",
+  "datum": "2027-01-14",
+  "einde": "2027-01-17",
+  "plaats": "MECC Maastricht",
+  "link": "https://interclassics.events/",
+  "org": "InterClassics (MECC Maastricht)",
+  "info": "Grote klassiekerbeurs in Maastricht."
  },
  {
   "club": "Xrover Belgium",
@@ -78,7 +128,8 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -87,7 +138,18 @@
   "plaats": "Nederland, plaats volgt",
   "link": "https://www.lrch.nl/evenementen/agenda/allroadrit-1-2027-snertrit",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
+ },
+ {
+  "club": "H.E.L.M. Kempen",
+  "soort": "4x4",
+  "titel": "Roadbook",
+  "datum": "2027-02-06",
+  "plaats": "Glosso Circuit, Schotelven 143, Arendonk",
+  "link": "https://www.helm-kempen.be/kalender/",
+  "org": "H.E.L.M. Kempen",
+  "info": "Roadbook, ook voor niet-leden. Vooraf inschrijven, deelname beperkt."
  },
  {
   "club": "LRCH",
@@ -96,7 +158,8 @@
   "plaats": "Kamperweg, Heerde (NL)",
   "link": "https://www.lrch.nl/evenementen/agenda/offroad-dag-1-2027-heerde",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Offroaddag van de Off Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Offroaddag van de Off Road Commissie van de LRCH. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LROCB",
@@ -106,7 +169,8 @@
   "plaats": "Hôtel Château Tilques, Tilques (Frankrijk)",
   "link": "https://www.facebook.com/events/1020539474370978/",
   "org": "LROCB – Land Rover Owners Club Belgium",
-  "info": "Valentijnsweekend van de club in Hôtel Château Tilques, net als drie jaar geleden. Evenement voor leden van de LROCB-groep."
+  "info": "Valentijnsweekend van de club in Hôtel Château Tilques, net als drie jaar geleden. Evenement voor leden van de LROCB-groep.",
+  "soort": "club"
  },
  {
   "club": "Xrover Belgium",
@@ -115,7 +179,8 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  },
  {
   "club": "Xrover Belgium",
@@ -124,7 +189,8 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -133,7 +199,8 @@
   "plaats": "Nederland, plaats volgt",
   "link": "https://www.lrch.nl/evenementen/agenda/allroadrit-2-2027-lenterit",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -142,7 +209,8 @@
   "plaats": "Nederland, plaats volgt",
   "link": "https://www.lrch.nl/evenementen/agenda/allroadrit-3-2027-midzomer",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -151,7 +219,8 @@
   "plaats": "Beesd (NL)",
   "link": "https://www.lrch.nl/evenementen/agenda/landgoedfair-marienwaerdt-2027",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Landgoedfair waar de LRCH met een stand aanwezig is. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Landgoedfair waar de LRCH met een stand aanwezig is. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
  },
  {
   "club": "LRCH",
@@ -160,7 +229,19 @@
   "plaats": "Nederland, plaats volgt",
   "link": "https://www.lrch.nl/evenementen/agenda/allroad-high-tea-rit",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
+ },
+ {
+  "club": "Cars Under The Stars",
+  "soort": "overland",
+  "titel": "Cars Under The Stars 2027",
+  "datum": "2027-09-10",
+  "einde": "2027-09-12",
+  "plaats": "Camping Le Prahay, Bouillon",
+  "link": "https://carsunderthestars.eu/",
+  "org": "Cars Under The Stars",
+  "info": "Kampeerweekend enkel voor Land Rovers, met greenlaning, offroad, eten en muziek."
  },
  {
   "club": "LRCH",
@@ -169,7 +250,8 @@
   "plaats": "Tsjechië",
   "link": "https://www.lrch.nl/evenementen/agenda/buitenland-special-2027-ahoj-lrch-jede-do-ceska",
   "org": "LRCH – Land Rover Club Holland",
-  "info": "Meerdaagse buitenlandreis van de LRCH. Info, voorwaarden en inschrijving via hun agenda."
+  "info": "Meerdaagse buitenlandreis van de LRCH. Info, voorwaarden en inschrijving via hun agenda.",
+  "soort": "club"
  },
  {
   "club": "Xrover Belgium",
@@ -178,7 +260,8 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  },
  {
   "club": "Xrover Belgium",
@@ -187,6 +270,7 @@
   "plaats": "Zie de agenda van Xrover",
   "link": "https://xrover.be/agenda/",
   "org": "Xrover Belgium",
-  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda."
+  "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
+  "soort": "club"
  }
 ]
