@@ -380,3 +380,19 @@ a.kal-kaart:hover .kal-meer{text-decoration:underline}
 /* lopende tekst in Source Serif 4; menu, knoppen, formulieren en labels blijven Manrope */
 p,.prose li,blockquote{font-family:var(--tekst)}
 p strong,p b,.prose li strong{font-weight:600}
+/* activiteitkaarten (ontwerp B): foto boven, tekst op donkergroen eronder */
+.ev{flex-direction:column;align-items:stretch;justify-content:flex-start;min-height:0;background:var(--green);color:#fff}
+.ev::after{display:none}
+.ev img{position:relative;inset:auto;display:block;width:100%;height:auto;aspect-ratio:16/10;flex:none}
+.ev-stack .ev{min-height:0}
+.ev-stack .ev img{aspect-ratio:21/9}
+.ev-body{padding:20px 22px 24px;flex:1;display:flex;flex-direction:column;align-items:flex-start}
+.ev-date{background:var(--sand);color:var(--green);margin-bottom:10px}
+.ev h3{font-size:clamp(30px,3.2vw,44px);line-height:1}
+.ev p{opacity:1;color:#e6ebe4;margin:10px 0 14px}
+.ev-meta{opacity:1;gap:6px;margin-bottom:18px}
+.ev-meta span{background:rgba(255,255,255,.12);color:#fff;border-radius:999px;padding:5px 11px;font-size:13px}
+@media(min-width:881px){.events>.ev img{aspect-ratio:auto;height:0;flex:1 1 300px;object-fit:cover}}
+.ev-body{position:static}
+.ev-date{position:absolute;top:16px;left:16px;z-index:3;margin:0;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.ev-body .btn{margin-top:auto}
