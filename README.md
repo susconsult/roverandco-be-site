@@ -75,6 +75,13 @@ Nieuwe website + webshop van **Rover & Co VZW** (roverandco.be), gebouwd als wol
 - Webshop met inschrijvingen en merch, betalen via Viva (Smart Checkout).
 - Eigen database (Cloudflare D1) met producten, klanten en volledige bestelgeschiedenis uit Ecwid, te beheren via een admin-pagina.
 
+## Ledenfoto's
+
+- Map `public/assets/img/leden/`: 63 foto's die leden in november 2026 vrijwillig via WhatsApp gaven om te gebruiken (`lid-01` tot `lid-63`, telkens een `.webp` van 1600 px en een `-s.webp` van 800 px).
+- Mag gebruikt worden op de site, in blogs en op sociale media. Vermelding: "Foto: lid Rover & Co". Nummerplaten blijven zichtbaar (beslist door Pieter).
+- Een selectie staat al op de site onder een eigen naam in `public/assets/img/` (`leden-*`): kerstrit, Church-banner, galerij Wild & Wheels.
+- Voor een blogfoto: kopieer de gekozen foto naar `public/assets/img/blog/` (dat doet het blogfoto-gesprek).
+
 ## Blog
 
 - Artikels staan in `data/blog/<slug>.md`: een kop met velden tussen `---`, daarna Markdown. `python3 bouw/build.py` maakt er `/blog/<slug>` van.
