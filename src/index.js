@@ -75,7 +75,7 @@ async function vivaToken(env) {
     body: "grant_type=client_credentials",
   });
   const d = await r.json().catch(() => null);
-  if (!r.ok || !d?.access_token) throw new Error(`Viva-token mislukt (${r.status})`);
+  if (!r.ok || !d?.access_token) throw new Error(`Viva-token mislukt (${r.status}) ${JSON.stringify(d).slice(0, 300)}`);
   return d.access_token;
 }
 
@@ -99,7 +99,7 @@ async function vivaOrder(env, { bedrag, omschrijving, klant, ref }) {
   });
   const ruw = await r.text();
   const code = r.ok ? orderCodeUit(ruw) : null;
-  if (!code) throw new Error(`Viva-order mislukt (${r.status})`);
+  if (!code) throw new Error(`Viva-order mislukt (${r.status}) ${ruw.slice(0, 400)}`);
   return code;
 }
 
@@ -260,7 +260,9 @@ async function plaats(request, env, soort) {
   let code;
   try {
     code = await vivaOrder(env, { bedrag: payload.totaal, omschrijving: S.omschrijving(res.record, nr), klant: res.record.klant, ref: nr });
-  } catch {
+  } catch (e) {
+    console.error("vivaOrder", nr, e?.message);
+    try { await env.SHOP_DB.prepare("UPDATE registraties SET notitie = ? WHERE nummer = ?").bind("Viva-fout: " + String(e?.message || e).slice(0, 500), nr).run(); } catch {}
     return json({ ok: false, fout: "Betalen lukt nu even niet. Je gegevens zijn bewaard, probeer zo meteen opnieuw." }, 502);
   }
   const c = await opslag(env, "ordercode", { soort, nummer: nr, ordercode: code });
