@@ -595,18 +595,23 @@ chips = '<button type="button" class="chip actief" data-filter="">Alles</button>
     f'<button type="button" class="chip" data-filter="{e(r)}">{e(r)}</button>' for r, _ in RUBRIEKEN)
 blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis, verhalen en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
 blogbody += '<section><div class="wrap">'
-if feed:
-    blogbody += kaart(feed[0], groot=True)
+blogbody += '<div class="blogzoek"><input type="search" id="blogzoek" placeholder="Zoek een artikel" aria-label="Zoek in de blog"></div>'
 blogbody += f'<div class="blogfilter" role="group" aria-label="Filter op onderwerp">{chips}</div>'
-blogbody += '<div class="blogfeed">' + "".join(kaart(a) for a in feed[1:]) + '</div>'
+blogbody += '<div class="blogfeed">' + "".join(kaart(a) for a in feed) + '</div>'
+blogbody += '<p class="bloggeen" hidden>Geen artikels gevonden.</p>'
 blogbody += f'<div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site["email"]}?subject=Artikel%20voor%20de%20blog">{site["email"]}</a>.</p></div>'
 blogbody += """</div></section>
 <script>
+var rub='',zk=document.getElementById('blogzoek');
+function toon(){var q=zk.value.trim().toLowerCase(),n=0;
+  document.querySelectorAll('.blogfeed .blogkaart').forEach(function(k){
+    var ok=(!rub||k.getAttribute('data-rubriek')===rub)&&(!q||k.textContent.toLowerCase().indexOf(q)>-1);
+    k.hidden=!ok;if(ok)n++});
+  document.querySelector('.bloggeen').hidden=n>0}
 document.querySelectorAll('.blogfilter .chip').forEach(function(b){b.addEventListener('click',function(){
-  var f=b.getAttribute('data-filter');
-  document.querySelectorAll('.blogfilter .chip').forEach(function(x){x.classList.toggle('actief',x===b)});
-  document.querySelectorAll('.blogfeed .blogkaart, .blogkaart-groot').forEach(function(k){k.hidden=!!f&&k.getAttribute('data-rubriek')!==f});
-})});
+  rub=b.getAttribute('data-filter');
+  document.querySelectorAll('.blogfilter .chip').forEach(function(x){x.classList.toggle('actief',x===b)});toon()})});
+zk.addEventListener('input',toon);
 </script>"""
 write("/blog", "Blog", "Artikels over Land Rover-onderhoud, geschiedenis, Land Rover in België (Minerva, ABL), community en partners.", blogbody)
 

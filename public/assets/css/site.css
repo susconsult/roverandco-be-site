@@ -398,3 +398,5 @@ p strong,p b,.prose li strong{font-weight:600}
 .ev-body .btn{margin-top:auto}
 .banner-groen img{filter:grayscale(1) contrast(1.15);mix-blend-mode:luminosity;opacity:.38}
 .logobanner{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover;border-radius:var(--r);margin:0 0 28px}
+
+.blogzoek{margin:0 0 16px}.blogzoek input{width:100%;max-width:520px;font:inherit;font-size:16px;padding:14px 18px;border:2px solid var(--groen,#1F3B2A);border-radius:999px;background:#fff;color:#1F3B2A}.blogzoek input:focus{outline:3px solid rgba(31,59,42,.25)}.bloggeen{margin:24px 0}
