@@ -4,12 +4,20 @@ rubriek: Partners
 volgorde: 2
 auteur: pieter
 datum: 2026-11-15
-beschrijving: P&P Hekwerk plaatst poorten, afsluitingen en hekwerk op maat, voor woningen en bedrijven. Wat begon in een carport, werd een bedrijf met een tiental medewerkers.
-foto: 5739
-foto_alt: Zicht over de motorkap op een bospad
+beschrijving: P&P Hekwerk van Pieter Aarts is de hoofdsponsor van alle evenementen van Rover & Co. Een bedrijf voor poorten en afsluitingen op maat, en een echte offroadliefhebber.
+foto: blog/partner-pp-hekwerk
+foto_alt: Logo van P&P Hekwerk op een lichte achtergrond
 ---
 
-Een terrein voor een evenement heeft altijd een begin en een einde. Waar het ophoudt, staat vaak een hek. Dat is meteen het vak van P&P Hekwerk, een van de partners van Rover & Co. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
+Er zijn partners, en er is P&P Hekwerk. Het bedrijf van Pieter Aarts is de hoofdsponsor van al onze evenementen, en ligt ons echt nauw aan het hart. In dit artikel vertellen we waarom, en stellen we het bedrijf voor aan de hand van wat ze zelf op hun website vertellen.
+
+## Wat P&P Hekwerk voor Rover & Co betekent
+
+Pieter Aarts houdt al zijn hele leven van offroad. Vroeger deed hij heel wat stevige dingen naast de gebaande paden, en die liefde is gebleven. Vandaag rijdt hij met een prachtige zwarte Defender 90 van de zaak, volledig in de stickers van P&P Hekwerk. Wie hem op een evenement ziet staan, vergeet hem niet snel.
+
+Zonder P&P Hekwerk zouden onze evenementen er niet zo uitzien. Ze steunen ons financieel, maar ook met middelen om de evenementen op te bouwen. Daarmee zijn ze de grootste bijdrager en de hoofdsponsor van al onze activiteiten.
+
+Pieter, en heel het team van P&P Hekwerk: bedankt. Dat jullie er telkens weer staan, betekent enorm veel voor ons.
 
 ## Van carport tot bedrijf
 
@@ -63,4 +71,5 @@ Dit artikel hoort bij ons overzicht [Onze partners: de bedrijven die Rover & Co 
 
 ## Bronnen
 
+- Rover & Co, eigen informatie (november 2026)
 - P&P Hekwerk, [home](https://pphekwerk.be), [Meet the family](https://pphekwerk.be/over-pp/meet-the-family), [werkwijze](https://pphekwerk.be/over-pp/werkwijze), [poorten](https://pphekwerk.be/aanbod/poorten), [afsluitingen](https://pphekwerk.be/aanbod/afsluitingen) en [industrie](https://pphekwerk.be/aanbod/pp-industrie)

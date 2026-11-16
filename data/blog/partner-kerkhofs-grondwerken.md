@@ -4,12 +4,20 @@ rubriek: Partners
 volgorde: 6
 auteur: pieter
 datum: 2026-11-15
-beschrijving: Kerkhofs Grondwerken uit Bocholt doet kleine grondwerken, transport voor de wegenbouw en verkoopt grind, zand en mengpuin. Een familiebedrijf sinds 1935.
+beschrijving: Jan Kerkhofs zette vorig jaar gratis een graafmachine van 18 ton op ons terrein. Maak kennis met Kerkhofs Grondwerken uit Bocholt, een familiebedrijf sinds 1935.
 foto: 959
 foto_alt: Defenders rijden door het stof
 ---
 
-Kerkhofs Grondwerken uit Bocholt is een van de partners van Rover & Co. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
+Kerkhofs Grondwerken uit Bocholt is een van de partners van Rover & Co, en Jan Kerkhofs is iemand die we graag eens in de bloemetjes zetten. In dit artikel vertellen we waarom, en stellen we het bedrijf voor aan de hand van wat ze zelf op hun website vertellen.
+
+## Wat Kerkhofs Grondwerken voor Rover & Co betekent
+
+Vorig jaar zette Jan Kerkhofs een graafmachine van 18 ton op het terrein, helemaal gratis. Hij hielp er ook mee om het plein vlak te maken. Zonder dat werk had het evenement er heel anders uitgezien.
+
+Jan is een echte liefhebber. Hij rijdt zelf een prachtige groene Defender, met een achterbank en daarachter nog een pick-upbak. Hij is ook dit jaar weer heel enthousiast, en hij steunt ons altijd. Dat hij daar zelf ook blij van wordt, maakt het nog mooier.
+
+Jan, bedankt. Voor de kraan, voor het werk, en voor het enthousiasme.
 
 ## Als het GROND-ig moet zijn
 
@@ -17,7 +25,7 @@ Dat is de slogan van Kerkhofs Grondwerken. Volgens de site is het bedrijf al vel
 
 ## Een familiebedrijf sinds 1935
 
-Op hun pagina over de geschiedenis vertelt Kerkhofs Grondwerken hoe het bedrijf door de generaties heen groeide:
+De geschiedenis van het bedrijf is voor Jan iets heel belangrijks, en dat begrijpen we. Het is een verhaal van drie generaties, en de oprichter heette net als hij Jan Kerkhofs. Op hun pagina over de geschiedenis vertelt Kerkhofs Grondwerken hoe het bedrijf groeide:
 
 - **1935:** Jan Kerkhofs richt het bedrijf op. Hij begint als molenaar en kolenhandelaar, en al snel is er nood aan transport.
 - **1950:** na de eerste vrachtwagen komt de eerste hydraulische graafmachine.
@@ -60,4 +68,5 @@ Dit artikel hoort bij ons overzicht [Onze partners: de bedrijven die Rover & Co 
 
 ## Bronnen
 
+- Rover & Co, eigen informatie (november 2026)
 - Kerkhofs Grondwerken, [home](https://kerkhofsgrondwerken.be), [historie](https://kerkhofsgrondwerken.be/historie.html), [diensten](https://kerkhofsgrondwerken.be/diensten.html) en [grind](https://kerkhofsgrondwerken.be/grind.html)

@@ -5,11 +5,17 @@ volgorde: 3
 auteur: pieter
 datum: 2026-11-15
 beschrijving: EPC Verbeteraars uit Ham helpt je EPC-score te verbeteren, van analyse tot het nieuwe attest, en regelt ook de keuringen bij koop, verkoop of verhuur.
-foto: 5577
-foto_alt: Defender 110 op een zandweg
+foto: blog/partner-epc-verbeteraars
+foto_alt: Logo van EPC Verbeteraars op een witte achtergrond
 ---
 
-EPC Verbeteraars uit Ham is een van de partners van Rover & Co. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
+EPC Verbeteraars uit Ham is een van de partners van Rover & Co. In dit artikel vertellen we wat Stef en Tine voor ons betekenen, en stellen we het bedrijf voor aan de hand van wat ze zelf op hun website vertellen.
+
+## Wat EPC Verbeteraars voor Rover & Co betekent
+
+Achter EPC Verbeteraars staan Stef en Tine. Stef rijdt zelf ook Land Rover: een grijze Defender, en een stoere.
+
+Ze helpen ons gigantisch veel. Stef heeft een groot organisatorisch talent en kent heel veel mensen. Dat merken we bij elk evenement: hij denkt mee over de organisatie en helpt ons met de vergunningen. Voor de elektriciteit op onze evenementen kunnen we rekenen op ElektroFix, het bedrijf van Stef en zijn team. Daarover lees je meer in [een apart artikel](/blog/partner-elektrofix).
 
 ## Wie zijn ze?
 
@@ -66,4 +72,5 @@ Dit artikel hoort bij ons overzicht [Onze partners: de bedrijven die Rover & Co 
 
 ## Bronnen
 
+- Rover & Co, eigen informatie (november 2026)
 - EPC Verbeteraars, [epcverbeteren.be](https://epcverbeteren.be): diensten, werkwijze, keuringen, team en contactgegevens

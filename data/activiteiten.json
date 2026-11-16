@@ -20,7 +20,9 @@
     "inschrijven_label": "Inschrijven",
     "affiche": "affiche-church-of-rover",
     "foto_pos": "50% 74%",
-    "banner_foto": null
+    "banner_foto": "870",
+    "banner_pos": "50% 50%",
+    "banner_groen": true
   },
   {
     "slug": "rit-tea-on-the-tailgate-kerst",

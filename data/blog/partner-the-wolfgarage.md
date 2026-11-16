@@ -5,11 +5,17 @@ volgorde: 1
 auteur: pieter
 datum: 2026-11-15
 beschrijving: The Wolfgarage restaureert klassieke Land Rovers, onderhoudt Defenders en bouwt ze om voor het avontuur. En het is mee aan de wieg van Rover & Co.
-foto: 730
-foto_alt: Defender 110 spat door de modder
+foto: blog/partner-the-wolfgarage
+foto_alt: Logo van The Wolfgarage op een zwarte achtergrond
 ---
 
-Wie Rover & Co zegt, zegt ook The Wolfgarage. De garage in Tessenderlo-Ham is een van onze partners, maar het is meer dan dat: The Wolfgarage noemt zich op zijn eigen site een trotse initiatiefnemer van Rover & Co. In dit artikel stellen we de garage voor, aan de hand van wat ze zelf over hun werk vertellen.
+Wie Rover & Co zegt, zegt ook The Wolfgarage. De garage in Tessenderlo-Ham is een van onze partners, maar het is veel meer dan dat. In dit artikel vertellen we wat The Wolfgarage voor ons betekent, en stellen we de garage voor aan de hand van wat ze zelf over hun werk vertellen.
+
+## Wat The Wolfgarage voor Rover & Co betekent
+
+The Wolfgarage is de garage van Dolf Borré, en Dolf is medeoprichter van Rover & Co. Ook op hun eigen site noemt The Wolfgarage zich een trotse initiatiefnemer van de club.
+
+Heel veel van het initiatief achter Rover & Co komt uit die garage. En ook de kennis: als het over Land Rovers gaat, over wat een Series of een Defender nodig heeft en hoe je hem rijdend houdt, dan zit die kennis bij The Wolfgarage. Dolf deelt die kennis ook hier op de site, in onze technische artikels.
 
 ## Defender-specialisten
 
@@ -77,4 +83,5 @@ Dit artikel hoort bij ons overzicht [Onze partners: de bedrijven die Rover & Co 
 
 ## Bronnen
 
+- Rover & Co, eigen informatie (november 2026)
 - The Wolfgarage, [home](https://wolfgarage.be), [over ons](https://wolfgarage.be/over-ons) en [diensten](https://wolfgarage.be/diensten)

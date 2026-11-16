@@ -5,11 +5,17 @@ volgorde: 4
 auteur: pieter
 datum: 2026-11-15
 beschrijving: SUS Consult uit Ham regelt IT, netwerk en online zichtbaarheid voor bedrijven, met één vast aanspreekpunt. En het bouwde ook deze website.
-foto: 5498
-foto_alt: Lachende chauffeur in een witte Defender
+foto: blog/partner-sus-consult
+foto_alt: Logo van SUS Consult op een lichte achtergrond
 ---
 
-Deze website en de site van Wild & Wheels: daar zit SUS Consult achter. Het bedrijf uit Ham is een van de partners van Rover & Co. Onderaan de site van Wild & Wheels staat het er ook: made with love by SUS Consult. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
+Deze website en de site van Wild & Wheels: daar zit SUS Consult achter. Maar dat is maar een deel van wat SUS Consult voor Rover & Co doet.
+
+## Wat SUS Consult voor Rover & Co betekent
+
+SUS Consult zorgt voor alles wat met communicatie en technologie te maken heeft. Online communicatie, de websites en ook de logo's komen uit hun hoek.
+
+Op de evenementen zelf zorgen ze voor de technologie die je niet ziet, maar die wel moet werken: het netwerk, de Bancontact-terminals en de kassasystemen. Kortom: alles wat er achter een festival zit om het vlot te laten draaien. Het bedrijf uit Ham is een van de partners van Rover & Co. Onderaan de site van Wild & Wheels staat het er ook: made with love by SUS Consult. In dit artikel stellen we het bedrijf voor, aan de hand van wat ze zelf op hun website vertellen.
 
 Eerlijk is eerlijk: de schrijver van dit artikel is ook de oprichter van SUS Consult. Daarom houden we het bij wat er op hun eigen site staat.
 
@@ -55,5 +61,6 @@ Dit artikel hoort bij ons overzicht [Onze partners: de bedrijven die Rover & Co 
 
 ## Bronnen
 
+- Rover & Co, eigen informatie (november 2026)
 - SUS Consult, [susconsult.be](https://susconsult.be): slogan, diensten, werkwijze en contactgegevens
 - Wild & Wheels, [wildandwheels.be](https://wildandwheels.be): vermelding van SUS Consult als maker

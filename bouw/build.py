@@ -145,9 +145,9 @@ def write(path, title, desc, body, hero=False, noindex=False):
         pages.append(path)
 
 
-def banner(eyebrow, title, intro="", foto=None, alt="", pos=None):
+def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False):
     pic = img(foto, alt, prio=True, pos=pos) if foto else ""
-    return f'<section class="banner">{pic}<div class="wrap"><div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
+    return f'<section class="banner{" banner-groen" if groen else ""}">{pic}<div class="wrap"><div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
 
 
 # ---------- productfoto's ----------
@@ -362,7 +362,7 @@ for a in alle_acts:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
            f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>' if a["inschrijven_label"] else ""
-    body = banner(a["datum_lang"], a["titel"], a["kort"], a.get("banner_foto", a["foto"]), a["foto_alt"], a.get("foto_pos")) + aftellen(a) + f"""
+    body = banner(a["datum_lang"], a["titel"], a["kort"], a.get("banner_foto", a["foto"]), a["foto_alt"], a.get("banner_pos", a.get("foto_pos")), a.get("banner_groen", False)) + aftellen(a) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">
@@ -563,10 +563,11 @@ def gerelateerd(a, n=3):
 for a in artikels:
     concept = a.get("status") == "concept"
     body = f"""
-<section class="banner">{img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
+<section class="banner">{'' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
 <section><article class="narrow prose blogtekst">
   {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
   <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>
+  {f'<img class="logobanner" src="/assets/img/{a["foto"]}.webp" alt="{e(a["foto_alt"])}" width="1280" height="900">' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else ''}
   {a['html']}
   {f'<p class="fotocredit">Foto bovenaan: {a["foto_credit"]}</p>' if a.get('foto_credit') else ''}
   <div class="auteur-onder"><span class="auteur-label">Geschreven door</span>{auteur_blok(a['auteur'])}</div>
