@@ -108,7 +108,7 @@ async function uitloggen(request, env) {
 
 const STIJL = `
 :root{--g:#1F3B2A;--z:#ECE6D6;--i:#141815;--m:#5B625C}
-*{box-sizing:border-box}body{margin:0;font:15px/1.5 Manrope,system-ui,sans-serif;color:var(--i);background:#f6f4ee}
+@font-face{font-family:"Inter";font-weight:400;src:url(/assets/fonts/inter-latin-400-normal.woff2) format("woff2")}@font-face{font-family:"Inter";font-weight:700;src:url(/assets/fonts/inter-latin-700-normal.woff2) format("woff2")}*{box-sizing:border-box}body{margin:0;font:15px/1.5 Inter,system-ui,sans-serif;color:var(--i);background:#f6f4ee}
 header{background:var(--g);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 header a{color:#fff;text-decoration:none;font-weight:700}header small{opacity:.8}
 main{max-width:1200px;margin:0 auto;padding:20px}

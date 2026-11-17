@@ -1,5 +1,5 @@
 /* ===== Designsysteem Rover & Co =====
-   Lettertypes: Big Shoulders Display (titels, 800/900), Manrope (interface, 400/700), Source Serif 4 (lopende tekst, 400/600).
+   Lettertypes: Big Shoulders Display (titels, 800/900), Inter (interface en lopende tekst, 400/600/700).
    Maten: --fs-display, --fs-h1, --fs-h2, --fs-h3, --fs-label, --fs-knop | --fs-lead, --fs-tekst | --fs-ui-groot, --fs-ui, --fs-sm (zie :root in site.css).
    Afstanden: secties --sec (96/64), na een banner --sec-kort. Eén linkerrand: .wrap (1200px). */
 button,input,select,textarea{font:inherit}

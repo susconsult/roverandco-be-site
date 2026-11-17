@@ -38,11 +38,11 @@ function loginPagina(fout = "") {
   return new Response(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>Terreinplanner · Rover &amp; Co</title>
 <style>
-@font-face{font-family:"Manrope";font-weight:400;src:url(/assets/fonts/manrope-latin-400-normal.woff2) format("woff2")}
-@font-face{font-family:"Manrope";font-weight:700;src:url(/assets/fonts/manrope-latin-700-normal.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-weight:400;src:url(/assets/fonts/inter-latin-400-normal.woff2) format("woff2")}
+@font-face{font-family:"Inter";font-weight:700;src:url(/assets/fonts/inter-latin-700-normal.woff2) format("woff2")}
 @font-face{font-family:"Big Shoulders Display";font-weight:800;src:url(/assets/fonts/big-shoulders-display-latin-800-normal.woff2) format("woff2")}
 *{box-sizing:border-box}html,body{height:100%;margin:0}
-body{font-family:Manrope,system-ui,sans-serif;background:#1F3B2A;color:#fff;display:grid;place-items:center;padding:20px}
+body{font-family:Inter,system-ui,sans-serif;background:#1F3B2A;color:#fff;display:grid;place-items:center;padding:20px}
 form{width:100%;max-width:360px;display:flex;flex-direction:column;gap:14px}
 h1{font-family:"Big Shoulders Display",Impact,sans-serif;font-weight:800;font-size:2.4rem;margin:0 0 4px;letter-spacing:.01em}
 p{margin:0 0 6px;opacity:.85}
