@@ -2,7 +2,7 @@
 // Lezen kan iedereen; posten met een account (zie src/leden.js). Moderatie: alleen beheerders (BEHEER_EMAILS).
 // Opmaak in berichten: [b]vet[/b], [i]schuin[/i], [quote=naam]...[/quote], [foto=123], links worden klikbaar.
 // Foto's worden in de browser verkleind (public/assets/js/forum.js) en in D1 bewaard (tabel forum_fotos).
-import { esc, ico, datum, banner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
+import { esc, ico, bannerFoto, datum, banner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
 
@@ -124,24 +124,38 @@ async function index(request, env, url, lid) {
       (SELECT COUNT(*) FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0) leden,
       (SELECT gebruikersnaam FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 ORDER BY id DESC LIMIT 1) nieuwste`).first();
 
-  let groep = "", rijen = "";
+  const FOTO = { series: "870", defender: "5577", "discovery-range-rover": "959", "elektriciteit-ombouw": "900", "samen-rijden": "977",
+    ritten: "968", vakantiekiekjes: "leden-daktent-rivier", "te-koop": "905", cafe: "leden-vuur-hond" };
+  let groep = "", kaarten = "";
   for (const c of cats) {
-    if (c.groep !== groep) { groep = c.groep; rijen += `<tr class="f-groep"><th colspan="4">${esc(groep)}</th></tr>`; }
+    if (c.groep !== groep) { if (groep) kaarten += "</div>"; groep = c.groep; kaarten += `<h2 class="fc-groep">${esc(groep)}</h2><div class="fc-grid">`; }
     const t = laatste[c.laatste_topic];
     const nieuw = t && isNieuw(lid, t, gelezen);
-    rijen += `<tr${nieuw ? ' class="f-nieuw"' : ""}><td class="f-cat">${icoon(c.icoon)}<div><a class="f-titel" href="/forum/c/${c.slug}">${esc(c.naam)}</a><small>${esc(c.omschrijving || "")}</small></div></td>
-      <td class="f-num">${c.topics}</td><td class="f-num">${c.berichten}</td>
-      <td class="f-laatste">${t ? `<a href="${topicUrl(t, Math.ceil(t.berichten / PER_PAGINA_BERICHTEN))}#laatste">${esc(t.titel)}</a><small>door ${lidLink(t.gebruikersnaam)} · ${datum(t.laatste_op)}</small>` : "<small>Nog geen berichten</small>"}</td></tr>`;
+    kaarten += `<a class="fc" href="/forum/c/${c.slug}"><img src="/assets/img/${FOTO[c.slug] || "968"}-s.webp" alt="" loading="lazy">
+      <div class="fc-b">${nieuw ? '<span class="tegel-label" style="position:static;display:inline-block;margin-bottom:8px">Nieuw</span>' : ""}<b>${esc(c.naam)}</b><span>${esc(c.omschrijving || "")}</span>
+      <small>${c.topics} ${c.topics === 1 ? "topic" : "topics"} · ${c.berichten} ${c.berichten === 1 ? "bericht" : "berichten"}${t ? ` · laatst: ${esc(t.titel)}` : ""}</small></div></a>`;
   }
+  if (groep) kaarten += "</div>";
+  const recent = (await env.SHOP_DB.prepare(`SELECT t.id, t.titel, t.berichten, t.laatste_op, c.naam cnaam FROM forum_topics t JOIN forum_categorieen c ON c.id = t.categorie_id
+    WHERE t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 6`).all()).results || [];
+  const toonStats = stats.leden >= 25;
   return pagina(env, request, {
     titel: "Forum", pad: "/forum", desc: "Het forum van Rover & Co: techniek, onderdelen, ritten en alles over Land Rover. Lezen kan iedereen, posten met een gratis account.",
-    inhoud: banner("Rover & Co", "Forum", "Techniek, onderdelen, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.") + `<section class="wrap f-sectie">
-      ${balk(lid, "/forum")}
-      <div class="f-waarom"><h2>Waarom een forum in 2026?</h2><p>Omdat we het beu zijn. Geen algoritme, geen reclame, niemand die aan jouw foto's verdient. Hier deel je kennis en vakantiekiekjes, en spreek je af: zin om zaterdag samen een roadbook te rijden? Post het, en wie meewil, reageert. Jouw berichten blijven van jou. Gewoon elkaar helpen, samen rijden en een echte community bouwen.</p>
-        <p class="f-waarom-tips"><span>${ico("auto")} Zet je Land Rovers in je <a href="/account/garage">garage</a></span><span>${ico("bel")} Volg categorieën, topics en #hashtags</span><span>${ico("hart")} Like wat je goed vindt</span></div>
-      <table class="f-tabel"><thead><tr><th>Forum</th><th class="f-num">Topics</th><th class="f-num">Berichten</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>
-      <p class="f-stats">${stats.leden} leden · ${stats.topics} topics · ${stats.berichten} berichten${stats.nieuwste ? ` · Nieuwste lid: ${lidLink(stats.nieuwste)}` : ""}</p>
-      ${lid ? "" : `<div class="f-oproep"><p><b>Zelf iets vragen of vertellen?</b> Maak een gratis account. Met hetzelfde account bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-solid" href="/account/registreren?terug=/forum">Account maken</a></div>`}
+    inhoud: `<section class="hero hero-nieuw forum-hero" style="padding:0">${bannerFoto("leden-vuur-avond").replace("<img ", '<img class="hero-img" ')}
+      <div class="wrap hero-in"><div class="eyebrow" style="color:#CFE3D4">Rover &amp; Co forum</div><h1>Rond het kampvuur</h1>
+      <p>Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.</p>
+      <div class="ctas"><a href="${lid ? "/forum/c/cafe/nieuw" : "/account/registreren?terug=/forum"}" class="btn btn-white">${lid ? "Start een topic" : "Maak je gratis account"}</a><a href="/forum/nieuw" class="btn btn-ghost-w">Recente berichten</a></div></div>
+      ${toonStats ? `<div class="forum-stats"><span><b>${stats.leden}</b>leden</span><span><b>${stats.topics}</b>topics</span><span><b>${stats.berichten}</b>berichten</span></div>` : ""}</section>
+    <div class="wrap waarom-kaarten">
+      <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg><b>Geen algoritme, geen reclame</b><span>Niemand verdient aan jouw foto's. Gewoon delen en elkaar helpen.</span></div>
+      <div>${ico("pin")}<b>Spreek af om samen te rijden</b><span>Zin in een roadbook zaterdag? Post het, wie meewil reageert.</span></div>
+      <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Je berichten blijven van jou</b><span>Zet je Land Rovers in je <a href="/account/garage">garage</a>, volg topics en #hashtags.</span></div>
+    </div>
+    <section class="wrap f-sectie forum-layout">
+      <div>${balk(lid, "/forum")}${kaarten}</div>
+      <aside class="forum-zij"><div class="zij-kaart"><h3>Nu actief</h3>${recent.length ? recent.map((t) => `<a href="${topicUrl(t)}"><b>${esc(t.titel)}</b><small>${esc(t.cnaam)} · ${datum(t.laatste_op)}</small></a>`).join("") : "<p>Nog stil. Start jij het eerste topic?</p>"}</div>
+        ${lid ? "" : `<div class="zij-kaart groen"><h3>Doe mee</h3><p>Met één gratis account post je op het forum, bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-wit" href="/account/registreren?terug=/forum">Account maken</a></div>`}
+        ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
     </section>`,
   });
 }
@@ -159,7 +173,7 @@ async function categorie(request, env, url, lid, slug) {
   const rijen = topics.map((t) => {
     const nieuw = isNieuw(lid, t, gelezen);
     const paginas = Math.ceil(t.berichten / PER_PAGINA_BERICHTEN);
-    return `<tr${nieuw ? ' class="f-nieuw"' : ""}><td class="f-cat"><div>${t.vast ? '<span class="f-label">Vast</span> ' : ""}${t.gesloten ? '<span class="f-label grijs">Gesloten</span> ' : ""}<a class="f-titel" href="${topicUrl(t)}">${esc(t.titel)}</a>${nieuw ? ' <span class="f-label nieuw">Nieuw</span>' : ""}${t.rit_datum ? `<span class="f-rit">📅 ${ritDatum(t.rit_datum)}${t.rit_plaats ? " · 📍 " + esc(t.rit_plaats) : ""}</span>` : ""}<small>door ${lidLink(t.auteur)} · ${datum(t.aangemaakt, true)}${paginas > 1 ? ` · pagina ${Array.from({ length: Math.min(paginas, 5) }, (_, i) => `<a href="${topicUrl(t, i + 1)}">${i + 1}</a>`).join(" ")}${paginas > 5 ? " …" : ""}` : ""}</small></div></td>
+    return `<tr${nieuw ? ' class="f-nieuw"' : ""}><td class="f-cat"><div>${t.vast ? '<span class="f-label">Vast</span> ' : ""}${t.gesloten ? '<span class="f-label grijs">Gesloten</span> ' : ""}<a class="f-titel" href="${topicUrl(t)}">${esc(t.titel)}</a>${nieuw ? ' <span class="f-label nieuw">Nieuw</span>' : ""}${t.rit_datum ? `<span class="f-rit">${ico("kalender")} ${ritDatum(t.rit_datum)}${t.rit_plaats ? ` · ${ico("pin")} ` + esc(t.rit_plaats) : ""}</span>` : ""}<small>door ${lidLink(t.auteur)} · ${datum(t.aangemaakt, true)}${paginas > 1 ? ` · pagina ${Array.from({ length: Math.min(paginas, 5) }, (_, i) => `<a href="${topicUrl(t, i + 1)}">${i + 1}</a>`).join(" ")}${paginas > 5 ? " …" : ""}` : ""}</small></div></td>
       <td class="f-num">${Math.max(0, t.berichten - 1)}</td>
       <td class="f-laatste"><a href="${topicUrl(t, paginas)}#laatste">${datum(t.laatste_op)}</a><small>door ${lidLink(t.laatste)}</small></td></tr>`;
   }).join("");
@@ -204,7 +218,7 @@ async function topic(request, env, url, lid, id) {
       <aside class="f-auteur">${avatar({ gebruikersnaam: b.gebruikersnaam, avatar_id: b.avatar_id }, 56)}
         <div>${lidLink(b.gebruikersnaam)}${b.geblokkeerd ? ' <span class="f-label grijs">Geblokkeerd</span>' : ""}
         <small>${tellers[b.lid_id] || 0} berichten<br>Lid sinds ${datum(b.lid_sinds, true)}</small>
-        ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : "🚙"}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>
+        ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : ico("auto")}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>
       <div class="f-inhoud">
         <div class="f-meta"><a href="#b${b.id}">${datum(b.aangemaakt)}</a>${b.bewerkt_op ? ` <small>(bewerkt ${datum(b.bewerkt_op)})</small>` : ""}</div>
         <div class="f-tekst">${opmaak(b.tekst)}</div>
