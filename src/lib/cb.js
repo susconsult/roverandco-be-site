@@ -171,7 +171,7 @@ async function radio(request, env, url, lid, nr) {
         <span class="cb-s">S</span><span class="cb-bars" id="cb-bars" data-n="${n}">${Array.from({ length: 9 }, (_, i) => `<i class="${i < Math.min(9, n) ? "aan" : ""}"></i>`).join("")}</span><small id="cb-online">${n} op de CB</small>
       </div>
     </div>
-    <p class="cb-oms">${esc(k.omschrijving || "")}${!k.vast ? ` · eigen kanaal van een lid, verdwijnt om ${new Date(Date.parse(k.aangemaakt) + CB_UREN * 3600_000).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Brussels" })} ${new Date(Date.parse(k.aangemaakt) + CB_UREN * 3600_000).toDateString() === new Date().toDateString() ? "vandaag" : "morgen"}` : ""}</p>
+    <p class="cb-oms">${esc(k.omschrijving || "")}${!k.vast ? ` · eigen kanaal van een lid, verdwijnt over ${Math.max(1, Math.ceil((Date.parse(k.aangemaakt) + CB_UREN * 3600_000 - Date.now()) / 3600_000))} uur` : ""}</p>
     <div class="cb-log" id="cb-log" aria-live="polite">${eerste.length ? "" : `<p class="cb-stil">Stilte op kanaal ${nr}. Breek de stilte!</p>`}</div>
     <form class="cb-zend" id="cb-zend" autocomplete="off">
       ${mag(lid) ? `<input id="cb-tekst" maxlength="500" placeholder="${albert ? "Zeg iets, Albert" : `Bericht op kanaal ${nr}`}" aria-label="Bericht" required>
