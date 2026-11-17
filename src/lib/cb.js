@@ -32,6 +32,13 @@ async function zaai(env) {
 }
 
 async function kanalen(env, lid) {
+  // Eigen kanalen van leden verdwijnen 24 uur na het openen, samen met hun berichten.
+  const oud = (await env.SHOP_DB.prepare("SELECT nr FROM cb_kanalen WHERE vast = 0 AND aangemaakt < ?").bind(grens()).all()).results || [];
+  if (oud.length) await env.SHOP_DB.batch(oud.flatMap((k) => [
+    env.SHOP_DB.prepare("DELETE FROM cb_kanalen WHERE nr = ? AND vast = 0").bind(k.nr),
+    env.SHOP_DB.prepare("DELETE FROM cb_berichten WHERE nr = ?").bind(k.nr),
+    env.SHOP_DB.prepare("DELETE FROM cb_gelezen WHERE nr = ?").bind(k.nr),
+  ]));
   const r = (await env.SHOP_DB.prepare(`SELECT k.*, (SELECT COUNT(*) FROM cb_berichten b WHERE b.nr = k.nr AND b.verwijderd = 0 AND b.aangemaakt > ? AND b.id > COALESCE((SELECT laatste_id FROM cb_gelezen g WHERE g.nr = k.nr AND g.lid_id = ?), 0) AND b.lid_id <> ?) ongelezen,
     (SELECT MAX(b.aangemaakt) FROM cb_berichten b WHERE b.nr = k.nr AND b.verwijderd = 0 AND b.aangemaakt > ?) laatste FROM cb_kanalen k ORDER BY k.nr`).bind(grens(), lid.id, lid.id, grens()).all()).results || [];
   return r;
@@ -164,7 +171,7 @@ async function radio(request, env, url, lid, nr) {
         <span class="cb-s">S</span><span class="cb-bars" id="cb-bars" data-n="${n}">${Array.from({ length: 9 }, (_, i) => `<i class="${i < Math.min(9, n) ? "aan" : ""}"></i>`).join("")}</span><small id="cb-online">${n} op de CB</small>
       </div>
     </div>
-    <p class="cb-oms">${esc(k.omschrijving || "")}${k.lid_id && !k.vast ? " · eigen kanaal van een lid" : ""}</p>
+    <p class="cb-oms">${esc(k.omschrijving || "")}${!k.vast ? ` · eigen kanaal van een lid, verdwijnt om ${new Date(Date.parse(k.aangemaakt) + CB_UREN * 3600_000).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Brussels" })} ${new Date(Date.parse(k.aangemaakt) + CB_UREN * 3600_000).toDateString() === new Date().toDateString() ? "vandaag" : "morgen"}` : ""}</p>
     <div class="cb-log" id="cb-log" aria-live="polite">${eerste.length ? "" : `<p class="cb-stil">Stilte op kanaal ${nr}. Breek de stilte!</p>`}</div>
     <form class="cb-zend" id="cb-zend" autocomplete="off">
       ${mag(lid) ? `<input id="cb-tekst" maxlength="500" placeholder="${albert ? "Zeg iets, Albert" : `Bericht op kanaal ${nr}`}" aria-label="Bericht" required>
@@ -185,7 +192,7 @@ async function radio(request, env, url, lid, nr) {
       <label>Naam<input name="naam" maxlength="30" required placeholder="Defender-rijders Limburg"></label>
       <label>Waarover?<input name="omschrijving" maxlength="80" placeholder="Korte uitleg"></label>
       <button class="btn btn-solid" type="submit">Kanaal openen</button>
-    </form><small>Je kan zelf 2 kanalen openen. Een kanaal blijft bestaan, de berichten verdwijnen na ${CB_UREN} uur.</small></details>` : ""}
+    </form><small>Je kan zelf 2 kanalen openen. Een eigen kanaal verdwijnt na ${CB_UREN} uur, handig voor een rit of een dag.</small></details>` : ""}
   ${magOpheffen ? `<form method="post" action="/cb/${nr}/opheffen" class="cb-op" data-bevestig="Kanaal ${nr} opheffen?"><button class="linkknop rood" type="submit">Kanaal ${nr} opheffen</button></form>` : ""}
 </section><script src="/assets/js/cb.js" defer></script>`,
   });

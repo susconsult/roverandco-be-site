@@ -676,18 +676,58 @@ write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",
 # ---------- over ons ----------
 write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit heel België samen. Onze missie en ons doel.",
       banner("Over ons", "Missie en doel", "Een vereniging van en voor Land Rover-liefhebbers uit heel België.", "959", "Defenders in het stof op een bosweg") + f"""
-<section><div class="narrow prose">
-  <p>{e(OVER_TEKST)}</p>
-  <p>Elk evenement wil een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parkeerplaats, wel een dag rond een kerktoren, in het bos of op een terrein waar je anders niet komt.</p>
-  <p>Eventuele opbrengsten uit onze activiteiten vloeien terug naar de community of naar goede doelen. We bouwen aan een open en warme werking waarin iedereen met een passie voor Land Rovers en het buitenleven welkom is.</p>
-  <div class="pillars">
-    <div class="pillar"><b>Rijden</b><span>Ritten en roadbooks op bijzondere plekken</span></div>
-    <div class="pillar"><b>Ontmoeten</b><span>Klassiek of nieuw, iedereen is welkom</span></div>
-    <div class="pillar"><b>Teruggeven</b><span>Opbrengst gaat terug naar de community</span></div>
+<section>
+  <div class="wrap about">
+    {img("leden-daktenten-rij", "Defenders met daktenten op een kampeerterrein", "about-img", sizes="(max-width:880px) 100vw, 50vw")}
+    <div>
+      <div class="eyebrow">Wie we zijn</div>
+      <h2>Een club van en voor liefhebbers</h2>
+      <p>{e(OVER_TEKST)}</p>
+      <p>Elk evenement wil een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parkeerplaats, wel een dag rond een kerktoren, in het bos of op een terrein met een verhaal.</p>
+    </div>
   </div>
-  <h3>Gegevens</h3>
-  <p>{e(site['naam'])}<br>{'<br>'.join(e(x) for x in site['adres'])}<br>Ondernemingsnummer {site['ondernemingsnummer']}</p>
-</div></section>""")
+</section>
+<section class="tegels-sec oo-pijlers"><div class="wrap">
+  <div class="sec-head"><div><div class="eyebrow">Waar we voor staan</div><h2>Rijden, ontmoeten, teruggeven</h2></div></div>
+  <div class="tegels">
+    <div class="tegel">{img("977", "", sizes="(max-width:880px) 100vw, 33vw")}<div class="tegel-b"><b>Rijden</b><span>Ritten en roadbooks op plekken met een verhaal</span></div></div>
+    <div class="tegel">{img("leden-vuur-avond", "", sizes="(max-width:880px) 100vw, 33vw")}<div class="tegel-b"><b>Ontmoeten</b><span>Klassiek of nieuw, iedereen is welkom</span></div></div>
+    <div class="tegel">{img("leden-kerk-oostham", "", sizes="(max-width:880px) 100vw, 33vw")}<div class="tegel-b"><b>Teruggeven</b><span>Opbrengsten gaan terug naar de community of naar goede doelen</span></div></div>
+  </div>
+</div></section>
+<section class="forum-band topo">
+  <div class="wrap forum-in">
+    <div>
+      <div class="eyebrow">Achter de schermen</div>
+      <h2>Wie zit erachter</h2>
+      <p>Rover &amp; Co draait op vrijwilligers en partners die er hun tijd, kennis en materiaal in steken. Zonder hen geen ritten, geen roadbooks en geen kampvuur.</p>
+      <div class="ctas"><a href="/contact" class="btn btn-wit">Contacteer ons</a></div>
+    </div>
+    <div class="oo-mensen">
+      <div class="oo-mens"><img src="/assets/img/auteurs/dolf-borre.webp" alt="" loading="lazy" width="72" height="72"><div><b>Dolf Borré</b><span>Medeoprichter, The Wolfgarage. De Land Rover-kennis van de club.</span></div></div>
+      <div class="oo-mens"><img src="/assets/img/auteurs/pieter-van-baekel.webp" alt="" loading="lazy" width="72" height="72"><div><b>Pieter Van Baekel</b><span>Communicatie, website en de techniek achter de evenementen.</span></div></div>
+    </div>
+  </div>
+</section>
+<section>
+  <div class="wrap">
+    <div class="sec-head"><div><div class="eyebrow">Partners</div><h2>Met dank aan</h2></div><a href="/blog" class="btn">Lees hun verhaal</a></div>
+    <div class="oo-partners">{''.join(f'<a href="/blog/{s}" title="{e(n)}"><img src="/assets/img/blog/{s}-s.webp" alt="{e(n)}" loading="lazy"><span>{e(n)}</span></a>' for s, n in PARTNERS_HOME)}</div>
+  </div>
+</section>
+<section class="gallery-sec">
+  <div class="wrap">
+    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
+    {galerij(GALERIJ[8:16])}
+  </div>
+</section>
+<section>
+  <div class="wrap oo-slot">
+    <div><div class="eyebrow">Doe mee</div><h2>Rij mee of maak een gratis account</h2><p>Schrijf je in voor een rit, of maak een account om op het forum en de CB mee te praten.</p>
+      <div class="ctas"><a href="/activiteiten" class="btn btn-solid">Rij mee</a><a href="/account/registreren" class="btn" data-gast>Maak je gratis account</a></div></div>
+    <div class="oo-gegevens"><b>Gegevens</b><p>{e(site['naam'])}<br>{'<br>'.join(e(x) for x in site['adres'])}<br>Ondernemingsnummer {site['ondernemingsnummer']}<br><a href="mailto:{site['email']}">{site['email']}</a></p></div>
+  </div>
+</section>""")
 
 # ---------- contact ----------
 write("/contact", "Contact", "Contacteer Rover & Co VZW in Oostham: e-mail, telefoon en adres.",
