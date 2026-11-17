@@ -85,6 +85,9 @@
     });
   });
 
+  /* ---------- gemelde garagefoto: meldformulier openen ---------- */
+  if (/^#wagen-\d+$/.test(location.hash)) { var wm = document.querySelector(location.hash + " .wagen-meld"); if (wm && !/gemeld/.test(location.search)) wm.open = true; }
+
   /* ---------- lightbox ---------- */
   var lb = document.getElementById("lightbox");
   function closeLightbox() { if (lb) lb.classList.remove("open"); }
@@ -95,6 +98,7 @@
       var cap = lb.querySelector(".lb-onderschrift");
       if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
       cap.textContent = b.dataset.onderschrift || "";
+      if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage of meld deze foto"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
       cap.hidden = !b.dataset.onderschrift;
       lb.classList.add("open");
     });

@@ -45,7 +45,7 @@ CREATE INDEX IF NOT EXISTS idx_berichten_lid ON forum_berichten(lid_id, aangemaa
 CREATE TABLE IF NOT EXISTS forum_fotos (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, type TEXT NOT NULL, data BLOB NOT NULL, grootte INTEGER NOT NULL, aangemaakt TEXT NOT NULL);
 CREATE INDEX IF NOT EXISTS idx_fotos_lid ON forum_fotos(lid_id, aangemaakt);
 CREATE TABLE IF NOT EXISTS forum_gelezen (lid_id INTEGER NOT NULL, topic_id INTEGER NOT NULL, op TEXT NOT NULL, PRIMARY KEY (lid_id, topic_id));
-CREATE TABLE IF NOT EXISTS forum_meldingen (id INTEGER PRIMARY KEY AUTOINCREMENT, bericht_id INTEGER NOT NULL, lid_id INTEGER, ip_hash TEXT, reden TEXT, aangemaakt TEXT NOT NULL, afgehandeld INTEGER NOT NULL DEFAULT 0);
+CREATE TABLE IF NOT EXISTS forum_meldingen (id INTEGER PRIMARY KEY AUTOINCREMENT, bericht_id INTEGER NOT NULL, lid_id INTEGER, ip_hash TEXT, reden TEXT, aangemaakt TEXT NOT NULL, afgehandeld INTEGER NOT NULL DEFAULT 0, wagen_id INTEGER);
 
 INSERT OR IGNORE INTO forum_categorieen (slug, groep, naam, omschrijving, icoon, volgorde) VALUES
  ('series', 'Techniek', 'Series I, II en III', 'Herstellen, onderdelen en vragen over de Series', 'tool', 10),

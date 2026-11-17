@@ -51,3 +51,8 @@ small{font-size:var(--fs-sm)}
 /* kaders met korte uitleg: interfaceletter */
 .kal-indienen p,.schrijf-mee p,.schrijf-mee a,.contact-grid .rubriek p,.contact-grid .rubriek a{font-family:var(--body);font-size:var(--fs-ui)}
 .forum-band p{font-family:var(--tekst);font-size:var(--fs-lead)}
+.lb-onderschrift a{color:#fff;font-weight:400;text-decoration:underline;text-underline-offset:3px}
+.wagen .wagen-meld,.wagen .f-mod{padding:0 14px 12px;font-size:var(--fs-sm)}
+.wagen .wagen-meld[open] form{flex-wrap:wrap}
+.wagen .wagen-meld input{min-width:0}
+.wagen:target{outline:3px solid var(--goud,#c9a227);outline-offset:3px;border-radius:12px}

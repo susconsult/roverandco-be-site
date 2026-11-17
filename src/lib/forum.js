@@ -364,11 +364,36 @@ async function meld(request, env, url, lid, id) {
   return naar(`${terug}?gemeld=1#b${b.id}`);
 }
 
+async function meldWagen(request, env, url, lid, id) {
+  const w = await env.SHOP_DB.prepare("SELECT w.*, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id WHERE w.id = ? AND w.foto_id IS NOT NULL").bind(id).first();
+  if (!w || !w.gebruikersnaam) return null;
+  const f = await request.formData();
+  const reden = tekst(f.get("reden"), 300);
+  const ip = await sha("ip:" + (request.headers.get("cf-connecting-ip") || ""));
+  const terug = `/forum/lid/${encodeURIComponent(w.gebruikersnaam)}`;
+  const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
+  if (recent.n >= 5) return naar(`${terug}?gemeld=1#wagen-${w.id}`);
+  await env.SHOP_DB.prepare("INSERT INTO forum_meldingen (bericht_id, wagen_id, lid_id, ip_hash, reden, aangemaakt) VALUES (0, ?, ?, ?, ?, ?)").bind(w.id, lid?.id || null, ip, reden, nu()).run();
+  const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
+  await mail(env, {
+    aan, onderwerp: `Melding: garagefoto van ${w.gebruikersnaam}`,
+    tekst: `Er werd een foto uit de garage gemeld.\n\nLid: ${w.gebruikersnaam}\nWagen: ${wagenNaam(w)}\nGemeld door: ${lid?.gebruikersnaam || "bezoeker zonder account"}\nReden: ${reden || "(geen reden)"}\n\nFoto: ${url.origin}/forum/foto/${w.foto_id}\n\nBekijk en verwijder hem hier (log in als moderator):\n${url.origin}${terug}#wagen-${w.id}`,
+  });
+  return naar(`${terug}?gemeld=1#wagen-${w.id}`);
+}
+
 async function moderatie(request, env, url, lid) {
   if (!lid?.beheerder) return new Response("Geen toegang.", { status: 403 });
   const f = await request.formData();
   const actie = String(f.get("actie") || "");
   const id = parseInt(f.get("id"), 10) || 0;
+  if (actie === "verwijder-wagenfoto") {
+    const w = await env.SHOP_DB.prepare("SELECT w.foto_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id WHERE w.id = ?").bind(id).first();
+    if (!w) return naar("/forum");
+    await env.SHOP_DB.prepare("UPDATE lid_wagens SET foto_id = NULL WHERE id = ?").bind(id).run();
+    await env.SHOP_DB.prepare("UPDATE forum_meldingen SET afgehandeld = 1 WHERE wagen_id = ?").bind(id).run();
+    return naar(`/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#garage`);
+  }
   if (actie === "verwijder-bericht") {
     const b = await env.SHOP_DB.prepare("SELECT b.topic_id, t.titel FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id WHERE b.id = ?").bind(id).first();
     if (!b) return naar("/forum");
@@ -442,7 +467,8 @@ async function profiel(request, env, url, lid, naam) {
     inhoud: banner("Forum", p.gebruikersnaam, "Lid van het Rover & Co-forum.") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel(esc(p.gebruikersnaam))}
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Garage</h2>
-      ${wagens.length ? garageKaarten(wagens) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
+      ${url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : ""}
+      ${wagens.length ? garageKaarten(wagens, { meld: lid?.id !== p.id, mod: !!lid?.beheerder }) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
     </section>`,
   });
 }
@@ -519,6 +545,7 @@ export async function forum(request, env, url) {
   if (p === "/forum") res = await index(request, env, url, lid);
   else if (p === "/forum/nieuw") res = await recent(request, env, url, lid);
   else if (p === "/forum/foto" && post) res = lid ? await fotoOpladen(request, env, lid) : json({ ok: false, fout: "Log eerst in." }, 401);
+  else if ((m = p.match(/^\/forum\/wagen\/(\d{1,10})\/meld$/)) && post) res = await meldWagen(request, env, url, lid, m[1]);
   else if (p === "/forum/mod" && post) res = await moderatie(request, env, url, lid);
   else if ((m = p.match(/^\/forum\/c\/([a-z0-9-]+)$/))) res = await categorie(request, env, url, lid, m[1]);
   else if ((m = p.match(/^\/forum\/c\/([a-z0-9-]+)\/nieuw$/))) res = !lid ? moetLid() : !lid.gebruikersnaam ? moetNaam() : await nieuwTopic(request, env, url, lid, m[1]);
