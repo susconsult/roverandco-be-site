@@ -1,6 +1,7 @@
 // /beheer/producten en /beheer/activiteiten: producten en activiteiten beheren (alleen voor wie in /beheer mag).
 // Gegevens in D1 (tabellen producten, activiteiten, media); de site toont ze meteen (src/aanbod.js).
 // De bewerkschermen werken met verborgen JSON-velden die public/assets/js/beheer.js omzet naar knoppen en rijen.
+import { hoofdTabs } from "./beheer-leden.js";
 import { pagina, esc } from "./beheer.js";
 import { producten, activiteiten, product, activiteit, eur } from "./aanbod.js";
 
@@ -58,8 +59,7 @@ const STIJL = `<style>
 @media(max-width:700px){.form-grid{grid-template-columns:1fr}}
 </style>`;
 
-const tabs = (aan) => `<nav class="tabs"><a href="/beheer?soort=bestelling">Bestellingen</a><a href="/beheer?soort=inschrijving">Inschrijvingen</a>
-  <a class="${aan === "p" ? "aan" : ""}" href="/beheer/producten">Producten</a><a class="${aan === "a" ? "aan" : ""}" href="/beheer/activiteiten">Activiteiten</a></nav>`;
+const tabs = (aan) => hoofdTabs(aan);
 const veld = (naam, label, waarde = "", { type = "text", hulp = "", breed = false, extra = "" } = {}) =>
   `<div class="veld${breed ? " breed" : ""}"><label for="v-${naam}">${label}</label><input id="v-${naam}" name="${naam}" type="${type}" value="${esc(waarde ?? "")}" ${extra}>${hulp ? `<small>${hulp}</small>` : ""}</div>`;
 const vink = (naam, label, aan) => `<label class="rij"><input type="checkbox" name="${naam}" value="1"${aan ? " checked" : ""}> ${label}</label>`;

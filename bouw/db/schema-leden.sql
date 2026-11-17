@@ -79,3 +79,8 @@ ALTER TABLE forum_topics ADD COLUMN rit_plaats TEXT;
 INSERT OR IGNORE INTO forum_categorieen (slug, groep, naam, omschrijving, icoon, volgorde) VALUES
  ('samen-rijden', 'Club', 'Samen rijden', 'Zin om samen een roadbook of rit te rijden? Spreek hier af', 'route', 45),
  ('vakantiekiekjes', 'Club', 'Vakantiekiekjes', 'Je mooiste foto''s van onderweg', 'camera', 55);
+
+CREATE TABLE IF NOT EXISTS lid_log (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, soort TEXT NOT NULL, tekst TEXT NOT NULL, link TEXT, aangemaakt TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS lid_log_lid ON lid_log (lid_id, aangemaakt);
+CREATE INDEX IF NOT EXISTS lid_log_tijd ON lid_log (aangemaakt);
+ALTER TABLE leden ADD COLUMN verwijderd_op TEXT;

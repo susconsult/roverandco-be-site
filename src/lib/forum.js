@@ -4,6 +4,7 @@
 // Foto's worden in de browser verkleind (public/assets/js/forum.js) en in D1 bewaard (tabel forum_fotos).
 import { esc, ico, bannerFoto, kruimel as hoofdKruimel, datum, banner as sjabloonBanner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
+import { log } from "./log.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
 
 const PER_PAGINA_TOPICS = 30;
@@ -303,6 +304,7 @@ async function nieuwTopic(request, env, url, lid, slug) {
   await zetVolgen(env, lid.id, "topic", id, true); // je volgt je eigen topic
   const link = topicUrl({ id, titel: w.titel });
   await meldNieuwBericht(env, { topic: { id, titel: w.titel }, catSlug: c.slug, catNaam: c.naam, auteur: lid, tags, link, nieuwTopic: true });
+  await log(env, lid.id, "forum", `Nieuw topic in ${c.naam}: ${w.titel}`, link);
   return naar(link);
 }
 
@@ -324,6 +326,7 @@ async function antwoorden(request, env, url, lid, id) {
   if (f.get("volg") !== "0") await zetVolgen(env, lid.id, "topic", t.id, true); // wie reageert, volgt het topic
   const c = await env.SHOP_DB.prepare("SELECT slug, naam FROM forum_categorieen WHERE id = ?").bind(t.categorie_id).first();
   await meldNieuwBericht(env, { topic: t, catSlug: c?.slug || "", catNaam: c?.naam || "", auteur: lid, tags, link, nieuwTopic: false });
+  await log(env, lid.id, "forum", `Reactie op: ${t.titel}`, link);
   return naar(link);
 }
 
@@ -342,6 +345,7 @@ async function bewerk(request, env, url, lid, id) {
   await env.SHOP_DB.prepare("UPDATE forum_berichten SET tekst = ?, bewerkt_op = ? WHERE id = ?").bind(w.tekst, nu(), b.id).run();
   await bewaarTags(env, b.id, b.tid, w.tekst);
   if (eerste) await env.SHOP_DB.prepare("UPDATE forum_topics SET titel = ? WHERE id = ?").bind(w.titel, b.tid).run();
+  await log(env, lid.id, "forum", `Bericht bewerkt in: ${eerste ? w.titel : b.titel}`, `${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel })}#b${b.id}`);
   const pos = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND id <= ?").bind(b.tid, b.id).first()).n;
   return naar(`${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel }, Math.ceil(pos / PER_PAGINA_BERICHTEN))}#b${b.id}`);
 }
@@ -356,6 +360,8 @@ async function meld(request, env, url, lid, id) {
   const terug = topicUrl({ id: b.topic_id, titel: b.titel });
   if (recent.n >= 5) return naar(`${terug}?gemeld=1#b${b.id}`);
   await env.SHOP_DB.prepare("INSERT INTO forum_meldingen (bericht_id, lid_id, ip_hash, reden, aangemaakt) VALUES (?, ?, ?, ?, ?)").bind(b.id, lid?.id || null, ip, reden, nu()).run();
+  if (lid) await log(env, lid.id, "forum", `Bericht gemeld van ${b.gebruikersnaam || "?"} in: ${b.titel}`, `${terug}#b${b.id}`);
+  if (b.lid_id) await log(env, b.lid_id, "forum", `Bericht van dit lid werd gemeld in: ${b.titel}${reden ? ` (${reden})` : ""}`, `${terug}#b${b.id}`);
   const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
   await mail(env, {
     aan, onderwerp: `Melding op het forum: ${b.titel}`,
@@ -374,6 +380,8 @@ async function meldWagen(request, env, url, lid, id) {
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
   if (recent.n >= 5) return naar(`${terug}?gemeld=1#wagen-${w.id}`);
   await env.SHOP_DB.prepare("INSERT INTO forum_meldingen (bericht_id, wagen_id, lid_id, ip_hash, reden, aangemaakt) VALUES (0, ?, ?, ?, ?, ?)").bind(w.id, lid?.id || null, ip, reden, nu()).run();
+  if (lid) await log(env, lid.id, "forum", `Garagefoto gemeld van ${w.gebruikersnaam}`, `${terug}#wagen-${w.id}`);
+  await log(env, w.lid_id, "garage", `Garagefoto van dit lid werd gemeld${reden ? ` (${reden})` : ""}`, `${terug}#wagen-${w.id}`);
   const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
   await mail(env, {
     aan, onderwerp: `Melding: garagefoto van ${w.gebruikersnaam}`,
@@ -493,6 +501,7 @@ async function likeActie(request, env, url, lid, id) {
   const b = await env.SHOP_DB.prepare("SELECT b.id, b.lid_id, b.topic_id, t.titel FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id WHERE b.id = ? AND b.verwijderd = 0").bind(id).first();
   if (!b) return json({ ok: false }, 404);
   const had = await env.SHOP_DB.prepare("SELECT 1 FROM forum_likes WHERE bericht_id = ? AND lid_id = ?").bind(b.id, lid.id).first();
+  await log(env, lid.id, "forum", `${had ? "Like weggehaald" : "Like gegeven"} in: ${b.titel}`, `${topicUrl({ id: b.topic_id, titel: b.titel })}#b${b.id}`);
   if (had) await env.SHOP_DB.prepare("DELETE FROM forum_likes WHERE bericht_id = ? AND lid_id = ?").bind(b.id, lid.id).run();
   else {
     await env.SHOP_DB.prepare("INSERT OR IGNORE INTO forum_likes (bericht_id, lid_id, aangemaakt) VALUES (?, ?, ?)").bind(b.id, lid.id, nu()).run();

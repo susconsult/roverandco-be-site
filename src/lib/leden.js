@@ -12,6 +12,7 @@
 // Variabelen: TURNSTILE_SITEKEY + TURNSTILE_SECRET (zonder deze twee: geen spamcheck), RESEND_API_KEY, BEHEER_EMAILS.
 import { esc, ico, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail, metVlag } from "./sjabloon.js";
 import { eur } from "./opslag.js";
+import { log } from "./log.js";
 import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
 
 const COOKIE = "rc_lid";
@@ -88,7 +89,7 @@ async function leesToken(env, t, soort) {
 
 const SLOT = "\n\nDit is een automatische mail, je kan er niet op antwoorden. Vragen? Mail naar info@roverandco.be";
 
-async function stuurBevestiging(env, origin, lid) {
+export async function stuurBevestiging(env, origin, lid) {
   const t = await maakToken(env, lid.id, "bevestig", 7);
   return mail(env, {
     aan: lid.email, onderwerp: "Bevestig je mailadres voor Rover & Co",
@@ -101,7 +102,7 @@ export async function wachtwoordLink(env, origin, lidId) {
   return `${origin}/account/wachtwoord?t=${await maakToken(env, lidId, "wachtwoord", 30)}`;
 }
 
-async function stuurWachtwoordLink(env, origin, lid) {
+export async function stuurWachtwoordLink(env, origin, lid) {
   // Hoogstens één mail per 5 minuten, zodat niemand een mailbox kan bestoken.
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM lid_tokens WHERE lid_id = ? AND soort = 'wachtwoord' AND aangemaakt > ?").bind(lid.id, Date.now() - 5 * 60_000).first();
   if (recent?.n) return true;
@@ -124,6 +125,7 @@ export async function lidVoorBestelling(env, request, klant) {
     await env.SHOP_DB.prepare("INSERT OR IGNORE INTO leden (email, naam, telefoon, aangemaakt, auto) VALUES (?, ?, ?, ?, 1)")
       .bind(email, klant.naam || null, klant.telefoon || null, nu()).run();
     lid = await env.SHOP_DB.prepare("SELECT id, wachtwoord FROM leden WHERE email = ?").bind(email).first();
+    if (lid) await log(env, lid.id, "account", "Account automatisch aangemaakt bij bestelling of inschrijving");
   }
   return lid ? { id: lid.id, zonderWachtwoord: !lid.wachtwoord } : null;
 }
@@ -212,7 +214,7 @@ async function inloggen(request, env, url) {
   const terug = veilig(tekst(f.get("terug"), 300));
   const lid = await env.SHOP_DB.prepare("SELECT * FROM leden WHERE email = ? OR gebruikersnaam = ?").bind(login, login).first();
   const fout = "E-mailadres, gebruikersnaam of wachtwoord klopt niet.";
-  if (!lid) return inlogPagina(env, request, { m: fout, email: login, terug });
+  if (!lid || lid.verwijderd_op) return inlogPagina(env, request, { m: fout, email: login, terug });
   if (lid.fout_tot > Date.now()) return inlogPagina(env, request, { m: "Te veel foute pogingen. Probeer het over 15 minuten opnieuw, of vraag een nieuw wachtwoord.", email: login, terug });
   if (!lid.wachtwoord) {
     await stuurWachtwoordLink(env, url.origin, lid);
@@ -220,11 +222,13 @@ async function inloggen(request, env, url) {
   }
   if (!(await klopt(String(f.get("wachtwoord") || ""), lid.wachtwoord))) {
     const teller = lid.fout_teller + 1;
+    await log(env, lid.id, "account", teller >= 8 ? "Mislukte login, account 15 minuten vergrendeld" : "Mislukte login (verkeerd wachtwoord)");
     await env.SHOP_DB.prepare("UPDATE leden SET fout_teller = ?, fout_tot = ? WHERE id = ?").bind(teller >= 8 ? 0 : teller, teller >= 8 ? Date.now() + 15 * 60_000 : 0, lid.id).run();
     return inlogPagina(env, request, { m: fout, email: login, terug });
   }
-  if (lid.geblokkeerd) return inlogPagina(env, request, { m: "Dit account is geblokkeerd. Vragen? Mail naar info@roverandco.be." });
+  if (lid.geblokkeerd) { await log(env, lid.id, "account", "Inlogpoging terwijl geblokkeerd"); return inlogPagina(env, request, { m: "Dit account is geblokkeerd. Vragen? Mail naar info@roverandco.be." }); }
   await env.SHOP_DB.prepare("UPDATE leden SET fout_teller = 0, fout_tot = 0, laatst_gezien = ? WHERE id = ?").bind(nu(), lid.id).run();
+  await log(env, lid.id, "account", "Ingelogd");
   return naar(terug || "/account", { "set-cookie": await nieuweSessie(env, lid.id) });
 }
 
@@ -255,6 +259,7 @@ async function registreren(request, env, url) {
   const r = await env.SHOP_DB.prepare("INSERT INTO leden (email, gebruikersnaam, wachtwoord, aangemaakt, laatst_gezien) VALUES (?, ?, ?, ?, ?)")
     .bind(w.email, w.gebruikersnaam, await maakHash(ww), nu(), nu()).run();
   const lid = { id: r.meta.last_row_id, email: w.email, gebruikersnaam: w.gebruikersnaam };
+  await log(env, lid.id, "account", "Account geregistreerd");
   await stuurBevestiging(env, url.origin, lid);
   return naar(terug || "/account?welkom=1", { "set-cookie": await nieuweSessie(env, lid.id) });
 }
@@ -278,7 +283,7 @@ async function vergeten(request, env, url) {
   const f = await request.formData();
   const email = tekst(f.get("email"), 160).toLowerCase();
   const lid = emailOk(email) ? await env.SHOP_DB.prepare("SELECT * FROM leden WHERE email = ?").bind(email).first() : null;
-  if (lid && !lid.geblokkeerd) await stuurWachtwoordLink(env, url.origin, lid);
+  if (lid && !lid.geblokkeerd && !lid.verwijderd_op) { await stuurWachtwoordLink(env, url.origin, lid); await log(env, lid.id, "account", "Wachtwoord vergeten: link gevraagd"); }
   return inhoud("Als er een account bestaat voor dit adres, staat er nu een mail met een link in je mailbox.", "info");
 }
 
@@ -313,6 +318,7 @@ async function wachtwoordKiezen(request, env, url) {
     .bind(await maakHash(ww), gn, nu(), lid.id).run();
   await env.SHOP_DB.prepare("DELETE FROM lid_tokens WHERE lid_id = ? AND soort = 'wachtwoord'").bind(lid.id).run();
   await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(lid.id).run(); // overal elders uitloggen
+  await log(env, lid.id, "account", lid.wachtwoord ? "Nieuw wachtwoord gekozen via mail" : "Eerste wachtwoord gekozen via mail");
   return naar("/account?ww=1", { "set-cookie": await nieuweSessie(env, lid.id) });
 }
 
@@ -322,6 +328,7 @@ async function bevestig(request, env, url) {
     inhoud: banner("Mijn account", "Link verlopen") + kader(`<p>Deze link is verlopen of al gebruikt. Log in en vraag een nieuwe bevestigingsmail aan in je account.</p><p><a class="btn btn-solid" href="/account">Naar mijn account</a></p>`) });
   await env.SHOP_DB.prepare("UPDATE leden SET bevestigd_op = COALESCE(bevestigd_op, ?) WHERE id = ?").bind(nu(), lid.id).run();
   await env.SHOP_DB.prepare("DELETE FROM lid_tokens WHERE lid_id = ? AND soort = 'bevestig'").bind(lid.id).run();
+  await log(env, lid.id, "account", "E-mailadres bevestigd");
   return naar("/account?bevestigd=1");
 }
 
@@ -385,7 +392,7 @@ async function gegevens(request, env, url, lid) {
         ${veld("gebruikersnaam", "Gebruikersnaam", { waarde: w.gebruikersnaam, auto: "username", extra: 'required minlength="3" maxlength="20"' })}
         ${veld("naam", "Voor- en achternaam", { waarde: w.naam, auto: "name" })}
         ${veld("telefoon", "Telefoon", { type: "tel", waarde: w.telefoon, auto: "tel" })}
-        ${veld("woonplaats", "Woonplaats", { waarde: w.woonplaats, auto: "address-level2", hulp: "Zichtbaar op je forumprofiel." })}
+        ${veld("woonplaats", "Woonplaats", { waarde: w.woonplaats, auto: "address-level2", hulp: "Alleen zichtbaar voor jou." })}
         <p>Je Land Rovers zet je in je <a href="/account/garage">garage</a>.</p>
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
@@ -400,6 +407,7 @@ async function gegevens(request, env, url, lid) {
   if (w.avatar_id && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(w.avatar_id, lid.id).first())) w.avatar_id = lid.avatar_id;
   await env.SHOP_DB.prepare("UPDATE leden SET gebruikersnaam = ?, naam = ?, telefoon = ?, woonplaats = ?, landrover = ?, avatar_id = ? WHERE id = ?")
     .bind(w.gebruikersnaam, w.naam || null, w.telefoon || null, w.woonplaats || null, w.landrover || null, w.avatar_id, lid.id).run();
+  await log(env, lid.id, "profiel", w.gebruikersnaam !== lid.gebruikersnaam ? `Gegevens gewijzigd (gebruikersnaam ${lid.gebruikersnaam || "-"} → ${w.gebruikersnaam})` : w.avatar_id !== lid.avatar_id ? "Gegevens en profielfoto gewijzigd" : "Gegevens gewijzigd");
   return naar("/account?opgeslagen=1");
 }
 
@@ -419,6 +427,7 @@ async function nieuwWachtwoord(request, env, url, lid) {
   const ww = String(f.get("wachtwoord") || "");
   if (ww.length < 8) return toon("Je nieuwe wachtwoord moet minstens 8 tekens hebben.");
   await env.SHOP_DB.prepare("UPDATE leden SET wachtwoord = ? WHERE id = ?").bind(await maakHash(ww), lid.id).run();
+  await log(env, lid.id, "account", "Wachtwoord gewijzigd in account");
   await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(lid.id).run();
   return naar("/account?ww=1", { "set-cookie": await nieuweSessie(env, lid.id) });
 }
@@ -443,6 +452,7 @@ async function garage(request, env, url, lid) {
     if (id && !eigen) return naar("/account/garage");
     if (f.get("actie") === "verwijder" && eigen) {
       await env.SHOP_DB.prepare("DELETE FROM lid_wagens WHERE id = ? AND lid_id = ?").bind(id, lid.id).run();
+      await log(env, lid.id, "garage", `Wagen verwijderd: ${eigen.type}`);
       return naar("/account/garage?weg=1");
     }
     const type = tekst(f.get("type"), 80);
@@ -454,6 +464,7 @@ async function garage(request, env, url, lid) {
     const v = [tekst(f.get("naam"), 60) || null, type, bouwjaar, foto, tekst(f.get("omschrijving"), 300) || null];
     if (eigen) await env.SHOP_DB.prepare("UPDATE lid_wagens SET naam = ?, type = ?, bouwjaar = ?, foto_id = ?, omschrijving = ? WHERE id = ? AND lid_id = ?").bind(...v, id, lid.id).run();
     else if (wagens.length < 30) await env.SHOP_DB.prepare("INSERT INTO lid_wagens (naam, type, bouwjaar, foto_id, omschrijving, lid_id, volgorde, aangemaakt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(...v, lid.id, wagens.length, new Date().toISOString()).run();
+    await log(env, lid.id, "garage", `${eigen ? "Wagen gewijzigd" : "Wagen toegevoegd"}: ${type}${foto && foto !== eigen?.foto_id ? " (nieuwe foto)" : ""}`, foto ? `/forum/foto/${foto}` : null);
     return naar("/account/garage?ok=1");
   }
   const formulier = (w = {}) => `<form method="post" action="/account/garage" class="garage-form">

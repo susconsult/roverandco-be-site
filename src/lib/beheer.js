@@ -4,6 +4,7 @@
 // Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
+import { beheerLeden, hoofdTabs } from "./beheer-leden.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
   status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
@@ -181,7 +182,7 @@ async function lijst(url, env, email) {
   const tab = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer?soort=${s}">${label}</a>`;
   const ftab = (f, label) => `<a class="${filter === f ? "aan" : ""}" href="${esc(q({ filter: f }))}">${label}</a>`;
   return pagina("Overzicht", `
-<nav class="tabs">${tab("bestelling", "Bestellingen")}${tab("inschrijving", "Inschrijvingen")}<a href="/beheer/producten">Producten</a><a href="/beheer/activiteiten">Activiteiten</a></nav>
+${hoofdTabs(soort)}
 <nav class="tabs">${ftab("echt", "Betaald en bevestigd")}${ftab("open", "Nog af te handelen")}${ftab("wacht", "Wacht op betaling")}${ftab("test", "Test")}${ftab("alle", "Alles")}</nav>
 <form class="filter" method="get" action="/beheer"><input type="hidden" name="soort" value="${soort}"><input type="hidden" name="filter" value="${filter}">
 <input name="q" placeholder="Zoek naam, e-mail, nummer" value="${esc(zoek)}">
@@ -282,6 +283,8 @@ export async function beheer(request, env, url) {
     if (origin && origin !== url.origin) return html("Geweigerd.", 403);
   }
   if (p === "/beheer" || p === "/beheer/") return lijst(url, env, w.email);
+  const ld = await beheerLeden(request, env, url, w.email);
+  if (ld) return ld;
   const ab = await beheerAanbod(request, env, url, w.email);
   if (ab) return ab;
   if (p === "/beheer/export.csv") return exporteer(url, env);
