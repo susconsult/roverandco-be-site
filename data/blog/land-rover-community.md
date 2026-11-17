@@ -43,7 +43,7 @@ Rover & Co bestaat sinds 2025. We organiseren ritten, bijeenkomsten en evenement
 
 ### Church of Rover en de rit naar Tea on the Tailgate
 
-Op zondag 22 november 2026 verzamelen we aan de kerk van Oostham, met een bezoek aan de kerktoren, een winterbar, hotdogs, een vuurkorf, een wijding om 14.30 uur en daarna een rondrit met roadbook. Op vrijdag 18 december rijden we samen in colonne van The Wolfgarage naar de kersteditie van Tea on the Tailgate in Lille.
+Op zondag 22 november 2026 verzamelen we aan de kerk van Oostham, met een bezoek aan de kerktoren, een winterbar, hotdogs, een vuurkorf, een wijding om 15.00 uur en daarna een rondrit met roadbook. Op vrijdag 18 december rijden we samen in colonne van The Wolfgarage naar de kersteditie van Tea on the Tailgate in Lille.
 
 Lees meer in [Winter met Rover & Co: Church of Rover en de rit naar Tea on the Tailgate](/blog/winter-church-of-rover-kerstmeeting).
 

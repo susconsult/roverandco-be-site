@@ -17,7 +17,7 @@ Op zondag 22 november verzamelen we aan de kerk van Oostham. Het wordt een gezel
 
 ### De kerktoren in
 
-Het hoogtepunt voor veel bezoekers is de kerktoren van Oostham. Je kunt hem bezoeken in tijdsloten van tien minuten. Dat kan van 10.00 tot 12.00 uur en van 13.00 tot 14.30 uur. Een bezoek kost 5 euro per persoon. Je kiest je tijdslot bij de inschrijving.
+Het hoogtepunt voor veel bezoekers is de kerktoren van Oostham. Je bezoekt hem in kleine groepjes van maximaal tien personen, met een tijdslot om het half uur: van 10.00 tot 12.00 uur en van 13.00 tot 14.30 uur. Een bezoek kost 5 euro per persoon. Je kiest je tijdslot bij de inschrijving.
 
 ### Winterbar en vuurkorven
 
@@ -25,14 +25,14 @@ Rond de kerk staan een winterbar, hotdogs en een vuurkorf klaar. Kom dus gerust 
 
 ### De wijding en de rondrit
 
-Om 14.30 uur volgt de wijding. Aansluitend vertrekken we samen voor een rondrit met roadbook. Een roadbook kost 15 euro per wagen.
+Om 15.00 uur volgt de wijding. Aansluitend vertrekken we samen voor een rondrit met roadbook. Een roadbook kost 15 euro per wagen.
 
 ### Praktisch
 
 - **Wanneer:** zondag 22 november 2026, vanaf 10.00 uur
 - **Waar:** kerk van Oostham
 - **Torenbezoek:** 5 euro per persoon, in tijdsloten van 10 minuten
-- **Rondrit met roadbook:** 15 euro per wagen, na de wijding om 14.30 uur
+- **Rondrit met roadbook:** 15 euro per wagen, na de wijding om 15.00 uur
 - **Ter plaatse:** winterbar, hotdogs en vuurkorf
 
 Inschrijven doe je via onze pagina [Church of Rover](/activiteiten/church-of-rover).
