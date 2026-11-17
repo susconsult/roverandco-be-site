@@ -221,3 +221,9 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 fieldset{min-width:0;max-width:100%}.co-blok input,.co-blok select,.co-blok textarea{max-width:100%}
 @media(max-width:880px){.checkout{grid-template-columns:minmax(0,1fr)}.checkout>*{min-width:0}}
 .akkoord{min-width:0;overflow-wrap:anywhere}.akkoord>*{min-width:0}.akkoord a,.akkoord span{white-space:normal}
+/* ---------- @tag suggesties ---------- */
+.noem-lijst{position:absolute;z-index:500;background:#fff;border-radius:12px;box-shadow:0 12px 30px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.05);padding:6px;display:grid}
+.noem-lijst button{display:flex;align-items:center;gap:10px;padding:8px 10px;border:0;background:none;border-radius:8px;font:500 var(--fs-ui) var(--body);color:var(--ink);cursor:pointer;text-align:left}
+.noem-lijst button.aan,.noem-lijst button:hover{background:var(--sand)}
+.noem-lijst img,.noem-av{width:26px;height:26px;border-radius:50%;object-fit:cover;flex:none;background:var(--green);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.f-noem{font-weight:600;color:var(--green-3);text-decoration:none;background:rgba(159,197,168,.25);border-radius:4px;padding:0 3px}

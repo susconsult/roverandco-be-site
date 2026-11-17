@@ -112,6 +112,48 @@
   });
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.querySelectorAll("details.drie[open]").forEach(function (d) { d.open = false; }); });
 
+  /* ---------- @gebruiker taggen: suggesties tijdens het typen ---------- */
+  (function () {
+    var box = null, veld = null, start = -1, timer = null, keuze = 0, lijst = [];
+    function sluit() { if (box) box.remove(); box = null; lijst = []; }
+    function zet(n) {
+      var v = veld.value, eind = veld.selectionStart;
+      veld.value = v.slice(0, start) + "@" + n + " " + v.slice(eind);
+      var pos = start + n.length + 2; veld.setSelectionRange(pos, pos); veld.focus(); sluit();
+    }
+    function toon() {
+      sluit(); if (!lijst.length) return;
+      box = document.createElement("div"); box.className = "noem-lijst"; box.setAttribute("role", "listbox");
+      box.innerHTML = lijst.map(function (x, i) { return '<button type="button" role="option" data-n="' + esc(x.n) + '" class="' + (i === keuze ? "aan" : "") + '">' + (x.a ? '<img src="/forum/foto/' + x.a + '" alt="">' : '<span class="noem-av">' + esc(x.n.slice(0, 1).toUpperCase()) + "</span>") + "@" + esc(x.n) + "</button>"; }).join("");
+      var r = veld.getBoundingClientRect();
+      box.style.left = (r.left + window.scrollX) + "px"; box.style.width = Math.min(280, r.width) + "px";
+      document.body.appendChild(box);
+      var h = box.offsetHeight;
+      box.style.top = (r.bottom + h + 8 > window.innerHeight ? r.top + window.scrollY - h - 6 : r.bottom + window.scrollY + 6) + "px";
+      box.addEventListener("mousedown", function (e) { var b = e.target.closest("[data-n]"); if (b) { e.preventDefault(); zet(b.dataset.n); } });
+    }
+    document.addEventListener("input", function (e) {
+      var el = e.target;
+      if (!el.matches || !el.matches('textarea[name="tekst"], #cb-tekst, #mini-tekst')) return;
+      veld = el;
+      var voor = el.value.slice(0, el.selectionStart), m = voor.match(/(^|[\s(])@([A-Za-z0-9._-]{1,20})$/);
+      if (!m) { sluit(); return; }
+      start = voor.length - m[2].length - 1;
+      clearTimeout(timer);
+      timer = setTimeout(function () {
+        fetch("/forum/api/leden?q=" + encodeURIComponent(m[2]), { credentials: "same-origin" }).then(function (r) { return r.json(); })
+          .then(function (d) { lijst = d || []; keuze = 0; toon(); }).catch(sluit);
+      }, 150);
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!box || e.target !== veld) return;
+      if (e.key === "ArrowDown" || e.key === "ArrowUp") { e.preventDefault(); keuze = (keuze + (e.key === "ArrowDown" ? 1 : lijst.length - 1)) % lijst.length; toon(); }
+      else if (e.key === "Enter" || e.key === "Tab") { e.preventDefault(); e.stopPropagation(); zet(lijst[keuze].n); }
+      else if (e.key === "Escape") sluit();
+    }, true);
+    document.addEventListener("click", function (e) { if (box && !box.contains(e.target)) sluit(); });
+  })();
+
   /* ---------- lightbox ---------- */
   var lb = document.getElementById("lightbox");
   function closeLightbox() { if (lb) lb.classList.remove("open"); }

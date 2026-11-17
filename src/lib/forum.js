@@ -14,6 +14,14 @@ const MAX_FOTO = 1_600_000;
 const nu = () => new Date().toISOString();
 const tekst = (v, max) => String(v ?? "").replace(/\r\n/g, "\n").trim().slice(0, max);
 const slugify = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+// @gebruikersnaam in een bericht: die leden krijgen een melding in hun bel.
+async function meldGenoemden(env, tekstRuw, auteur, titel, link) {
+  const namen = [...new Set((String(tekstRuw).match(/(?:^|[\s(])@([A-Za-z0-9._-]{3,20})/g) || []).map((x) => x.trim().replace(/^[(]/, "").slice(1).toLowerCase()))].slice(0, 15);
+  if (!namen.length) return;
+  const ids = ((await env.SHOP_DB.prepare(`SELECT id FROM leden WHERE lower(gebruikersnaam) IN (${namen.map(() => "?").join(",")}) AND id <> ? AND geblokkeerd = 0`).bind(...namen, auteur.id).all()).results || []).map((x) => x.id);
+  if (ids.length) await stuurMelding(env, ids, `${auteur.gebruikersnaam} noemde je in "${titel}"`, link);
+}
+
 // Op welke pagina staat een bericht? Pagina's tellen alleen de hoofdberichten; antwoorden staan bij hun hoofdbericht.
 async function paginaVan(env, topicId, berichtId) {
   const b = await env.SHOP_DB.prepare("SELECT COALESCE(parent_id, id) root FROM forum_berichten WHERE id = ?").bind(berichtId).first();
@@ -56,6 +64,7 @@ export function opmaak(ruw) {
   h = h.replace(/\[foto=(\d{1,10})\]/gi, (_, id) => `<a class="f-foto" href="/forum/foto/${id}" target="_blank"><img src="/forum/foto/${id}" alt="Foto" loading="lazy"></a>`);
   h = h.replace(/(^|[\s>(])(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, (_, voor, u) => `${voor}<a href="${u}" rel="nofollow ugc noopener" target="_blank">${u.length > 60 ? u.slice(0, 57) + "…" : u}</a>`);
   h = tagLinks(h);
+  h = h.replace(/(^|[\s>(])@([A-Za-z0-9._-]{3,20})/g, (_, voor, n) => `${voor}<a class="f-noem" href="/forum/lid/${encodeURIComponent(n)}">@${n}</a>`);
   return h.replace(/\n/g, "<br>").replace(/<br>\s*(<\/?blockquote)/g, "$1").replace(/(<\/blockquote>)<br>/g, "$1");
 }
 
@@ -321,6 +330,7 @@ async function nieuwTopic(request, env, url, lid, slug) {
   await zetVolgen(env, lid.id, "topic", id, true); // je volgt je eigen topic
   const link = topicUrl({ id, titel: w.titel });
   await meldNieuwBericht(env, { topic: { id, titel: w.titel }, catSlug: c.slug, catNaam: c.naam, auteur: lid, tags, link, nieuwTopic: true });
+  await meldGenoemden(env, w.tekst, lid, w.titel, link);
   await log(env, lid.id, "forum", `Nieuw topic in ${c.naam}: ${w.titel}`, link);
   return naar(link);
 }
@@ -351,6 +361,7 @@ async function antwoorden(request, env, url, lid, id) {
   if (f.get("volg") !== "0") await zetVolgen(env, lid.id, "topic", t.id, true); // wie reageert, volgt het topic
   const c = await env.SHOP_DB.prepare("SELECT slug, naam FROM forum_categorieen WHERE id = ?").bind(t.categorie_id).first();
   await meldNieuwBericht(env, { topic: t, catSlug: c?.slug || "", catNaam: c?.naam || "", auteur: lid, tags, link, nieuwTopic: false });
+  await meldGenoemden(env, w.tekst, lid, t.titel, link);
   await log(env, lid.id, "forum", `Reactie op: ${t.titel}`, link);
   return naar(link);
 }
@@ -567,6 +578,11 @@ export async function forum(request, env, url) {
   if (!env.SHOP_DB) return new Response("Nog niet gekoppeld.", { status: 503 });
   let m;
   if ((m = p.match(/^\/forum\/foto\/(\d{1,10})$/))) return fotoTonen(env, m[1]);
+  if (p === "/forum/api/leden") {
+    const q = String(url.searchParams.get("q") || "").replace(/[^A-Za-z0-9._-]/g, "").slice(0, 20);
+    const r = q ? (await env.SHOP_DB.prepare("SELECT gebruikersnaam n, avatar_id a FROM leden WHERE gebruikersnaam LIKE ? AND geblokkeerd = 0 AND verwijderd_op IS NULL ORDER BY laatst_gezien DESC LIMIT 6").bind(q + "%").all()).results || [] : [];
+    return json(r);
+  }
   if (request.method === "POST" && !eigenOrigin(request, url)) return new Response("Geweigerd.", { status: 403 });
   const lid = await huidigLid(request, env);
   const post = request.method === "POST";
