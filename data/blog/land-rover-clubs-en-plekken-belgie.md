@@ -23,7 +23,7 @@ Ken je een club of plek die hier niet tussen staat? Mail ons op [info@roverandco
 **Rover & Co.** En dan is er ons eigen Rover & Co, uit Oostham. Wij zijn een vzw die ritten, bijeenkomsten en evenementen organiseert, op plekken waar je anders niet komt. Klassiek of nieuw: iedereen is welkom. Een paar van onze vaste afspraken:
 
 - **Church of Rover:** een Land Rover-meeting aan de kerk van Oostham, met een bezoek aan de kerktoren, een rondrit, een winterbar en vuurkorven;
-- **Kerstmeeting:** een winterse meeting aan de VVV-toren in Gerhagen;
+- **Samen rijden:** ritten in colonne, zoals naar de kersteditie van Tea on the Tailgate in Lille;
 - **Wild & Wheels:** het nieuwe Land Rover-weekend in Pakawi Park, de opvolger van Wool & Wheels.
 
 Data en inschrijven vind je op onze pagina [Activiteiten](/activiteiten).

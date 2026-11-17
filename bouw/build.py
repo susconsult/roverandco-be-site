@@ -113,7 +113,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
       </div>
       <div>
         <h4>Volg ons</h4>
-        <ul><li><a href="{site['instagram']}" rel="noopener">Instagram</a></li><li><a href="{site['facebook']}" rel="noopener">Facebook</a></li></ul>
+        <ul><li><a href="{site['instagram']}" target="_blank" rel="noopener">Instagram</a></li><li><a href="{site['facebook']}" target="_blank" rel="noopener">Facebook</a></li></ul>
       </div>
     </div>
     <div class="legal">
@@ -298,7 +298,7 @@ home = f"""
     <div class="eyebrow">Mee op pad?</div>
     <h2>Blijf op de hoogte van de volgende rit</h2>
     <p>Volg ons op Instagram en Facebook, of schrijf je in voor een activiteit. Iedere Land Rover is welkom.</p>
-    <div class="ctas" style="justify-content:center"><a href="{site['instagram']}" class="btn btn-white" rel="noopener">Instagram</a><a href="{site['facebook']}" class="btn btn-ghost-w" rel="noopener">Facebook</a></div>
+    <div class="ctas" style="justify-content:center"><a href="{site['instagram']}" class="btn btn-white" target="_blank" rel="noopener">Instagram</a><a href="{site['facebook']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Facebook</a></div>
   </div>
 </section>"""
 write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen op plekken waar je anders niet komt. Activiteiten, ritten en merch.", home, hero=True)
@@ -432,7 +432,7 @@ var KAL='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18
 function el(t,c,x){{var n=document.createElement(t);if(c)n.className=c;if(x!=null)n.textContent=x;return n}}
 function d(s){{var p=s.split("-");return new Date(+p[0],+p[1]-1,+p[2])}}
 function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textContent="";var maand="",n=0;
-  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons"?a.ons:(a.soort||"club")===filter))&&(!maandF||a.datum.slice(0,7)<=maandF&&(a.einde||a.datum).slice(0,7)>=maandF)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
+  alle.filter(function(a){{return d(a.einde||a.datum)>=vandaag&&(filter==="alles"||(filter==="ons"?a.ons:(a.soort||"club").split(",").indexOf(filter)>-1))&&(!maandF||a.datum.slice(0,7)<=maandF&&(a.einde||a.datum).slice(0,7)>=maandF)}}).sort(function(a,b){{return a.datum<b.datum?-1:1}}).forEach(function(a){{
     var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;var blok=el("div","kal-blok");blok.append(el("h3","kal-maand",m));grid=el("div","kal-grid");blok.append(grid);lijst.append(blok)}}
     var r=el(a.link?"a":"div","kal-kaart"+(a.ons?" ons":""));if(a.link){{r.href=a.link;if(!a.ons)r.rel="noopener"}}
     var dag=el("div","kal-datum");dag.append(el("span","kal-wd",DAGEN[dt.getDay()]),el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
@@ -656,12 +656,12 @@ write("/over-ons", "Over ons", "Rover & Co VZW uit Oostham brengt Land Rover-lie
 
 # ---------- contact ----------
 write("/contact", "Contact", "Contacteer Rover & Co VZW in Oostham: e-mail, telefoon en adres.",
-      banner("Contact", "Contact", "Een vraag over een activiteit of een bestelling? Laat het ons weten.", None) + f"""
+      banner("Contact", "Contacteer ons", "Een vraag over een activiteit of een bestelling? Laat het ons weten.", None) + f"""
 <section><div class="wrap contact-grid">
   <div class="rubriek"><h3>Mail</h3><p><a href="mailto:{site['email']}">{site['email']}</a></p></div>
   <div class="rubriek"><h3>Bel</h3><p><a href="tel:{site['telefoon_link']}">{site['telefoon']}</a></p></div>
   <div class="rubriek"><h3>Adres</h3><p>{e(site['naam'])}<br>{'<br>'.join(e(x) for x in site['adres'])}</p><p><a href="https://www.google.com/maps/search/?api=1&query=Olmensesteenweg+105+3945+Oostham" rel="noopener">Routebeschrijving</a></p></div>
-  <div class="rubriek"><h3>Volg ons</h3><p><a href="{site['instagram']}" rel="noopener">Instagram</a><br><a href="{site['facebook']}" rel="noopener">Facebook</a></p></div>
+  <div class="rubriek"><h3>Volg ons</h3><p><a href="{site['instagram']}" target="_blank" rel="noopener">Instagram</a><br><a href="{site['facebook']}" target="_blank" rel="noopener">Facebook</a></p></div>
 </div></section>""")
 
 # ---------- algemene voorwaarden ----------

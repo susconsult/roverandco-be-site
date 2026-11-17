@@ -243,6 +243,7 @@ function activiteitFormulier(a, email, fout = "") {
       ${veld("aftellen_start", "Aftellen tot (start)", lokaal(a.aftellen?.start), { type: "datetime-local", hulp: "Toont een aftelklok onder de banner. Leeg = geen." })}
       ${veld("aftellen_einde", "Einde activiteit", lokaal(a.aftellen?.einde), { type: "datetime-local" })}
       ${veld("extern_url", "Hele activiteit staat op een andere site", a.extern_url, { type: "url", breed: true, hulp: "Leeg laten tenzij de kaartjes moeten doorlinken naar een andere site." })}
+      ${veld("kalender_soort", "Soort in de kalender", a.kalender_soort || "club", { hulp: "club, 4x4, beurs, overland. Meerdere mag, met komma's (bv. club,overland)." })}
       ${veld("foto_pos", "Uitsnede hoofdfoto", a.foto_pos, { hulp: "Bv. 50% 70% (horizontaal verticaal)" })}
       ${veld("banner_pos", "Uitsnede banner", a.banner_pos)}
     </div>
@@ -289,6 +290,7 @@ async function activiteitBewaren(request, env, oud, email) {
     foto_pos: g("foto_pos", 20), banner_pos: g("banner_pos", 20), extern_url: /^https?:\/\//.test(g("extern_url", 300)) ? g("extern_url", 300) : "",
     inschrijven_url: /^https?:\/\//.test(g("inschrijven_url", 300)) ? g("inschrijven_url", 300) : "", inschrijven_label: g("inschrijven_label", 40),
     inschrijving,
+    kalender_soort: g("kalender_soort", 60).toLowerCase().split(/[\s,]+/).filter((x) => ["club", "4x4", "beurs", "overland"].includes(x)).join(",") || "club",
   };
   const as = brussel(g("aftellen_start", 20)), ae = brussel(g("aftellen_einde", 20));
   if (as) d.aftellen = { start: as, einde: ae || as }; else delete d.aftellen;

@@ -118,7 +118,7 @@ function aftellen(a) {
 const affiche = (a) => a.affiche
   ? `<button type="button" class="affiche" data-full="${e(fotoGroot(a.affiche))}" aria-label="Affiche groot bekijken"><img src="${e(fotoKlein(a.affiche))}" alt="Affiche ${e(a.titel)}" loading="lazy"></button>` : "";
 const fotoblok = (a) => (a.fotos || []).length
-  ? `<section class="gallery-sec"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>${e(a.fotos_titel || "Sfeerbeelden")}</h2></div></div>${galerij(a.fotos)}</div></section>` : "";
+  ? `<section class="gallery-sec"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>${e(a.fotos_titel || "Sfeerbeelden")}</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>${galerij(a.fotos)}</div></section>` : "";
 
 /* ---------------- pagina's ---------------- */
 
@@ -267,7 +267,7 @@ async function kalender(env, request) {
   const [acts, r] = await Promise.all([activiteiten(env), env.ASSETS.fetch(request)]);
   const ons = acts.filter((a) => komend(a) && a.datum).map((a) => ({
     club: "Rover & Co", ons: true, titel: a.titel, datum: a.datum, einde: a.einde || "", label: a.datum_label,
-    plaats: (a.locatie || "") + (a.uren ? " · " + a.uren : ""), link: a.extern_url || `/activiteiten/${a.slug}`, org: "Rover & Co VZW", soort: "club", info: a.kort || "",
+    plaats: (a.locatie || "") + (a.uren ? " · " + a.uren : ""), link: a.extern_url || `/activiteiten/${a.slug}`, org: "Rover & Co VZW", soort: a.kalender_soort || "club", info: a.kort || "",
   }));
   const alle = [...ons, ...kalenderAnderen.map((k) => ({ ...k, ons: false }))].sort((x, y) => (x.datum < y.datum ? -1 : 1));
   return new HTMLRewriter().on("script#kal-data", vervang(JSON.stringify(alle).replace(/</g, "\\u003c")))

@@ -41,11 +41,11 @@ Lees meer over de plekken waar Land Rover-fans naartoe trekken in [Red Wharf Bay
 
 Rover & Co bestaat sinds 2025. We organiseren ritten, bijeenkomsten en evenementen. We willen bij elk evenement een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parking, maar een dag rond een kerktoren, in het bos of op een terrein waar je anders niet komt.
 
-### Church of Rover en de Kerstmeeting
+### Church of Rover en de rit naar Tea on the Tailgate
 
-Op zondag 22 november 2026 verzamelen we aan de kerk van Oostham, met een bezoek aan de kerktoren, een winterbar, hotdogs, een vuurkorf, een wijding om 14.30 uur en daarna een rondrit met roadbook. Op zondag 13 december sluiten we het jaar af met een Kerstmeeting aan de VVV-toren in Gerhagen.
+Op zondag 22 november 2026 verzamelen we aan de kerk van Oostham, met een bezoek aan de kerktoren, een winterbar, hotdogs, een vuurkorf, een wijding om 14.30 uur en daarna een rondrit met roadbook. Op vrijdag 18 december rijden we samen in colonne van The Wolfgarage naar de kersteditie van Tea on the Tailgate in Lille.
 
-Lees meer in [Winter met Rover & Co: Church of Rover en de Kerstmeeting](/blog/winter-church-of-rover-kerstmeeting).
+Lees meer in [Winter met Rover & Co: Church of Rover en de rit naar Tea on the Tailgate](/blog/winter-church-of-rover-kerstmeeting).
 
 ### Van Wool & Wheels naar Wild & Wheels
 
@@ -91,7 +91,7 @@ Wil je erbij horen? Dat is eenvoudig.
 
 ## Alle artikels in deze reeks
 
-1. [Winter met Rover & Co: Church of Rover en de Kerstmeeting](/blog/winter-church-of-rover-kerstmeeting)
+1. [Winter met Rover & Co: Church of Rover en de rit naar Tea on the Tailgate](/blog/winter-church-of-rover-kerstmeeting)
 2. [Wool & Wheels 2026: Land Rovers, schapen en een country fair](/blog/wool-and-wheels-2026)
 3. [Wild & Wheels 2027: Land Rovers in Pakawi Park](/blog/wild-and-wheels-2027)
 4. [Land Rover-clubs in Europa: van Schotland tot Luxemburg](/blog/land-rover-clubs-europa)
@@ -99,7 +99,7 @@ Wil je erbij horen? Dat is eenvoudig.
 
 ## Bronnen
 
-- Rover & Co, [Over ons](/over-ons), [Church of Rover](/activiteiten/church-of-rover), [Kerstmeeting](/activiteiten/kerstmeeting) en [Wool & Wheels](https://roverandco.be/woolandwheels)
+- Rover & Co, [Over ons](/over-ons), [Church of Rover](/activiteiten/church-of-rover), [Rit naar Tea on the Tailgate Kerst](/activiteiten/rit-tea-on-the-tailgate-kerst) en [Wool & Wheels](https://roverandco.be/woolandwheels)
 - Wild & Wheels, [wildandwheels.be](https://wildandwheels.be)
 - Land Rover Monthly, [Scottish Land Rover Owners Club](https://www.pressreader.com/uk/land-rover-monthly/20210201/282746294330800), [North East Rover Owners Club](https://www.pressreader.com/uk/land-rover-monthly/20180501/282677572837387) en [Dunsfold Collection Show](https://www.pressreader.com/uk/land-rover-monthly/20170801/281629600264037)
 - Footman James, [Land Rover Series One Club](https://www.footmanjames.co.uk/enthusiast-clubs/land-rover-series-one-club)

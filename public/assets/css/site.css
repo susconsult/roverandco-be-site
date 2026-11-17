@@ -513,3 +513,4 @@ span.f-like{cursor:default}
 .garage-form .veld2{gap:12px}
 .meldingen{list-style:none;padding:0;margin:0}.meldingen li{padding:12px 0;border-bottom:1px solid var(--sand-2);display:flex;justify-content:space-between;gap:12px}
 .meldingen li.nieuw a{font-weight:800}.meldingen small{color:var(--muted);white-space:nowrap}
+.acc-dl dt,.acc-dl dd{font-family:var(--tekst)}

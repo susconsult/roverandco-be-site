@@ -1,15 +1,15 @@
 ---
-titel: Winter met Rover & Co: Church of Rover en de Kerstmeeting
+titel: Winter met Rover & Co: Church of Rover en de rit naar Tea on the Tailgate
 rubriek: Community
 volgorde: 1
 auteur: pieter
 datum: 2026-11-15
-beschrijving: Op 22 november rijden de Land Rovers naar de kerk van Oostham, op 13 december naar de VVV-toren in Gerhagen. Alles over onze twee wintermeetings.
+beschrijving: Op 22 november rijden de Land Rovers naar de kerk van Oostham, op 18 december samen in colonne naar Tea on the Tailgate in Lille. Alles over onze twee winterritten.
 foto: 870
 foto_alt: Series Land Rover rijdt door de modder
 ---
 
-Een Land Rover is geen zomerauto. Hij is gebouwd voor modder, regen en koude ochtenden. Daarom sluiten we het jaar niet af met een pauze, maar met twee wintermeetings: Church of Rover in Oostham en de Kerstmeeting in Gerhagen. In dit artikel lees je wat je er kunt verwachten.
+Een Land Rover is geen zomerauto. Hij is gebouwd voor modder, regen en koude ochtenden. Daarom sluiten we het jaar niet af met een pauze, maar met twee winterafspraken: Church of Rover in Oostham en een rit in colonne naar de kersteditie van Tea on the Tailgate in Lille. In dit artikel lees je wat je er kunt verwachten.
 
 ## Church of Rover: zondag 22 november
 
@@ -39,17 +39,18 @@ Inschrijven doe je via onze pagina [Church of Rover](/activiteiten/church-of-rov
 
 [[foto: 977 | Colonne Defenders in het bos]]
 
-## Kerstmeeting: zondag 13 december
+## Rit naar Tea on the Tailgate: vrijdag 18 december
 
-Op zondag 13 december sluiten we het jaar af met een Kerstmeeting aan de VVV-toren in Gerhagen. We starten om 14.30 uur.
-
-Het programma maken we later bekend. Hou onze pagina [Kerstmeeting](/activiteiten/kerstmeeting) en onze sociale media in de gaten.
+Tea on the Tailgate houdt een kersteditie in Lille: een gezellige avondmeet voor Land Rover-rijders en liefhebbers. Wij rijden er samen in colonne naartoe, vanaf The Wolfgarage in Ham.
 
 ### Praktisch
 
-- **Wanneer:** zondag 13 december 2026, start om 14.30 uur
-- **Waar:** VVV-toren Gerhagen
-- **Programma:** volgt
+- **Wanneer:** vrijdag 18 december 2026, vertrek om 18.00 uur
+- **Vertrek:** The Wolfgarage, Olmensesteenweg 105, 3945 Tessenderlo-Ham
+- **Bestemming:** Tea on the Tailgate Kersteditie, Poeyelheide 13t, Lille (19.00 tot 22.00 uur)
+- **Prijs:** gratis, wel even inschrijven
+
+Inschrijven doe je via onze pagina [Rit naar Tea on the Tailgate Kerst](/activiteiten/rit-tea-on-the-tailgate-kerst).
 
 ## Voor wie?
 
@@ -66,5 +67,5 @@ Dit artikel hoort bij ons overzicht [Samen Land Rover rijden: de community in Be
 ## Bronnen
 
 - Rover & Co, [Church of Rover](/activiteiten/church-of-rover): programma, prijzen en uren
-- Rover & Co, [Kerstmeeting](/activiteiten/kerstmeeting): datum, plaats en startuur
+- Rover & Co, [Rit naar Tea on the Tailgate Kerst](/activiteiten/rit-tea-on-the-tailgate-kerst): datum, vertrek en bestemming
 - Rover & Co, [Over ons](/over-ons): onze missie
