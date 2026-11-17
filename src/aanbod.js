@@ -82,7 +82,7 @@ function img(naam, alt, { cls = "", sizes = "100vw", prio = false, pos = null } 
   return `<img ${a}src="/assets/img/${e(naam)}-s.webp" srcset="/assets/img/${e(naam)}-s.webp 800w, /assets/img/${e(naam)}.webp 1600w" sizes="${sizes}" alt="${e(alt)}"${load}>`;
 }
 function banner(eyebrow, titel, intro = "", foto = null, alt = "", pos = null, groen = false, kruim = null) {
-  return `<section class="banner${groen ? " banner-groen" : ""}">${foto ? img(foto, alt, { prio: true, pos }) : ""}<div class="wrap">${kruimel(kruim || [])}<div class="eyebrow">${e(eyebrow)}</div><h1>${e(titel)}</h1>${intro ? `<p>${e(intro)}</p>` : ""}</div></section>`;
+  return `<section class="banner banner-foto">${foto ? img(foto, alt, { prio: true, pos }) : ""}<div class="wrap">${kruimel(kruim || [])}<div class="eyebrow">${e(eyebrow)}</div><h1>${e(titel)}</h1>${intro ? `<p>${e(intro)}</p>` : ""}</div></section>`;
 }
 function galerij(items) {
   return '<div class="gallery">' + items.map(([n, a]) =>
