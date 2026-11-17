@@ -426,7 +426,8 @@ async function gegevens(request, env, url, lid) {
         ${veld("gebruikersnaam", "Gebruikersnaam", { waarde: w.gebruikersnaam, auto: "username", extra: 'required minlength="3" maxlength="20"' })}
         ${veld("naam", "Voor- en achternaam", { waarde: w.naam, auto: "name" })}
         ${veld("telefoon", "Telefoon", { type: "tel", waarde: w.telefoon, auto: "tel" })}
-        ${veld("woonplaats", "Woonplaats", { waarde: w.woonplaats, auto: "address-level2", hulp: "Alleen zichtbaar voor jou." })}
+        ${veld("straat", "Straat en nummer", { waarde: w.straat, auto: "street-address", hulp: "Voor verzendingen uit de shop. Alleen zichtbaar voor jou." })}
+        <div class="veld2">${veld("postcode", "Postcode", { waarde: w.postcode, auto: "postal-code" })}${veld("gemeente", "Gemeente", { waarde: w.gemeente || w.woonplaats, auto: "address-level2" })}</div>
         <p>Je Land Rovers zet je in je <a href="/account/garage">garage</a>.</p>
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
@@ -435,12 +436,13 @@ async function gegevens(request, env, url, lid) {
   });
   if (request.method !== "POST") return toon();
   const f = await request.formData();
-  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), naam: tekst(f.get("naam"), 120), telefoon: tekst(f.get("telefoon"), 40), woonplaats: tekst(f.get("woonplaats"), 80), landrover: lid.landrover, avatar_id: parseInt(f.get("avatar_id"), 10) || null };
+  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), naam: tekst(f.get("naam"), 120), telefoon: tekst(f.get("telefoon"), 40), straat: tekst(f.get("straat"), 120), postcode: tekst(f.get("postcode"), 10), gemeente: tekst(f.get("gemeente"), 80), landrover: lid.landrover, avatar_id: parseInt(f.get("avatar_id"), 10) || null };
+  w.woonplaats = w.gemeente;
   if (!naamOk(w.gebruikersnaam)) return toon("Kies een gebruikersnaam van 3 tot 20 tekens: letters, cijfers, punt, streepje of underscore.", { ...lid, ...w });
   if (await env.SHOP_DB.prepare("SELECT 1 FROM leden WHERE gebruikersnaam = ? AND id <> ?").bind(w.gebruikersnaam, lid.id).first()) return toon("Die gebruikersnaam is al bezet.", { ...lid, ...w });
   if (w.avatar_id && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(w.avatar_id, lid.id).first())) w.avatar_id = lid.avatar_id;
-  await env.SHOP_DB.prepare("UPDATE leden SET gebruikersnaam = ?, naam = ?, telefoon = ?, woonplaats = ?, landrover = ?, avatar_id = ? WHERE id = ?")
-    .bind(w.gebruikersnaam, w.naam || null, w.telefoon || null, w.woonplaats || null, w.landrover || null, w.avatar_id, lid.id).run();
+  await env.SHOP_DB.prepare("UPDATE leden SET gebruikersnaam = ?, naam = ?, telefoon = ?, woonplaats = ?, straat = ?, postcode = ?, gemeente = ?, landrover = ?, avatar_id = ? WHERE id = ?")
+    .bind(w.gebruikersnaam, w.naam || null, w.telefoon || null, w.woonplaats || null, w.straat || null, w.postcode || null, w.gemeente || null, w.landrover || null, w.avatar_id, lid.id).run();
   await log(env, lid.id, "profiel", w.gebruikersnaam !== lid.gebruikersnaam ? `Gegevens gewijzigd (gebruikersnaam ${lid.gebruikersnaam || "-"} → ${w.gebruikersnaam})` : w.avatar_id !== lid.avatar_id ? "Gegevens en profielfoto gewijzigd" : "Gegevens gewijzigd");
   return naar("/account?opgeslagen=1");
 }
@@ -543,7 +545,9 @@ export async function leden(request, env, url) {
   const p = url.pathname.replace(/\/$/, "") || "/";
   if (p === "/api/account/ik") {
     const lid = await huidigLid(request, env);
-    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, beheerder: !!lid.beheerder, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
+    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, straat: lid.straat, postcode: lid.postcode, gemeente: lid.gemeente, land: lid.land,
+      wagen: await env.SHOP_DB.prepare("SELECT type, bouwjaar FROM lid_wagens WHERE lid_id = ? ORDER BY volgorde, id LIMIT 1").bind(lid.id).first().then((w) => w ? [w.type, w.bouwjaar].filter(Boolean).join(", ") : null).catch(() => null),
+      beheerder: !!lid.beheerder, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
       { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
   }
   if (p !== "/account" && !p.startsWith("/account/")) return null;

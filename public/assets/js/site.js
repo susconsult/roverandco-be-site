@@ -433,7 +433,8 @@
         }
       }
       formulieren.forEach(function (f) {
-        ["naam", "email", "telefoon"].forEach(function (n) { var el = f.elements[n]; if (el && !el.value && ik[n]) el.value = ik[n]; });
+        ["naam", "email", "telefoon", "straat", "postcode", "gemeente", "wagen"].forEach(function (n) { var el = f.elements[n]; if (el && !el.value && ik[n]) el.value = ik[n]; });
+        if (f.elements.land && ik.land) f.elements.land.value = ik.land;
       });
     }).catch(function () {});
   }

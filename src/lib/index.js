@@ -272,6 +272,12 @@ async function plaats(request, env, soort) {
   try {
     const lid = await lidVoorBestelling(env, request, res.record.klant);
     if (lid) await env.SHOP_DB.prepare("UPDATE registraties SET lid_id = ? WHERE nummer = ?").bind(lid.id, nr).run();
+    // Gegevens bewaren in het account, zodat ze de volgende keer al ingevuld zijn.
+    if (lid) {
+      const k = res.record.klant || {}, lv = res.record.levering || {};
+      await env.SHOP_DB.prepare("UPDATE leden SET naam = COALESCE(?, naam), telefoon = COALESCE(?, telefoon) WHERE id = ?").bind(k.naam || null, k.telefoon || null, lid.id).run();
+      if (lv.type === "verzenden" && lv.straat) await env.SHOP_DB.prepare("UPDATE leden SET straat = ?, postcode = ?, gemeente = ?, land = ? WHERE id = ?").bind(lv.straat, lv.postcode, lv.gemeente, lv.land || "BE", lid.id).run();
+    }
   } catch (e) { console.error("lid koppelen", nr, e?.message); }
   if (a.betaald || !metBetaling) {
     await stuurKlantmail(env, a.mail, payload.site);

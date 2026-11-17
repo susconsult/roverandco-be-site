@@ -98,3 +98,7 @@ ALTER TABLE forum_meldingen ADD COLUMN cb_id INTEGER;
 CREATE TABLE IF NOT EXISTS lid_bewaard (lid_id INTEGER NOT NULL, soort TEXT NOT NULL, sleutel TEXT NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (lid_id, soort, sleutel));
 CREATE TABLE IF NOT EXISTS cb_reacties (bericht_id INTEGER NOT NULL, lid_id INTEGER NOT NULL, soort TEXT NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (bericht_id, lid_id, soort));
 ALTER TABLE forum_berichten ADD COLUMN parent_id INTEGER;
+ALTER TABLE leden ADD COLUMN straat TEXT;
+ALTER TABLE leden ADD COLUMN postcode TEXT;
+ALTER TABLE leden ADD COLUMN gemeente TEXT;
+ALTER TABLE leden ADD COLUMN land TEXT;
