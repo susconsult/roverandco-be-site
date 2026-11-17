@@ -151,7 +151,8 @@ tr:hover td{background:#fafaf6}td a{color:var(--g);font-weight:600}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 .som{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}.som div{background:#fff;border-radius:10px;padding:12px 16px}.som b{display:block;font-size:20px}
 .leeg{padding:30px;text-align:center;color:var(--m)}
-@media(max-width:700px){dl{grid-template-columns:1fr}th.mob,td.mob{display:none}}`;
+@media(max-width:700px){dl{grid-template-columns:1fr}th.mob,td.mob{display:none}}
+@media(max-width:900px){input,select,textarea{font-size:16px!important}}`;
 
 const MENU = [
   ["", [["home", "Te doen", "/beheer", "home"]]],

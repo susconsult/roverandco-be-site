@@ -272,3 +272,5 @@ fieldset{min-width:0;max-width:100%}.co-blok input,.co-blok select,.co-blok text
 @media(prefers-reduced-motion:reduce){.made-by .hartje{animation:none}}
 .made-by a{display:inline-flex}
 .made-by img{height:26px;width:auto}
+/* iPhone zoomt in op velden kleiner dan 16px: op gsm altijd minstens 16px */
+@media(max-width:900px){input,select,textarea{font-size:16px!important}}
