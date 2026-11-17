@@ -267,7 +267,7 @@ async function plaats(request, env, soort) {
   }
   const c = await opslag(env, "ordercode", { soort, nummer: nr, ordercode: code });
   if (!c || c.ok !== true) return json({ ok: false, fout }, 502);
-  return json({ ok: true, nummer: nr, betalen: vivaAdressen(env).checkout + code });
+  return json({ ok: true, nummer: nr, betalen: vivaAdressen(env).checkout + code + "&color=1F3B2A" });
 }
 
 // Controleert een betaling bij Viva en zet ze in de sheet op "Betaald" (veilig om meermaals te doen).
