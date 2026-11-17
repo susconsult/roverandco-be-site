@@ -133,7 +133,7 @@ section{padding:100px 0}
 .pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:30px 0}
 .pillar{background:var(--green);color:var(--white);border-radius:12px;padding:18px}
 .pillar b{font-family:var(--head);font-size:26px;text-transform:uppercase;display:block;line-height:1}
-.pillar span{font-size:14px;opacity:.9}
+.pillar span{display:block;margin-top:12px;font-size:15px;line-height:1.4;opacity:.9}
 @media(max-width:880px){.about{grid-template-columns:1fr}.pillars{grid-template-columns:1fr}}
 
 /* shop */
@@ -190,7 +190,7 @@ fieldset.opt{border:0;padding:0;min-width:0}
 footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
 .foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}
 .foot h4{font-family:var(--head);font-size:22px;text-transform:uppercase;margin-bottom:14px;letter-spacing:1px}
-.foot p,.foot li{font-size:15px;opacity:.82;list-style:none;margin-bottom:6px}
+.foot p,.foot li{font-family:var(--body);font-size:15px;opacity:.82;list-style:none;margin-bottom:6px}
 .foot a{text-decoration:none}
 .foot a:hover{text-decoration:underline}
 .foot .logo img{height:110px;margin:0 0 12px}

@@ -18,7 +18,8 @@ alle_acts = json.load(open(os.path.join(DATA, "activiteiten.json"), encoding="ut
 acts = [a for a in alle_acts if not a.get("verborgen")]  # verborgen = testactiviteit: niet in lijsten, noindex
 shop = json.load(open(os.path.join(DATA, "shop.json"), encoding="utf-8"))["producten"]
 ecwid = {p["ecwid_id"]: p for p in json.load(open(os.path.join(DATA, "ecwid", "producten.json"), encoding="utf-8"))}
-VERSIE = date.today().isoformat()
+import hashlib as _h
+VERSIE = _h.sha1(b"".join(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "assets", f), "rb").read() for f in ("css/site.css", "js/site.js", "js/forum.js"))).hexdigest()[:10]
 pages = []  # voor sitemap
 
 e = html.escape
@@ -640,7 +641,7 @@ write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",
 
 # ---------- over ons ----------
 write("/over-ons", "Over ons", "Rover & Co VZW uit Oostham brengt Land Rover-liefhebbers samen. Onze missie en ons doel.",
-      banner("Over ons", "Missie en doel", "", "5498", "Lachende chauffeur in een witte Defender") + f"""
+      banner("Over ons", "Missie en doel", "", "959", "Defenders in het stof op een bosweg") + f"""
 <section><div class="narrow prose">
   <p>{e(OVER_TEKST)}</p>
   <p>Elk evenement wil een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parkeerplaats, wel een dag rond een kerktoren, in het bos of op een terrein waar je anders niet komt.</p>
