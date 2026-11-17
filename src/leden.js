@@ -180,7 +180,7 @@ function registreerPagina(env, request, { m = "", w = {}, terug = "" } = {}) {
         ${veld("email", "E-mailadres", { type: "email", waarde: w.email, auto: "email", extra: "required" })}
         ${veld("wachtwoord", "Wachtwoord", { type: "password", auto: "new-password", extra: 'required minlength="8"', hulp: "Minstens 8 tekens." })}
         ${turnstileVeld(env)}
-        <label class="vink"><input type="checkbox" name="akkoord" value="ja" required> Ik ga akkoord met de <a href="/voorwaarden" target="_blank">voorwaarden</a> en de <a href="/privacy" target="_blank">privacyverklaring</a>.</label>
+        <label class="vink"><input type="checkbox" name="akkoord" value="ja" required><span>Ik ga akkoord met de <a href="/voorwaarden" target="_blank">voorwaarden</a> en de <a href="/privacy" target="_blank">privacyverklaring</a>.</span></label>
         <button class="btn btn-solid" type="submit">Account maken</button>
       </form>
       <p class="acc-links">Heb je al een account? <a href="/account/inloggen">Log in</a></p>`),
