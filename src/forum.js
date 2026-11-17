@@ -78,7 +78,7 @@ const isNieuw = (lid, t, gelezen) => !!lid && t.laatste_op > (gelezen[t.id] || l
 
 /* ---------------- stukjes opmaak ---------------- */
 
-const kruimel = (...delen) => `<nav class="f-kruimel" aria-label="Kruimelpad"><a href="/forum">Forum</a>${delen.map((d) => ` <span>›</span> ${d}`).join("")}</nav>`;
+const kruimel = (...delen) => `<nav class="f-kruimel" aria-label="Kruimelpad"><a href="/">Home</a> <span>›</span> <a href="/forum">Forum</a>${delen.map((d) => ` <span>›</span> ${d}`).join("")}</nav>`;
 
 function balk(lid, pad) {
   const rechts = lid

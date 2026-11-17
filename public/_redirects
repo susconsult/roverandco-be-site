@@ -1,3 +1,18 @@
 # Kerstmeeting 2026 gaat niet door: oude links naar het activiteitenoverzicht.
 /activiteiten/kerstmeeting /activiteiten 301
 /activiteiten/kerstmeeting/* /activiteiten 301
+
+# Oude Ecwid-adressen (roverandco.be tot nov 2026) naar de nieuwe site.
+/products/church-of-rover-22-11-2026 /activiteiten/church-of-rover 301
+/products/rover--co-t-shirt /shop/rover-co-t-shirt 301
+/products/built-for-the-wild-t-shirt /shop/built-for-the-wild-t-shirt 301
+/products/life-is-better-in-low-range-t-shirt /shop/life-is-better-in-low-range-t-shirt 301
+/products/rover--co-emaille-mok /shop/emaille-mok 301
+/products/wool--wheels-stel-je-eigen-weekend-samen /activiteiten/wild-and-wheels 301
+/products/wool--wheels-hoodie /shop 301
+/products/wool--wheels-t-shirt /shop 301
+/products/cart /afrekenen 302
+/products/account /account 302
+/products/account/* /account 302
+/products /shop 301
+/products/* /shop 301

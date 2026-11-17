@@ -169,7 +169,7 @@ const veilig = (s) => (s && s.startsWith("/") && !s.startsWith("//") ? s : "");
 function inlogPagina(env, request, { m = "", email = "", terug = "", soort = "fout" } = {}) {
   return pagina(env, request, {
     titel: "Inloggen", noindex: true, pad: "/account/inloggen",
-    inhoud: banner("Mijn account", "Inloggen") + kader(`
+    inhoud: banner("Mijn account", "Inloggen", "", [["Mijn account", "/account"], ["Inloggen"]]) + kader(`
       ${melding(m, soort)}
       <form method="post" action="/account/inloggen">
         <input type="hidden" name="terug" value="${esc(terug)}">
@@ -184,7 +184,7 @@ function inlogPagina(env, request, { m = "", email = "", terug = "", soort = "fo
 function registreerPagina(env, request, { m = "", w = {}, terug = "" } = {}) {
   return pagina(env, request, {
     titel: "Registreren", noindex: true, pad: "/account/registreren",
-    inhoud: banner("Mijn account", "Registreren", "Eén account voor het forum, de shop en je inschrijvingen.") + kader(`
+    inhoud: banner("Mijn account", "Registreren", "Eén account voor het forum, de shop en je inschrijvingen.", [["Mijn account", "/account"], ["Registreren"]]) + kader(`
       ${melding(m)}
       <form method="post" action="/account/registreren">
         <input type="hidden" name="terug" value="${esc(terug)}">
@@ -268,7 +268,7 @@ async function uitloggen(request, env) {
 async function vergeten(request, env, url) {
   const inhoud = (m, soort) => pagina(env, request, {
     titel: "Wachtwoord vergeten", noindex: true,
-    inhoud: banner("Mijn account", "Wachtwoord vergeten") + kader(`${melding(m, soort)}
+    inhoud: banner("Mijn account", "Wachtwoord vergeten", "", [["Mijn account", "/account"], ["Wachtwoord vergeten"]]) + kader(`${melding(m, soort)}
       <form method="post" action="/account/wachtwoord-vergeten">
         ${veld("email", "E-mailadres", { type: "email", auto: "email", extra: "required autofocus" })}
         <button class="btn btn-solid" type="submit">Stuur me een link</button>
@@ -380,7 +380,7 @@ async function overzicht(request, env, url, lid) {
 async function gegevens(request, env, url, lid) {
   const toon = (m, w = lid) => pagina(env, request, {
     titel: "Gegevens wijzigen", noindex: true,
-    inhoud: banner("Mijn account", "Gegevens wijzigen") + kader(`${melding(m)}
+    inhoud: banner("Mijn account", "Gegevens wijzigen", "", [["Mijn account", "/account"], ["Gegevens wijzigen"]]) + kader(`${melding(m)}
       <form method="post" action="/account/gegevens" id="gegevens-form">
         ${veld("gebruikersnaam", "Gebruikersnaam", { waarde: w.gebruikersnaam, auto: "username", extra: 'required minlength="3" maxlength="20"' })}
         ${veld("naam", "Voor- en achternaam", { waarde: w.naam, auto: "name" })}
@@ -406,7 +406,7 @@ async function gegevens(request, env, url, lid) {
 async function nieuwWachtwoord(request, env, url, lid) {
   const toon = (m) => pagina(env, request, {
     titel: "Wachtwoord wijzigen", noindex: true,
-    inhoud: banner("Mijn account", "Wachtwoord wijzigen") + kader(`${melding(m)}
+    inhoud: banner("Mijn account", "Wachtwoord wijzigen", "", [["Mijn account", "/account"], ["Wachtwoord wijzigen"]]) + kader(`${melding(m)}
       <form method="post" action="/account/nieuw-wachtwoord">
         ${lid.wachtwoord ? veld("huidig", "Huidig wachtwoord", { type: "password", auto: "current-password", extra: "required" }) : ""}
         ${veld("wachtwoord", "Nieuw wachtwoord", { type: "password", auto: "new-password", extra: 'required minlength="8"', hulp: "Minstens 8 tekens." })}
@@ -469,7 +469,7 @@ async function garage(request, env, url, lid) {
   const m = url.searchParams.has("ok") ? melding("Bewaard.", "ok") : url.searchParams.has("weg") ? melding("Verwijderd uit je garage.", "ok") : url.searchParams.has("fout") ? melding("Vul minstens het type in.") : "";
   return pagina(env, request, {
     titel: "Mijn garage", noindex: true,
-    inhoud: banner("Mijn account", "Mijn garage", "Zet hier je Land Rovers. Niets is verplicht. Andere leden zien ze op je profiel en bij je berichten op het forum.") + `<section class="narrow acc-sectie">${m}
+    inhoud: banner("Mijn account", "Mijn garage", "Zet hier je Land Rovers. Niets is verplicht. Andere leden zien ze op je profiel en bij je berichten op het forum.", [["Mijn account", "/account"], ["Mijn garage"]]) + `<section class="narrow acc-sectie">${m}
       ${wagens.map((w) => `<div class="acc-kaart"><h2>${esc(w.type)}${w.bouwjaar ? ` <small>${w.bouwjaar}</small>` : ""}</h2>${formulier(w)}</div>`).join("")}
       <div class="acc-kaart"><h2>${wagens.length ? "Nog een Land Rover toevoegen" : "Je eerste Land Rover"}</h2>${formulier()}</div>
       <p><a href="/account">← Terug naar mijn account</a>${lid.gebruikersnaam ? ` · <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}#garage">Bekijk je profiel</a>` : ""}</p>
@@ -483,7 +483,7 @@ async function meldingen(request, env, lid) {
   await env.SHOP_DB.prepare("DELETE FROM lid_meldingen WHERE lid_id = ? AND gelezen = 1 AND aangemaakt < ?").bind(lid.id, new Date(Date.now() - 90 * 86400_000).toISOString()).run();
   return pagina(env, request, {
     titel: "Meldingen", noindex: true,
-    inhoud: banner("Mijn account", "Meldingen") + `<section class="narrow acc-sectie"><div class="acc-kaart">
+    inhoud: banner("Mijn account", "Meldingen", "", [["Mijn account", "/account"], ["Meldingen"]]) + `<section class="narrow acc-sectie"><div class="acc-kaart">
       ${r.length ? `<ul class="meldingen">${r.map((x) => `<li class="${x.gelezen ? "" : "nieuw"}"><a href="${esc(x.link)}">${esc(x.tekst)}</a><small>${datum(x.aangemaakt)}</small></li>`).join("")}</ul>`
         : "<p>Nog geen meldingen. Volg een categorie, topic of #hashtag op het forum, dan krijg je hier een melding bij nieuwe berichten.</p>"}
       </div><p><a href="/account">← Terug naar mijn account</a> · <a href="/forum">Naar het forum</a></p></section>`,

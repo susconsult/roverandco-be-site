@@ -9,8 +9,10 @@ export const datum = (iso, kort = false) => {
   return d.toLocaleString("nl-BE", { timeZone: "Europe/Brussels", ...o });
 };
 
-export function banner(eyebrow, titel, intro = "") {
-  return `<section class="banner banner-groen"><div class="wrap"><div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
+// Kruimelpad: [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
+export const kruimel = (delen = []) => delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
+export function banner(eyebrow, titel, intro = "", kruim = null) {
+  return `<section class="banner banner-groen"><div class="wrap">${kruimel(kruim || [])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
 }
 
 let cache = null;

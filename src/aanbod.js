@@ -4,7 +4,7 @@
 // en vult de delen in op statische pagina's die erop steunen (HTMLRewriter):
 //   / (eerstvolgende, activiteiten, shop), /kalender (Rover & Co-activiteiten), /afrekenen (ophalen op activiteit), /sitemap.xml
 // Ook de prijscontrole bij afrekenen en inschrijven (laadCatalogus) leest uit de database.
-import { esc as e, pagina } from "./sjabloon.js";
+import { esc as e, pagina, kruimel } from "./sjabloon.js";
 import kalenderAnderen from "../data/kalender.json";
 
 const DOMEIN = "https://roverandco.be";
@@ -81,8 +81,8 @@ function img(naam, alt, { cls = "", sizes = "100vw", prio = false, pos = null } 
   if (String(naam).startsWith("/")) return `<img ${a}src="${e(naam)}" alt="${e(alt)}"${load}>`;
   return `<img ${a}src="/assets/img/${e(naam)}-s.webp" srcset="/assets/img/${e(naam)}-s.webp 800w, /assets/img/${e(naam)}.webp 1600w" sizes="${sizes}" alt="${e(alt)}"${load}>`;
 }
-function banner(eyebrow, titel, intro = "", foto = null, alt = "", pos = null, groen = false) {
-  return `<section class="banner${groen ? " banner-groen" : ""}">${foto ? img(foto, alt, { prio: true, pos }) : ""}<div class="wrap"><div class="eyebrow">${e(eyebrow)}</div><h1>${e(titel)}</h1>${intro ? `<p>${e(intro)}</p>` : ""}</div></section>`;
+function banner(eyebrow, titel, intro = "", foto = null, alt = "", pos = null, groen = false, kruim = null) {
+  return `<section class="banner${groen ? " banner-groen" : ""}">${foto ? img(foto, alt, { prio: true, pos }) : ""}<div class="wrap">${kruimel(kruim || [])}<div class="eyebrow">${e(eyebrow)}</div><h1>${e(titel)}</h1>${intro ? `<p>${e(intro)}</p>` : ""}</div></section>`;
 }
 function galerij(items) {
   return '<div class="gallery">' + items.map(([n, a]) =>
@@ -148,8 +148,8 @@ async function productPagina(env, request, slug) {
   const tekst = String(p.omschrijving || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return pagina(env, request, {
     titel: p.naam, pad: `/shop/${p.slug}`, desc: tekst.slice(0, 155),
-    inhoud: `<section><div class="wrap pdp"><div><div class="pdp-main"><img id="pdp-main" src="${e(fotos[0].groot)}" alt="${e(p.naam)}" fetchpriority="high"></div><div class="thumbs">${thumbs}</div></div>
-  <div><a href="/shop" class="eyebrow" style="text-decoration:none">← Shop</a><h1>${e(p.naam)}</h1><div class="price" id="prijs">${eur(p.prijs)}</div>
+    inhoud: `<section class="pdp-sec"><div class="wrap">${kruimel([["Shop", "/shop"], [p.naam]]).replace('class="kruimel"', 'class="kruimel donker"')}</div><div class="wrap pdp"><div><div class="pdp-main"><img id="pdp-main" src="${e(fotos[0].groot)}" alt="${e(p.naam)}" fetchpriority="high"></div><div class="thumbs">${thumbs}</div></div>
+  <div><h1>${e(p.naam)}</h1><div class="price" id="prijs">${eur(p.prijs)}</div>
     <form id="product-form" data-id="${e(p.slug)}" data-naam="${e(p.naam)}" data-prijs="${Number(p.prijs) || 0}" novalidate>${opts}
       <div class="opt"><label for="aantal">Aantal</label><input class="qty" id="aantal" type="number" min="1" value="1"></div>
       <button class="btn btn-solid" type="submit">In mandje</button></form>
@@ -226,7 +226,7 @@ async function activiteitPagina(env, request, slug) {
     ? `<a class="btn btn-solid" href="#inschrijven" style="width:100%;justify-content:center">Inschrijven</a><p class="note">Het formulier staat onderaan deze pagina. ${gratis(a) ? "Inschrijven is gratis." : "Je betaalt veilig online via Viva."}</p>`
     : a.inschrijven_url ? `<a class="btn btn-solid" href="${e(a.inschrijven_url)}" rel="noopener" style="width:100%;justify-content:center">${e(a.inschrijven_label || "Inschrijven")}</a><p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>`
     : a.inschrijven_label ? `<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">${e(a.inschrijven_label)}</span>` : "";
-  let body = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen) + aftellen(a) + `
+  let body = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen, [["Activiteiten", "/activiteiten"], [a.titel]]) + aftellen(a) + `
 <section><div class="wrap detail">
   <div class="prose">${a.omschrijving_html || ""}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">

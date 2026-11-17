@@ -149,9 +149,17 @@ def write(path, title, desc, body, hero=False, noindex=False):
         pages.append(path)
 
 
-def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False):
+def kruimel(delen):
+    if not delen: return ""
+    s = '<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>'
+    for d in delen:
+        s += '<span aria-hidden="true">›</span>' + (f'<a href="{e(d[1])}">{e(d[0])}</a>' if len(d) > 1 else f'<span aria-current="page">{e(d[0])}</span>')
+    return s + "</nav>"
+
+
+def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False, kruim=None):
     pic = img(foto, alt, prio=True, pos=pos) if foto else ""
-    return f'<section class="banner{" banner-groen" if groen else ""}">{pic}<div class="wrap"><div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
+    return f'<section class="banner{" banner-groen" if groen else ""}">{pic}<div class="wrap">{kruimel(kruim)}<div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
 
 
 # ---------- productfoto's ----------
@@ -577,7 +585,7 @@ def gerelateerd(a, n=3):
 for a in artikels:
     concept = a.get("status") == "concept"
     body = f"""
-<section class="banner">{'' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap"><div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
+<section class="banner">{'' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap">{kruimel([("Blog", "/blog"), (a['titel'],)])}<div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
 <section><article class="narrow prose blogtekst">
   {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
   <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>
@@ -811,7 +819,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
 
 # ---------- afrekenen ----------
 act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])
-afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
+afrekenen = banner("Shop", "Afrekenen", "", None, kruim=[("Shop", "/shop"), ("Afrekenen",)]) + f"""
 <section><div class="wrap">
   <form id="checkout-form" class="checkout" novalidate data-verzendkost="7.5" data-gratis-vanaf="100">
     <div class="co-main">
