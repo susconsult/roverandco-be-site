@@ -15,5 +15,19 @@
     "TURNSTILE_SITEKEY": "0x4AAAAAAGE9uv9Eyyo0-uE_",
     "TURNSTILE_HOSTNAMES": "roverandco.be,www.roverandco.be,roverandco-be-site.pieter-2d7.workers.dev"
   },
-  "keep_vars": true
+  "keep_vars": true,
+  // Previews (branch astro e.a.): zelfde databases; secrets staan apart in het dashboard (Previews Base).
+  "previews": {
+    "d1_databases": [
+      { "binding": "PLANNER_DB", "database_id": "2f299f3c-3aad-4e03-bf59-251ed2201c97" },
+      { "binding": "SHOP_DB", "database_id": "6ed66464-6163-4297-817d-c67b3109d699" }
+    ],
+    "vars": {
+      "TURNSTILE_SITEKEY": "0x4AAAAAAGE9uv9Eyyo0-uE_",
+      "TURNSTILE_HOSTNAMES": "roverandco.be,www.roverandco.be,roverandco-be-site.pieter-2d7.workers.dev,astro-roverandco-be-site.pieter-2d7.workers.dev",
+      "VIVA_CLIENT_ID": "g9eadck6j4ug37itdgx3aiplabntfzvlw7r2fdeh645s2.apps.vivapayments.com",
+      "VIVA_MERCHANT_ID": "cd8c7313-d29c-4fd0-adc8-adf8ffc48272",
+      "VIVA_SOURCE_CODE": "2267"
+    }
+  }
 }
