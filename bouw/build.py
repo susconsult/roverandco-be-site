@@ -255,71 +255,81 @@ OVER_TEKST = ("Rover & Co is een Belgische vzw die Land Rover-liefhebbers samenb
 
 # ---------- home ----------
 eerst = acts[0]
+
+def tegel(href, foto, titel, tekst, label=""):
+    return (f'<a class="tegel" href="{href}">{img(foto, "", sizes="(max-width:880px) 50vw, 25vw")}'
+            f'<div class="tegel-b">{f"<span class=tegel-label>{e(label)}</span>" if label else ""}<b>{e(titel)}</b><span>{e(tekst)}</span></div></a>')
+
+PARTNERS_HOME = [("partner-the-wolfgarage", "The Wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk"), ("partner-pakawi", "Pakawi Park"),
+                 ("partner-epc-verbeteraars", "EPC Verbeteraars"), ("partner-elektrofix", "ElektroFix"), ("partner-sus-consult", "SUS Consult")]
+
 home = f"""
-<section class="hero" style="padding:0">
+<section class="hero hero-nieuw" style="padding:0">
   {img("964", "Defender met daktent in een stoffige bosweg", "hero-img", prio=True)}
   <div class="wrap hero-in">
-    <div class="eyebrow" style="color:#CFE3D4">Land Rover-vereniging · Oostham</div>
-    <h1>Waar de weg ophoudt, begint het</h1>
-    <p>We brengen Land Rover-liefhebbers samen op plekken waar je anders niet komt. Geen parkeerplaats, wel een belevenis.</p>
-    <div class="ctas"><a href="/activiteiten" class="btn btn-white">Bekijk activiteiten</a><a href="/shop" class="btn btn-ghost-w">Naar de shop</a></div>
+    <div class="eyebrow" style="color:#CFE3D4">Land Rover-club · Oostham</div>
+    <h1>For the ones built different</h1>
+    <p>Land Rover-liefhebbers die elkaar vinden. Op de weg, ernaast en rond het kampvuur.</p>
+    <div class="ctas"><a href="/activiteiten" class="btn btn-white">Rij mee</a><a href="/account/registreren" class="btn btn-ghost-w" data-gast>Word lid, gratis</a></div>
   </div>
-  <a href="/activiteiten/{eerst['slug']}" class="next-pill" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span style="font-size:14px">{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a>
 </section>
-<div class="strip" aria-hidden="true"><div class="strip-track" data-dyn="strip">{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts) * 2}<span>Series · Defender · Discovery · Range Rover</span>·{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts)}<span>Series · Defender · Discovery · Range Rover</span>·</div></div>
-<section class="lid-band" id="lid-band"><div class="wrap lid-in">
-  <div><div class="eyebrow">Gratis account</div><h2>Word deel van de club</h2><p>Eén account voor alles. Geen reclame, geen algoritme.</p></div>
-  <ul class="lid-lijst">
-    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg></span><span><b>Je garage</b>Toon je Land Rovers aan de club</span></li>
-    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></svg></span><span><b>Forum en samen rijden</b>Vragen, roadbooks en afspreken</span></li>
-    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="m9 15 2 2 4-4"/></svg></span><span><b>Sneller inschrijven</b>Je gegevens staan klaar, alles op één plek</span></li>
-  </ul>
-  <div class="lid-knoppen"><a class="btn btn-wit" href="/account/registreren">Maak je account</a><a class="btn" href="/forum">Bekijk het forum</a></div>
+<div class="wrap volgende-wrap"><a href="/activiteiten/{eerst['slug']}" class="volgende" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span>{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a></div>
+<section class="tegels-sec"><div class="wrap tegels">
+  {tegel("/activiteiten", "977", "Activiteiten", "Ritten, roadbooks en weekends")}
+  {tegel("/forum", "leden-vuur-avond", "Forum", "Vragen, verhalen en samen rijden", "Nieuw")}
+  {tegel("/shop", "5577", "Shop", "T-shirts, hoodies en mokken")}
+  {tegel("/blog", "5739", "Blog", "Onderhoud, geschiedenis en verhalen")}
 </div></section>
 <section>
   <div class="wrap">
     <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><div class="ctas"><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a><a href="/kalender" class="btn">Kalender</a></div></div>
     <div class="events" data-dyn="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
+    <a class="kal-tip" href="/kalender"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg><span><b>Ook events van andere clubs</b> Land Rover-clubs, 4x4-dagen, beurzen en overland in België en Nederland, op één kalender.</span><span class="pijl">→</span></a>
   </div>
 </section>
-{weetje_blok()}
-<section class="gallery-sec">
-  <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
-    {galerij(GALERIJ[:12])}
-  </div>
-</section>
-<section>
-  <div class="wrap about">
-    {img("5498", "Lachende chauffeur in een witte Defender", "about-img", sizes="(max-width:880px) 100vw, 50vw")}
+<section class="forum-band topo">
+  <div class="wrap forum-in">
     <div>
-      <div class="eyebrow">Over ons</div>
-      <h2>Voor wie liever modder dan asfalt ziet</h2>
-      <p>{e(OVER_TEKST)}</p>
-      <div class="pillars">
-        <div class="pillar"><b>Rijden</b><span>Ritten en roadbooks op bijzondere plekken</span></div>
-        <div class="pillar"><b>Ontmoeten</b><span>Klassiek of nieuw, iedereen is welkom</span></div>
-        <div class="pillar"><b>Teruggeven</b><span>Opbrengst gaat terug naar de community</span></div>
-      </div>
-      <a href="/over-ons" class="btn btn-solid">Lees ons verhaal</a>
+      <div class="eyebrow">Forum</div>
+      <h2>Wat leeft er</h2>
+      <p>Geen algoritme, geen reclame. Vragen stellen, kennis delen en afspreken om samen te rijden. Jouw berichten blijven van jou.</p>
+      <div class="ctas"><a href="/account/registreren" class="btn btn-wit" data-gast>Maak je gratis account</a><a href="/forum" class="btn">Naar het forum</a></div>
     </div>
+    <div class="forum-lijst" data-dyn="forum"><a class="forum-rij" href="/forum"><span>Het forum is open</span><small>Start jij het eerste topic?</small></a></div>
   </div>
 </section>
+<section class="garage-sec">
+  <div class="wrap">
+    <div class="sec-head"><div><div class="eyebrow">Uit de garage</div><h2>Wagens van leden</h2></div><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></div>
+    <div class="garage-rij" data-dyn="garage"><a class="garage-leeg" href="/account/garage">Nog niemand. Zet als eerste je Land Rover in de garage.</a></div>
+  </div>
+</section>
+__BLOGHOME__
 <section class="shop-sec">
   <div class="wrap">
     <div class="sec-head"><div><div class="eyebrow">Shop</div><h2>Draag het</h2></div><a href="/shop" class="btn btn-solid">Naar de shop</a></div>
     <div class="products" data-dyn="producten">{''.join(product_card(p) for p in producten)}</div>
   </div>
 </section>
-<section class="cta-band">
+<section class="gallery-sec">
   <div class="wrap">
-    <div class="eyebrow">Mee op pad?</div>
-    <h2>Blijf op de hoogte van de volgende rit</h2>
-    <p>Volg ons op Instagram en Facebook, of schrijf je in voor een activiteit. Iedere Land Rover is welkom.</p>
-    <div class="ctas" style="justify-content:center"><a href="{site['instagram']}" class="btn btn-white" target="_blank" rel="noopener">Instagram</a><a href="{site['facebook']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Facebook</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
+    {galerij(GALERIJ[:8])}
+  </div>
+</section>
+<section>
+  <div class="wrap about">
+    {img("leden-daktenten-rij", "Defenders met daktenten op een kampeerterrein", "about-img", sizes="(max-width:880px) 100vw, 50vw")}
+    <div>
+      <div class="eyebrow">Over ons</div>
+      <h2>Een club van en voor liefhebbers</h2>
+      <p>{e(OVER_TEKST)}</p>
+      <a href="/over-ons" class="btn btn-solid">Lees ons verhaal</a>
+      <div class="partners-home"><small>Met dank aan onze partners</small><div>{''.join(f'<a href="/blog/{s}" title="{e(n)}"><img src="/assets/img/blog/{s}-s.webp" alt="{e(n)}" loading="lazy"></a>' for s, n in PARTNERS_HOME)}</div></div>
+    </div>
   </div>
 </section>"""
-write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen op plekken waar je anders niet komt. Activiteiten, ritten en merch.", home, hero=True)
+
 
 # ---------- activiteiten ----------
 # /activiteiten en /activiteiten/<slug> maakt de Worker live uit de database (src/aanbod.js). Hieronder enkel nog
@@ -917,6 +927,11 @@ open(os.path.join(PUB, "_sjabloon.html"), "w", encoding="utf-8").write(layout("/
 pages.append("/forum")
 
 # ---------- sitemap + robots ----------
+
+# home: blog-blok en schrijven (na de artikels)
+home = home.replace("__BLOGHOME__", '<section class="blog-home"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Blog</div><h2>Kennis en verhalen</h2></div><a href="/blog" class="btn btn-solid">Alle artikels</a></div><div class="blogfeed">' + "".join(kaart(x) for x in gepubliceerd[:3]) + '</div></div></section>')
+write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen: ritten, roadbooks, een forum, een shop en verhalen over Land Rover.", home, hero=True)
+
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
      "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VERSIE}</lastmod></url>\n" for p in pages) + "</urlset>\n"
 open(os.path.join(PUB, "sitemap.xml"), "w").write(sm)

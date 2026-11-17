@@ -244,8 +244,21 @@ async function activiteitPagina(env, request, slug) {
 
 const vervang = (html) => ({ element(el) { el.setInnerContent(html, { html: true }); } });
 
+const slugTitel = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+async function recenteTopics(env) {
+  try {
+    return (await env.SHOP_DB.prepare(`SELECT t.id, t.titel, t.berichten, c.naam cnaam, l.gebruikersnaam naam FROM forum_topics t JOIN forum_categorieen c ON c.id = t.categorie_id
+      LEFT JOIN leden l ON l.id = t.lid_id WHERE t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 4`).all()).results || [];
+  } catch { return []; }
+}
+async function recenteWagens(env) {
+  try {
+    return (await env.SHOP_DB.prepare(`SELECT w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
+      WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 ORDER BY w.aangemaakt DESC LIMIT 6`).all()).results || [];
+  } catch { return []; }
+}
 async function home(env, request) {
-  const [acts, prods, r] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request)]);
+  const [acts, prods, r, topics, wagens] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request), recenteTopics(env), recenteWagens(env)]);
   const lijst = acts.filter(komend);
   const eerst = lijst[0];
   const titels = lijst.map((a) => `<span>${e(a.titel)}</span>·`).join("");
@@ -254,12 +267,14 @@ async function home(env, request) {
       element(el) {
         if (!eerst) { el.remove(); return; }
         el.setAttribute("href", eerst.extern_url || `/activiteiten/${eerst.slug}`);
-        el.setInnerContent(`<small>Eerstvolgende</small><strong>${e(eerst.titel)}</strong><span style="font-size:14px">${e(eerst.datum_label || "")}${eerst.locatie ? " · " + e(eerst.locatie) : ""}</span>`, { html: true });
+        el.setInnerContent(`<small>Eerstvolgende</small><strong>${e(eerst.titel)}</strong><span>${e(eerst.datum_label || "")}${eerst.locatie ? " · " + e(eerst.locatie) : ""}</span>`, { html: true });
       },
     })
     .on('[data-dyn="strip"]', vervang(`${titels.repeat(2)}<span>Series · Defender · Discovery · Range Rover</span>·${titels}<span>Series · Defender · Discovery · Range Rover</span>·`))
     .on('[data-dyn="events"]', vervang(lijst.length ? `${evKaart(lijst[0], true)}<div class="ev-stack">${lijst.slice(1, 3).map((a) => evKaart(a)).join("")}</div>` : "<p>Binnenkort nieuwe activiteiten.</p>"))
     .on('[data-dyn="producten"]', vervang(prods.map(productKaart).join("")))
+    .on('[data-dyn="forum"]', topics.length ? vervang(topics.map((t) => `<a class="forum-rij" href="/forum/t/${t.id}-${slugTitel(t.titel)}"><span>${e(t.titel)}</span><small>${e(t.cnaam)} · ${t.berichten} ${t.berichten === 1 ? "bericht" : "berichten"}${t.naam ? ` · door ${e(t.naam)}` : ""}</small></a>`).join("")) : { element() {} })
+    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => `<a class="garage-kaart" href="/forum/lid/${encodeURIComponent(w.naam_lid)}#garage"><img src="/forum/foto/${w.foto_id}" alt="${e(w.type)}" loading="lazy"><span><b>${e(w.naam || w.type)}</b>${w.naam ? e(w.type) : ""}${w.bouwjaar ? ` · ${w.bouwjaar}` : ""}<small>van ${e(w.naam_lid)}</small></span></a>`).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
 }
 
