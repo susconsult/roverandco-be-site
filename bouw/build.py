@@ -267,12 +267,6 @@ home = f"""
   <a href="/activiteiten/{eerst['slug']}" class="next-pill" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span style="font-size:14px">{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a>
 </section>
 <div class="strip" aria-hidden="true"><div class="strip-track" data-dyn="strip">{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts) * 2}<span>Series · Defender · Discovery · Range Rover</span>·{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts)}<span>Series · Defender · Discovery · Range Rover</span>·</div></div>
-<section>
-  <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><div class="ctas"><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a><a href="/kalender" class="btn">Kalender</a></div></div>
-    <div class="events" data-dyn="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
-  </div>
-</section>
 <section class="lid-band" id="lid-band"><div class="wrap lid-in">
   <div><div class="eyebrow">Gratis account</div><h2>Word deel van de club</h2><p>Eén account voor alles. Geen reclame, geen algoritme.</p></div>
   <ul class="lid-lijst">
@@ -282,6 +276,12 @@ home = f"""
   </ul>
   <div class="lid-knoppen"><a class="btn btn-wit" href="/account/registreren">Maak je account</a><a class="btn" href="/forum">Bekijk het forum</a></div>
 </div></section>
+<section>
+  <div class="wrap">
+    <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><div class="ctas"><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a><a href="/kalender" class="btn">Kalender</a></div></div>
+    <div class="events" data-dyn="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
+  </div>
+</section>
 {weetje_blok()}
 <section class="gallery-sec">
   <div class="wrap">
