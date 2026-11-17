@@ -124,7 +124,7 @@ async function betaald(env, b) {
   await stuurMelding(env, data, (juist ? "Betaald" : `LET OP: betaald bedrag (${eur(b.bedrag)}) klopt niet met het totaal`) +
     ` – Viva-transactie ${b.transactie}\nMail naar klant: ${mailKlant}`);
   if (rij.soort === "inschrijving") await controleerGrenzen(env, data, voor);
-  const res = { ok: true, nummer: rij.nummer, soort: rij.soort };
+  const res = { ok: true, nummer: rij.nummer, soort: rij.soort, site: data.site };
   if (juist && b.resend) res.mail = klantMail(data);
   return res;
 }

@@ -1,4 +1,7 @@
 User-agent: *
 Allow: /
 Disallow: /planner
+Disallow: /account
+Disallow: /forum/nieuw
+Disallow: /forum/lid/
 Sitemap: https://roverandco.be/sitemap.xml

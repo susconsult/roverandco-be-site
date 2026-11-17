@@ -407,3 +407,81 @@ p strong,p b,.prose li strong{font-weight:600}
 
 .blogzoek{margin:0 0 16px}.blogzoek input{width:100%;max-width:520px;font:inherit;font-size:16px;padding:14px 18px;border:2px solid var(--groen,#1F3B2A);border-radius:999px;background:#fff;color:#1F3B2A}.blogzoek input:focus{outline:3px solid rgba(31,59,42,.25)}.bloggeen{margin:24px 0}
 .betaal-met{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted);margin-top:8px}.betaal-met .viva-logo{height:16px;width:auto;background:#fff;padding:4px 6px;border-radius:4px;box-sizing:content-box}
+
+/* ---------- account en forum ---------- */
+.acct-btn{text-decoration:none}
+.acc-sectie{padding:40px 0 70px}
+.acc-kaart{background:var(--white);border-radius:var(--r);padding:26px;margin-bottom:20px}
+.acc-kaart h2{font-size:30px;margin-bottom:14px}
+.acc-kaart form .btn{margin-top:4px}
+.acc-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px;align-items:start}
+.acc-grid .acc-kaart{margin:0}
+.acc-links{margin-top:18px;font-size:15px}.acc-links a,.acc-kaart a:not(.btn){color:var(--green-2)}
+.acc-knoppen{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
+.acc-dl{display:grid;grid-template-columns:150px 1fr;gap:6px 14px;margin:0}.acc-dl dt{color:var(--muted)}
+.acc-tabel{width:100%;border-collapse:collapse;font-size:15px}.acc-tabel th,.acc-tabel td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--sand-2);vertical-align:top}
+.acc-tabel th{font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:14px;color:var(--muted)}.acc-tabel .r{text-align:right;white-space:nowrap}
+.acc-tabel small{color:var(--muted)}
+.acc-status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:700;background:var(--sand)}
+.acc-status.ok{background:#DCEFE2;color:var(--green)}.acc-status.wacht{background:#FBEFD5;color:#7A5200}
+.acc-leeg{color:var(--muted)}
+.hulp{display:block;color:var(--muted);font-size:14px;margin-top:4px}
+.vink{display:flex;gap:10px;align-items:flex-start;margin:6px 0 16px;font-size:15px}.vink input{margin-top:5px}
+.melding{border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:15px}
+.melding-fout{background:#F7DEDE;color:#791F1F}.melding-ok{background:#DCEFE2;color:var(--green)}.melding-info{background:#FBEFD5;color:#633806}
+.linkknop{background:none;border:0;padding:0;font:inherit;color:var(--green-2);text-decoration:underline;cursor:pointer}.linkknop.rood{color:#A32D2D}
+.avatar{border-radius:50%;object-fit:cover;flex:none;background:var(--sand-2)}
+.avatar-leeg{display:inline-grid;place-items:center;background:var(--green);color:var(--white);font-family:var(--head);font-weight:800}
+.avatar-kies{display:flex;gap:14px;align-items:center}
+.f-sectie{padding:30px 0 70px}
+.f-balk{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:15px;margin-bottom:14px;font-family:var(--ui,inherit)}
+.f-balk a,.f-sectie a:not(.btn){color:var(--green-2)}
+.f-kruimel{font-size:15px;margin-bottom:16px;color:var(--muted)}.f-kruimel span{margin:0 4px}
+.f-kop{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin:10px 0 14px}
+.f-tabel{width:100%;border-collapse:collapse;background:var(--white);border-radius:var(--r);overflow:hidden}
+.f-tabel thead th{background:var(--green);color:var(--white);text-align:left;padding:12px 16px;font-family:var(--head);text-transform:uppercase;letter-spacing:1.2px;font-size:15px}
+.f-tabel td{padding:14px 16px;border-top:1px solid var(--sand);vertical-align:middle}
+.f-tabel tr.f-groep th{background:var(--sand-2);color:var(--green);text-align:left;padding:8px 16px;font-family:var(--head);text-transform:uppercase;letter-spacing:1.5px;font-size:14px}
+.f-cat{display:flex;gap:14px;align-items:center}.f-cat>div{min-width:0}
+.f-icoon{color:var(--green-3,#3E7350);flex:none}.f-nieuw .f-icoon{color:#C46A12}
+.f-titel{font-weight:700;font-size:17px;text-decoration:none}.f-nieuw .f-titel{color:var(--green)}
+.f-cat small,.f-laatste small{display:block;color:var(--muted);font-size:14px}
+.f-num{text-align:center;width:110px;color:var(--muted)}.f-laatste{width:270px;font-size:15px}
+.f-label{display:inline-block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;padding:1px 8px;border-radius:99px;background:var(--green);color:var(--white);vertical-align:2px}
+.f-label.grijs{background:var(--sand-2);color:var(--ink)}.f-label.nieuw{background:#F57819}
+.f-stats{color:var(--muted);font-size:15px;margin-top:14px}
+.f-oproep,.f-leeg{background:var(--white);border-radius:var(--r);padding:22px;margin-top:20px;display:flex;gap:16px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.f-pag{font-size:15px}.f-pag a,.f-pag span{display:inline-block;min-width:30px;text-align:center;padding:3px 6px;border-radius:6px}.f-pag .aan{background:var(--green);color:var(--white)}
+.f-post{display:grid;grid-template-columns:200px minmax(0,1fr);background:var(--white);border-radius:var(--r);margin-bottom:14px;overflow:hidden}
+.f-auteur{background:#F4F1E8;padding:18px;display:flex;flex-direction:column;gap:10px;font-size:15px}
+.f-auteur .f-lid{font-weight:800}.f-auteur small{display:block;color:var(--muted);font-size:13px;line-height:1.5;margin-top:4px}
+.f-inhoud{padding:16px 22px;display:flex;flex-direction:column;min-width:0}
+.f-meta{font-size:14px;color:var(--muted);border-bottom:1px solid var(--sand);padding-bottom:8px;margin-bottom:12px}.f-meta a{color:var(--muted)}
+.f-tekst{font-family:var(--body);overflow-wrap:anywhere;flex:1}
+.f-tekst img{max-width:100%;max-height:520px;border-radius:8px;margin:8px 0;display:block}
+.f-citaat{border-left:4px solid var(--sand-2);background:#F7F4EC;margin:8px 0 12px;padding:10px 14px;font-size:16px}.f-citaat cite{display:block;font-style:normal;font-weight:700;font-size:14px;color:var(--muted);margin-bottom:4px}
+.f-acties{display:flex;gap:16px;flex-wrap:wrap;align-items:center;font-size:14px;margin-top:14px;padding-top:10px;border-top:1px solid var(--sand)}
+.f-acties form{display:inline}.f-meld summary{cursor:pointer;color:var(--muted)}.f-meld[open] form{display:flex;gap:8px;margin-top:8px}.f-meld input{flex:1;padding:8px;border:2px solid #cfc8b6;border-radius:8px;font:inherit;min-width:200px}
+.f-modbalk{background:#FBEFD5;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;gap:16px;align-items:center;flex-wrap:wrap;font-size:15px}.f-modbalk form{display:inline}
+.f-antwoord{background:var(--white);border-radius:var(--r);padding:22px;margin-top:20px}.f-antwoord h2{font-size:30px;margin-bottom:12px}
+.f-editor{border:2px solid #cfc8b6;border-radius:10px;overflow:hidden;margin-bottom:14px;background:#fff}
+.f-editor:focus-within{border-color:var(--green)}
+.f-tools{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:8px;background:#F4F1E8;border-bottom:1px solid #e3ddcc}
+.f-tools button,.f-fotoknop{font:inherit;font-size:14px;min-width:36px;padding:5px 10px;border:1px solid #cfc8b6;background:#fff;border-radius:6px;cursor:pointer}
+.f-status{font-size:14px;color:var(--muted)}
+.f-editor textarea{width:100%;border:0;padding:12px 14px;font:inherit;font-family:var(--body);resize:vertical;min-height:180px;outline:none}
+.f-hulp{color:var(--muted);font-size:14px;margin-top:10px}
+.f-profiel{display:flex;gap:24px;align-items:center}.f-h2{font-size:30px;margin:24px 0 10px}
+.f-lijst{list-style:none;padding:0}.f-lijst li{background:var(--white);border-radius:10px;padding:12px 16px;margin-bottom:8px}.f-lijst small{color:var(--muted)}
+@media(max-width:880px){
+  .acc-grid{grid-template-columns:1fr}
+  .f-num,.f-tabel thead .f-num{display:none}
+  .f-laatste{width:auto}
+  .f-tabel tr:not(.f-groep){display:grid;grid-template-columns:1fr}
+  .f-tabel thead{display:none}
+  .f-tabel td{border-top:0;padding:8px 14px}.f-tabel tr:not(.f-groep){border-top:1px solid var(--sand)}
+  .f-tabel td.f-laatste{padding-top:0;padding-left:54px}
+  .f-post{grid-template-columns:1fr}
+  .f-auteur{flex-direction:row;align-items:center;padding:12px 16px}.f-auteur small{display:inline}
+  .acc-dl{grid-template-columns:1fr}.f-profiel{flex-direction:column;align-items:flex-start}
+}

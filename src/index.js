@@ -7,7 +7,9 @@
 // - /api/viva/webhook : melding van Viva (Transaction Payment Created), vangnet als de browser sluit.
 // - /planner, /api/planner/* : terreinplanner achter login (zie src/planner.js)
 // - /api/kalender     : activiteiten van andere clubs indienen/goedkeuren/ophalen (zie src/kalender.js)
-// - /beheer         : bestellingen en inschrijvingen beheren, achter Cloudflare Access (zie src/beheer.js)
+// - /beheer         : bestellingen en inschrijvingen beheren, login met code per mail (zie src/beheer.js)
+// - /account, /api/account/ik : accounts (zie src/leden.js); elke bestelling/inschrijving hangt aan een account
+// - /forum           : het forum (zie src/forum.js)
 // - Alle andere adressen: statische bestanden uit public/.
 //
 // Secrets in Cloudflare (geen waarden in deze repo):
@@ -21,6 +23,8 @@ import { planner } from "./planner.js";
 import { kalender } from "./kalender.js";
 import { opslag } from "./opslag.js";
 import { beheer } from "./beheer.js";
+import { leden, lidVoorBestelling, wachtwoordLink } from "./leden.js";
+import { forum } from "./forum.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
@@ -114,8 +118,16 @@ async function vivaTransactie(env, id) {
 
 /* ---------------- Klantmail via Resend ---------------- */
 
-async function stuurKlantmail(env, m) {
+async function stuurKlantmail(env, m, origin) {
   if (!m || !env.RESEND_API_KEY) return;
+  // Account zonder wachtwoord (automatisch aangemaakt bij deze bestelling)? Dan de link om er een te kiezen erbij.
+  try {
+    const lid = await env.SHOP_DB.prepare("SELECT l.id, l.wachtwoord FROM registraties r JOIN leden l ON l.id = r.lid_id WHERE r.nummer = ?").bind(m.nummer).first();
+    if (lid && !lid.wachtwoord && origin) {
+      const link = await wachtwoordLink(env, origin, lid.id);
+      m = { ...m, tekst: m.tekst.replace("Dit is een automatische mail", `Je account bij Rover & Co\nWe maakten een account voor je aan met dit mailadres. Daarin vind je je bestellingen en inschrijvingen terug, en je kan ermee op ons forum. Kies hier je wachtwoord (de link is 30 dagen geldig):\n${link}\n\nDit is een automatische mail`) };
+    }
+  } catch (e) { console.error("wachtwoordlink", e?.message); }
   let status;
   try {
     const r = await fetch("https://api.resend.com/emails", {
@@ -252,8 +264,13 @@ async function plaats(request, env, soort) {
   if (a?.fout === "vol" && a.onderdeel) return json({ ok: false, fout: `${a.onderdeel} is volzet. Pas je keuze aan.`, velden: ["aantal"] }, 409);
   if (a?.fout === "vol") return json({ ok: false, fout: "Dit tijdslot is intussen volzet. Kies een ander tijdslot.", velden: ["tijdslot"] }, 409);
   if (!a || a.ok !== true || a.nummer !== nr) return json({ ok: false, fout }, 502);
+  // Elke bestelling of inschrijving hangt aan een account (automatisch aangemaakt als het nog niet bestaat).
+  try {
+    const lid = await lidVoorBestelling(env, request, res.record.klant);
+    if (lid) await env.SHOP_DB.prepare("UPDATE registraties SET lid_id = ? WHERE nummer = ?").bind(lid.id, nr).run();
+  } catch (e) { console.error("lid koppelen", nr, e?.message); }
   if (a.betaald || !metBetaling) {
-    await stuurKlantmail(env, a.mail);
+    await stuurKlantmail(env, a.mail, payload.site);
     return json({ ok: true, nummer: nr, klaar: true, test: !betaal, gratis: betaal && !a.betaald });
   }
 
@@ -270,6 +287,11 @@ async function plaats(request, env, soort) {
   return json({ ok: true, nummer: nr, betalen: vivaAdressen(env).checkout + code + "&color=1F3B2A" });
 }
 
+// Adres van de site voor links in mails (bewaard bij de bestelling).
+function siteVan(env, a) {
+  return a?.site || env.SITE_URL || "https://roverandco.be";
+}
+
 // Controleert een betaling bij Viva en zet ze in de sheet op "Betaald" (veilig om meermaals te doen).
 async function verwerkBetaling(env, transactieId) {
   if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(transactieId || "")) return { ok: false, status: "onbekend" };
@@ -277,7 +299,7 @@ async function verwerkBetaling(env, transactieId) {
   if (tr.statusId !== "F") return { ok: false, status: tr.statusId, nummer: tr.ref };
   const a = await opslag(env, "betaald", { ordercode: tr.orderCode, transactie: transactieId, bedrag: tr.bedrag, ref: tr.ref, resend: !!env.RESEND_API_KEY });
   if (!a || a.ok !== true) throw new Error("Sheet niet bijgewerkt");
-  await stuurKlantmail(env, a.mail);
+  await stuurKlantmail(env, a.mail, siteVan(env, a));
   return { ok: true, nummer: a.nummer, soort: a.soort };
 }
 
@@ -325,6 +347,11 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const p = url.pathname;
+    if (p === "/_sjabloon" || p === "/_sjabloon.html") return new Response("Niet gevonden", { status: 404 });
+    const ld = await leden(request, env, url);
+    if (ld) return ld;
+    const fo = await forum(request, env, url);
+    if (fo) return fo;
     const bh = await beheer(request, env, url);
     if (bh) return bh;
     const pl = await planner(request, env, url);

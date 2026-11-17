@@ -78,6 +78,9 @@ def layout(path, title, desc, body, hero=False, noindex=False):
     <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="84" height="84"></a>
     <ul class="menu" id="menu">{menu}</ul>
     <div class="nav-right">
+      <a class="cart-btn acct-btn" href="/account" aria-label="Mijn account" title="Mijn account">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
+      </a>
       <button class="cart-btn" type="button" aria-label="Winkelmandje openen" data-open-cart>
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
         <span class="cart-count">0</span>
@@ -688,17 +691,20 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
 <section><div class="narrow prose">
   <p>{e(site['naam'])} ({site['ondernemingsnummer']}, {', '.join(site['adres'])}) is verantwoordelijk voor de gegevens die je ons bezorgt.</p>
   <h2>Wat we gebruiken en waarom</h2>
-  <p>We gebruiken je naam, e-mailadres, telefoonnummer en adres alleen om je inschrijving of bestelling af te handelen en je te contacteren over onze activiteiten. We verkopen je gegevens niet.</p>
+  <p>We gebruiken je naam, e-mailadres, telefoonnummer en adres alleen om je inschrijving of bestelling af te handelen, je account te beheren en je te contacteren over onze activiteiten. We verkopen je gegevens niet.</p>
+  <h2>Je account en het forum</h2>
+  <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug. Je kiest zelf een wachtwoord via de link in je bevestigingsmail. Je wachtwoord bewaren we alleen versleuteld.</p>
+  <p>Met je account kan je ook berichten plaatsen op het forum. Je gebruikersnaam, je berichten en wat je zelf op je profiel zet (woonplaats, je Land Rover, profielfoto) zijn voor iedereen zichtbaar. Je e-mailadres en telefoonnummer niet.</p>
   <h2>Wie helpt ons daarbij</h2>
   <ul>
     <li>Betalingen verlopen via Viva. Wij zien je kaartgegevens niet.</li>
-    <li>Bestellingen en inschrijvingen bewaren we in een Google-spreadsheet van Rover & Co.</li>
-    <li>Bevestigingsmails versturen we via Resend.</li>
+    <li>De website, je account, het forum, bestellingen en inschrijvingen draaien bij Cloudflare. Bij het registreren gebruiken we Cloudflare Turnstile om spambots tegen te houden.</li>
+    <li>Mails (bevestigingen, wachtwoordlinks) versturen we via Resend.</li>
   </ul>
   <h2>Hoe lang</h2>
   <p>We bewaren bestel- en betaalgegevens zo lang als de wettelijke boekhoudplicht vraagt.</p>
   <h2>Cookies</h2>
-  <p>Deze website plaatst geen tracking- of advertentiecookies. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
+  <p>Deze website plaatst geen tracking- of advertentiecookies. Als je inlogt, zetten we één cookie die nodig is om je ingelogd te houden. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
   <h2>Jouw rechten</h2>
   <p>Je kan je gegevens altijd opvragen, laten aanpassen of laten verwijderen via <a href="mailto:{site['email']}">{site['email']}</a>. Ben je niet tevreden, dan kan je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
 </div></section>""")
@@ -780,7 +786,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
-        <p class="note">{"Inschrijven is gratis. Daarna krijg je een bevestiging per mail." if gratis(a) else "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."}</p>{'' if gratis(a) else '<p class="betaal-met">Betalen via '+'<img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13">'+'</p>'}
+        <p class="note">{"Inschrijven is gratis. Daarna krijg je een bevestiging per mail." if gratis(a) else "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."} Je inschrijving komt in je <a href="/account">account</a>; heb je er nog geen, dan maken we er een voor je aan.</p>{'' if gratis(a) else '<p class="betaal-met">Betalen via '+'<img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13">'+'</p>'}
       </div>
     </aside>
   </form>
@@ -853,7 +859,7 @@ afrekenen = banner("Shop", "Afrekenen", "", None) + f"""
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>
-        <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail.</p>
+        <p class="note">Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail. Je bestelling komt in je <a href="/account">account</a>; heb je er nog geen, dan maken we er een voor je aan.</p>
         <p class="betaal-met">Betalen via <img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13"></p>
       </div>
     </aside>
@@ -882,9 +888,13 @@ write("/betaling-mislukt", "Betaling niet gelukt", "De betaling bij Rover & Co i
   <p>Lukt het niet? Mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a>.</p>
 </div></section>""", noindex=True)
 
+# ---------- sjabloon voor pagina's die de Worker maakt (account, forum: zie src/sjabloon.js) ----------
+open(os.path.join(PUB, "_sjabloon.html"), "w", encoding="utf-8").write(layout("/__PAD__", "__TITEL__", "__DESC__", "__INHOUD__"))
+pages.append("/forum")
+
 # ---------- sitemap + robots ----------
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
      "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VERSIE}</lastmod></url>\n" for p in pages) + "</urlset>\n"
 open(os.path.join(PUB, "sitemap.xml"), "w").write(sm)
-open(os.path.join(PUB, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nDisallow: /planner\nSitemap: {site['domein']}/sitemap.xml\n")
+open(os.path.join(PUB, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nDisallow: /planner\nDisallow: /account\nDisallow: /forum/nieuw\nDisallow: /forum/lid/\nSitemap: {site['domein']}/sitemap.xml\n")
 print(f"{len(pages)} pagina's gebouwd + 404, sitemap en robots.txt")

@@ -279,5 +279,16 @@
   var opn = document.getElementById("opnieuw");
   if (opn) { try { var t = sessionStorage.getItem("rc-terug"); if (t && t.charAt(0) === "/") opn.href = t; } catch (x) {} }
 
+  /* ---------- ingelogd? gegevens invullen in afrekenen en inschrijven ---------- */
+  var formulieren = ["checkout-form", "inschrijf-form"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
+  if (formulieren.length) {
+    fetch("/api/account/ik", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (ik) {
+      if (!ik || !ik.ingelogd) return;
+      formulieren.forEach(function (f) {
+        ["naam", "email", "telefoon"].forEach(function (n) { var el = f.elements[n]; if (el && !el.value && ik[n]) el.value = ik[n]; });
+      });
+    }).catch(function () {});
+  }
+
   render();
 })();

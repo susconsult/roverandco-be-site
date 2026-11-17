@@ -13,6 +13,7 @@
     ["Kalender", "/kalender"],
     ["Shop", "/shop"],
     ["Blog", "/blog"],
+    ["Forum", "/forum"],
     ["Foto's", "/fotos"],
     ["Over ons", "/over-ons"],
     ["Contact", "/contact"]
