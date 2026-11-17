@@ -1,0 +1,15 @@
+{
+  "name": "roverandco-be-site",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "python3 bouw/build.py && astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/cloudflare": "^14.4.8",
+    "astro": "^7.4.12",
+    "wrangler": "^4.164.0"
+  }
+}

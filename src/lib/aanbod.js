@@ -5,7 +5,7 @@
 //   / (eerstvolgende, activiteiten, shop), /kalender (Rover & Co-activiteiten), /afrekenen (ophalen op activiteit), /sitemap.xml
 // Ook de prijscontrole bij afrekenen en inschrijven (laadCatalogus) leest uit de database.
 import { esc as e, pagina, kruimel } from "./sjabloon.js";
-import kalenderAnderen from "../data/kalender.json";
+import kalenderAnderen from "../../data/kalender.json";
 
 const DOMEIN = "https://roverandco.be";
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
