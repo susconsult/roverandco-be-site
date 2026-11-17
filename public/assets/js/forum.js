@@ -112,3 +112,30 @@
     });
   });
 })();
+
+/* ---------- antwoorden op een bericht (één niveau, zoals Reddit) ---------- */
+(function () {
+  var hoofdForm = document.getElementById("antwoord");
+  if (!hoofdForm) return;
+  var actie = hoofdForm.getAttribute("action");
+  document.addEventListener("click", function (e) {
+    var k = e.target.closest("[data-reageer]");
+    if (!k) return;
+    var open = document.querySelector(".f-mini");
+    if (open) { var was = open.dataset.bij; open.remove(); if (was === k.dataset.bij) return; }
+    var art = document.getElementById("b" + k.dataset.bij);
+    // na het laatste antwoord in deze draad plaatsen
+    var na = document.getElementById("b" + k.dataset.reageer), n = na;
+    while (n && n.nextElementSibling && n.nextElementSibling.classList.contains("f-antw")) n = n.nextElementSibling;
+    if (art && art.classList.contains("f-antw")) n = art;
+    var f = document.createElement("form");
+    f.className = "f-mini"; f.method = "post"; f.action = actie; f.dataset.bij = k.dataset.bij;
+    var naam = k.dataset.naam && art && art.classList.contains("f-antw") ? "@" + k.dataset.naam + " " : "";
+    f.innerHTML = '<input type="hidden" name="parent" value="' + k.dataset.reageer + '"><input type="hidden" name="bij" value="' + k.dataset.bij + '">' +
+      '<label class="sr-only" for="mini-tekst">Je antwoord</label><textarea id="mini-tekst" name="tekst" rows="3" maxlength="20000" required placeholder="Antwoord aan ' + (k.dataset.naam || "") + '"></textarea>' +
+      '<div class="f-mini-knoppen"><button class="btn btn-solid" type="submit">Plaatsen</button><button class="btn" type="button" data-sluit>Annuleren</button></div>';
+    (n || art).insertAdjacentElement("afterend", f);
+    var ta = f.querySelector("textarea"); ta.value = naam; ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+    f.querySelector("[data-sluit]").addEventListener("click", function () { f.remove(); });
+  });
+})();

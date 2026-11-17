@@ -14,6 +14,12 @@ const MAX_FOTO = 1_600_000;
 const nu = () => new Date().toISOString();
 const tekst = (v, max) => String(v ?? "").replace(/\r\n/g, "\n").trim().slice(0, max);
 const slugify = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+// Op welke pagina staat een bericht? Pagina's tellen alleen de hoofdberichten; antwoorden staan bij hun hoofdbericht.
+async function paginaVan(env, topicId, berichtId) {
+  const b = await env.SHOP_DB.prepare("SELECT COALESCE(parent_id, id) root FROM forum_berichten WHERE id = ?").bind(berichtId).first();
+  const n = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND parent_id IS NULL AND id <= ?").bind(topicId, b?.root || berichtId).first()).n;
+  return Math.max(1, Math.ceil(n / PER_PAGINA_BERICHTEN));
+}
 const topicUrl = (t, pag = 1) => `/forum/t/${t.id}-${slugify(t.titel)}${pag > 1 ? `?p=${pag}` : ""}`;
 const lidLink = (naam) => naam ? `<a class="f-lid" href="/forum/lid/${encodeURIComponent(naam)}">${esc(naam)}</a>` : "<span class=\"f-lid\">onbekend</span>";
 const json = (d, s = 200) => new Response(JSON.stringify(d), { status: s, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
@@ -193,12 +199,16 @@ async function categorie(request, env, url, lid, slug) {
 async function topic(request, env, url, lid, id) {
   const t = await env.SHOP_DB.prepare("SELECT t.*, c.slug AS cslug, c.naam AS cnaam FROM forum_topics t JOIN forum_categorieen c ON c.id = t.categorie_id WHERE t.id = ? AND t.verwijderd = 0").bind(id).first();
   if (!t) return null;
-  const totaal = t.berichten;
-  const paginas = Math.max(1, Math.ceil(totaal / PER_PAGINA_BERICHTEN));
+  const alle = (await env.SHOP_DB.prepare(`SELECT b.*, l.gebruikersnaam, l.avatar_id, l.aangemaakt AS lid_sinds, l.landrover, l.woonplaats, l.geblokkeerd
+      FROM forum_berichten b LEFT JOIN leden l ON l.id = b.lid_id WHERE b.topic_id = ? AND b.verwijderd = 0 ORDER BY b.id LIMIT 2000`).bind(t.id).all()).results || [];
+  const ids = new Set(alle.map((b) => b.id));
+  const hoofd = alle.filter((b) => !b.parent_id || !ids.has(b.parent_id));
+  const kinderen = {};
+  for (const b of alle) if (b.parent_id && ids.has(b.parent_id)) (kinderen[b.parent_id] ||= []).push(b);
+  const paginas = Math.max(1, Math.ceil(hoofd.length / PER_PAGINA_BERICHTEN));
   const pag = Math.min(paginas, Math.max(1, parseInt(url.searchParams.get("p"), 10) || 1));
-  const berichten = (await env.SHOP_DB.prepare(`SELECT b.*, l.gebruikersnaam, l.avatar_id, l.aangemaakt AS lid_sinds, l.landrover, l.woonplaats, l.geblokkeerd
-      FROM forum_berichten b LEFT JOIN leden l ON l.id = b.lid_id WHERE b.topic_id = ? AND b.verwijderd = 0 ORDER BY b.id LIMIT ? OFFSET ?`
-  ).bind(t.id, PER_PAGINA_BERICHTEN, (pag - 1) * PER_PAGINA_BERICHTEN).all()).results || [];
+  const berichten = hoofd.slice((pag - 1) * PER_PAGINA_BERICHTEN, pag * PER_PAGINA_BERICHTEN).flatMap((b) => [b, ...(kinderen[b.id] || []).map((k) => ({ ...k, isAntwoord: true, op: b }))]);
+  const laatsteId = Math.max(0, ...berichten.map((b) => b.id));
   const auteurs = [...new Set(berichten.map((b) => b.lid_id))];
   const tellers = auteurs.length ? Object.fromEntries(((await env.SHOP_DB.prepare(
     `SELECT lid_id, COUNT(*) n FROM forum_berichten WHERE verwijderd = 0 AND lid_id IN (${auteurs.map(() => "?").join(",")}) GROUP BY lid_id`
@@ -212,9 +222,9 @@ async function topic(request, env, url, lid, id) {
   const gar = await garages(env, auteurs);
   const volgT = volgKnop(lid, "topic", t.id, await volgt(env, lid, "topic", t.id), topicUrl(t, pag), "dit topic");
   const kan = (b) => lid && (lid.beheerder || (b.lid_id === lid.id && !t.gesloten));
-  const posts = berichten.map((b, i) => `
-    <article class="f-post" id="b${b.id}"${i === berichten.length - 1 ? ' data-laatste' : ""}>
-      ${i === berichten.length - 1 ? '<span id="laatste" class="f-anker" aria-hidden="true"></span>' : ""}
+  const posts = berichten.map((b) => `
+    <article class="f-post${b.isAntwoord ? " f-antw" : ""}" id="b${b.id}"${b.id === laatsteId ? ' data-laatste' : ""}>
+      ${b.id === laatsteId ? '<span id="laatste" class="f-anker" aria-hidden="true"></span>' : ""}
       <aside class="f-auteur">${avatar({ gebruikersnaam: b.gebruikersnaam, avatar_id: b.avatar_id }, 56)}
         <div>${lidLink(b.gebruikersnaam)}${b.geblokkeerd ? ' <span class="f-label grijs">Geblokkeerd</span>' : ""}
         ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : ico("auto")}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>
@@ -223,6 +233,7 @@ async function topic(request, env, url, lid, id) {
         <div class="f-tekst">${opmaak(b.tekst)}</div>
         <div class="f-acties">
           ${likeKnop(lid, b.id, lk.aantal[b.id], lk.mijn.has(b.id))}
+          ${lid && !t.gesloten ? `<button type="button" class="linkknop f-reageer" data-reageer="${b.isAntwoord ? b.op.id : b.id}" data-naam="${esc(b.gebruikersnaam || "")}" data-bij="${b.id}">Antwoorden</button>` : ""}
           ${drieMenu([
             lid && !t.gesloten ? `<button type="button" data-citeer="${esc(b.gebruikersnaam || "")}" data-ruw="${esc(b.tekst)}">Citeren</button>` : "",
             kan(b) && b.lid_id === lid?.id ? `<a href="/forum/b/${b.id}/bewerk">Bewerken</a>` : "",
@@ -324,10 +335,18 @@ async function antwoorden(request, env, url, lid, id) {
   if (w.tekst.length < 2) return postFormulier(env, request, { titel: "Antwoorden", kop: t.titel, actie: `/forum/t/${t.id}/antwoord`, w, m: "Schrijf eerst je bericht.", terug });
   const snel = await teSnel(env, lid, false);
   if (snel) return postFormulier(env, request, { titel: "Antwoorden", kop: t.titel, actie: `/forum/t/${t.id}/antwoord`, w, m: snel, terug });
-  const r = await env.SHOP_DB.prepare("INSERT INTO forum_berichten (topic_id, lid_id, tekst, aangemaakt) VALUES (?, ?, ?, ?)").bind(t.id, lid.id, w.tekst, nu()).run();
+  let ouder = null;
+  const pid = parseInt(f.get("parent"), 10) || 0;
+  if (pid) {
+    ouder = await env.SHOP_DB.prepare("SELECT id, parent_id, lid_id FROM forum_berichten WHERE id = ? AND topic_id = ? AND verwijderd = 0").bind(pid, t.id).first();
+    if (ouder) ouder.root = ouder.parent_id || ouder.id; // één niveau: antwoord op een antwoord komt bij hetzelfde hoofdbericht
+  }
+  const r = await env.SHOP_DB.prepare("INSERT INTO forum_berichten (topic_id, lid_id, tekst, aangemaakt, parent_id) VALUES (?, ?, ?, ?, ?)").bind(t.id, lid.id, w.tekst, nu(), ouder?.root || null).run();
   await herbereken(env, t.id);
-  const n = (await env.SHOP_DB.prepare("SELECT berichten FROM forum_topics WHERE id = ?").bind(t.id).first()).berichten;
-  const link = `${topicUrl(t, Math.ceil(n / PER_PAGINA_BERICHTEN))}#b${r.meta.last_row_id}`;
+  const link = `${topicUrl(t, await paginaVan(env, t.id, r.meta.last_row_id))}#b${r.meta.last_row_id}`;
+  const bij = parseInt(f.get("bij"), 10) || 0;
+  const aan = bij && bij !== pid ? await env.SHOP_DB.prepare("SELECT lid_id FROM forum_berichten WHERE id = ? AND topic_id = ?").bind(bij, t.id).first() : ouder;
+  if (aan?.lid_id && aan.lid_id !== lid.id) await stuurMelding(env, [aan.lid_id], `${lid.gebruikersnaam} antwoordde op je bericht in "${t.titel}"`, link);
   const tags = await bewaarTags(env, r.meta.last_row_id, t.id, w.tekst);
   if (f.get("volg") !== "0") await zetVolgen(env, lid.id, "topic", t.id, true); // wie reageert, volgt het topic
   const c = await env.SHOP_DB.prepare("SELECT slug, naam FROM forum_categorieen WHERE id = ?").bind(t.categorie_id).first();
@@ -352,8 +371,7 @@ async function bewerk(request, env, url, lid, id) {
   await bewaarTags(env, b.id, b.tid, w.tekst);
   if (eerste) await env.SHOP_DB.prepare("UPDATE forum_topics SET titel = ? WHERE id = ?").bind(w.titel, b.tid).run();
   await log(env, lid.id, "forum", `Bericht bewerkt in: ${eerste ? w.titel : b.titel}`, `${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel })}#b${b.id}`);
-  const pos = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND id <= ?").bind(b.tid, b.id).first()).n;
-  return naar(`${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel }, Math.ceil(pos / PER_PAGINA_BERICHTEN))}#b${b.id}`);
+  return naar(`${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel }, await paginaVan(env, b.tid, b.id))}#b${b.id}`);
 }
 
 async function meld(request, env, url, lid, id) {
@@ -513,8 +531,7 @@ async function likeActie(request, env, url, lid, id) {
     await env.SHOP_DB.prepare("INSERT OR IGNORE INTO forum_likes (bericht_id, lid_id, aangemaakt) VALUES (?, ?, ?)").bind(b.id, lid.id, nu()).run();
     // Melding naar de schrijver (niet voor je eigen bericht, en hoogstens één per bericht per dag per liker).
     if (b.lid_id !== lid.id) {
-      const pos = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND id <= ?").bind(b.topic_id, b.id).first()).n;
-      const link = `${topicUrl({ id: b.topic_id, titel: b.titel }, Math.ceil(pos / PER_PAGINA_BERICHTEN))}#b${b.id}`;
+      const link = `${topicUrl({ id: b.topic_id, titel: b.titel }, await paginaVan(env, b.topic_id, b.id))}#b${b.id}`;
       const al = await env.SHOP_DB.prepare("SELECT 1 FROM lid_meldingen WHERE lid_id = ? AND link = ? AND tekst LIKE ? AND aangemaakt > ?").bind(b.lid_id, link, `${lid.gebruikersnaam} %`, new Date(Date.now() - 86400_000).toISOString()).first();
       if (!al) await stuurMelding(env, [b.lid_id], `${lid.gebruikersnaam} vindt je bericht in "${b.titel}" leuk`, link);
     }

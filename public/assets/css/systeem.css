@@ -173,3 +173,13 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 @keyframes bel-schud{0%,100%{transform:rotate(0)}10%,30%{transform:rotate(-14deg)}20%,40%{transform:rotate(14deg)}50%{transform:rotate(0)}}
 @media(prefers-reduced-motion:reduce){.bel-btn.nieuw svg{animation:none}}
 .f-post{position:relative}.f-anker{position:absolute;top:-90px;left:0;width:1px;height:1px}
+/* ---------- forum: antwoorden op een bericht ---------- */
+.f-post.f-antw{margin-left:56px;grid-template-columns:150px minmax(0,1fr);position:relative}
+.f-post.f-antw{box-shadow:inset 4px 0 0 var(--green-light)}
+.f-post.f-antw .avatar{width:40px!important;height:40px!important;font-size:17px!important}
+.f-reageer{font-weight:600}
+.f-mini{margin:-4px 0 14px 56px;background:#fff;border-radius:var(--r);padding:14px;border:2px solid var(--green-light)}
+.f-mini textarea{width:100%;border:2px solid #cfc8b6;border-radius:8px;padding:10px;font:inherit}
+.f-mini-knoppen{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}.f-mini-knoppen .btn{padding:10px 18px}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+@media(max-width:700px){.f-post.f-antw{margin-left:22px;grid-template-columns:1fr}.f-mini{margin-left:22px}}
