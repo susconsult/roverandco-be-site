@@ -92,6 +92,10 @@
     b.addEventListener("click", function () {
       lb.querySelector("img").src = b.dataset.full;
       lb.querySelector("img").alt = b.querySelector("img").alt;
+      var cap = lb.querySelector(".lb-onderschrift");
+      if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
+      cap.textContent = b.dataset.onderschrift || "";
+      cap.hidden = !b.dataset.onderschrift;
       lb.classList.add("open");
     });
   });

@@ -274,7 +274,7 @@ async function home(env, request) {
     .on('[data-dyn="events"]', vervang(lijst.length ? `${evKaart(lijst[0], true)}<div class="ev-stack">${lijst.slice(1, 3).map((a) => evKaart(a)).join("")}</div>` : "<p>Binnenkort nieuwe activiteiten.</p>"))
     .on('[data-dyn="producten"]', vervang(prods.map(productKaart).join("")))
     .on('[data-dyn="forum"]', topics.length ? vervang(topics.map((t) => `<a class="forum-rij" href="/forum/t/${t.id}-${slugTitel(t.titel)}"><span>${e(t.titel)}</span><small>${e(t.cnaam)} · ${t.berichten} ${t.berichten === 1 ? "bericht" : "berichten"}${t.naam ? ` · door ${e(t.naam)}` : ""}</small></a>`).join("")) : { element() {} })
-    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => `<a class="garage-kaart" href="/forum/lid/${encodeURIComponent(w.naam_lid)}#garage"><img src="/forum/foto/${w.foto_id}" alt="${e(w.type)}" loading="lazy"><span><b>${e(w.naam || w.type)}</b>${w.naam ? e(w.type) : ""}${w.bouwjaar ? ` · ${w.bouwjaar}` : ""}<small>van ${e(w.naam_lid)}</small></span></a>`).join("")) : { element() {} })
+    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => `<button type="button" class="garage-kaart" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(w.naam_lid)}" aria-label="Foto van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="Land Rover van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(w.naam_lid)}</b></span></button>`).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
 }
 

@@ -217,7 +217,6 @@ async function topic(request, env, url, lid, id) {
       ${i === berichten.length - 1 ? '<a id="laatste"></a>' : ""}
       <aside class="f-auteur">${avatar({ gebruikersnaam: b.gebruikersnaam, avatar_id: b.avatar_id }, 56)}
         <div>${lidLink(b.gebruikersnaam)}${b.geblokkeerd ? ' <span class="f-label grijs">Geblokkeerd</span>' : ""}
-        <small>${tellers[b.lid_id] || 0} berichten<br>Lid sinds ${datum(b.lid_sinds, true)}</small>
         ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : ico("auto")}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>
       <div class="f-inhoud">
         <div class="f-meta"><a href="#b${b.id}">${datum(b.aangemaakt)}</a>${b.bewerkt_op ? ` <small>(bewerkt ${datum(b.bewerkt_op)})</small>` : ""}</div>
@@ -437,21 +436,16 @@ async function recent(request, env, url, lid) {
 }
 
 async function profiel(request, env, url, lid, naam) {
-  const p = await env.SHOP_DB.prepare("SELECT id, gebruikersnaam, aangemaakt, woonplaats, landrover, avatar_id, geblokkeerd FROM leden WHERE gebruikersnaam = ?").bind(naam).first();
+  // Bewust weinig info: enkel gebruikersnaam, avatar en garage. Geen woonplaats, data of activiteit.
+  const p = await env.SHOP_DB.prepare("SELECT id, gebruikersnaam, avatar_id FROM leden WHERE gebruikersnaam = ? AND COALESCE(geblokkeerd, 0) = 0").bind(naam).first();
   if (!p) return null;
   const wagens = (await garages(env, [p.id]))[p.id] || [];
-  const n = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE lid_id = ? AND verwijderd = 0").bind(p.id).first()).n;
-  const laatste = (await env.SHOP_DB.prepare(`SELECT DISTINCT t.id, t.titel, t.laatste_op FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id
-      WHERE b.lid_id = ? AND b.verwijderd = 0 AND t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 10`).bind(p.id).all()).results || [];
   return pagina(env, request, {
     titel: `${p.gebruikersnaam} – Forum`, noindex: true,
-    inhoud: banner("Forum", p.gebruikersnaam) + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel("Leden", esc(p.gebruikersnaam))}
-      <div class="acc-kaart f-profiel">${avatar(p, 96)}<dl class="acc-dl"><dt>Lid sinds</dt><dd>${datum(p.aangemaakt, true)}</dd><dt>Berichten</dt><dd>${n}</dd>
-        ${p.woonplaats ? `<dt>Woonplaats</dt><dd>${esc(p.woonplaats)}</dd>` : ""}${!wagens.length && p.landrover ? `<dt>Land Rover</dt><dd>${esc(p.landrover)}</dd>` : ""}${p.geblokkeerd ? "<dt>Status</dt><dd>Geblokkeerd</dd>" : ""}</dl></div>
+    inhoud: banner("Forum", p.gebruikersnaam) + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel(esc(p.gebruikersnaam))}
+      <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Garage</h2>
       ${wagens.length ? garageKaarten(wagens) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
-      <h2 class="f-h2">Laatst actief in</h2>
-      ${laatste.length ? `<ul class="f-lijst">${laatste.map((t) => `<li><a href="${topicUrl(t)}">${esc(t.titel)}</a> <small>${datum(t.laatste_op)}</small></li>`).join("")}</ul>` : "<p>Nog geen berichten.</p>"}
     </section>`,
   });
 }
