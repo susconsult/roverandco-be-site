@@ -214,7 +214,7 @@ async function topic(request, env, url, lid, id) {
   const kan = (b) => lid && (lid.beheerder || (b.lid_id === lid.id && !t.gesloten));
   const posts = berichten.map((b, i) => `
     <article class="f-post" id="b${b.id}"${i === berichten.length - 1 ? ' data-laatste' : ""}>
-      ${i === berichten.length - 1 ? '<a id="laatste"></a>' : ""}
+      ${i === berichten.length - 1 ? '<span id="laatste" class="f-anker" aria-hidden="true"></span>' : ""}
       <aside class="f-auteur">${avatar({ gebruikersnaam: b.gebruikersnaam, avatar_id: b.avatar_id }, 56)}
         <div>${lidLink(b.gebruikersnaam)}${b.geblokkeerd ? ' <span class="f-label grijs">Geblokkeerd</span>' : ""}
         ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : ico("auto")}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>

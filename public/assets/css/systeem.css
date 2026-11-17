@@ -172,3 +172,4 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 .bel-btn{position:relative}.bel-btn.nieuw svg{animation:bel-schud 2.4s ease-in-out 1}
 @keyframes bel-schud{0%,100%{transform:rotate(0)}10%,30%{transform:rotate(-14deg)}20%,40%{transform:rotate(14deg)}50%{transform:rotate(0)}}
 @media(prefers-reduced-motion:reduce){.bel-btn.nieuw svg{animation:none}}
+.f-post{position:relative}.f-anker{position:absolute;top:-90px;left:0;width:1px;height:1px}
