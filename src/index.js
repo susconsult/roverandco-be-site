@@ -349,6 +349,8 @@ export default {
   async fetch(request, env) {
     const url = new URL(request.url);
     const p = url.pathname;
+    // www.roverandco.be → roverandco.be (één adres, voor Google en voor de login-cookie).
+    if (url.hostname === "www.roverandco.be") { url.hostname = "roverandco.be"; return Response.redirect(url.href, 301); }
     if (p === "/_sjabloon" || p === "/_sjabloon.html") return new Response("Niet gevonden", { status: 404 });
     // Oude Ecwid-adressen (roverandco.be tot nov 2026) naar de nieuwe site.
     if (p === "/products" || p.startsWith("/products/")) {
