@@ -350,6 +350,20 @@ export default {
     const url = new URL(request.url);
     const p = url.pathname;
     if (p === "/_sjabloon" || p === "/_sjabloon.html") return new Response("Niet gevonden", { status: 404 });
+    // Oude Ecwid-adressen (roverandco.be tot nov 2026) naar de nieuwe site.
+    if (p === "/products" || p.startsWith("/products/")) {
+      const OUD = {
+        "church-of-rover-22-11-2026": "/activiteiten/church-of-rover",
+        "rover--co-t-shirt": "/shop/rover-co-t-shirt",
+        "built-for-the-wild-t-shirt": "/shop/built-for-the-wild-t-shirt",
+        "life-is-better-in-low-range-t-shirt": "/shop/life-is-better-in-low-range-t-shirt",
+        "rover--co-emaille-mok": "/shop/emaille-mok",
+        "wool--wheels-stel-je-eigen-weekend-samen": "/activiteiten/wild-and-wheels",
+        "cart": "/afrekenen", "account": "/account",
+      };
+      const deel = p.split("/")[2] || "";
+      return Response.redirect(new URL(OUD[deel] || "/shop", url.origin).href, 301);
+    }
     const ld = await leden(request, env, url);
     if (ld) return ld;
     const fo = await forum(request, env, url);
