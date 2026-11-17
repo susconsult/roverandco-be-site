@@ -255,13 +255,13 @@ home = f"""
     <p>We brengen Land Rover-liefhebbers samen op plekken waar je anders niet komt. Geen parkeerplaats, wel een belevenis.</p>
     <div class="ctas"><a href="/activiteiten" class="btn btn-white">Bekijk activiteiten</a><a href="/shop" class="btn btn-ghost-w">Naar de shop</a></div>
   </div>
-  <a href="/activiteiten/{eerst['slug']}" class="next-pill"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span style="font-size:14px">{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a>
+  <a href="/activiteiten/{eerst['slug']}" class="next-pill" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span style="font-size:14px">{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a>
 </section>
-<div class="strip" aria-hidden="true"><div class="strip-track">{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts) * 2}<span>Series · Defender · Discovery · Range Rover</span>·{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts)}<span>Series · Defender · Discovery · Range Rover</span>·</div></div>
+<div class="strip" aria-hidden="true"><div class="strip-track" data-dyn="strip">{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts) * 2}<span>Series · Defender · Discovery · Range Rover</span>·{''.join(f'<span>{e(a["titel"])}</span>·' for a in acts)}<span>Series · Defender · Discovery · Range Rover</span>·</div></div>
 <section>
   <div class="wrap">
     <div class="sec-head"><div><div class="eyebrow">Activiteiten</div><h2>Rij mee</h2></div><div class="ctas"><a href="/activiteiten" class="btn btn-solid">Alle activiteiten</a><a href="/kalender" class="btn">Kalender</a></div></div>
-    <div class="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
+    <div class="events" data-dyn="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
   </div>
 </section>
 {weetje_blok()}
@@ -290,7 +290,7 @@ home = f"""
 <section class="shop-sec">
   <div class="wrap">
     <div class="sec-head"><div><div class="eyebrow">Shop</div><h2>Draag het</h2></div><a href="/shop" class="btn btn-solid">Naar de shop</a></div>
-    <div class="products">{''.join(product_card(p) for p in producten)}</div>
+    <div class="products" data-dyn="producten">{''.join(product_card(p) for p in producten)}</div>
   </div>
 </section>
 <section class="cta-band">
@@ -304,7 +304,9 @@ home = f"""
 write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen op plekken waar je anders niet komt. Activiteiten, ritten en merch.", home, hero=True)
 
 # ---------- activiteiten ----------
-write("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rover & Co: Church of Rover en Wild & Wheels.",
+# /activiteiten en /activiteiten/<slug> maakt de Worker live uit de database (src/aanbod.js). Hieronder enkel nog
+# de opmaak die de startpagina en de zaai-data nodig hebben.
+_ongebruikt = ("/activiteiten", "Activiteiten", "Ritten, meetings en evenementen van Rover & Co: Church of Rover en Wild & Wheels.",
       banner("Activiteiten", "Rij mee", "Elke activiteit is een belevenis op een bijzondere plek. Schrijf je in en rij mee.", "977", "Colonne Defenders in het bos") +
       f'<section><div class="wrap"><div class="ev-list">{"".join(ev_card(a, True) for a in acts)}</div></div></section>')
 
@@ -380,7 +382,7 @@ for a in alle_acts:
     if inschrijving_open(a):
         EVENT_BODY[a["slug"]] = body  # wordt geschreven samen met het inschrijfformulier (zie onder)
         continue
-    write(f"/activiteiten/{a['slug']}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
+    pass  # (pagina wordt live gemaakt door de Worker)
 
 # ---------- kalender ----------
 KAL_ANDEREN = json.load(open(os.path.join(ROOT, "data", "kalender.json"), encoding="utf-8"))
@@ -460,7 +462,8 @@ f.addEventListener("submit",function(ev){{ev.preventDefault();var fd=new FormDat
 write("/kalender", "Kalender", "Land Rover-kalender: activiteiten van Rover & Co en andere clubs in België en Nederland. Dien ook je eigen activiteit in.", kalender)
 
 # ---------- shop ----------
-write("/shop", "Shop", "Merch van Rover & Co: T-shirts en emaille mok. Met elke aankoop steun je de vereniging.",
+# /shop en /shop/<slug> maakt de Worker live uit de database (src/aanbod.js).
+_ongebruikt = ("/shop", "Shop", "Merch van Rover & Co: T-shirts en emaille mok. Met elke aankoop steun je de vereniging.",
       banner("Shop", "Draag het", "Met elke aankoop steun je onze vereniging.", "5577", "Defender 110 op een zandweg") +
       f'<section class="shop-sec"><div class="wrap"><div class="products">{"".join(product_card(p) for p in producten)}</div></div></section>')
 
@@ -495,7 +498,7 @@ for pr in producten:
   </div>
 </div></section>"""
     tekst = re.sub(r"<[^>]+>", " ", pr["omschrijving"])
-    write(f"/shop/{pr['slug']}", pr["naam"], " ".join(tekst.split())[:155], body)
+    pass  # (pagina wordt live gemaakt door de Worker)
 
 # ---------- blog ----------
 # Artikels staan in data/blog/<slug>.md: kop met velden tussen '---', daarna Markdown.
@@ -727,8 +730,20 @@ cat["__inschrijvingen"] = {
                 "onderdelen": a["inschrijving"]["onderdelen"], "tijdsloten": a["inschrijving"].get("tijdsloten"),
                 "wagen": bool(a["inschrijving"].get("wagen"))}
     for a in alle_acts if inschrijving_open(a)}
-os.makedirs(os.path.join(ROOT, "src"), exist_ok=True)
-json.dump(cat, open(os.path.join(ROOT, "src", "catalogus.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
+# Zaai-data voor de database (eenmalig ingeladen; daarna beheer via /beheer). Zie bouw/db/schema-aanbod.sql.
+def _sql(v):
+    return "'" + str(v).replace("'", "''") + "'"
+_zaai = []
+for i, pr in enumerate(producten):
+    d = {"naam": pr["naam"], "categorie": pr["categorie"], "lint": pr["lint"], "prijs": pr["prijs"],
+         "fotos": [{"klein": f + "-s.webp", "groot": f + ".webp"} for f in pr["fotos"]],
+         "opties": [{"naam": o["naam"], "verplicht": o["verplicht"], "waarden": [{"waarde": v["waarde"], "meerprijs": prijs_float(v["meerprijs"]), "standaard": v["standaard"]} for v in o["waarden"]]} for o in pr["opties"]],
+         "omschrijving": pr["omschrijving"]}
+    _zaai.append(f"INSERT OR IGNORE INTO producten (slug, naam, data, zichtbaar, volgorde, bijgewerkt) VALUES ({_sql(pr['slug'])}, {_sql(pr['naam'])}, {_sql(json.dumps(d, ensure_ascii=False))}, 1, {i * 10}, '{VANDAAG}');")
+for i, a in enumerate(alle_acts):
+    d = {k: v for k, v in a.items() if k not in ("slug", "verborgen")}
+    _zaai.append(f"INSERT OR IGNORE INTO activiteiten (slug, titel, datum, data, zichtbaar, volgorde, bijgewerkt) VALUES ({_sql(a['slug'])}, {_sql(a['titel'])}, {_sql(a.get('datum', ''))}, {_sql(json.dumps(d, ensure_ascii=False))}, {0 if a.get('verborgen') else 1}, {i * 10}, '{VANDAAG}');")
+open(os.path.join(ROOT, "bouw", "db", "zaai-aanbod.sql"), "w", encoding="utf-8").write("\n".join(_zaai) + "\n")
 
 # ---------- inschrijven per activiteit ----------
 PER = {"persoon": "per persoon", "wagen": "per wagen", "stuk": "per stuk"}
@@ -791,16 +806,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
     </aside>
   </form>
 </div></section>"""
-    write(f"/activiteiten/{slug}", a["titel"], f"{a['titel']}: {a['kort']}", body, noindex=bool(a.get("verborgen")))
-    # Oud adres /inschrijven blijft werken: doorsturen naar het formulier op de eventpagina.
-    doel = f"/activiteiten/{slug}#inschrijven"
-    out = os.path.join(PUB, "activiteiten", slug, "inschrijven.html")
-    os.makedirs(os.path.dirname(out), exist_ok=True)
-    open(out, "w", encoding="utf-8").write(
-        f'<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="robots" content="noindex">'
-        f'<meta http-equiv="refresh" content="0; url={doel}"><link rel="canonical" href="{site["domein"]}/activiteiten/{slug}">'
-        f'<title>Inschrijven: {e(a["titel"])}</title><script>location.replace("{doel}")</script></head>'
-        f'<body><a href="{doel}">Naar het inschrijfformulier</a></body></html>')
+    pass  # pagina + inschrijfformulier maakt de Worker live (src/aanbod.js); oude /inschrijven-adressen stuurt de Worker door
 
 # ---------- afrekenen ----------
 act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])

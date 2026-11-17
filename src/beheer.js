@@ -3,11 +3,12 @@
 // -> sessie van 30 dagen in een cookie (HttpOnly, Secure, alleen voor /beheer).
 // Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
+import { beheerAanbod } from "./beheer-aanbod.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
   status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
 });
-const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const datum = (iso) => iso ? new Date(iso).toLocaleString("nl-BE", { timeZone: "Europe/Brussels", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "";
 
 /* ---------------- login met code per mail ---------------- */
@@ -130,7 +131,7 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .leeg{padding:30px;text-align:center;color:var(--m)}
 @media(max-width:700px){dl{grid-template-columns:1fr}th.mob,td.mob{display:none}}`;
 
-const pagina = (titel, inhoud, email) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+export const pagina = (titel, inhoud, email) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="robots" content="noindex,nofollow"><title>${esc(titel)} – Beheer Rover &amp; Co</title><style>${STIJL}</style></head><body>
 <header><a href="/beheer">Rover &amp; Co beheer</a><small>${esc(email || "")} · <a href="/beheer/uitloggen" style="font-weight:400">Uitloggen</a></small></header><main>${inhoud}</main></body></html>`);
 
@@ -180,7 +181,7 @@ async function lijst(url, env, email) {
   const tab = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer?soort=${s}">${label}</a>`;
   const ftab = (f, label) => `<a class="${filter === f ? "aan" : ""}" href="${esc(q({ filter: f }))}">${label}</a>`;
   return pagina("Overzicht", `
-<nav class="tabs">${tab("bestelling", "Bestellingen")}${tab("inschrijving", "Inschrijvingen")}</nav>
+<nav class="tabs">${tab("bestelling", "Bestellingen")}${tab("inschrijving", "Inschrijvingen")}<a href="/beheer/producten">Producten</a><a href="/beheer/activiteiten">Activiteiten</a></nav>
 <nav class="tabs">${ftab("echt", "Betaald en bevestigd")}${ftab("open", "Nog af te handelen")}${ftab("wacht", "Wacht op betaling")}${ftab("test", "Test")}${ftab("alle", "Alles")}</nav>
 <form class="filter" method="get" action="/beheer"><input type="hidden" name="soort" value="${soort}"><input type="hidden" name="filter" value="${filter}">
 <input name="q" placeholder="Zoek naam, e-mail, nummer" value="${esc(zoek)}">
@@ -281,6 +282,8 @@ export async function beheer(request, env, url) {
     if (origin && origin !== url.origin) return html("Geweigerd.", 403);
   }
   if (p === "/beheer" || p === "/beheer/") return lijst(url, env, w.email);
+  const ab = await beheerAanbod(request, env, url, w.email);
+  if (ab) return ab;
   if (p === "/beheer/export.csv") return exporteer(url, env);
   const m = p.match(/^\/beheer\/r\/([A-Z]{2}-\d{6}-[A-Z0-9]{5})$/);
   if (m) return request.method === "POST" ? bewaar(request, m[1], env, w.email) : detail(m[1], env, w.email);

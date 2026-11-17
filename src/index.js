@@ -1,6 +1,7 @@
 // Worker voor roverandco.be
-// - /api/bestelling   : bestelling uit de shop (prijzen opnieuw berekend uit src/catalogus.json)
-// - /api/inschrijving : inschrijving voor een activiteit (prijzen en tijdsloten uit src/catalogus.json)
+// - /api/bestelling   : bestelling uit de shop (prijzen opnieuw berekend uit de database, zie laadCatalogus in src/aanbod.js)
+// - /api/inschrijving : inschrijving voor een activiteit (prijzen en tijdsloten uit de database)
+// - /shop, /activiteiten, / , /kalender, /afrekenen, /sitemap.xml, /media/<id>: live uit de database (src/aanbod.js)
 //   Beide: eerst bewaren in de database (D1, binding SHOP_DB, zie src/opslag.js), dan een Viva-betaalorder
 //   maken en de bezoeker naar Viva Smart Checkout sturen.
 // - /betaald          : terugkeer uit Viva (succes-URL). De Worker vraagt bij Viva na of er echt betaald is.
@@ -18,13 +19,13 @@
 //   RESEND_API_KEY (bevestigingsmail naar de klant vanaf noreply@roverandco.be)
 //   Optioneel: VIVA_OMGEVING = "demo" (anders live).
 // Zolang VIVA_CLIENT_ID / VIVA_CLIENT_SECRET / VIVA_SOURCE_CODE ontbreken: testmodus, er wordt niet betaald.
-import catalogus from "./catalogus.json";
 import { planner } from "./planner.js";
 import { kalender } from "./kalender.js";
 import { opslag } from "./opslag.js";
 import { beheer } from "./beheer.js";
 import { leden, lidVoorBestelling, wachtwoordLink } from "./leden.js";
 import { forum } from "./forum.js";
+import { aanbod, laadCatalogus } from "./aanbod.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
@@ -145,7 +146,7 @@ async function stuurKlantmail(env, m, origin) {
 
 /* ---------------- Shop: bestelling ---------------- */
 
-function controleerBestelling(b) {
+function controleerBestelling(b, catalogus) {
   const fouten = [];
   const klant = controleerKlant(b.klant, fouten);
 
@@ -194,7 +195,7 @@ function controleerBestelling(b) {
 
 /* ---------------- Activiteit: inschrijving ---------------- */
 
-function controleerInschrijving(b) {
+function controleerInschrijving(b, catalogus) {
   const fouten = [];
   const slug = tekst(b.activiteit, 80);
   const cfg = (catalogus.__inschrijvingen || {})[slug];
@@ -248,7 +249,8 @@ async function plaats(request, env, soort) {
   let b;
   try { b = await request.json(); } catch { return json({ ok: false, fout: "Ongeldige aanvraag." }, 400); }
   if (b.website) return json({ ok: true, nummer: `${S.prefix}-OK`, klaar: true }); // spam-val: bot geen hint geven
-  const res = S.controleer(b);
+  if (!env.SHOP_DB) return json({ ok: false, fout: "Dit is nog niet gekoppeld. Probeer later opnieuw." }, 503);
+  const res = S.controleer(b, await laadCatalogus(env));
   if (res.fouten.includes("gesloten")) return json({ ok: false, fout: "De inschrijvingen voor deze activiteit zijn afgesloten." }, 422);
   if (res.fouten.length) return json({ ok: false, fout: "Controleer je gegevens.", velden: res.fouten }, 422);
   if (!env.SHOP_DB) return json({ ok: false, fout: "Dit is nog niet gekoppeld. Probeer later opnieuw." }, 503);
@@ -364,6 +366,8 @@ export default {
     }
     if (p === "/api/viva/webhook") return webhook(request, env);
     if (p === "/betaald" || p === "/betaald/") return terugUitViva(url, env);
+    const ab = await aanbod(request, env, url);
+    if (ab) return ab;
     if (p.startsWith("/api/")) return json({ ok: false, fout: "Onbekend adres." }, 404);
     return env.ASSETS.fetch(request);
   },
