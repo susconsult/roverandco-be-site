@@ -54,7 +54,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
     menu = "".join(
         f'<li><a href="{href}"{" aria-current=\"page\"" if path == href or (href != "/" and path.startswith(href + "/")) else ""}>{e(lbl)}</a></li>'
         for lbl, href in site["menu"])
-    full_title = f"{title} | Rover & Co" if path != "/" else "Rover & Co VZW | Land Rover-vereniging uit Oostham"
+    full_title = f"{title} | Rover & Co" if path != "/" else "Rover & Co VZW | Land Rover-club in België"
     canon = site["domein"] + path
     return f"""<!DOCTYPE html>
 <html lang="nl">
@@ -267,7 +267,7 @@ home = f"""
 <section class="hero hero-nieuw" style="padding:0">
   {img("964", "Defender met daktent in een stoffige bosweg", "hero-img", prio=True)}
   <div class="wrap hero-in">
-    <div class="eyebrow" style="color:#CFE3D4">Land Rover-club · Oostham</div>
+    <div class="eyebrow" style="color:#CFE3D4">Land Rover-club · België</div>
     <h1>For the ones built different</h1>
     <p>Land Rover-liefhebbers die elkaar vinden. Op de weg, ernaast en rond het kampvuur.</p>
     <div class="ctas"><a href="/activiteiten" class="btn btn-white">Rij mee</a><a href="/account/registreren" class="btn btn-ghost-w" data-gast>Word lid, gratis</a></div>
@@ -667,7 +667,7 @@ write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",
       f'<section class="gallery-sec"><div class="wrap">{galerij(GALERIJ)}</div></section>')
 
 # ---------- over ons ----------
-write("/over-ons", "Over ons", "Rover & Co VZW uit Oostham brengt Land Rover-liefhebbers samen. Onze missie en ons doel.",
+write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit heel België samen. Onze missie en ons doel.",
       banner("Over ons", "Missie en doel", "", "959", "Defenders in het stof op een bosweg") + f"""
 <section><div class="narrow prose">
   <p>{e(OVER_TEKST)}</p>
