@@ -1,5 +1,6 @@
 // Forum: garage, likes, volgen (categorie, topic, hashtag), hashtags en meldingen (het belletje).
 import { esc, ico } from "./sjabloon.js";
+import { drieMenu, deelKnop, bewaarKnop, meldLink } from "./melden.js";
 
 const nu = () => new Date().toISOString();
 
@@ -90,7 +91,11 @@ export async function garages(env, lidIds) {
 export const wagenNaam = (w) => [w.type, w.bouwjaar].filter(Boolean).join(", ") + (w.naam ? ` "${w.naam}"` : "");
 export function garageKaarten(wagens, o = {}) {
   return `<div class="garage">${wagens.map((w) => `<figure class="wagen" id="wagen-${w.id}">${w.foto_id ? `<button type="button" data-full="/forum/foto/${w.foto_id}" class="wagen-foto" aria-label="Foto groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${esc(wagenNaam(w))}" loading="lazy"></button>` : `<div class="wagen-foto leeg" aria-hidden="true">${ico("auto")}</div>`}
-    <figcaption><b>${esc(w.naam || w.type)}</b>${w.naam ? `<small>${esc(w.type)}</small>` : ""}</figcaption>${o.meld && w.foto_id ? `
-    <details class="f-meld wagen-meld"><summary>Melden</summary><form method="post" action="/forum/wagen/${w.id}/meld"><input name="reden" maxlength="300" placeholder="Wat is er mis met deze foto?" required><button class="btn" type="submit">Verstuur</button></form></details>` : ""}${o.mod && w.foto_id ? `
-    <form method="post" action="/forum/mod" class="f-mod" data-bevestig="Deze foto verwijderen?"><input type="hidden" name="actie" value="verwijder-wagenfoto"><input type="hidden" name="id" value="${w.id}"><button class="linkknop rood" type="submit">Foto verwijderen</button></form>` : ""}</figure>`).join("")}</div>`;
+    <figcaption><b>${esc(w.naam || w.type)}</b>${w.naam ? `<small>${esc(w.type)}</small>` : ""}${o.profiel ? drieMenu([
+      o.eigen ? `<a href="/account/garage">Bewerken</a>` : "",
+      deelKnop(`${o.profiel}#wagen-${w.id}`, wagenNaam(w)),
+      o.lid && !o.eigen && w.foto_id ? bewaarKnop("wagen", w.id, o.bewaard?.has(w.id)) : "",
+      !o.eigen && w.foto_id ? meldLink("wagen", w.id) : "",
+      o.mod && w.foto_id ? `<hr><form method="post" action="/forum/mod" class="f-mod" data-bevestig="Deze foto verwijderen?"><input type="hidden" name="actie" value="verwijder-wagenfoto"><input type="hidden" name="id" value="${w.id}"><button class="rood" type="submit">Foto verwijderen</button></form>` : "",
+    ]) : ""}</figcaption></figure>`).join("")}</div>`;
 }

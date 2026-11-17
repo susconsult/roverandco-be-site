@@ -33,7 +33,7 @@ async function zaai(env) {
 
 async function kanalen(env, lid) {
   const r = (await env.SHOP_DB.prepare(`SELECT k.*, (SELECT COUNT(*) FROM cb_berichten b WHERE b.nr = k.nr AND b.verwijderd = 0 AND b.aangemaakt > ? AND b.id > COALESCE((SELECT laatste_id FROM cb_gelezen g WHERE g.nr = k.nr AND g.lid_id = ?), 0) AND b.lid_id <> ?) ongelezen,
-    (SELECT COUNT(*) FROM cb_berichten b WHERE b.nr = k.nr AND b.verwijderd = 0 AND b.aangemaakt > ?) berichten FROM cb_kanalen k ORDER BY k.nr`).bind(grens(), lid.id, lid.id, grens()).all()).results || [];
+    (SELECT MAX(b.aangemaakt) FROM cb_berichten b WHERE b.nr = k.nr AND b.verwijderd = 0 AND b.aangemaakt > ?) laatste FROM cb_kanalen k ORDER BY k.nr`).bind(grens(), lid.id, lid.id, grens()).all()).results || [];
   return r;
 }
 
@@ -45,6 +45,27 @@ function berichtJson(b, lid) {
 async function berichten(env, nr, lid, na = 0) {
   return ((await env.SHOP_DB.prepare(`SELECT b.*, l.gebruikersnaam, l.avatar_id FROM cb_berichten b JOIN leden l ON l.id = b.lid_id
     WHERE b.nr = ? AND b.verwijderd = 0 AND b.aangemaakt > ? AND b.id > ? ORDER BY b.id DESC LIMIT 200`).bind(nr, grens(), na).all()).results || []).reverse().map((b) => berichtJson(b, lid));
+}
+
+const SOORTEN = ["hart", "lach", "duim"];
+async function reacties(env, nr, lid) {
+  const r = (await env.SHOP_DB.prepare(`SELECT x.bericht_id id, x.soort, COUNT(*) n, SUM(x.lid_id = ?) mijn FROM cb_reacties x JOIN cb_berichten b ON b.id = x.bericht_id
+    WHERE b.nr = ? AND b.verwijderd = 0 AND b.aangemaakt > ? GROUP BY x.bericht_id, x.soort`).bind(lid.id, nr, grens()).all()).results || [];
+  const m = {};
+  for (const x of r) { m[x.id] ||= {}; m[x.id][x.soort] = [x.n, x.mijn ? 1 : 0]; }
+  return m;
+}
+
+async function reageer(request, env, lid, id) {
+  if (!mag(lid)) return json({ ok: false, fout: "Bevestig eerst je mailadres." }, 403);
+  let d = {}; try { d = await request.json(); } catch { /* leeg */ }
+  if (!SOORTEN.includes(d.soort)) return json({ ok: false }, 400);
+  const b = await env.SHOP_DB.prepare("SELECT nr FROM cb_berichten WHERE id = ? AND verwijderd = 0 AND aangemaakt > ?").bind(id, grens()).first();
+  if (!b) return json({ ok: false }, 404);
+  const had = await env.SHOP_DB.prepare("SELECT 1 FROM cb_reacties WHERE bericht_id = ? AND lid_id = ? AND soort = ?").bind(id, lid.id, d.soort).first();
+  if (had) await env.SHOP_DB.prepare("DELETE FROM cb_reacties WHERE bericht_id = ? AND lid_id = ? AND soort = ?").bind(id, lid.id, d.soort).run();
+  else await env.SHOP_DB.prepare("INSERT OR IGNORE INTO cb_reacties (bericht_id, lid_id, soort, aangemaakt) VALUES (?, ?, ?, ?)").bind(id, lid.id, d.soort, nu()).run();
+  return json({ ok: true, reacties: (await reacties(env, b.nr, lid))[id] || {} });
 }
 
 async function online(env) {
@@ -61,11 +82,14 @@ async function gelezen(env, lid, nr, id) {
 }
 
 const mag = (lid) => !!lid?.bevestigd_op;
+const lamp = (k) => k.laatste && Date.now() - Date.parse(k.laatste) < 10 * 60_000 ? "aan" : k.laatste ? "zwak" : "";
+const kanaalRij = (x, nr) => `<a class="cb-rij${x.nr === nr ? " aan" : ""}" href="/cb/${x.nr}" data-nr="${x.nr}" title="${esc(x.omschrijving || "")}"><i class="cb-lamp ${lamp(x)}" aria-hidden="true"></i><b>${String(x.nr).padStart(2, "0")}</b><span>${esc(x.naam)}</span>${x.ongelezen && x.nr !== nr ? `<em>${x.ongelezen > 99 ? "99+" : x.ongelezen}</em>` : ""}</a>`;
 
 async function opruimen(env) {
   await env.SHOP_DB.batch([
     env.SHOP_DB.prepare("DELETE FROM cb_berichten WHERE aangemaakt < ?").bind(grens()),
     env.SHOP_DB.prepare("DELETE FROM cb_audio WHERE aangemaakt < ?").bind(grens()),
+    env.SHOP_DB.prepare("DELETE FROM cb_reacties WHERE aangemaakt < ?").bind(grens()),
   ]);
 }
 
@@ -126,6 +150,7 @@ async function radio(request, env, url, lid, nr) {
     inhoud: banner("CB", "Op de CB", `Praat live met andere leden. Kies een kanaal, druk op zenden. Berichten verdwijnen na ${CB_UREN} uur, net als op een echte CB.`, [["CB"]], "leden-zonsondergang") + `
 <section class="wrap cb-sectie">
   ${m === "nieuw" ? `<div class="melding melding-ok">Kanaal ${nr} is open. Roep de anderen erbij!</div>` : m ? `<div class="melding melding-fout" role="alert">${esc(m)}</div>` : ""}
+  <div class="cb-opstelling">
   <div class="cb-radio" data-nr="${nr}" data-albert="${albert ? 1 : 0}" data-mod="${lid.beheerder ? 1 : 0}" data-ik="${esc(lid.gebruikersnaam || "")}">
     <div class="cb-front">
       <a class="cb-draai" href="/cb/${vorige}" aria-label="Vorig kanaal (${vorige})"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg></a>
@@ -147,10 +172,12 @@ async function radio(request, env, url, lid, nr) {
     </form>
     ${mag(lid) ? `<p class="cb-hint" id="cb-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> om te praten (max. 20 s).</p>` : ""}
   </div>
+  <aside class="cb-paneel" aria-label="Alle kanalen"><div class="cb-paneel-kop">Kanalen <small><i class="cb-lamp aan"></i> actief</small></div>
+    <nav class="cb-lijst" id="cb-lijst">${lijst.map((x) => kanaalRij(x, nr)).join("")}</nav></aside>
+  </div>
   <script type="application/json" id="cb-data">${JSON.stringify(eerste).replace(/</g, "\\u003c")}</script>
+  <script type="application/json" id="cb-reacties">${JSON.stringify(await reacties(env, nr, lid))}</script>
 
-  <h2 class="cb-h2">Alle kanalen</h2>
-  <div class="cb-kanalen">${lijst.map((x) => `<a class="cb-kanaal${x.nr === nr ? " aan" : ""}" href="/cb/${x.nr}"><b>${String(x.nr).padStart(2, "0")}</b><span>${esc(x.naam)}<small>${esc(x.omschrijving || "")}</small></span>${x.ongelezen && x.nr !== nr ? `<em aria-label="${x.ongelezen} nieuw">${x.ongelezen > 99 ? "99+" : x.ongelezen}</em>` : ""}</a>`).join("")}</div>
 
   ${mag(lid) && vrij.length && eigenKanalen < 2 ? `<details class="cb-nieuw"><summary>Zelf een kanaal openen</summary>
     <form method="post" action="/cb/nieuw">
@@ -172,7 +199,7 @@ async function ophalen(env, url, lid, nr) {
   await gelezen(env, lid, nr, b.at(-1)?.id);
   await aanwezig(env, lid);
   const lijst = await kanalen(env, lid);
-  return json({ berichten: b, online: await online(env), ongelezen: Object.fromEntries(lijst.filter((x) => x.ongelezen && x.nr !== nr).map((x) => [x.nr, x.ongelezen])) });
+  return json({ berichten: b, reacties: await reacties(env, nr, lid), online: await online(env), kanalen: lijst.map((x) => ({ nr: x.nr, naam: x.naam, ongelezen: x.nr === nr ? 0 : x.ongelezen, lamp: lamp(x) })) });
 }
 
 async function zenden(request, env, url, lid, nr) {
@@ -271,6 +298,7 @@ export async function cb(request, env, url) {
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})$/))) return request.method === "POST" ? zenden(request, env, url, lid, +m[1]) : ophalen(env, url, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})\/audio$/)) && request.method === "POST") return zendAudio(request, env, lid, +m[1]);
   if ((m = p.match(/^\/cb\/audio\/(\d{1,10})$/))) return audioTonen(env, +m[1]);
+  if ((m = p.match(/^\/api\/cb\/reactie\/(\d{1,10})$/)) && request.method === "POST") return reageer(request, env, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/meld\/(\d{1,10})$/)) && request.method === "POST") return melden(request, env, url, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/weg\/(\d{1,10})$/)) && request.method === "POST") return wegdoen(env, lid, +m[1]);
   return null;

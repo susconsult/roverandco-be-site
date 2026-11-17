@@ -5,6 +5,7 @@
 import { esc, ico, bannerFoto, kruimel as hoofdKruimel, datum, banner as sjabloonBanner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
 import { log } from "./log.js";
+import { drieMenu, deelKnop, bewaarKnop, meldLink, bewaardSet } from "./melden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
 
 const PER_PAGINA_TOPICS = 30;
@@ -207,6 +208,7 @@ async function topic(request, env, url, lid, id) {
   if (lid) await env.SHOP_DB.prepare("INSERT INTO forum_gelezen (lid_id, topic_id, op) VALUES (?, ?, ?) ON CONFLICT(lid_id, topic_id) DO UPDATE SET op = excluded.op").bind(lid.id, t.id, nu()).run();
 
   const lk = await likes(env, lid, berichten.map((b) => b.id));
+  const bw = await bewaardSet(env, lid, "bericht", berichten.map((b) => b.id));
   const gar = await garages(env, auteurs);
   const volgT = volgKnop(lid, "topic", t.id, await volgt(env, lid, "topic", t.id), topicUrl(t, pag), "dit topic");
   const kan = (b) => lid && (lid.beheerder || (b.lid_id === lid.id && !t.gesloten));
@@ -221,11 +223,15 @@ async function topic(request, env, url, lid, id) {
         <div class="f-tekst">${opmaak(b.tekst)}</div>
         <div class="f-acties">
           ${likeKnop(lid, b.id, lk.aantal[b.id], lk.mijn.has(b.id))}
-          ${lid && !t.gesloten ? `<button type="button" class="linkknop" data-citeer="${esc(b.gebruikersnaam || "")}" data-ruw="${esc(b.tekst)}">Citeren</button>` : ""}
-          ${kan(b) ? `<a href="/forum/b/${b.id}/bewerk">Bewerken</a>` : ""}
-          <details class="f-meld"><summary>Melden</summary><form method="post" action="/forum/b/${b.id}/meld"><input name="reden" maxlength="300" placeholder="Wat is er mis met dit bericht?" required><button class="btn" type="submit">Verstuur</button></form></details>
-          ${lid?.beheerder ? `<form method="post" action="/forum/mod" class="f-mod" data-bevestig="${b.id === eersteId ? "Het hele topic verwijderen?" : "Dit bericht verwijderen?"}"><input type="hidden" name="actie" value="${b.id === eersteId ? "verwijder-topic" : "verwijder-bericht"}"><input type="hidden" name="id" value="${b.id === eersteId ? t.id : b.id}"><button class="linkknop rood" type="submit">Verwijderen</button></form>
-            ${b.lid_id !== lid.id && !b.geblokkeerd ? `<form method="post" action="/forum/mod" class="f-mod" data-bevestig="${esc(b.gebruikersnaam || "")} blokkeren? Die kan dan niet meer inloggen."><input type="hidden" name="actie" value="blokkeer"><input type="hidden" name="id" value="${b.lid_id}"><button class="linkknop rood" type="submit">Lid blokkeren</button></form>` : ""}` : ""}
+          ${drieMenu([
+            lid && !t.gesloten ? `<button type="button" data-citeer="${esc(b.gebruikersnaam || "")}" data-ruw="${esc(b.tekst)}">Citeren</button>` : "",
+            kan(b) && b.lid_id === lid?.id ? `<a href="/forum/b/${b.id}/bewerk">Bewerken</a>` : "",
+            deelKnop(`${topicUrl(t)}#b${b.id}`, t.titel),
+            lid && b.lid_id !== lid.id ? bewaarKnop("bericht", b.id, bw.has(b.id)) : "",
+            b.lid_id !== lid?.id ? meldLink("bericht", b.id) : "",
+            lid?.beheerder ? `<hr>${b.lid_id !== lid.id ? `<a href="/forum/b/${b.id}/bewerk">Bewerken (moderator)</a>` : ""}<form method="post" action="/forum/mod" class="f-mod" data-bevestig="${b.id === eersteId ? "Het hele topic verwijderen?" : "Dit bericht verwijderen?"}"><input type="hidden" name="actie" value="${b.id === eersteId ? "verwijder-topic" : "verwijder-bericht"}"><input type="hidden" name="id" value="${b.id === eersteId ? t.id : b.id}"><button class="rood" type="submit">Verwijderen</button></form>
+            ${b.lid_id !== lid.id && !b.geblokkeerd ? `<form method="post" action="/forum/mod" class="f-mod" data-bevestig="${esc(b.gebruikersnaam || "")} blokkeren? Die kan dan niet meer inloggen."><input type="hidden" name="actie" value="blokkeer"><input type="hidden" name="id" value="${b.lid_id}"><button class="rood" type="submit">Lid blokkeren</button></form>` : ""}` : "",
+          ])}
         </div>
       </div>
     </article>`).join("");
@@ -476,7 +482,7 @@ async function profiel(request, env, url, lid, naam) {
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Garage</h2>
       ${url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : ""}
-      ${wagens.length ? garageKaarten(wagens, { meld: lid?.id !== p.id, mod: !!lid?.beheerder }) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
+      ${wagens.length ? garageKaarten(wagens, { lid, eigen: lid?.id === p.id, mod: !!lid?.beheerder, bewaard: await bewaardSet(env, lid, "wagen", wagens.map((w) => w.id)), profiel: `/forum/lid/${encodeURIComponent(p.gebruikersnaam)}` }) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
     </section>`,
   });
 }

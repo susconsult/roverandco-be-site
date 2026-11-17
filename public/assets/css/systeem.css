@@ -58,7 +58,20 @@ small{font-size:var(--fs-sm)}
 .wagen:target{outline:3px solid var(--goud,#c9a227);outline-offset:3px;border-radius:12px}
 /* ---------- CB-chat: een echte CB-bak ---------- */
 .cb-sectie{padding-top:40px}
-.cb-radio{background:linear-gradient(#2a2d2a,#1b1d1b);border-radius:18px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);color:#e9e6dc;max-width:900px}
+.cb-opstelling{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:16px;align-items:start}
+.cb-radio{background:linear-gradient(#2a2d2a,#1b1d1b);border-radius:18px;padding:18px;box-shadow:0 18px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);color:#e9e6dc;min-width:0}
+.cb-paneel{background:linear-gradient(#2a2d2a,#1b1d1b);border-radius:18px;padding:14px 10px;color:#e9e6dc;box-shadow:0 18px 40px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.08);position:sticky;top:100px;max-height:calc(100vh - 120px);overflow-y:auto}
+.cb-paneel-kop{display:flex;justify-content:space-between;align-items:center;padding:2px 8px 10px;font:700 12px var(--body);letter-spacing:2px;text-transform:uppercase;color:#b9b5aa}.cb-paneel-kop small{font-size:11px;letter-spacing:1px;display:flex;align-items:center;gap:6px;text-transform:none}
+.cb-lijst{display:grid;gap:2px}
+.cb-rij{display:grid;grid-template-columns:12px 30px 1fr auto;align-items:center;gap:8px;padding:8px;border-radius:8px;color:#e9e6dc;text-decoration:none;font-size:14px}
+.cb-rij:hover{background:rgba(255,255,255,.06)}.cb-rij.aan{background:#2e2410;color:#ffb547;box-shadow:inset 0 1px 4px rgba(0,0,0,.6)}
+.cb-rij b{font:800 20px/1 var(--head);font-variant-numeric:tabular-nums}.cb-rij span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cb-rij em{font-style:normal;font-size:11px;font-weight:700;background:#c0392b;color:#fff;border-radius:99px;padding:1px 7px}
+.cb-lamp{display:inline-block;width:10px;height:10px;border-radius:50%;background:#3a1d1a;box-shadow:inset 0 1px 2px rgba(0,0,0,.8)}
+.cb-lamp.zwak{background:#6b2a22}
+.cb-lamp.aan{background:#ff4d3a;box-shadow:0 0 6px #ff4d3a,0 0 12px rgba(255,77,58,.6);animation:cb-lamp 1.6s ease-in-out infinite}
+@keyframes cb-lamp{50%{box-shadow:0 0 3px #ff4d3a,0 0 6px rgba(255,77,58,.4)}}
+@media(prefers-reduced-motion:reduce){.cb-lamp.aan{animation:none}}
 .cb-front{display:grid;grid-template-columns:auto 1fr auto auto;gap:14px;align-items:center}
 .cb-draai{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#4a4f4a,#121412 70%);box-shadow:0 3px 8px rgba(0,0,0,.5),inset 0 1px 1px rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;color:#e9e6dc}
 .cb-draai svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
@@ -86,9 +99,6 @@ small{font-size:var(--fs-sm)}
 .cb-av{width:32px;height:32px;border-radius:50%;object-fit:cover;flex:none;background:var(--sand-2);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:var(--green)}
 .cb-wie{font-size:var(--fs-sm)}.cb-wie time{color:var(--muted);margin-left:4px}
 .cb-roep{color:var(--green-3)}.cb-roep.ik{background:#ffe7b8;border-radius:4px;padding:0 3px}
-.cb-acties{display:flex;gap:10px}.cb-acties button{background:none;border:0;padding:0;font:inherit;font-size:12px;color:var(--muted);cursor:pointer;opacity:0;transition:opacity .15s}
-.cb-bericht:hover .cb-acties button,.cb-acties button:focus{opacity:1}
-@media(hover:none){.cb-acties button{opacity:.7}}
 .cb-zend{display:flex;gap:12px;margin-top:14px;align-items:center}
 .cb-zend p{margin:0;color:#e9e6dc}.cb-zend p a{color:#ffb547}
 .cb-zend input{flex:1;min-width:0;padding:14px 16px;border-radius:10px;border:0;font:inherit;background:#f4f1e8}
@@ -114,6 +124,7 @@ small{font-size:var(--fs-sm)}
 .cb-nieuw input,.cb-nieuw select{padding:10px;border:2px solid #cfc8b6;border-radius:8px;font:inherit;color:var(--ink)}
 .cb-nieuw small{color:var(--muted)}
 .cb-op{margin-top:14px}
+@media(max-width:900px){.cb-opstelling{grid-template-columns:1fr}.cb-paneel{position:static;max-height:none}.cb-lijst{grid-template-columns:repeat(auto-fill,minmax(160px,1fr))}}
 @media(max-width:700px){
   .cb-radio{padding:12px;border-radius:14px}
   .cb-front{grid-template-columns:auto 1fr auto;gap:10px}
@@ -125,3 +136,35 @@ small{font-size:var(--fs-sm)}
   .cb-bericht{max-width:95%}
   .cb-nieuw form{grid-template-columns:1fr}
 }
+/* ---------- ⋯-menu ---------- */
+details.drie{position:relative;display:inline-block}
+details.drie>summary{list-style:none;cursor:pointer;width:34px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;line-height:1;color:var(--muted);letter-spacing:1px}
+details.drie>summary::-webkit-details-marker{display:none}
+details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.08);color:var(--ink)}
+.drie-menu{position:absolute;right:0;top:calc(100% + 4px);z-index:30;min-width:190px;background:#fff;border-radius:12px;box-shadow:0 12px 32px rgba(0,0,0,.16),0 0 0 1px rgba(0,0,0,.05);padding:6px;display:grid}
+.drie-menu a,.drie-menu button{display:block;width:100%;text-align:left;padding:9px 12px;border-radius:8px;background:none;border:0;font:inherit;font-size:var(--fs-ui);color:var(--ink);text-decoration:none;cursor:pointer;font-weight:500}
+.drie-menu a:hover,.drie-menu button:hover{background:var(--sand)}
+.drie-menu .rood{color:#a32d2d}.drie-menu form{margin:0;display:block}
+.drie-menu hr{border:0;border-top:1px solid #eee;margin:4px 6px}
+.drie-menu [aria-pressed="true"]{color:var(--green-3)}
+.f-acties{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.f-acties details.drie{margin-left:auto}
+.wagen figcaption{position:relative;padding-right:40px}.wagen figcaption details.drie{position:absolute;right:6px;top:50%;transform:translateY(-50%)}
+.cb-bericht .drie{align-self:flex-start}.cb-bericht .drie>summary{color:var(--muted);width:28px;height:24px;font-size:16px}
+.meld-voorbeeld{background:var(--sand);border-radius:10px;padding:12px 14px;margin:8px 0 18px;overflow-wrap:anywhere}
+.meld-form fieldset{border:0;padding:0;margin:0 0 14px;display:grid;gap:8px}.meld-form legend{font-weight:700;margin-bottom:8px}
+.meld-form .keuze{display:flex;gap:10px;align-items:center;background:#fff;border:2px solid #e3dccb;border-radius:10px;padding:10px 12px;cursor:pointer}
+.meld-form .keuze:has(input:checked){border-color:var(--green)}
+.meld-form textarea{width:100%;padding:10px;border:2px solid #cfc8b6;border-radius:8px;font:inherit}
+.bewaard-lijst{list-style:none;margin:0;padding:0}.bewaard-lijst li{padding:12px 0;border-bottom:1px solid #eee;display:grid;gap:2px}.bewaard-lijst p{margin:4px 0 0;color:var(--muted)}
+.cb-log .drie-menu{top:auto;bottom:calc(100% + 4px);right:auto;left:0}
+.f-post:has(details.drie[open]),.wagen:has(details.drie[open]){overflow:visible;z-index:20;position:relative}.f-post:has(details.drie[open])>*:first-child{border-radius:16px 16px 0 0}
+.f-acties .drie-menu a,.wagen .drie-menu a{color:var(--ink);text-decoration:none}
+.cb-reacties{display:flex;gap:4px;margin-top:6px}
+.cb-re{display:inline-flex;align-items:center;gap:3px;border:1px solid transparent;background:none;border-radius:99px;padding:2px 6px;cursor:pointer;color:#9a978d;font:600 12px var(--body)}
+.cb-re svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.cb-re:hover{background:var(--sand);color:var(--ink)}
+.cb-re.heeft{border-color:#e3dccb;color:var(--ink)}
+.cb-re.mijn{background:#dcefe2;border-color:#9fc5a8;color:var(--green)}
+.cb-re.mijn[data-re="hart"] svg{fill:#c0392b;stroke:#c0392b}
+.cb-bericht:not(:hover) .cb-re:not(.heeft){opacity:.45}
+@media(hover:none){.cb-bericht .cb-re:not(.heeft){opacity:.6}}

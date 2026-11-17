@@ -88,6 +88,30 @@
   /* ---------- gemelde garagefoto: meldformulier openen ---------- */
   if (/^#wagen-\d+$/.test(location.hash)) { var wm = document.querySelector(location.hash + " .wagen-meld"); if (wm && !/gemeld/.test(location.search)) wm.open = true; }
 
+  /* ---------- ⋯-menu: sluiten, delen, bewaren ---------- */
+  document.addEventListener("click", function (e) {
+    document.querySelectorAll("details.drie[open]").forEach(function (d) { if (!d.contains(e.target)) d.open = false; });
+    var deel = e.target.closest("[data-deel]");
+    if (deel) {
+      var url = location.origin + deel.dataset.deel, titel = deel.dataset.titel || document.title;
+      if (navigator.share) navigator.share({ title: titel, url: url }).catch(function () {});
+      else if (navigator.clipboard) navigator.clipboard.writeText(url).then(function () { deel.textContent = "Link gekopieerd"; setTimeout(function () { deel.textContent = "Delen"; }, 2000); });
+      else prompt("Kopieer deze link:", url);
+      var d1 = deel.closest("details"); if (d1 && navigator.share) d1.open = false;
+    }
+    var bw = e.target.closest("[data-bewaar]");
+    if (bw) {
+      var p = bw.dataset.bewaar.split(":");
+      fetch("/api/bewaar", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ soort: p[0], id: p[1] }) })
+        .then(function (r) { return r.json(); }).then(function (d) {
+          if (d.ok) { bw.textContent = d.bewaard ? "Bewaard" : "Bewaren"; bw.setAttribute("aria-pressed", d.bewaard ? "true" : "false"); }
+          else if (d.fout) alert(d.fout);
+        });
+    }
+    if (e.target.closest(".drie-menu [data-citeer]")) { var d2 = e.target.closest("details"); if (d2) d2.open = false; }
+  });
+  document.addEventListener("keydown", function (e) { if (e.key === "Escape") document.querySelectorAll("details.drie[open]").forEach(function (d) { d.open = false; }); });
+
   /* ---------- lightbox ---------- */
   var lb = document.getElementById("lightbox");
   function closeLightbox() { if (lb) lb.classList.remove("open"); }
@@ -98,7 +122,7 @@
       var cap = lb.querySelector(".lb-onderschrift");
       if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
       cap.textContent = b.dataset.onderschrift || "";
-      if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage of meld deze foto"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
+      if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
       cap.hidden = !b.dataset.onderschrift;
       lb.classList.add("open");
     });

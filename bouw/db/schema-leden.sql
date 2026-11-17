@@ -95,3 +95,5 @@ CREATE TABLE IF NOT EXISTS cb_audio (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_i
 ALTER TABLE cb_berichten ADD COLUMN audio_id INTEGER;
 ALTER TABLE cb_berichten ADD COLUMN duur INTEGER;
 ALTER TABLE forum_meldingen ADD COLUMN cb_id INTEGER;
+CREATE TABLE IF NOT EXISTS lid_bewaard (lid_id INTEGER NOT NULL, soort TEXT NOT NULL, sleutel TEXT NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (lid_id, soort, sleutel));
+CREATE TABLE IF NOT EXISTS cb_reacties (bericht_id INTEGER NOT NULL, lid_id INTEGER NOT NULL, soort TEXT NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (bericht_id, lid_id, soort));

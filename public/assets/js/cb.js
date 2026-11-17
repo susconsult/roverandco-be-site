@@ -11,6 +11,33 @@
   function opmaak(t) {
     return esc(t).replace(/@([A-Za-z0-9._-]{3,20})/g, function (m, n) { return '<b class="cb-roep' + (n.toLowerCase() === ik ? " ik" : "") + '">@' + n + "</b>"; });
   }
+  var albert = radio.dataset.albert === "1";
+  function menu(b) {
+    var items = "";
+    if (!b.eigen && !albert) items += '<button type="button" data-antwoord="' + esc(b.naam) + '">Antwoorden</button>';
+    if (!b.eigen) items += '<a href="/melden?soort=cb&id=' + b.id + '">Melden</a>';
+    if (mod) items += (items ? "<hr>" : "") + '<button type="button" class="rood" data-weg="' + b.id + '">Verwijderen</button>';
+    return items ? '<details class="drie"><summary aria-label="Meer opties"><span aria-hidden="true">⋯</span></summary><div class="drie-menu">' + items + "</div></details>" : "";
+  }
+  var IC = {
+    hart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/>',
+    lach: '<circle cx="12" cy="12" r="8.5"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01" stroke-width="2.6"/>',
+    duim: '<path d="M7 11v9H4v-9h3Z"/><path d="M7 11l4-7c1.5 0 2.3 1 2 2.5L12.5 10H18a2 2 0 0 1 2 2.3l-1.2 6A2 2 0 0 1 16.8 20H7"/>'
+  };
+  var LABEL = { hart: "Hartje", lach: "Lach", duim: "Duim omhoog" };
+  function reactieBalk(id, r) {
+    r = r || {};
+    return ["hart", "lach", "duim"].map(function (k) {
+      var x = r[k] || [0, 0];
+      return '<button type="button" class="cb-re' + (x[1] ? " mijn" : "") + (x[0] ? " heeft" : "") + '" data-re="' + k + '" data-id="' + id + '" aria-label="' + LABEL[k] + (x[0] ? " (" + x[0] + ")" : "") + '" aria-pressed="' + (x[1] ? "true" : "false") + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + IC[k] + "</svg>" + (x[0] ? "<span>" + x[0] + "</span>" : "") + "</button>";
+    }).join("");
+  }
+  function zetReacties(map) {
+    document.querySelectorAll(".cb-bericht").forEach(function (el) {
+      var id = el.id.slice(1), balk = el.querySelector(".cb-reacties");
+      if (balk) balk.innerHTML = reactieBalk(id, map[id]);
+    });
+  }
   function onderaan() { return logEl.scrollHeight - logEl.scrollTop - logEl.clientHeight < 80; }
   function toon(lijst) {
     if (!lijst.length) return;
@@ -24,7 +51,7 @@
       d.id = "c" + b.id;
       d.innerHTML = (b.av ? '<img class="cb-av" src="/forum/foto/' + b.av + '" alt="">' : '<span class="cb-av">' + esc(b.naam.slice(0, 1).toUpperCase()) + "</span>") +
         '<div><span class="cb-wie"><b>' + esc(b.naam) + "</b> <time>" + uur(b.t) + "</time></span>" + (b.audio ? '<p class="cb-audio"><audio controls preload="none" src="/cb/audio/' + b.audio + '"></audio>' + (b.duur ? "<small>" + b.duur + " s</small>" : "") + "</p>" : "<p>" + opmaak(b.tekst) + "</p>") +
-        '<span class="cb-acties">' + (b.eigen ? "" : '<button type="button" data-meld="' + b.id + '">Melden</button>') + (mod ? '<button type="button" data-weg="' + b.id + '">Verwijderen</button>' : "") + "</span></div>";
+        '<span class="cb-reacties">' + reactieBalk(b.id) + "</span></div>" + menu(b);
       logEl.appendChild(d);
     });
     if (vast) logEl.scrollTop = logEl.scrollHeight;
@@ -35,15 +62,19 @@
     for (var i = 0; i < bars.length; i++) bars[i].className = i < Math.min(9, n) ? "aan" : "";
     var o = document.getElementById("cb-online"); if (o) o.textContent = n + " op de CB";
   }
-  function badges(o) {
-    document.querySelectorAll(".cb-kanaal").forEach(function (a) {
-      var k = a.getAttribute("href").split("/").pop(), em = a.querySelector("em");
-      if (o[k]) { if (!em) { em = document.createElement("em"); a.appendChild(em); } em.textContent = o[k] > 99 ? "99+" : o[k]; }
+  function badges(lijst) {
+    var nav = document.getElementById("cb-lijst"); if (!nav || !lijst) return;
+    lijst.forEach(function (k) {
+      var a = nav.querySelector('[data-nr="' + k.nr + '"]');
+      if (!a) { a = document.createElement("a"); a.className = "cb-rij"; a.href = "/cb/" + k.nr; a.dataset.nr = k.nr; a.innerHTML = '<i class="cb-lamp"></i><b>' + String(k.nr).padStart(2, "0") + "</b><span>" + esc(k.naam) + "</span>"; nav.appendChild(a); }
+      a.querySelector(".cb-lamp").className = "cb-lamp " + (k.lamp || "");
+      var em = a.querySelector("em");
+      if (k.ongelezen) { if (!em) { em = document.createElement("em"); a.appendChild(em); } em.textContent = k.ongelezen > 99 ? "99+" : k.ongelezen; }
       else if (em) em.remove();
     });
   }
 
-  try { toon(JSON.parse(document.getElementById("cb-data").textContent)); } catch (e) {}
+  try { toon(JSON.parse(document.getElementById("cb-data").textContent)); zetReacties(JSON.parse(document.getElementById("cb-reacties").textContent)); } catch (e) {}
   logEl.scrollTop = logEl.scrollHeight;
 
   function haal() {
@@ -51,7 +82,7 @@
     fetch("/api/cb/" + nr + "?na=" + laatste, { credentials: "same-origin" }).then(function (r) {
       if (r.status === 401) { location.href = "/account/inloggen?terug=/cb/" + nr; return null; }
       return r.json();
-    }).then(function (d) { if (d) { toon(d.berichten || []); meter(d.online || 0); badges(d.ongelezen || {}); } })
+    }).then(function (d) { if (d) { toon(d.berichten || []); if (d.reacties) zetReacties(d.reacties); meter(d.online || 0); badges(d.kanalen); } })
       .catch(function () {}).then(function () { bezig = false; });
   }
   (function lus() { setTimeout(function () { haal(); lus(); }, document.hidden ? 20000 : 4000); })();
@@ -129,10 +160,14 @@
   }
 
   logEl.addEventListener("click", function (e) {
-    var m = e.target.closest("[data-meld]"), w = e.target.closest("[data-weg]");
-    if (m && confirm("Dit bericht melden bij de beheerder?")) {
-      fetch("/api/cb/meld/" + m.dataset.meld, { method: "POST", credentials: "same-origin" }).then(function () { m.textContent = "Gemeld"; m.disabled = true; });
+    var re = e.target.closest("[data-re]");
+    if (re) {
+      fetch("/api/cb/reactie/" + re.dataset.id, { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ soort: re.dataset.re }) })
+        .then(function (r) { return r.json(); }).then(function (d) { if (d.ok) { var balk = re.parentNode; var m = {}; m[re.dataset.id] = d.reacties; balk.innerHTML = reactieBalk(re.dataset.id, d.reacties); } else if (d.fout) alert(d.fout); });
+      return;
     }
+    var w = e.target.closest("[data-weg]"), an = e.target.closest("[data-antwoord]");
+    if (an && veld) { veld.value = "@" + an.dataset.antwoord + " " + veld.value.replace(/^@\S+\s*/, ""); veld.focus(); var dd = an.closest("details"); if (dd) dd.open = false; }
     if (w && confirm("Dit bericht verwijderen?")) {
       fetch("/api/cb/weg/" + w.dataset.weg, { method: "POST", credentials: "same-origin" }).then(function (r) { if (r.ok) document.getElementById("c" + w.dataset.weg).remove(); });
     }
