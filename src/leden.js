@@ -361,7 +361,7 @@ async function overzicht(request, env, url, lid) {
     <form method="post" action="/account/bevestig-opnieuw" style="display:inline"><button class="linkknop" type="submit">Stuur de mail opnieuw</button></form></div>`;
   return pagina(env, request, {
     titel: "Mijn account", noindex: true, pad: "/account",
-    inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account") + `<section class="wrap acc-sectie">${m}${onbevestigd}
+    inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account", "", [["Mijn account"]]) + `<section class="wrap acc-sectie">${m}${onbevestigd}
       <div class="acc-grid">
         <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>Mijn inschrijvingen</h2>${lijst("inschrijving")}</div>
         <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Mijn bestellingen</h2>${lijst("bestelling")}</div>

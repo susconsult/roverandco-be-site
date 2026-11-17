@@ -160,6 +160,8 @@ def kruimel(delen):
 def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False, kruim=None):
     foto = foto or {"Contact": "905", "Voorwaarden": "5739", "Privacy": "5739", "404": "730", "Shop": "5577"}.get(eyebrow, "leden-zonsondergang")
     pic = img(foto, alt, prio=True, pos=pos)
+    if kruim is None:
+        kruim = [(title if eyebrow in ("Rover & Co", "404") else eyebrow,)]
     return f'<section class="banner banner-foto{" banner-groen" if groen else ""}">{pic}<div class="wrap">{kruimel(kruim)}<div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
 
 
