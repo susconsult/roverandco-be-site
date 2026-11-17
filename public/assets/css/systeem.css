@@ -199,3 +199,20 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 .oo-slot h2{margin-top:6px}.oo-gegevens{background:var(--sand);border-radius:14px;padding:20px}.oo-gegevens p{margin:6px 0 0}
 @media(max-width:880px){.oo-pijlers .tegels{grid-template-columns:1fr}.oo-slot{grid-template-columns:1fr;padding:24px}}
 .oo-pijlers{padding-bottom:var(--sec)}
+/* ---------- accountmenu ---------- */
+.nav-right{position:relative}
+.acc-menu{position:absolute;right:0;top:calc(100% + 10px);width:280px;background:#fff;color:var(--ink);border-radius:16px;box-shadow:0 18px 44px rgba(0,0,0,.22),0 0 0 1px rgba(0,0,0,.05);padding:8px;z-index:200;display:grid}
+.acc-menu[hidden]{display:none}
+.acc-menu-kop{padding:10px 12px 12px;border-bottom:1px solid #eee;margin-bottom:6px;display:grid}.acc-menu-kop small{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+.acc-menu a{display:flex;align-items:center;gap:12px;padding:9px 12px;border-radius:10px;color:var(--ink);text-decoration:none;font-weight:500;font-size:var(--fs-ui)}
+.acc-menu a:hover{background:var(--sand)}
+.acc-menu svg{width:19px;height:19px;fill:none;stroke:var(--green);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.acc-menu span{flex:1}.acc-menu em{font-style:normal;font-size:12px;font-weight:700;background:#c0392b;color:#fff;border-radius:99px;padding:1px 8px}
+.acc-menu hr{border:0;border-top:1px solid #eee;margin:6px 4px}
+.acc-tegels{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.acc-tegel{background:#fff;border-radius:16px;padding:20px;text-decoration:none;color:var(--ink);display:grid;gap:4px;box-shadow:0 1px 3px rgba(0,0,0,.05);transition:transform .15s,box-shadow .15s}
+.acc-tegel:hover{transform:translateY(-3px);box-shadow:0 12px 26px rgba(0,0,0,.08)}
+.acc-tegel .acc-ic{margin-bottom:8px}.acc-tegel b{font-size:var(--fs-ui-groot)}.acc-tegel small{color:var(--muted);font-size:var(--fs-ui)}
+.acc-nieuw{color:#c0392b}
+.acc-uit{margin-top:24px}
+@media(max-width:600px){.acc-menu{position:fixed;left:12px;right:12px;top:76px;width:auto}}

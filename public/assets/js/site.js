@@ -314,6 +314,34 @@
   /* ---------- gratis-account-band op home verbergen voor wie al een account heeft ---------- */
   if (/(^|; )rc_lid_aan=1/.test(document.cookie)) document.querySelectorAll("[data-gast]").forEach(function (el) { el.hidden = true; });
 
+  /* ---------- accountmenu onder het account-icoon ---------- */
+  function accountMenu(acc, ik) {
+    if (document.getElementById("acc-menu")) return;
+    var I = {
+      home: '<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>', bon: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/>',
+      auto: '<path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+      bewaar: '<path d="M6 4h12v17l-6-4-6 4V4Z"/>', bel: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>',
+      profiel: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', instel: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
+      beheer: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+      uit: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>'
+    };
+    function item(href, ic, label, extra) { return '<a href="' + href + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + I[ic] + "</svg><span>" + label + "</span>" + (extra || "") + "</a>"; }
+    var m = document.createElement("div");
+    m.id = "acc-menu"; m.className = "acc-menu"; m.hidden = true; m.setAttribute("role", "menu");
+    m.innerHTML = '<div class="acc-menu-kop"><b>' + esc(ik.gebruikersnaam || "Mijn account") + "</b><small>" + esc(ik.email || "") + "</small></div>" +
+      item("/account", "home", "Mijn account") + item("/account/bestellingen", "bon", "Bestellingen en inschrijvingen") +
+      item("/account/garage", "auto", "Mijn garage") + item("/account/bewaard", "bewaar", "Bewaard") +
+      item("/account/meldingen", "bel", "Meldingen", ik.meldingen ? '<em>' + (ik.meldingen > 99 ? "99+" : ik.meldingen) + "</em>" : "") +
+      (ik.gebruikersnaam ? item("/forum/lid/" + encodeURIComponent(ik.gebruikersnaam), "profiel", "Mijn profiel op het forum") : "") +
+      item("/account/gegevens", "instel", "Gegevens en wachtwoord") + "<hr>" +
+      (ik.beheerder ? item("/beheer", "beheer", "Beheer") : "") + item("/account/uitloggen", "uit", "Uitloggen");
+    acc.parentNode.appendChild(m);
+    acc.setAttribute("aria-haspopup", "true"); acc.setAttribute("aria-expanded", "false"); acc.setAttribute("aria-controls", "acc-menu");
+    acc.addEventListener("click", function (e) { e.preventDefault(); var open = m.hidden; m.hidden = !open; acc.setAttribute("aria-expanded", open ? "true" : "false"); });
+    document.addEventListener("click", function (e) { if (!m.hidden && !m.contains(e.target) && !acc.contains(e.target)) { m.hidden = true; acc.setAttribute("aria-expanded", "false"); } });
+    document.addEventListener("keydown", function (e) { if (e.key === "Escape" && !m.hidden) { m.hidden = true; acc.setAttribute("aria-expanded", "false"); acc.focus(); } });
+  }
+
   var bel = document.querySelector(".bel-btn");
   if (bel && /(^|; )rc_lid_aan=1/.test(document.cookie)) bel.hidden = false;
 
@@ -325,6 +353,7 @@
       var acc = document.querySelector(".acct-btn");
       if (acc) {
         acc.classList.add("ingelogd");
+        accountMenu(acc, ik);
         if (bel) {
           bel.hidden = false;
           if (ik.meldingen) {

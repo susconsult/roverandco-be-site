@@ -336,7 +336,7 @@ async function bevestig(request, env, url) {
 
 const STATUS_KLAS = (s) => /niet betaald/i.test(s) ? "nee" : /betaald|bevestigd/i.test(s) ? "ok" : /wacht/i.test(s) ? "wacht" : "";
 
-async function overzicht(request, env, url, lid) {
+async function registratieLijsten(env, lid) {
   const rijen = (await env.SHOP_DB.prepare(
     `SELECT nummer, soort, aangemaakt, status, totaal, activiteit, data FROM registraties
      WHERE lid_id = ?1 OR (?2 = 1 AND email = ?3 COLLATE NOCASE) ORDER BY aangemaakt DESC LIMIT 100`
@@ -359,6 +359,29 @@ async function overzicht(request, env, url, lid) {
         <small class="acc-meta">${datum(x.aangemaakt, true)}</small>${wat}<div class="acc-tot"><span>Totaal</span><b>${eur(x.totaal)}</b></div></div>`;
     }).join("")}</div>`;
   };
+  return lijst;
+}
+
+const ACC_IC = {
+  bon: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/>',
+  auto: '<path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+  bewaar: '<path d="M6 4h12v17l-6-4-6 4V4Z"/>',
+  bel: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>',
+  profiel: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  instel: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+  cb: '<path d="M4 14a8 8 0 0 1 16 0"/><path d="M8 14a4 4 0 0 1 8 0"/><circle cx="12" cy="15" r="1.5"/><path d="M12 16.5V21"/>',
+};
+const accTegel = (href, ic, titel, sub) => `<a class="acc-tegel" href="${href}"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ACC_IC[ic]}</svg></span><b>${titel}</b><small>${sub}</small></a>`;
+
+async function overzicht(request, env, url, lid) {
+  const db = env.SHOP_DB;
+  const [reg, wagens, bewaard, nieuw] = await Promise.all([
+    db.prepare("SELECT COUNT(*) n FROM registraties WHERE lid_id = ?1 OR (?2 = 1 AND email = ?3 COLLATE NOCASE)").bind(lid.id, lid.bevestigd_op ? 1 : 0, lid.email).first(),
+    db.prepare("SELECT COUNT(*) n FROM lid_wagens WHERE lid_id = ?").bind(lid.id).first(),
+    db.prepare("SELECT COUNT(*) n FROM lid_bewaard WHERE lid_id = ?").bind(lid.id).first().catch(() => ({ n: 0 })),
+    aantalOngelezen(env, lid.id),
+  ]);
+  const meer = (n, een, veel) => `${n} ${n === 1 ? een : veel}`;
   const m = url.searchParams.has("welkom") ? melding("Welkom! Je account is klaar. Bevestig nog je mailadres via de mail die we je stuurden.", "ok")
     : url.searchParams.has("bevestigd") ? melding("Je mailadres is bevestigd.", "ok")
     : url.searchParams.has("ww") ? melding("Je wachtwoord is bewaard.", "ok")
@@ -368,19 +391,30 @@ async function overzicht(request, env, url, lid) {
     <form method="post" action="/account/bevestig-opnieuw" style="display:inline"><button class="linkknop" type="submit">Stuur de mail opnieuw</button></form></div>`;
   return pagina(env, request, {
     titel: "Mijn account", noindex: true, pad: "/account",
-    inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account", "Je inschrijvingen, bestellingen, garage en meldingen op één plek.", [["Mijn account"]]) + `<section class="wrap acc-sectie">${m}${onbevestigd}
+    inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account", "Alles van jou op één plek. Kies hieronder waar je naartoe wil.", [["Mijn account"]]) + `<section class="wrap acc-sectie">${m}${onbevestigd}
+      <div class="acc-tegels">
+        ${accTegel("/account/bestellingen", "bon", "Bestellingen en inschrijvingen", reg.n ? meer(reg.n, "bestelling of inschrijving", "bestellingen en inschrijvingen") : "Nog niets besteld")}
+        ${accTegel("/account/garage", "auto", "Mijn garage", wagens.n ? meer(wagens.n, "Land Rover", "Land Rovers") : "Zet je Land Rover erin")}
+        ${accTegel("/account/meldingen", "bel", "Meldingen", nieuw ? `<b class="acc-nieuw">${nieuw} nieuw</b>` : "Geen nieuwe meldingen")}
+        ${accTegel("/account/bewaard", "bewaar", "Bewaard", bewaard.n ? meer(bewaard.n, "item", "items") : "Berichten en foto's om terug te vinden")}
+        ${lid.gebruikersnaam ? accTegel(`/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}`, "profiel", "Mijn profiel", "Zo zien anderen je op het forum") : ""}
+        ${accTegel("/account/gegevens", "instel", "Gegevens en wachtwoord", esc(lid.email))}
+        ${accTegel("/cb", "cb", "Op de CB", "Live praten met andere leden")}
+      </div>
+      <p class="acc-uit"><a href="/account/uitloggen">Uitloggen</a></p></section>`,
+  });
+}
+
+async function bestellingen(request, env, url, lid) {
+  const lijst = await registratieLijsten(env, lid);
+  return pagina(env, request, {
+    titel: "Bestellingen en inschrijvingen", noindex: true, pad: "/account/bestellingen",
+    inhoud: banner("Mijn account", "Bestellingen en inschrijvingen", "Al je inschrijvingen voor activiteiten en je bestellingen uit de shop.", [["Mijn account", "/account"], ["Bestellingen en inschrijvingen"]]) + `<section class="wrap acc-sectie">
       <div class="acc-grid">
         <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>Mijn inschrijvingen</h2>${lijst("inschrijving")}</div>
         <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Mijn bestellingen</h2>${lijst("bestelling")}</div>
-        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Mijn gegevens</h2>
-          <dl class="acc-dl"><dt>Gebruikersnaam</dt><dd>${esc(lid.gebruikersnaam || "–")}</dd><dt>E-mail</dt><dd>${esc(lid.email)}</dd>
-          <dt>Naam</dt><dd>${esc(lid.naam || "–")}</dd><dt>Telefoon</dt><dd>${esc(lid.telefoon || "–")}</dd><dt>Woonplaats</dt><dd>${esc(lid.woonplaats || "–")}</dd></dl>
-          <p class="acc-knoppen"><a class="btn btn-solid" href="/account/gegevens">Gegevens wijzigen</a> <a class="btn" href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a></p></div>
-        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg></span>Mijn garage</h2>${await garageMini(env, lid)}<p class="acc-knoppen"><a class="btn btn-solid" href="/account/garage">Garage beheren</a> <a class="btn" href="/account/bewaard">Bewaard</a></p></div>
-        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/></svg></span>Meldingen</h2><p>${(n => n ? `Je hebt <b>${n}</b> nieuwe ${n === 1 ? "melding" : "meldingen"}.` : "Geen nieuwe meldingen.")(await aantalOngelezen(env, lid.id))}</p><p class="acc-knoppen"><a class="btn btn-solid" href="/account/meldingen">Bekijk meldingen</a></p></div>
-        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></svg></span>Forum</h2><p>${lid.gebruikersnaam ? `Je profiel: <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}">${esc(lid.gebruikersnaam)}</a>` : "Kies eerst een gebruikersnaam bij je gegevens."}</p>
-          <p class="acc-knoppen"><a class="btn btn-solid" href="/forum">Naar het forum</a> <a class="btn" href="/account/uitloggen">Uitloggen</a></p></div>
-      </div></section>`,
+      </div>
+      <p><a href="/account">← Terug naar mijn account</a></p></section>`,
   });
 }
 
@@ -397,7 +431,7 @@ async function gegevens(request, env, url, lid) {
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
         <button class="btn btn-solid" type="submit">Bewaren</button> <a class="btn" href="/account">Annuleren</a>
-      </form><script src="/assets/js/forum.js" defer></script>`),
+      </form><p class="acc-links"><a href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a></p><script src="/assets/js/forum.js" defer></script>`),
   });
   if (request.method !== "POST") return toon();
   const f = await request.formData();
@@ -507,7 +541,7 @@ export async function leden(request, env, url) {
   const p = url.pathname.replace(/\/$/, "") || "/";
   if (p === "/api/account/ik") {
     const lid = await huidigLid(request, env);
-    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
+    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, beheerder: !!lid.beheerder, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
       { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
   }
   if (p !== "/account" && !p.startsWith("/account/")) return null;
@@ -524,6 +558,7 @@ export async function leden(request, env, url) {
   const lid = await huidigLid(request, env);
   if (!lid) return naar("/account/inloggen?terug=" + encodeURIComponent(p));
   if (p === "/account") return metVlag(request, await overzicht(request, env, url, lid), lid);
+  if (p === "/account/bestellingen") return bestellingen(request, env, url, lid);
   if (p === "/account/gegevens") return gegevens(request, env, url, lid);
   if (p === "/account/nieuw-wachtwoord") return nieuwWachtwoord(request, env, url, lid);
   if (p === "/account/garage") return garage(request, env, url, lid);
