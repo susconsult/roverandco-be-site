@@ -259,3 +259,9 @@ fieldset{min-width:0;max-width:100%}.co-blok input,.co-blok select,.co-blok text
 .f-editor.sleep{box-shadow:0 0 0 3px var(--green-light)}
 .f-editor.laadt .f-fotoknop{opacity:.6;pointer-events:none}
 .f-galerij .f-foto{margin:0;line-height:0;padding:0;max-width:none}.f-galerij .f-foto img{margin:0;border-radius:0;max-width:none}.f-editor{overflow:visible}.f-editor textarea{border-radius:0 0 10px 10px}.f-emoji-pop{max-height:260px;overflow-y:auto}
+/* staande ledenfoto's in brede banners goed kaderen */
+.banner-foto img[src*="leden-defender-110-lichtjes-boven"]{object-position:50% 30%}
+.banner-foto img[src*="leden-defender-blauwe-lucht-staand"]{object-position:50% 72%}
+.banner-foto img[src*="leden-defender-blauwe-lucht"]{object-position:50% 60%}
+.banner-foto img[src*="leden-defender-110-zonsondergang-achter"]{object-position:50% 62%}
+.banner-foto img[src*="leden-defender-spiegel-detail"]{object-position:50% 30%}

@@ -55,7 +55,7 @@ async function meldPagina(request, env, url, lid) {
   const soort = url.searchParams.get("soort"), id = parseInt(url.searchParams.get("id"), 10) || 0;
   const it = await item(env, soort, id);
   const kader = (inhoud) => pagina(env, request, { titel: "Melden", noindex: true, pad: "/melden",
-    inhoud: banner("Melden", "Iets melden", "Zie je iets wat hier niet hoort? Laat het ons weten. We bekijken elke melding.", [["Melden"]], "leden-vuur-avond") + `<section class="narrow acc-sectie"><div class="acc-kaart">${inhoud}</div></section>` });
+    inhoud: banner("Melden", "Iets melden", "Zie je iets wat hier niet hoort? Laat het ons weten. We bekijken elke melding.", [["Melden"]], "leden-defender-spiegel-detail") + `<section class="narrow acc-sectie"><div class="acc-kaart">${inhoud}</div></section>` });
   if (!it) return kader(`<p>Dit bericht of deze foto bestaat niet meer. Misschien werd het al verwijderd.</p><p><a class="btn" href="/forum">Naar het forum</a></p>`);
   if (it.alleenLeden && !lid) return naar(`/account/inloggen?terug=${encodeURIComponent(url.pathname + url.search)}`);
   if (url.searchParams.has("ok")) return kader(`<h2>Bedankt</h2><p>Je melding is doorgestuurd. We bekijken ze zo snel mogelijk.</p><p><a class="btn btn-solid" href="${esc(it.terug)}">Terug</a></p>`);

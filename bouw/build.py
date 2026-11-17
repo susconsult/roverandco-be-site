@@ -162,7 +162,7 @@ def kruimel(delen):
 
 
 def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False, kruim=None):
-    foto = foto or {"Contact": "905", "Voorwaarden": "5739", "Privacy": "5739", "404": "730", "Shop": "5577"}.get(eyebrow, "leden-zonsondergang")
+    foto = foto or {"Contact": "905", "Voorwaarden": "leden-defender-blauwe-lucht", "Privacy": "leden-defender-90-zonsondergang-veld", "404": "730", "Shop": "5577", "Betaling": "leden-defender-110-lichtjes-boven"}.get(eyebrow, "leden-defender-110-lichtjes-boven")
     pic = img(foto, alt, prio=True, pos=pos)
     if kruim is None:
         kruim = [(title if eyebrow in ("Rover & Co", "404") else eyebrow,)]
@@ -215,12 +215,12 @@ def ev_card(a, big=False):
             f'<div class="ev-body"><span class="ev-date">{e(a["datum_label"])}</span><h3>{e(a["titel"])}</h3>{extra}</div></a>')
 
 
-GALERIJ = [("730", "Defender 110 spat door de modder"), ("5644", "Series met duim omhoog"), ("905", "Defender met daktent in het bos"),
+GALERIJ = [("leden-defender-90-zonsondergang", "Zwarte Defender 90 bij zonsondergang"), ("leden-defender-blauwe-lucht", "Defender onder een blauwe lucht"), ("730", "Defender 110 spat door de modder"), ("5644", "Series met duim omhoog"), ("905", "Defender met daktent in het bos"),
            ("968", "Colonne op een landweg"), ("815", "Series 3 in de modder"), ("publiek", "Publiek kijkt naar de modderbaan"),
            ("900", "Forward Control in het bos"), ("5739", "Zicht over de motorkap op een bospad"), ("959", "Defenders in het stof"),
            ("5577", "Defender 110 op een zandweg"), ("5511", "Nieuwe Defender in het stof"), ("5498", "Defender 110 met zwaaiende chauffeur"),
            ("870", "Series door de modder"), ("977", "Colonne Defenders in het bos"), ("964", "Defender met daktent in een stoffige bosweg"),
-           ("standen", "Rally-Defenders op het festivalterrein")]
+           ("standen", "Rally-Defenders op het festivalterrein"), ("leden-defender-110-lichtjes-boven", "Zwarte Defender 110 met lichtjes, van boven"), ("leden-defender-spiegel-detail", "Spiegel en deurklink van een Defender"), ("leden-defender-110-zonsondergang-achter", "Defender 110 van achter bij zonsondergang")]
 
 
 def galerij(items):
@@ -429,7 +429,7 @@ kal_items = [{"club": "Rover & Co", "ons": True, "titel": a["titel"], "datum": a
               "label": a["datum_label"], "plaats": a["locatie"] + (" · " + a["uren"] if a.get("uren") else ""), "link": f"/activiteiten/{a['slug']}", "org": "Rover & Co VZW", "soort": "club", "info": a.get("kort", "")} for a in acts]
 kal_items += [{**k, "ons": False} for k in KAL_ANDEREN]
 kal_data = json.dumps(sorted(kal_items, key=lambda x: x["datum"]), ensure_ascii=False).replace("</", "<\\/")
-kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten, andere Land Rover-clubs, 4x4-dagen, beurzen en overland, op één plek.", "968", "Colonne op een landweg") + f"""
+kalender = banner("Kalender", "Wat staat er op de planning", "Onze activiteiten, andere Land Rover-clubs, 4x4-dagen, beurzen en overland, op één plek.", "leden-defender-90-zonsondergang", "Zwarte Defender 90 bij zonsondergang") + f"""
 <section><div class="wrap">
   <div class="kal-filter" role="group" aria-label="Filter de kalender">
     <label class="kf"><span class="kf-l">Soort</span><select id="kf-soort">
@@ -952,7 +952,7 @@ write("/bedankt", "Bedankt", "Bedankt voor je bestelling of inschrijving bij Rov
 </div></section>""", noindex=True)
 
 write("/betaling-mislukt", "Betaling niet gelukt", "De betaling bij Rover & Co is niet gelukt.",
-      banner("Rover & Co", "Betaling niet gelukt", "Er is niets afgeschreven. Je kan het gewoon opnieuw proberen.", None) + """
+      banner("Rover & Co", "Betaling niet gelukt", "Er is niets afgeschreven. Je kan het gewoon opnieuw proberen.", "900") + """
 <section><div class="narrow prose">
   <p>Je betaling is niet gelukt of je hebt ze geannuleerd. Er is niets aangerekend.</p>
   <p>Je gegevens staan nog klaar. Je kan het meteen opnieuw proberen.</p>
