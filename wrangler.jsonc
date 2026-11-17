@@ -15,5 +15,10 @@
     { "binding": "PLANNER_DB", "database_name": "roverandco-planner", "database_id": "2f299f3c-3aad-4e03-bf59-251ed2201c97" },
     { "binding": "SHOP_DB", "database_name": "roverandco-shop", "database_id": "6ed66464-6163-4297-817d-c67b3109d699" }
   ],
+  // Turnstile (spamcheck bij registreren). De sitekey is publiek; TURNSTILE_SECRET staat als Secret in Cloudflare.
+  "vars": {
+    "TURNSTILE_SITEKEY": "0x4AAAAAAGE9uv9Eyyo0-uE_",
+    "TURNSTILE_HOSTNAMES": "roverandco.be,www.roverandco.be,roverandco-be-site.pieter-2d7.workers.dev"
+  },
   "keep_vars": true
 }

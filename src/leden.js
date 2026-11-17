@@ -128,21 +128,32 @@ export async function lidVoorBestelling(env, request, klant) {
 
 /* ---------------- Turnstile ---------------- */
 
+const TURNSTILE_ACTIE = "registreren";
 const turnstileAan = (env) => !!(env.TURNSTILE_SITEKEY && env.TURNSTILE_SECRET);
+const turnstileHosts = (env) => String(env.TURNSTILE_HOSTNAMES || "").toLowerCase().split(",").map((x) => x.trim()).filter(Boolean);
+// Controle aan de serverkant: token uit cf-turnstile-response, siteverify met secret + IP + timeout,
+// en dan success, de juiste action en een toegelaten hostname. Bij elke fout: weigeren.
 async function turnstileOk(env, f, request) {
   if (!turnstileAan(env)) return true;
+  const token = String(f.get("cf-turnstile-response") || "");
+  if (!token || token.length > 2048) return false;
   const body = new FormData();
   body.append("secret", env.TURNSTILE_SECRET);
-  body.append("response", String(f.get("cf-turnstile-response") || ""));
+  body.append("response", token);
   const ip = request.headers.get("cf-connecting-ip");
   if (ip) body.append("remoteip", ip);
   try {
-    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body });
-    return !!(await r.json()).success;
+    const r = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", { method: "POST", body, signal: AbortSignal.timeout(5000) });
+    const d = await r.json();
+    if (d.success !== true) return false;
+    if (d.action !== TURNSTILE_ACTIE) return false;
+    const hosts = turnstileHosts(env);
+    if (hosts.length && !hosts.includes(String(d.hostname || "").toLowerCase())) return false;
+    return true;
   } catch { return false; }
 }
 const turnstileVeld = (env) => turnstileAan(env)
-  ? `<div class="cf-turnstile" data-sitekey="${esc(env.TURNSTILE_SITEKEY)}" data-language="nl" style="margin:6px 0 14px"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>`
+  ? `<div class="cf-turnstile" data-sitekey="${esc(env.TURNSTILE_SITEKEY)}" data-action="${TURNSTILE_ACTIE}" data-language="nl" style="margin:6px 0 14px"></div><script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>`
   : "";
 
 /* ---------------- formulieren ---------------- */
