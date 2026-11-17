@@ -279,11 +279,20 @@
   var opn = document.getElementById("opnieuw");
   if (opn) { try { var t = sessionStorage.getItem("rc-terug"); if (t && t.charAt(0) === "/") opn.href = t; } catch (x) {} }
 
-  /* ---------- ingelogd? gegevens invullen in afrekenen en inschrijven ---------- */
+  /* ---------- ingelogd? belletje met meldingen + gegevens invullen in afrekenen en inschrijven ---------- */
   var formulieren = ["checkout-form", "inschrijf-form"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
-  if (formulieren.length) {
+  if (/(^|; )rc_lid_aan=1/.test(document.cookie) || formulieren.length) {
     fetch("/api/account/ik", { credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (ik) {
       if (!ik || !ik.ingelogd) return;
+      var acc = document.querySelector(".acct-btn");
+      if (acc) {
+        acc.classList.add("ingelogd");
+        if (ik.meldingen) {
+          acc.href = "/account/meldingen";
+          acc.setAttribute("aria-label", ik.meldingen + " nieuwe meldingen");
+          var tel = document.createElement("span"); tel.className = "cart-count bel-count"; tel.textContent = ik.meldingen > 99 ? "99+" : ik.meldingen; acc.append(tel);
+        }
+      }
       formulieren.forEach(function (f) {
         ["naam", "email", "telefoon"].forEach(function (n) { var el = f.elements[n]; if (el && !el.value && ik[n]) el.value = ik[n]; });
       });

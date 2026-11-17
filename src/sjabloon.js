@@ -36,7 +36,11 @@ export async function pagina(env, request, { titel, desc = "", inhoud, pad, noin
   return new Response(h, { status, headers: hdr });
 }
 
-export const naar = (pad, extra = {}) => new Response(null, { status: 303, headers: { location: pad, "cache-control": "no-store", ...extra } });
+export const naar = (pad, extra = {}) => {
+  const h = new Headers({ location: pad, "cache-control": "no-store" });
+  for (const [k, v] of Object.entries(extra)) for (const x of [].concat(v)) h.append(k, x);
+  return new Response(null, { status: 303, headers: h });
+};
 
 // Alleen formulieren van onze eigen site aanvaarden.
 export const eigenOrigin = (request, url) => {
@@ -60,4 +64,11 @@ export async function mail(env, { aan, onderwerp, tekst, sleutel }) {
     });
     return r.ok;
   } catch { return false; }
+}
+
+// Ingelogd maar de vlag-cookie voor het belletje ontbreekt (bv. ingelogd voor die cookie bestond)? Dan zetten we hem.
+export function metVlag(request, res, lid) {
+  if (!lid || !res || /(^|;\s*)rc_lid_aan=1/.test(request.headers.get("cookie") || "")) return res;
+  try { res.headers.append("set-cookie", "rc_lid_aan=1; Path=/; Max-Age=7776000; Secure; SameSite=Lax"); } catch {}
+  return res;
 }

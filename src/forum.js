@@ -2,8 +2,9 @@
 // Lezen kan iedereen; posten met een account (zie src/leden.js). Moderatie: alleen beheerders (BEHEER_EMAILS).
 // Opmaak in berichten: [b]vet[/b], [i]schuin[/i], [quote=naam]...[/quote], [foto=123], links worden klikbaar.
 // Foto's worden in de browser verkleind (public/assets/js/forum.js) en in D1 bewaard (tabel forum_fotos).
-import { esc, datum, banner, pagina, naar, eigenOrigin, sha, mail } from "./sjabloon.js";
+import { esc, datum, banner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
+import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
 
 const PER_PAGINA_TOPICS = 30;
 const PER_PAGINA_BERICHTEN = 20;
@@ -19,9 +20,19 @@ const ICONEN = {
   bolt: '<path d="M13 3v7h6l-8 11v-7H5z"/>',
   calendar: '<rect x="4" y="5" width="16" height="16" rx="2"/><path d="M16 3v4M8 3v4M4 11h16"/>',
   tag: '<path d="M7.5 7.5h.01M3 6v5.2a2 2 0 0 0 .6 1.4l7.8 7.8a2 2 0 0 0 2.8 0l5.2-5.2a2 2 0 0 0 0-2.8L11.6 4.6A2 2 0 0 0 10.2 4H5a2 2 0 0 0-2 2z"/>',
+  route: '<circle cx="6" cy="19" r="2"/><circle cx="18" cy="5" r="2"/><path d="M12 19h4.5a3.5 3.5 0 0 0 0-7h-8a3.5 3.5 0 0 1 0-7H12"/>',
+  camera: '<path d="M5 7h1a2 2 0 0 0 2-2 1 1 0 0 1 1-1h6a1 1 0 0 1 1 1 2 2 0 0 0 2 2h1a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2"/><circle cx="12" cy="13" r="3"/>',
   message: '<path d="M8 9h8M8 13h6M18 4a3 3 0 0 1 3 3v8a3 3 0 0 1-3 3h-5l-5 3v-3H6a3 3 0 0 1-3-3V7a3 3 0 0 1 3-3z"/>',
 };
 const icoon = (n) => `<svg class="f-icoon" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONEN[n] || ICONEN.message}</svg>`;
+
+// "2026-12-05T09:30" -> "za 5 dec 2026, 09:30"
+const ritDatum = (v) => {
+  const m = String(v || "").match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}:\d{2})$/);
+  if (!m) return esc(v || "");
+  const d = new Date(Date.UTC(+m[1], +m[2] - 1, +m[3], 12));
+  return `${["zo", "ma", "di", "wo", "do", "vr", "za"][d.getUTCDay()]} ${+m[3]} ${["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"][+m[2] - 1]} ${m[1]}, ${m[4]}`;
+};
 
 /* ---------------- opmaak van berichten ---------------- */
 
@@ -36,6 +47,7 @@ export function opmaak(ruw) {
   h = h.replace(/\[b\]([\s\S]*?)\[\/b\]/gi, "<b>$1</b>").replace(/\[i\]([\s\S]*?)\[\/i\]/gi, "<i>$1</i>");
   h = h.replace(/\[foto=(\d{1,10})\]/gi, (_, id) => `<a class="f-foto" href="/forum/foto/${id}" target="_blank"><img src="/forum/foto/${id}" alt="Foto" loading="lazy"></a>`);
   h = h.replace(/(^|[\s>(])(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, (_, voor, u) => `${voor}<a href="${u}" rel="nofollow ugc noopener" target="_blank">${u.length > 60 ? u.slice(0, 57) + "…" : u}</a>`);
+  h = tagLinks(h);
   return h.replace(/\n/g, "<br>").replace(/<br>\s*(<\/?blockquote)/g, "$1").replace(/(<\/blockquote>)<br>/g, "$1");
 }
 
@@ -125,6 +137,8 @@ async function index(request, env, url, lid) {
     titel: "Forum", pad: "/forum", desc: "Het forum van Rover & Co: techniek, onderdelen, ritten en alles over Land Rover. Lezen kan iedereen, posten met een gratis account.",
     inhoud: banner("Rover & Co", "Forum", "Techniek, onderdelen, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.") + `<section class="wrap f-sectie">
       ${balk(lid, "/forum")}
+      <div class="f-waarom"><h2>Waarom een forum in 2026?</h2><p>Omdat we het beu zijn. Geen algoritme, geen reclame, niemand die aan jouw foto's verdient. Hier deel je kennis en vakantiekiekjes, en spreek je af: zin om zaterdag samen een roadbook te rijden? Post het, en wie meewil, reageert. Jouw berichten blijven van jou. Gewoon elkaar helpen, samen rijden en een echte community bouwen.</p>
+        <p class="f-waarom-tips"><span>🚙 Zet je Land Rovers in je <a href="/account/garage">garage</a></span><span>🔔 Volg categorieën, topics en #hashtags</span><span>♥ Like wat je goed vindt</span></div>
       <table class="f-tabel"><thead><tr><th>Forum</th><th class="f-num">Topics</th><th class="f-num">Berichten</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>
       <p class="f-stats">${stats.leden} leden · ${stats.topics} topics · ${stats.berichten} berichten${stats.nieuwste ? ` · Nieuwste lid: ${lidLink(stats.nieuwste)}` : ""}</p>
       ${lid ? "" : `<div class="f-oproep"><p><b>Zelf iets vragen of vertellen?</b> Maak een gratis account. Met hetzelfde account bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-solid" href="/account/registreren?terug=/forum">Account maken</a></div>`}
@@ -145,16 +159,17 @@ async function categorie(request, env, url, lid, slug) {
   const rijen = topics.map((t) => {
     const nieuw = isNieuw(lid, t, gelezen);
     const paginas = Math.ceil(t.berichten / PER_PAGINA_BERICHTEN);
-    return `<tr${nieuw ? ' class="f-nieuw"' : ""}><td class="f-cat"><div>${t.vast ? '<span class="f-label">Vast</span> ' : ""}${t.gesloten ? '<span class="f-label grijs">Gesloten</span> ' : ""}<a class="f-titel" href="${topicUrl(t)}">${esc(t.titel)}</a>${nieuw ? ' <span class="f-label nieuw">Nieuw</span>' : ""}<small>door ${lidLink(t.auteur)} · ${datum(t.aangemaakt, true)}${paginas > 1 ? ` · pagina ${Array.from({ length: Math.min(paginas, 5) }, (_, i) => `<a href="${topicUrl(t, i + 1)}">${i + 1}</a>`).join(" ")}${paginas > 5 ? " …" : ""}` : ""}</small></div></td>
+    return `<tr${nieuw ? ' class="f-nieuw"' : ""}><td class="f-cat"><div>${t.vast ? '<span class="f-label">Vast</span> ' : ""}${t.gesloten ? '<span class="f-label grijs">Gesloten</span> ' : ""}<a class="f-titel" href="${topicUrl(t)}">${esc(t.titel)}</a>${nieuw ? ' <span class="f-label nieuw">Nieuw</span>' : ""}${t.rit_datum ? `<span class="f-rit">📅 ${ritDatum(t.rit_datum)}${t.rit_plaats ? " · 📍 " + esc(t.rit_plaats) : ""}</span>` : ""}<small>door ${lidLink(t.auteur)} · ${datum(t.aangemaakt, true)}${paginas > 1 ? ` · pagina ${Array.from({ length: Math.min(paginas, 5) }, (_, i) => `<a href="${topicUrl(t, i + 1)}">${i + 1}</a>`).join(" ")}${paginas > 5 ? " …" : ""}` : ""}</small></div></td>
       <td class="f-num">${Math.max(0, t.berichten - 1)}</td>
       <td class="f-laatste"><a href="${topicUrl(t, paginas)}#laatste">${datum(t.laatste_op)}</a><small>door ${lidLink(t.laatste)}</small></td></tr>`;
   }).join("");
+  const volgCat = volgKnop(lid, "cat", c.slug, await volgt(env, lid, "cat", c.slug), `/forum/c/${c.slug}`, c.naam);
   const nieuwKnop = lid ? `<a class="btn btn-solid" href="/forum/c/${c.slug}/nieuw">Nieuw topic</a>` : `<a class="btn btn-solid" href="/account/inloggen?terug=${encodeURIComponent(`/forum/c/${c.slug}/nieuw`)}">Log in om een topic te starten</a>`;
   return pagina(env, request, {
     titel: `${c.naam} – Forum`, pad: `/forum/c/${c.slug}${pag > 1 ? `?p=${pag}` : ""}`, desc: `${c.naam}: ${c.omschrijving || ""} Op het forum van Rover & Co.`,
     inhoud: banner("Forum", c.naam, c.omschrijving || "") + `<section class="wrap f-sectie">
       ${balk(lid, `/forum/c/${c.slug}`)}${kruimel(esc(c.naam))}
-      <div class="f-kop">${nieuwKnop}${paginering(pag, Math.ceil(totaal / PER_PAGINA_TOPICS), (i) => `/forum/c/${c.slug}?p=${i}`)}</div>
+      <div class="f-kop"><div class="f-knoppen">${nieuwKnop}${volgCat}</div>${paginering(pag, Math.ceil(totaal / PER_PAGINA_TOPICS), (i) => `/forum/c/${c.slug}?p=${i}`)}</div>
       ${topics.length ? `<table class="f-tabel"><thead><tr><th>Topic</th><th class="f-num">Antwoorden</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>`
         : `<div class="f-leeg"><p>Hier staat nog niets. Start jij het eerste topic?</p>${nieuwKnop}</div>`}
       <div class="f-kop">${paginering(pag, Math.ceil(totaal / PER_PAGINA_TOPICS), (i) => `/forum/c/${c.slug}?p=${i}`)}</div>
@@ -179,17 +194,22 @@ async function topic(request, env, url, lid, id) {
 
   if (lid) await env.SHOP_DB.prepare("INSERT INTO forum_gelezen (lid_id, topic_id, op) VALUES (?, ?, ?) ON CONFLICT(lid_id, topic_id) DO UPDATE SET op = excluded.op").bind(lid.id, t.id, nu()).run();
 
+  const lk = await likes(env, lid, berichten.map((b) => b.id));
+  const gar = await garages(env, auteurs);
+  const volgT = volgKnop(lid, "topic", t.id, await volgt(env, lid, "topic", t.id), topicUrl(t, pag), "dit topic");
   const kan = (b) => lid && (lid.beheerder || (b.lid_id === lid.id && !t.gesloten));
   const posts = berichten.map((b, i) => `
     <article class="f-post" id="b${b.id}"${i === berichten.length - 1 ? ' data-laatste' : ""}>
       ${i === berichten.length - 1 ? '<a id="laatste"></a>' : ""}
       <aside class="f-auteur">${avatar({ gebruikersnaam: b.gebruikersnaam, avatar_id: b.avatar_id }, 56)}
         <div>${lidLink(b.gebruikersnaam)}${b.geblokkeerd ? ' <span class="f-label grijs">Geblokkeerd</span>' : ""}
-        <small>${tellers[b.lid_id] || 0} berichten<br>Lid sinds ${datum(b.lid_sinds, true)}${b.landrover ? `<br>${esc(b.landrover)}` : ""}</small></div></aside>
+        <small>${tellers[b.lid_id] || 0} berichten<br>Lid sinds ${datum(b.lid_sinds, true)}</small>
+        ${(gar[b.lid_id] || []).length ? `<a class="f-auteur-wagen" href="/forum/lid/${encodeURIComponent(b.gebruikersnaam)}#garage">${gar[b.lid_id][0].foto_id ? `<img src="/forum/foto/${gar[b.lid_id][0].foto_id}" alt="" loading="lazy">` : "🚙"}<span>${esc(wagenNaam(gar[b.lid_id][0]))}${gar[b.lid_id].length > 1 ? ` <em>+${gar[b.lid_id].length - 1}</em>` : ""}</span></a>` : b.landrover ? `<small>${esc(b.landrover)}</small>` : ""}</div></aside>
       <div class="f-inhoud">
         <div class="f-meta"><a href="#b${b.id}">${datum(b.aangemaakt)}</a>${b.bewerkt_op ? ` <small>(bewerkt ${datum(b.bewerkt_op)})</small>` : ""}</div>
         <div class="f-tekst">${opmaak(b.tekst)}</div>
         <div class="f-acties">
+          ${likeKnop(lid, b.id, lk.aantal[b.id], lk.mijn.has(b.id))}
           ${lid && !t.gesloten ? `<button type="button" class="linkknop" data-citeer="${esc(b.gebruikersnaam || "")}" data-ruw="${esc(b.tekst)}">Citeren</button>` : ""}
           ${kan(b) ? `<a href="/forum/b/${b.id}/bewerk">Bewerken</a>` : ""}
           <details class="f-meld"><summary>Melden</summary><form method="post" action="/forum/b/${b.id}/meld"><input name="reden" maxlength="300" placeholder="Wat is er mis met dit bericht?" required><button class="btn" type="submit">Verstuur</button></form></details>
@@ -212,7 +232,8 @@ async function topic(request, env, url, lid, id) {
     titel: `${t.titel} – ${t.cnaam}`, pad: topicUrl(t, pag), desc: String(berichten[0]?.tekst || t.titel).replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").slice(0, 155),
     inhoud: banner(t.cnaam, t.titel) + `<section class="wrap f-sectie">
       ${balk(lid, topicUrl(t, pag))}${kruimel(`<a href="/forum/c/${t.cslug}">${esc(t.cnaam)}</a>`, esc(t.titel))}${m}${mod}
-      <div class="f-kop">${t.gesloten ? '<span class="f-label grijs">Gesloten</span>' : lid ? '<a class="btn btn-solid" href="#antwoord">Antwoorden</a>' : ""}${pg}</div>
+      ${t.rit_datum ? `<div class="f-ritblok"><b>Samen rijden</b><span>📅 ${ritDatum(t.rit_datum)}</span>${t.rit_plaats ? `<span>📍 ${esc(t.rit_plaats)}</span>` : ""}<small>Rij je mee? Reageer hieronder.</small></div>` : ""}
+      <div class="f-kop"><div class="f-knoppen">${t.gesloten ? '<span class="f-label grijs">Gesloten</span>' : lid ? '<a class="btn btn-solid" href="#antwoord">Antwoorden</a>' : ""}${volgT}</div>${pg}</div>
       ${posts}
       <div class="f-kop">${pg}</div>
       ${antwoord}
@@ -220,17 +241,19 @@ async function topic(request, env, url, lid, id) {
   });
 }
 
-function postFormulier(env, request, { titel, kop, actie, toonTitel, w = {}, m = "", terug }) {
+function postFormulier(env, request, { titel, kop, actie, toonTitel, w = {}, m = "", terug, rit = false }) {
   return pagina(env, request, {
     titel, noindex: true,
     inhoud: banner("Forum", kop) + `<section class="wrap f-sectie">${terug}
       ${m ? `<div class="melding melding-fout" role="alert">${esc(m)}</div>` : ""}
       <form class="f-antwoord" method="post" action="${actie}">
         ${toonTitel ? `<div class="veld"><label for="f-titel">Titel</label><input id="f-titel" name="titel" maxlength="120" minlength="5" required value="${esc(w.titel || "")}"></div>` : ""}
+        ${rit ? `<div class="veld2"><div class="veld"><label for="f-ritdatum">Wanneer? <small>(optioneel)</small></label><input id="f-ritdatum" name="rit_datum" type="datetime-local" value="${esc(w.rit_datum || "")}"></div>
+          <div class="veld"><label for="f-ritplaats">Vertrekplaats <small>(optioneel)</small></label><input id="f-ritplaats" name="rit_plaats" maxlength="100" value="${esc(w.rit_plaats || "")}" placeholder="Bv. Kerk van Oostham"></div></div>` : ""}
         ${editor("tekst", w.tekst || "")}
         <button class="btn btn-solid" type="submit">Plaatsen</button>
       </form>
-      <p class="f-hulp">Opmaak: [b]vet[/b], [i]schuin[/i], [quote=naam]citaat[/quote]. Links worden vanzelf klikbaar. Foto's voeg je toe met de knop Foto.</p>
+      <p class="f-hulp">Opmaak: [b]vet[/b], [i]schuin[/i], [quote=naam]citaat[/quote]. Links worden vanzelf klikbaar. Met #hashtags (bv. #td5 of #roadbook) vinden anderen je bericht terug. Foto's voeg je toe met de knop Foto.</p>
     </section><script src="/assets/js/forum.js" defer></script>`,
   });
 }
@@ -250,21 +273,27 @@ async function teSnel(env, lid, topicsOok) {
 async function nieuwTopic(request, env, url, lid, slug) {
   const c = await env.SHOP_DB.prepare("SELECT * FROM forum_categorieen WHERE slug = ?").bind(slug).first();
   if (!c) return null;
-  const toon = (m, w) => postFormulier(env, request, { titel: "Nieuw topic", kop: `Nieuw topic in ${c.naam}`, actie: `/forum/c/${c.slug}/nieuw`, toonTitel: true, w, m,
+  const rit = c.slug === "samen-rijden";
+  const toon = (m, w) => postFormulier(env, request, { titel: "Nieuw topic", kop: `Nieuw topic in ${c.naam}`, actie: `/forum/c/${c.slug}/nieuw`, toonTitel: true, w, m, rit,
     terug: kruimel(`<a href="/forum/c/${c.slug}">${esc(c.naam)}</a>`, "Nieuw topic") });
   if (request.method !== "POST") return toon();
   const f = await request.formData();
-  const w = { titel: tekst(f.get("titel"), 120).replace(/\s+/g, " "), tekst: tekst(f.get("tekst"), 20000) };
+  const w = { titel: tekst(f.get("titel"), 120).replace(/\s+/g, " "), tekst: tekst(f.get("tekst"), 20000),
+    rit_datum: /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/.test(tekst(f.get("rit_datum"), 20)) ? tekst(f.get("rit_datum"), 20) : "", rit_plaats: tekst(f.get("rit_plaats"), 100) };
   if (w.titel.length < 5) return toon("Geef je topic een titel van minstens 5 tekens.", w);
   if (w.tekst.length < 2) return toon("Schrijf eerst je bericht.", w);
   const snel = await teSnel(env, lid, true);
   if (snel) return toon(snel, w);
   const t = nu();
-  const r = await env.SHOP_DB.prepare("INSERT INTO forum_topics (categorie_id, titel, lid_id, aangemaakt, laatste_op, laatste_lid_id, berichten) VALUES (?, ?, ?, ?, ?, ?, 1)")
-    .bind(c.id, w.titel, lid.id, t, t, lid.id).run();
+  const r = await env.SHOP_DB.prepare("INSERT INTO forum_topics (categorie_id, titel, lid_id, aangemaakt, laatste_op, laatste_lid_id, berichten, rit_datum, rit_plaats) VALUES (?, ?, ?, ?, ?, ?, 1, ?, ?)")
+    .bind(c.id, w.titel, lid.id, t, t, lid.id, rit && w.rit_datum ? w.rit_datum : null, rit && w.rit_plaats ? w.rit_plaats : null).run();
   const id = r.meta.last_row_id;
-  await env.SHOP_DB.prepare("INSERT INTO forum_berichten (topic_id, lid_id, tekst, aangemaakt) VALUES (?, ?, ?, ?)").bind(id, lid.id, w.tekst, t).run();
-  return naar(topicUrl({ id, titel: w.titel }));
+  const b = await env.SHOP_DB.prepare("INSERT INTO forum_berichten (topic_id, lid_id, tekst, aangemaakt) VALUES (?, ?, ?, ?)").bind(id, lid.id, w.tekst, t).run();
+  const tags = await bewaarTags(env, b.meta.last_row_id, id, w.tekst);
+  await zetVolgen(env, lid.id, "topic", id, true); // je volgt je eigen topic
+  const link = topicUrl({ id, titel: w.titel });
+  await meldNieuwBericht(env, { topic: { id, titel: w.titel }, catSlug: c.slug, catNaam: c.naam, auteur: lid, tags, link, nieuwTopic: true });
+  return naar(link);
 }
 
 async function antwoorden(request, env, url, lid, id) {
@@ -280,7 +309,12 @@ async function antwoorden(request, env, url, lid, id) {
   const r = await env.SHOP_DB.prepare("INSERT INTO forum_berichten (topic_id, lid_id, tekst, aangemaakt) VALUES (?, ?, ?, ?)").bind(t.id, lid.id, w.tekst, nu()).run();
   await herbereken(env, t.id);
   const n = (await env.SHOP_DB.prepare("SELECT berichten FROM forum_topics WHERE id = ?").bind(t.id).first()).berichten;
-  return naar(`${topicUrl(t, Math.ceil(n / PER_PAGINA_BERICHTEN))}#b${r.meta.last_row_id}`);
+  const link = `${topicUrl(t, Math.ceil(n / PER_PAGINA_BERICHTEN))}#b${r.meta.last_row_id}`;
+  const tags = await bewaarTags(env, r.meta.last_row_id, t.id, w.tekst);
+  if (f.get("volg") !== "0") await zetVolgen(env, lid.id, "topic", t.id, true); // wie reageert, volgt het topic
+  const c = await env.SHOP_DB.prepare("SELECT slug, naam FROM forum_categorieen WHERE id = ?").bind(t.categorie_id).first();
+  await meldNieuwBericht(env, { topic: t, catSlug: c?.slug || "", catNaam: c?.naam || "", auteur: lid, tags, link, nieuwTopic: false });
+  return naar(link);
 }
 
 async function bewerk(request, env, url, lid, id) {
@@ -296,6 +330,7 @@ async function bewerk(request, env, url, lid, id) {
   if (w.tekst.length < 2) return toon("Je bericht is leeg.", w);
   if (eerste && w.titel.length < 5) return toon("Geef je topic een titel van minstens 5 tekens.", w);
   await env.SHOP_DB.prepare("UPDATE forum_berichten SET tekst = ?, bewerkt_op = ? WHERE id = ?").bind(w.tekst, nu(), b.id).run();
+  await bewaarTags(env, b.id, b.tid, w.tekst);
   if (eerste) await env.SHOP_DB.prepare("UPDATE forum_topics SET titel = ? WHERE id = ?").bind(w.titel, b.tid).run();
   const pos = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND id <= ?").bind(b.tid, b.id).first()).n;
   return naar(`${topicUrl({ id: b.tid, titel: eerste ? w.titel : b.titel }, Math.ceil(pos / PER_PAGINA_BERICHTEN))}#b${b.id}`);
@@ -390,6 +425,7 @@ async function recent(request, env, url, lid) {
 async function profiel(request, env, url, lid, naam) {
   const p = await env.SHOP_DB.prepare("SELECT id, gebruikersnaam, aangemaakt, woonplaats, landrover, avatar_id, geblokkeerd FROM leden WHERE gebruikersnaam = ?").bind(naam).first();
   if (!p) return null;
+  const wagens = (await garages(env, [p.id]))[p.id] || [];
   const n = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE lid_id = ? AND verwijderd = 0").bind(p.id).first()).n;
   const laatste = (await env.SHOP_DB.prepare(`SELECT DISTINCT t.id, t.titel, t.laatste_op FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id
       WHERE b.lid_id = ? AND b.verwijderd = 0 AND t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 10`).bind(p.id).all()).results || [];
@@ -397,9 +433,65 @@ async function profiel(request, env, url, lid, naam) {
     titel: `${p.gebruikersnaam} – Forum`, noindex: true,
     inhoud: banner("Forum", p.gebruikersnaam) + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel("Leden", esc(p.gebruikersnaam))}
       <div class="acc-kaart f-profiel">${avatar(p, 96)}<dl class="acc-dl"><dt>Lid sinds</dt><dd>${datum(p.aangemaakt, true)}</dd><dt>Berichten</dt><dd>${n}</dd>
-        ${p.woonplaats ? `<dt>Woonplaats</dt><dd>${esc(p.woonplaats)}</dd>` : ""}${p.landrover ? `<dt>Land Rover</dt><dd>${esc(p.landrover)}</dd>` : ""}${p.geblokkeerd ? "<dt>Status</dt><dd>Geblokkeerd</dd>" : ""}</dl></div>
+        ${p.woonplaats ? `<dt>Woonplaats</dt><dd>${esc(p.woonplaats)}</dd>` : ""}${!wagens.length && p.landrover ? `<dt>Land Rover</dt><dd>${esc(p.landrover)}</dd>` : ""}${p.geblokkeerd ? "<dt>Status</dt><dd>Geblokkeerd</dd>" : ""}</dl></div>
+      <h2 class="f-h2" id="garage">Garage</h2>
+      ${wagens.length ? garageKaarten(wagens) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
       <h2 class="f-h2">Laatst actief in</h2>
       ${laatste.length ? `<ul class="f-lijst">${laatste.map((t) => `<li><a href="${topicUrl(t)}">${esc(t.titel)}</a> <small>${datum(t.laatste_op)}</small></li>`).join("")}</ul>` : "<p>Nog geen berichten.</p>"}
+    </section>`,
+  });
+}
+
+/* ---------------- volgen, likes, hashtags ---------------- */
+
+async function volgActie(request, env, lid) {
+  const f = await request.formData();
+  const soort = String(f.get("soort") || "");
+  let sleutel = String(f.get("sleutel") || "").toLowerCase().slice(0, 80);
+  const terug = String(f.get("terug") || "/forum");
+  const veilig = terug.startsWith("/forum") ? terug : "/forum";
+  if (!["cat", "topic", "tag"].includes(soort) || !sleutel) return naar(veilig);
+  if (soort === "topic" && !/^\d+$/.test(sleutel)) return naar(veilig);
+  if (soort === "cat" && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_categorieen WHERE slug = ?").bind(sleutel).first())) return naar(veilig);
+  if (soort === "tag") sleutel = sleutel.replace(/^#/, "").replace(/[^a-zà-ÿ0-9_-]/g, "").slice(0, 30);
+  await zetVolgen(env, lid.id, soort, sleutel, f.get("aan") === "1");
+  return naar(veilig);
+}
+
+async function likeActie(request, env, url, lid, id) {
+  const b = await env.SHOP_DB.prepare("SELECT b.id, b.lid_id, b.topic_id, t.titel FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id WHERE b.id = ? AND b.verwijderd = 0").bind(id).first();
+  if (!b) return json({ ok: false }, 404);
+  const had = await env.SHOP_DB.prepare("SELECT 1 FROM forum_likes WHERE bericht_id = ? AND lid_id = ?").bind(b.id, lid.id).first();
+  if (had) await env.SHOP_DB.prepare("DELETE FROM forum_likes WHERE bericht_id = ? AND lid_id = ?").bind(b.id, lid.id).run();
+  else {
+    await env.SHOP_DB.prepare("INSERT OR IGNORE INTO forum_likes (bericht_id, lid_id, aangemaakt) VALUES (?, ?, ?)").bind(b.id, lid.id, nu()).run();
+    // Melding naar de schrijver (niet voor je eigen bericht, en hoogstens één per bericht per dag per liker).
+    if (b.lid_id !== lid.id) {
+      const pos = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE topic_id = ? AND verwijderd = 0 AND id <= ?").bind(b.topic_id, b.id).first()).n;
+      const link = `${topicUrl({ id: b.topic_id, titel: b.titel }, Math.ceil(pos / PER_PAGINA_BERICHTEN))}#b${b.id}`;
+      const al = await env.SHOP_DB.prepare("SELECT 1 FROM lid_meldingen WHERE lid_id = ? AND link = ? AND tekst LIKE ? AND aangemaakt > ?").bind(b.lid_id, link, `${lid.gebruikersnaam} %`, new Date(Date.now() - 86400_000).toISOString()).first();
+      if (!al) await stuurMelding(env, [b.lid_id], `${lid.gebruikersnaam} vindt je bericht in "${b.titel}" leuk`, link);
+    }
+  }
+  const n = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_likes WHERE bericht_id = ?").bind(b.id).first()).n;
+  if ((request.headers.get("accept") || "").includes("application/json")) return json({ ok: true, aantal: n, mijn: !had });
+  return naar((request.headers.get("referer") || "").startsWith(url.origin) ? request.headers.get("referer").replace(/#.*$/, "") + `#b${b.id}` : "/forum");
+}
+
+async function tagPagina(request, env, url, lid, tag) {
+  tag = tag.toLowerCase().slice(0, 30);
+  const topics = (await env.SHOP_DB.prepare(`SELECT t.*, c.naam AS cnaam, c.slug AS cslug, l.gebruikersnaam AS laatste FROM forum_topics t
+      JOIN forum_categorieen c ON c.id = t.categorie_id LEFT JOIN leden l ON l.id = t.laatste_lid_id
+      WHERE t.verwijderd = 0 AND t.id IN (SELECT ft.topic_id FROM forum_tags ft JOIN forum_berichten b ON b.id = ft.bericht_id WHERE ft.tag = ? AND b.verwijderd = 0)
+      ORDER BY t.laatste_op DESC LIMIT 60`).bind(tag).all()).results || [];
+  const rijen = topics.map((t) => `<tr><td class="f-cat"><div><a class="f-titel" href="${topicUrl(t)}">${esc(t.titel)}</a><small>in <a href="/forum/c/${t.cslug}">${esc(t.cnaam)}</a></small></div></td>
+      <td class="f-num">${Math.max(0, t.berichten - 1)}</td><td class="f-laatste"><a href="${topicUrl(t, Math.ceil(t.berichten / PER_PAGINA_BERICHTEN))}#laatste">${datum(t.laatste_op)}</a><small>door ${lidLink(t.laatste)}</small></td></tr>`).join("");
+  const pad = `/forum/tag/${encodeURIComponent(tag)}`;
+  return pagina(env, request, {
+    titel: `#${tag} – Forum`, pad, noindex: !topics.length,
+    inhoud: banner("Forum", `#${tag}`) + `<section class="wrap f-sectie">${balk(lid, pad)}${kruimel(`#${esc(tag)}`)}
+      <div class="f-kop"><div class="f-knoppen">${volgKnop(lid, "tag", tag, await volgt(env, lid, "tag", tag), pad, "#" + tag)}</div></div>
+      ${topics.length ? `<table class="f-tabel"><thead><tr><th>Topic</th><th class="f-num">Antwoorden</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>` : `<div class="f-leeg"><p>Nog geen berichten met #${esc(tag)}. Volg de hashtag en je krijgt een melding zodra iemand hem gebruikt.</p></div>`}
     </section>`,
   });
 }
@@ -429,8 +521,12 @@ export async function forum(request, env, url) {
   else if ((m = p.match(/^\/forum\/t\/(\d{1,10})\/antwoord$/)) && post) res = !lid ? moetLid() : !lid.gebruikersnaam ? moetNaam() : await antwoorden(request, env, url, lid, m[1]);
   else if ((m = p.match(/^\/forum\/b\/(\d{1,10})\/bewerk$/))) res = !lid ? moetLid() : await bewerk(request, env, url, lid, m[1]);
   else if ((m = p.match(/^\/forum\/b\/(\d{1,10})\/meld$/)) && post) res = await meld(request, env, url, lid, m[1]);
+  else if (p === "/forum/volg" && post) res = lid ? await volgActie(request, env, lid) : moetLid();
+  else if ((m = p.match(/^\/forum\/b\/(\d{1,10})\/like$/)) && post) res = lid ? await likeActie(request, env, url, lid, m[1]) : json({ ok: false, fout: "Log eerst in." }, 401);
+  else if ((m = p.match(/^\/forum\/tag\/([^/]{1,90})$/))) res = await tagPagina(request, env, url, lid, decodeURIComponent(m[1]));
   else if ((m = p.match(/^\/forum\/lid\/([^/]{1,40})$/))) res = await profiel(request, env, url, lid, decodeURIComponent(m[1]));
 
-  return res || pagina(env, request, { titel: "Niet gevonden", noindex: true, status: 404,
+  if (res) return metVlag(request, res, lid);
+  return pagina(env, request, { titel: "Niet gevonden", noindex: true, status: 404,
     inhoud: banner("Forum", "Niet gevonden") + `<section class="narrow acc-sectie"><div class="acc-kaart"><p>Deze pagina bestaat niet (meer).</p><a class="btn btn-solid" href="/forum">Naar het forum</a></div></section>` });
 }

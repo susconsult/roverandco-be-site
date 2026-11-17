@@ -59,3 +59,23 @@ INSERT OR IGNORE INTO forum_categorieen (slug, groep, naam, omschrijving, icoon,
 -- Bestellingen en inschrijvingen koppelen aan een lid (eenmalig uitvoeren).
 ALTER TABLE registraties ADD COLUMN lid_id INTEGER;
 CREATE INDEX IF NOT EXISTS idx_reg_lid ON registraties(lid_id);
+
+-- ---- Uitbreiding 17 nov 2026: garage, likes, volgen, hashtags, meldingen, samen rijden ----
+-- Garage: de Land Rovers van een lid (zoveel als je wil, niets verplicht).
+CREATE TABLE IF NOT EXISTS lid_wagens (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, naam TEXT, type TEXT NOT NULL, bouwjaar INTEGER, foto_id INTEGER, omschrijving TEXT, volgorde INTEGER NOT NULL DEFAULT 0, aangemaakt TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_wagens_lid ON lid_wagens(lid_id, volgorde);
+CREATE TABLE IF NOT EXISTS forum_likes (bericht_id INTEGER NOT NULL, lid_id INTEGER NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (bericht_id, lid_id));
+-- Volgen: soort = 'cat' (sleutel = slug), 'topic' (sleutel = id), 'tag' (sleutel = hashtag zonder #, kleine letters).
+CREATE TABLE IF NOT EXISTS forum_volgen (lid_id INTEGER NOT NULL, soort TEXT NOT NULL, sleutel TEXT NOT NULL, aangemaakt TEXT NOT NULL, PRIMARY KEY (lid_id, soort, sleutel));
+CREATE INDEX IF NOT EXISTS idx_volgen_sleutel ON forum_volgen(soort, sleutel);
+CREATE TABLE IF NOT EXISTS forum_tags (bericht_id INTEGER NOT NULL, topic_id INTEGER NOT NULL, tag TEXT NOT NULL, PRIMARY KEY (bericht_id, tag));
+CREATE INDEX IF NOT EXISTS idx_tags_tag ON forum_tags(tag, topic_id);
+-- Meldingen (het belletje bij je account).
+CREATE TABLE IF NOT EXISTS lid_meldingen (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, tekst TEXT NOT NULL, link TEXT NOT NULL, gelezen INTEGER NOT NULL DEFAULT 0, aangemaakt TEXT NOT NULL);
+CREATE INDEX IF NOT EXISTS idx_meldingen_lid ON lid_meldingen(lid_id, gelezen, id);
+-- Samen rijden: datum en vertrekplaats bij een topic (eenmalig uitvoeren).
+ALTER TABLE forum_topics ADD COLUMN rit_datum TEXT;
+ALTER TABLE forum_topics ADD COLUMN rit_plaats TEXT;
+INSERT OR IGNORE INTO forum_categorieen (slug, groep, naam, omschrijving, icoon, volgorde) VALUES
+ ('samen-rijden', 'Club', 'Samen rijden', 'Zin om samen een roadbook of rit te rijden? Spreek hier af', 'route', 45),
+ ('vakantiekiekjes', 'Club', 'Vakantiekiekjes', 'Je mooiste foto''s van onderweg', 'camera', 55);

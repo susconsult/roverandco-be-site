@@ -10,8 +10,9 @@
 // - /api/account/ik           : gegevens van wie ingelogd is (om formulieren in te vullen)
 // Wachtwoorden: PBKDF2-SHA256, 100 000 rondes, eigen zout per lid. Sessie: cookie rc_lid (HttpOnly, Secure), 90 dagen.
 // Variabelen: TURNSTILE_SITEKEY + TURNSTILE_SECRET (zonder deze twee: geen spamcheck), RESEND_API_KEY, BEHEER_EMAILS.
-import { esc, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail } from "./sjabloon.js";
+import { esc, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail, metVlag } from "./sjabloon.js";
 import { eur } from "./opslag.js";
+import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
 
 const COOKIE = "rc_lid";
 const SESSIE_DAGEN = 90;
@@ -67,7 +68,8 @@ async function nieuweSessie(env, lidId) {
   const token = willekeurig();
   await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE verloopt < ?").bind(Date.now()).run();
   await env.SHOP_DB.prepare("INSERT INTO lid_sessies (token_hash, lid_id, verloopt) VALUES (?, ?, ?)").bind(await sha(token), lidId, Date.now() + SESSIE_DAGEN * 86400_000).run();
-  return `${COOKIE}=${token}; Path=/; Max-Age=${SESSIE_DAGEN * 86400}; HttpOnly; Secure; SameSite=Lax`;
+  // Tweede cookie zonder inhoud: laat de site (site.js) weten dat er iemand ingelogd is, voor het belletje.
+  return [`${COOKIE}=${token}; Path=/; Max-Age=${SESSIE_DAGEN * 86400}; HttpOnly; Secure; SameSite=Lax`, `rc_lid_aan=1; Path=/; Max-Age=${SESSIE_DAGEN * 86400}; Secure; SameSite=Lax`];
 }
 
 /* ---------------- mails met eenmalige link ---------------- */
@@ -260,7 +262,7 @@ async function registreren(request, env, url) {
 async function uitloggen(request, env) {
   const token = cookie(request, COOKIE);
   if (token) await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE token_hash = ?").bind(await sha(token)).run();
-  return naar("/", { "set-cookie": `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax` });
+  return naar("/", { "set-cookie": [`${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`, "rc_lid_aan=; Path=/; Max-Age=0; Secure; SameSite=Lax"] });
 }
 
 async function vergeten(request, env, url) {
@@ -358,6 +360,8 @@ async function overzicht(request, env, url, lid) {
           <dl class="acc-dl"><dt>Gebruikersnaam</dt><dd>${esc(lid.gebruikersnaam || "–")}</dd><dt>E-mail</dt><dd>${esc(lid.email)}</dd>
           <dt>Naam</dt><dd>${esc(lid.naam || "–")}</dd><dt>Telefoon</dt><dd>${esc(lid.telefoon || "–")}</dd><dt>Woonplaats</dt><dd>${esc(lid.woonplaats || "–")}</dd><dt>Mijn Land Rover</dt><dd>${esc(lid.landrover || "–")}</dd></dl>
           <p class="acc-knoppen"><a class="btn btn-solid" href="/account/gegevens">Gegevens wijzigen</a> <a class="btn" href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a></p></div>
+        <div class="acc-kaart"><h2>Mijn garage</h2>${await garageMini(env, lid)}<p class="acc-knoppen"><a class="btn btn-solid" href="/account/garage">Garage beheren</a></p></div>
+        <div class="acc-kaart"><h2>Meldingen</h2><p>${(n => n ? `Je hebt <b>${n}</b> nieuwe ${n === 1 ? "melding" : "meldingen"}.` : "Geen nieuwe meldingen.")(await aantalOngelezen(env, lid.id))}</p><p class="acc-knoppen"><a class="btn btn-solid" href="/account/meldingen">Bekijk meldingen</a></p></div>
         <div class="acc-kaart"><h2>Forum</h2><p>${lid.gebruikersnaam ? `Je profiel: <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}">${esc(lid.gebruikersnaam)}</a>` : "Kies eerst een gebruikersnaam bij je gegevens."}</p>
           <p class="acc-knoppen"><a class="btn btn-solid" href="/forum">Naar het forum</a> <a class="btn" href="/account/uitloggen">Uitloggen</a></p></div>
       </div></section>`,
@@ -373,7 +377,7 @@ async function gegevens(request, env, url, lid) {
         ${veld("naam", "Voor- en achternaam", { waarde: w.naam, auto: "name" })}
         ${veld("telefoon", "Telefoon", { type: "tel", waarde: w.telefoon, auto: "tel" })}
         ${veld("woonplaats", "Woonplaats", { waarde: w.woonplaats, auto: "address-level2", hulp: "Zichtbaar op je forumprofiel." })}
-        ${veld("landrover", "Mijn Land Rover", { waarde: w.landrover, extra: 'maxlength="80" placeholder="Defender 110 Td5, 2002"', hulp: "Zichtbaar op je forumprofiel." })}
+        <p>Je Land Rovers zet je in je <a href="/account/garage">garage</a>.</p>
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
         <button class="btn btn-solid" type="submit">Bewaren</button> <a class="btn" href="/account">Annuleren</a>
@@ -381,7 +385,7 @@ async function gegevens(request, env, url, lid) {
   });
   if (request.method !== "POST") return toon();
   const f = await request.formData();
-  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), naam: tekst(f.get("naam"), 120), telefoon: tekst(f.get("telefoon"), 40), woonplaats: tekst(f.get("woonplaats"), 80), landrover: tekst(f.get("landrover"), 80), avatar_id: parseInt(f.get("avatar_id"), 10) || null };
+  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), naam: tekst(f.get("naam"), 120), telefoon: tekst(f.get("telefoon"), 40), woonplaats: tekst(f.get("woonplaats"), 80), landrover: lid.landrover, avatar_id: parseInt(f.get("avatar_id"), 10) || null };
   if (!naamOk(w.gebruikersnaam)) return toon("Kies een gebruikersnaam van 3 tot 20 tekens: letters, cijfers, punt, streepje of underscore.", { ...lid, ...w });
   if (await env.SHOP_DB.prepare("SELECT 1 FROM leden WHERE gebruikersnaam = ? AND id <> ?").bind(w.gebruikersnaam, lid.id).first()) return toon("Die gebruikersnaam is al bezet.", { ...lid, ...w });
   if (w.avatar_id && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(w.avatar_id, lid.id).first())) w.avatar_id = lid.avatar_id;
@@ -414,13 +418,76 @@ export const avatar = (lid, maat = 40) => lid?.avatar_id
   ? `<img class="avatar" src="/forum/foto/${lid.avatar_id}" width="${maat}" height="${maat}" alt="" loading="lazy">`
   : `<span class="avatar avatar-leeg" style="width:${maat}px;height:${maat}px;font-size:${Math.round(maat / 2.4)}px" aria-hidden="true">${esc(String(lid?.gebruikersnaam || "?").slice(0, 1).toUpperCase())}</span>`;
 
+/* ---------------- garage ---------------- */
+
+async function garageMini(env, lid) {
+  const w = (await env.SHOP_DB.prepare("SELECT * FROM lid_wagens WHERE lid_id = ? ORDER BY volgorde, id").bind(lid.id).all()).results || [];
+  return w.length ? garageKaarten(w) : "<p>Nog leeg. Zet hier je Land Rovers: andere leden zien ze bij je berichten op het forum.</p>";
+}
+
+async function garage(request, env, url, lid) {
+  const wagens = (await env.SHOP_DB.prepare("SELECT * FROM lid_wagens WHERE lid_id = ? ORDER BY volgorde, id").bind(lid.id).all()).results || [];
+  if (request.method === "POST") {
+    const f = await request.formData();
+    const id = parseInt(f.get("id"), 10) || 0;
+    const eigen = id ? wagens.find((x) => x.id === id) : null;
+    if (id && !eigen) return naar("/account/garage");
+    if (f.get("actie") === "verwijder" && eigen) {
+      await env.SHOP_DB.prepare("DELETE FROM lid_wagens WHERE id = ? AND lid_id = ?").bind(id, lid.id).run();
+      return naar("/account/garage?weg=1");
+    }
+    const type = tekst(f.get("type"), 80);
+    if (!type) return naar("/account/garage?fout=type");
+    const jaar = parseInt(f.get("bouwjaar"), 10);
+    const bouwjaar = jaar >= 1948 && jaar <= new Date().getFullYear() + 1 ? jaar : null;
+    let foto = parseInt(f.get("foto_id"), 10) || null;
+    if (foto && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(foto, lid.id).first())) foto = eigen?.foto_id || null;
+    const v = [tekst(f.get("naam"), 60) || null, type, bouwjaar, foto, tekst(f.get("omschrijving"), 300) || null];
+    if (eigen) await env.SHOP_DB.prepare("UPDATE lid_wagens SET naam = ?, type = ?, bouwjaar = ?, foto_id = ?, omschrijving = ? WHERE id = ? AND lid_id = ?").bind(...v, id, lid.id).run();
+    else if (wagens.length < 30) await env.SHOP_DB.prepare("INSERT INTO lid_wagens (naam, type, bouwjaar, foto_id, omschrijving, lid_id, volgorde, aangemaakt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(...v, lid.id, wagens.length, new Date().toISOString()).run();
+    return naar("/account/garage?ok=1");
+  }
+  const formulier = (w = {}) => `<form method="post" action="/account/garage" class="garage-form">
+      <input type="hidden" name="id" value="${w.id || ""}">
+      <div class="avatar-kies">${w.foto_id ? `<img class="wagen-mini" src="/forum/foto/${w.foto_id}" alt="">` : '<span class="wagen-mini leeg">🚙</span>'}<label class="btn">Foto kiezen<input type="file" accept="image/*" data-wagenfoto hidden></label><input type="hidden" name="foto_id" value="${w.foto_id || ""}"></div>
+      <div class="veld2">${veld("type" + (w.id || ""), "Type", { waarde: w.type, extra: 'name="type" required maxlength="80" placeholder="Defender 110 Td5"' }).replace(`name="type${w.id || ""}"`, "")}
+        ${veld("bouwjaar" + (w.id || ""), "Bouwjaar", { type: "number", waarde: w.bouwjaar || "", extra: 'name="bouwjaar" min="1948" max="2030"' }).replace(`name="bouwjaar${w.id || ""}"`, "")}</div>
+      <div class="veld2">${veld("naam" + (w.id || ""), "Bijnaam <small>(optioneel)</small>", { waarde: w.naam, extra: 'name="naam" maxlength="60" placeholder="Otis"' }).replace(`name="naam${w.id || ""}"`, "")}
+        ${veld("oms" + (w.id || ""), "Iets over deze wagen <small>(optioneel)</small>", { waarde: w.omschrijving, extra: 'name="omschrijving" maxlength="300"' }).replace(`name="oms${w.id || ""}"`, "")}</div>
+      <button class="btn btn-solid" type="submit">${w.id ? "Bewaren" : "Toevoegen aan garage"}</button>
+      ${w.id ? `<button class="btn" type="submit" name="actie" value="verwijder" data-bevestig="Deze wagen uit je garage halen?">Verwijderen</button>` : ""}
+    </form>`;
+  const m = url.searchParams.has("ok") ? melding("Bewaard.", "ok") : url.searchParams.has("weg") ? melding("Verwijderd uit je garage.", "ok") : url.searchParams.has("fout") ? melding("Vul minstens het type in.") : "";
+  return pagina(env, request, {
+    titel: "Mijn garage", noindex: true,
+    inhoud: banner("Mijn account", "Mijn garage", "Zet hier je Land Rovers. Niets is verplicht. Andere leden zien ze op je profiel en bij je berichten op het forum.") + `<section class="narrow acc-sectie">${m}
+      ${wagens.map((w) => `<div class="acc-kaart"><h2>${esc(w.type)}${w.bouwjaar ? ` <small>${w.bouwjaar}</small>` : ""}</h2>${formulier(w)}</div>`).join("")}
+      <div class="acc-kaart"><h2>${wagens.length ? "Nog een Land Rover toevoegen" : "Je eerste Land Rover"}</h2>${formulier()}</div>
+      <p><a href="/account">← Terug naar mijn account</a>${lid.gebruikersnaam ? ` · <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}#garage">Bekijk je profiel</a>` : ""}</p>
+    </section><script src="/assets/js/forum.js" defer></script>`,
+  });
+}
+
+async function meldingen(request, env, lid) {
+  const r = (await env.SHOP_DB.prepare("SELECT * FROM lid_meldingen WHERE lid_id = ? ORDER BY id DESC LIMIT 100").bind(lid.id).all()).results || [];
+  await env.SHOP_DB.prepare("UPDATE lid_meldingen SET gelezen = 1 WHERE lid_id = ? AND gelezen = 0").bind(lid.id).run();
+  await env.SHOP_DB.prepare("DELETE FROM lid_meldingen WHERE lid_id = ? AND gelezen = 1 AND aangemaakt < ?").bind(lid.id, new Date(Date.now() - 90 * 86400_000).toISOString()).run();
+  return pagina(env, request, {
+    titel: "Meldingen", noindex: true,
+    inhoud: banner("Mijn account", "Meldingen") + `<section class="narrow acc-sectie"><div class="acc-kaart">
+      ${r.length ? `<ul class="meldingen">${r.map((x) => `<li class="${x.gelezen ? "" : "nieuw"}"><a href="${esc(x.link)}">${esc(x.tekst)}</a><small>${datum(x.aangemaakt)}</small></li>`).join("")}</ul>`
+        : "<p>Nog geen meldingen. Volg een categorie, topic of #hashtag op het forum, dan krijg je hier een melding bij nieuwe berichten.</p>"}
+      </div><p><a href="/account">← Terug naar mijn account</a> · <a href="/forum">Naar het forum</a></p></section>`,
+  });
+}
+
 /* ---------------- router ---------------- */
 
 export async function leden(request, env, url) {
   const p = url.pathname.replace(/\/$/, "") || "/";
   if (p === "/api/account/ik") {
     const lid = await huidigLid(request, env);
-    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon } : { ingelogd: false }),
+    return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
       { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
   }
   if (p !== "/account" && !p.startsWith("/account/")) return null;
@@ -436,9 +503,11 @@ export async function leden(request, env, url) {
 
   const lid = await huidigLid(request, env);
   if (!lid) return naar("/account/inloggen?terug=" + encodeURIComponent(p));
-  if (p === "/account") return overzicht(request, env, url, lid);
+  if (p === "/account") return metVlag(request, await overzicht(request, env, url, lid), lid);
   if (p === "/account/gegevens") return gegevens(request, env, url, lid);
   if (p === "/account/nieuw-wachtwoord") return nieuwWachtwoord(request, env, url, lid);
+  if (p === "/account/garage") return garage(request, env, url, lid);
+  if (p === "/account/meldingen") return meldingen(request, env, lid);
   if (p === "/account/bevestig-opnieuw" && request.method === "POST") {
     if (!lid.bevestigd_op) await stuurBevestiging(env, url.origin, lid);
     return naar("/account?mail=1");

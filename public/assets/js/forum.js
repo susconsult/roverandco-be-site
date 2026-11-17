@@ -69,6 +69,37 @@
     f.addEventListener("submit", function (e) { if (!window.confirm(f.dataset.bevestig)) e.preventDefault(); });
   });
 
+  document.querySelectorAll("button[data-bevestig]").forEach(function (b) {
+    b.addEventListener("click", function (e) { if (!window.confirm(b.dataset.bevestig)) e.preventDefault(); });
+  });
+
+  document.querySelectorAll("[data-wagenfoto]").forEach(function (inp) {
+    inp.addEventListener("change", function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      var vak = inp.closest(".avatar-kies"), knop = vak.querySelector("label");
+      knop.firstChild.nodeValue = "Opladen…";
+      oplaad(f, 1600).then(function (d) {
+        knop.firstChild.nodeValue = "Foto kiezen";
+        if (!d || !d.ok) { alert((d && d.fout) || "Opladen mislukt."); return; }
+        inp.form.elements.foto_id.value = d.id;
+        var oud = vak.querySelector(".wagen-mini"), img = document.createElement("img");
+        img.className = "wagen-mini"; img.alt = ""; img.src = "/forum/foto/" + d.id; oud.replaceWith(img);
+      }).catch(function () { knop.firstChild.nodeValue = "Foto kiezen"; alert("Opladen mislukt."); });
+    });
+  });
+
+  document.querySelectorAll(".f-likeform").forEach(function (f) {
+    f.addEventListener("submit", function (e) {
+      e.preventDefault();
+      var b = f.querySelector("button");
+      fetch(f.action, { method: "POST", headers: { accept: "application/json" }, credentials: "same-origin" }).then(function (r) { return r.json(); }).then(function (d) {
+        if (!d.ok) return;
+        b.classList.toggle("aan", d.mijn); b.setAttribute("aria-pressed", d.mijn);
+        b.querySelector("span").textContent = d.aantal || "";
+      }).catch(function () { f.submit(); });
+    });
+  });
+
   var av = document.querySelector("[data-avatar]");
   if (av) av.addEventListener("change", function () {
     var f = av.files && av.files[0]; if (!f) return;

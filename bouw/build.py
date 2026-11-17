@@ -707,7 +707,7 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <h2>Hoe lang</h2>
   <p>We bewaren bestel- en betaalgegevens zo lang als de wettelijke boekhoudplicht vraagt.</p>
   <h2>Cookies</h2>
-  <p>Deze website plaatst geen tracking- of advertentiecookies. Als je inlogt, zetten we één cookie die nodig is om je ingelogd te houden. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
+  <p>Deze website plaatst geen tracking- of advertentiecookies. Als je inlogt, zetten we twee kleine cookies die nodig zijn om je ingelogd te houden en je meldingen te tonen. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
   <h2>Jouw rechten</h2>
   <p>Je kan je gegevens altijd opvragen, laten aanpassen of laten verwijderen via <a href="mailto:{site['email']}">{site['email']}</a>. Ben je niet tevreden, dan kan je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
 </div></section>""")

@@ -485,3 +485,31 @@ p strong,p b,.prose li strong{font-weight:600}
   .f-auteur{flex-direction:row;align-items:center;padding:12px 16px}.f-auteur small{display:inline}
   .acc-dl{grid-template-columns:1fr}.f-profiel{flex-direction:column;align-items:flex-start}
 }
+
+/* ---------- forum: garage, likes, volgen, meldingen ---------- */
+.acct-btn.ingelogd{border-color:var(--white)}
+.bel-count{background:#F57819;color:var(--white)}
+.f-waarom{background:var(--green);color:var(--white);border-radius:var(--r);padding:24px 26px;margin-bottom:18px}
+.f-waarom h2{font-size:clamp(26px,3vw,36px);margin-bottom:8px}.f-waarom p{max-width:75ch}
+.f-waarom a{color:var(--white)!important;text-decoration:underline}
+.f-waarom-tips{display:flex;gap:10px 22px;flex-wrap:wrap;margin-top:12px;font-size:15px;opacity:.95}
+.f-knoppen{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.f-volgform{display:inline}.f-volg{font-size:15px;padding:10px 16px}.f-volg.aan{background:var(--green);color:var(--white);border-color:var(--green)}
+.f-like{background:none;border:1px solid var(--sand-2);border-radius:99px;padding:2px 12px;font:inherit;font-size:14px;color:var(--muted);cursor:pointer}
+.f-like.aan{color:#C0392B;border-color:#E8B4AE;background:#FBEDEB}.f-likeform{display:inline}
+span.f-like{cursor:default}
+.f-tag{font-weight:700;text-decoration:none}
+.f-rit{display:inline-block;margin-left:8px;font-size:13px;font-weight:700;color:var(--green);background:#DCEFE2;border-radius:99px;padding:1px 10px}
+.f-ritblok{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;background:#DCEFE2;color:var(--green);border-radius:var(--r);padding:14px 18px;margin-bottom:12px}
+.f-ritblok small{color:var(--green);opacity:.85}
+.f-auteur-wagen{display:flex;gap:8px;align-items:center;font-size:13px;text-decoration:none;color:var(--ink)!important;margin-top:6px}
+.f-auteur-wagen img{width:44px;height:33px;object-fit:cover;border-radius:5px}.f-auteur-wagen em{font-style:normal;color:var(--muted)}
+.garage{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:14px;margin:6px 0 10px}
+.wagen{background:var(--white);border-radius:12px;overflow:hidden;margin:0;border:1px solid var(--sand-2)}
+.wagen-foto{display:block;width:100%;padding:0;border:0;background:var(--sand-2);cursor:zoom-in}.wagen-foto img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
+.wagen-foto.leeg{aspect-ratio:4/3;display:grid;place-items:center;font-size:42px;cursor:default}
+.wagen figcaption{padding:10px 12px;font-size:15px}.wagen figcaption span{color:var(--muted)}.wagen figcaption small{display:block;color:var(--muted)}.wagen figcaption p{font-size:14px;margin-top:4px}
+.wagen-mini{width:96px;height:72px;object-fit:cover;border-radius:8px;display:grid;place-items:center;background:var(--sand-2);font-size:32px}
+.garage-form .veld2{gap:12px}
+.meldingen{list-style:none;padding:0;margin:0}.meldingen li{padding:12px 0;border-bottom:1px solid var(--sand-2);display:flex;justify-content:space-between;gap:12px}
+.meldingen li.nieuw a{font-weight:800}.meldingen small{color:var(--muted);white-space:nowrap}
