@@ -60,7 +60,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
 <html lang="nl">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <title>{e(full_title)}</title>
 <meta name="description" content="{e(desc)}">{'<meta name="robots" content="noindex">' if noindex or path in ("/afrekenen", "/bedankt", "/404") else ""}
 <link rel="canonical" href="{canon}">

@@ -154,6 +154,11 @@
     document.addEventListener("click", function (e) { if (box && !box.contains(e.target)) sluit(); });
   })();
 
+  /* ---------- geen pinch-zoom op iPhone (Safari negeert user-scalable=no) ---------- */
+  ["gesturestart", "gesturechange", "gestureend"].forEach(function (t) { document.addEventListener(t, function (e) { e.preventDefault(); }, { passive: false }); });
+  var laatsteTik = 0;
+  document.addEventListener("touchend", function (e) { var nu = Date.now(); if (nu - laatsteTik < 300 && !e.target.closest("input,textarea,select,button,a")) e.preventDefault(); laatsteTik = nu; }, { passive: false });
+
   /* ---------- lightbox (met bladeren binnen een galerij) ---------- */
   var lb = document.getElementById("lightbox"), lbGroep = [], lbI = 0;
   function closeLightbox() { if (lb) lb.classList.remove("open"); }

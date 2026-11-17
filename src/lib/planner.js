@@ -35,7 +35,7 @@ async function sessie(request, env) {
 }
 
 function loginPagina(fout = "") {
-  return new Response(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  return new Response(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="robots" content="noindex,nofollow"><title>Terreinplanner · Rover &amp; Co</title>
 <style>
 @font-face{font-family:"Inter";font-weight:400;src:url(/assets/fonts/inter-latin-400-normal.woff2) format("woff2")}

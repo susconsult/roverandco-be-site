@@ -46,7 +46,7 @@ async function stuurCode(env, email, code) {
   return r.ok;
 }
 
-const loginPagina = (stap, { email = "", melding = "" } = {}) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+const loginPagina = (stap, { email = "", melding = "" } = {}) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="robots" content="noindex,nofollow"><title>Inloggen – Beheer Rover &amp; Co</title><style>${STIJL}
 .login{max-width:380px;margin:60px auto}.login input{width:100%;margin:6px 0 12px}.login button{width:100%}</style></head><body>
 <header><a href="/beheer">Rover &amp; Co beheer</a></header><main><form class="kaart login" method="post" action="/beheer/login">
@@ -176,7 +176,7 @@ export const pagina = (titel, inhoud, email) => {
   const aan = (inhoud.match(/<!--aan:([a-z]+)-->/) || [])[1] || "";
   const menu = MENU.map(([groep, items]) => `${groep ? `<div class="zb-groep">${groep}</div>` : ""}${items.map(([k, label, href, ic, teller]) =>
     `<a href="${href}" class="${k === aan ? "aan" : ""}">${icoon(ic)}<span>${label}</span>${teller ? `<b class="teller" data-teller="${teller}" hidden></b>` : ""}</a>`).join("")}`).join("");
-  return html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+  return html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="robots" content="noindex,nofollow"><title>${esc(titel)} – Beheer Rover &amp; Co</title><style>${STIJL}</style></head><body${email ? ' class="met-zb"' : ""}>
 ${email ? `<aside class="zb"><a class="zb-logo" href="/beheer"><img src="/assets/img/logo-licht.webp" alt="" width="34" height="34">Beheer</a>
 <button class="zb-menu" type="button" aria-expanded="false" onclick="this.parentNode.classList.toggle('open');this.setAttribute('aria-expanded',this.parentNode.classList.contains('open'))">Menu</button>
