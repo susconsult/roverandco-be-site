@@ -168,3 +168,7 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 .cb-re.mijn[data-re="hart"] svg{fill:#c0392b;stroke:#c0392b}
 .cb-bericht:not(:hover) .cb-re:not(.heeft){opacity:.45}
 @media(hover:none){.cb-bericht .cb-re:not(.heeft){opacity:.6}}
+
+.bel-btn{position:relative}.bel-btn.nieuw svg{animation:bel-schud 2.4s ease-in-out 1}
+@keyframes bel-schud{0%,100%{transform:rotate(0)}10%,30%{transform:rotate(-14deg)}20%,40%{transform:rotate(14deg)}50%{transform:rotate(0)}}
+@media(prefers-reduced-motion:reduce){.bel-btn.nieuw svg{animation:none}}

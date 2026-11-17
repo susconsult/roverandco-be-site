@@ -53,8 +53,9 @@ export async function meldNieuwBericht(env, { topic, catSlug, catNaam, auteur, t
   const voorw = ["(soort = 'topic' AND sleutel = ?)", "(soort = 'cat' AND sleutel = ?)"];
   const p = [String(topic.id), catSlug];
   if (tags.length) { voorw.push(`(soort = 'tag' AND sleutel IN (${tags.map(() => "?").join(",")}))`); p.push(...tags); }
-  const r = (await env.SHOP_DB.prepare(`SELECT DISTINCT v.lid_id FROM forum_volgen v JOIN leden l ON l.id = v.lid_id WHERE (${voorw.join(" OR ")}) AND v.lid_id <> ? AND l.geblokkeerd = 0`)
-    .bind(...p, auteur.id).all()).results || [];
+  const r = (await env.SHOP_DB.prepare(`SELECT DISTINCT v.lid_id FROM forum_volgen v JOIN leden l ON l.id = v.lid_id WHERE (${voorw.join(" OR ")}) AND v.lid_id <> ? AND l.geblokkeerd = 0
+    UNION SELECT t.lid_id FROM forum_topics t JOIN leden l ON l.id = t.lid_id WHERE t.id = ? AND t.lid_id <> ? AND l.geblokkeerd = 0`)
+    .bind(...p, auteur.id, topic.id, auteur.id).all()).results || [];
   const tekst = nieuwTopic ? `${auteur.gebruikersnaam} startte "${topic.titel}" in ${catNaam}` : `${auteur.gebruikersnaam} reageerde in "${topic.titel}"`;
   await meld(env, r.map((x) => x.lid_id), tekst, link);
 }

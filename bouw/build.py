@@ -80,6 +80,9 @@ def layout(path, title, desc, body, hero=False, noindex=False):
     <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="84" height="84"></a>
     <ul class="menu" id="menu">{menu}</ul>
     <div class="nav-right">
+      <a class="cart-btn bel-btn" href="/account/meldingen" aria-label="Meldingen" title="Meldingen" hidden>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/></svg>
+      </a>
       <a class="cart-btn acct-btn" href="/account" aria-label="Mijn account" title="Mijn account">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>
       </a>

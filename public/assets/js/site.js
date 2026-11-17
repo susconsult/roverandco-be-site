@@ -314,6 +314,9 @@
   /* ---------- gratis-account-band op home verbergen voor wie al een account heeft ---------- */
   if (/(^|; )rc_lid_aan=1/.test(document.cookie)) document.querySelectorAll("[data-gast]").forEach(function (el) { el.hidden = true; });
 
+  var bel = document.querySelector(".bel-btn");
+  if (bel && /(^|; )rc_lid_aan=1/.test(document.cookie)) bel.hidden = false;
+
   /* ---------- ingelogd? belletje met meldingen + gegevens invullen in afrekenen en inschrijven ---------- */
   var formulieren = ["checkout-form", "inschrijf-form"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
   if (/(^|; )rc_lid_aan=1/.test(document.cookie) || formulieren.length) {
@@ -322,10 +325,13 @@
       var acc = document.querySelector(".acct-btn");
       if (acc) {
         acc.classList.add("ingelogd");
-        if (ik.meldingen) {
-          acc.href = "/account/meldingen";
-          acc.setAttribute("aria-label", ik.meldingen + " nieuwe meldingen");
-          var tel = document.createElement("span"); tel.className = "cart-count bel-count"; tel.textContent = ik.meldingen > 99 ? "99+" : ik.meldingen; acc.append(tel);
+        if (bel) {
+          bel.hidden = false;
+          if (ik.meldingen) {
+            bel.setAttribute("aria-label", ik.meldingen + " nieuwe meldingen");
+            bel.classList.add("nieuw");
+            var tel = document.createElement("span"); tel.className = "cart-count bel-count"; tel.textContent = ik.meldingen > 99 ? "99+" : ik.meldingen; bel.append(tel);
+          }
         }
       }
       formulieren.forEach(function (f) {
