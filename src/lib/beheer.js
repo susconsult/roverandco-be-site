@@ -4,7 +4,7 @@
 // Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
-import { beheerLeden, hoofdTabs } from "./beheer-leden.js";
+import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
   status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
@@ -110,12 +110,33 @@ async function uitloggen(request, env) {
 const STIJL = `
 :root{--g:#1F3B2A;--z:#ECE6D6;--i:#141815;--m:#5B625C}
 @font-face{font-family:"Inter";font-weight:400;src:url(/assets/fonts/inter-latin-400-normal.woff2) format("woff2")}@font-face{font-family:"Inter";font-weight:700;src:url(/assets/fonts/inter-latin-700-normal.woff2) format("woff2")}*{box-sizing:border-box}body{margin:0;font:15px/1.5 Inter,system-ui,sans-serif;color:var(--i);background:#f6f4ee}
-header{background:var(--g);color:#fff;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
-header a{color:#fff;text-decoration:none;font-weight:700}header small{opacity:.8}
-main{max-width:1200px;margin:0 auto;padding:20px}
-nav.tabs{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap}
-nav.tabs a{padding:8px 14px;border-radius:8px;background:#fff;color:var(--i);text-decoration:none;border:1px solid #ddd}
-nav.tabs a.aan{background:var(--g);color:#fff;border-color:var(--g)}
+header{background:var(--g);color:#fff;padding:14px 20px}
+header a{color:#fff;text-decoration:none;font-weight:700}
+main{max-width:1160px;margin:0 auto;padding:28px 28px 60px}
+body.met-zb main{margin-left:240px;max-width:none}
+.pag-titel{font-size:26px;margin:0 0 18px;letter-spacing:-.01em}
+.zb{position:fixed;inset:0 auto 0 0;width:240px;background:var(--g);color:#fff;display:flex;flex-direction:column;padding:18px 12px;overflow-y:auto;z-index:5}
+.zb-logo{display:flex;align-items:center;gap:10px;color:#fff;text-decoration:none;font-weight:700;font-size:17px;padding:0 8px 18px}
+.zb nav{display:flex;flex-direction:column;gap:2px}
+.zb nav a{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;color:rgba(255,255,255,.85);text-decoration:none;font-weight:500}
+.zb nav a:hover{background:rgba(255,255,255,.08);color:#fff}.zb nav a.aan{background:rgba(255,255,255,.16);color:#fff;font-weight:700}
+.zb nav svg{width:19px;height:19px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.zb nav span{flex:1}
+.teller{background:#c9a227;color:#1b1b1b;border-radius:99px;padding:1px 8px;font-size:12px}.teller.rood{background:#e24b4a;color:#fff}
+.zb-groep{font-size:11px;letter-spacing:.12em;text-transform:uppercase;opacity:.55;padding:16px 10px 6px}
+.zb-voet{margin-top:auto;padding:16px 10px 0;display:grid;gap:4px;font-size:13px}.zb-voet a{color:rgba(255,255,255,.85)}.zb-voet small{opacity:.6;overflow:hidden;text-overflow:ellipsis}
+.zb-menu{display:none}
+nav.tabs{display:inline-flex;gap:4px;margin-bottom:16px;flex-wrap:wrap;background:#fff;padding:4px;border-radius:10px;border:1px solid #e6e1d4}
+nav.tabs a{padding:7px 13px;border-radius:7px;color:var(--m);text-decoration:none;font-size:14px;font-weight:500}
+nav.tabs a:hover{color:var(--i)}nav.tabs a.aan{background:var(--g);color:#fff}
+.tegels{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:22px}
+.tegel{background:#fff;border-radius:14px;padding:18px;text-decoration:none;color:var(--i);border:1px solid #e9e4d7;transition:transform .15s,box-shadow .15s;display:grid;gap:2px}
+a.tegel:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.06)}
+.tegel small{color:var(--m);font-size:13px}.tegel b{font-size:34px;line-height:1.1}.tegel span{color:var(--g);font-weight:600;font-size:13px}
+.tegel.let b{color:#a32d2d}.tegel.ok b{color:var(--g)}
+.twee{display:grid;grid-template-columns:1.3fr 1fr;gap:16px}
+@media(max-width:900px){body.met-zb main{margin-left:0;padding:18px}.zb{position:sticky;top:0;width:auto;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center;padding:10px 14px}.zb-logo{padding:0;flex:1}.zb-menu{display:block;background:rgba(255,255,255,.12);border:0;color:#fff}
+.zb nav,.zb-voet{display:none;width:100%}.zb.open nav,.zb.open .zb-voet{display:flex}.zb.open .zb-voet{display:grid}.zb nav{padding-top:10px}.twee{grid-template-columns:1fr}.tegels{grid-template-columns:1fr 1fr;gap:10px}.tegel{padding:14px}.tegel b{font-size:28px}.pag-titel{font-size:22px}}
 form.filter{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
 input,select,textarea,button{font:inherit;padding:8px 10px;border:1px solid #ccc;border-radius:8px;background:#fff}
 button,.knop{background:var(--g);color:#fff;border-color:var(--g);cursor:pointer;text-decoration:none;display:inline-block;padding:8px 14px;border-radius:8px}
@@ -132,9 +153,39 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 .leeg{padding:30px;text-align:center;color:var(--m)}
 @media(max-width:700px){dl{grid-template-columns:1fr}th.mob,td.mob{display:none}}`;
 
-export const pagina = (titel, inhoud, email) => html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex,nofollow"><title>${esc(titel)} – Beheer Rover &amp; Co</title><style>${STIJL}</style></head><body>
-<header><a href="/beheer">Rover &amp; Co beheer</a><small>${esc(email || "")} · <a href="/beheer/uitloggen" style="font-weight:400">Uitloggen</a></small></header><main>${inhoud}</main></body></html>`);
+const MENU = [
+  ["", [["home", "Te doen", "/beheer", "home"]]],
+  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"]]],
+  ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
+  ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"]]],
+];
+const I = {
+  home: '<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>',
+  zak: '<path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
+  ticket: '<path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4Z"/><path d="M14 7v12" stroke-dasharray="2 2"/>',
+  leden: '<circle cx="9" cy="8" r="3"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.2c2.8.4 5 2.8 5 5.8"/>',
+  vlag: '<path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/>',
+  lijst: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
+  shirt: '<path d="M8 4l-5 3 2 4 3-1v10h8V10l3 1 2-4-5-3c0 2-2 3-4 3S8 6 8 4Z"/>',
+  kalender: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+};
+export const icoon = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${I[n] || ""}</svg>`;
+
+export const pagina = (titel, inhoud, email) => {
+  const aan = (inhoud.match(/<!--aan:([a-z]+)-->/) || [])[1] || "";
+  const menu = MENU.map(([groep, items]) => `${groep ? `<div class="zb-groep">${groep}</div>` : ""}${items.map(([k, label, href, ic, teller]) =>
+    `<a href="${href}" class="${k === aan ? "aan" : ""}">${icoon(ic)}<span>${label}</span>${teller ? `<b class="teller" data-teller="${teller}" hidden></b>` : ""}</a>`).join("")}`).join("");
+  return html(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow"><title>${esc(titel)} – Beheer Rover &amp; Co</title><style>${STIJL}</style></head><body${email ? ' class="met-zb"' : ""}>
+${email ? `<aside class="zb"><a class="zb-logo" href="/beheer"><img src="/assets/img/logo-licht.webp" alt="" width="34" height="34">Beheer</a>
+<button class="zb-menu" type="button" aria-expanded="false" onclick="this.parentNode.classList.toggle('open');this.setAttribute('aria-expanded',this.parentNode.classList.contains('open'))">Menu</button>
+<nav>${menu}</nav>
+<div class="zb-voet"><a href="/" target="_blank" rel="noopener">Naar de site</a><small>${esc(email)}</small><a href="/beheer/uitloggen">Uitloggen</a></div></aside>`
+  : `<header><a href="/beheer">Rover &amp; Co beheer</a></header>`}
+<main><h1 class="pag-titel">${esc(titel)}</h1>${inhoud}</main>
+${email ? `<script>fetch("/beheer/api/tellers",{credentials:"same-origin"}).then(function(r){return r.json()}).then(function(t){document.querySelectorAll("[data-teller]").forEach(function(b){var n=t[b.dataset.teller];if(n){b.textContent=n>99?"99+":n;b.hidden=false;if(b.dataset.teller==="meldingen")b.classList.add("rood")}})}).catch(function(){})</script>` : ""}
+</body></html>`);
+};
 
 function badge(status) {
   const s = String(status);
@@ -181,7 +232,7 @@ async function lijst(url, env, email) {
 
   const tab = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer?soort=${s}">${label}</a>`;
   const ftab = (f, label) => `<a class="${filter === f ? "aan" : ""}" href="${esc(q({ filter: f }))}">${label}</a>`;
-  return pagina("Overzicht", `
+  return pagina(soort === "inschrijving" ? "Inschrijvingen" : "Bestellingen", `
 ${hoofdTabs(soort)}
 <nav class="tabs">${ftab("echt", "Betaald en bevestigd")}${ftab("open", "Nog af te handelen")}${ftab("wacht", "Wacht op betaling")}${ftab("test", "Test")}${ftab("alle", "Alles")}</nav>
 <form class="filter" method="get" action="/beheer"><input type="hidden" name="soort" value="${soort}"><input type="hidden" name="filter" value="${filter}">
@@ -207,7 +258,7 @@ async function detail(nummer, env, email, melding = "") {
        <dt>Artikels</dt><dd><pre>${esc(artikelTekst(d))}</pre></dd><dt>Subtotaal</dt><dd>${eur(d.subtotaal)}</dd><dt>Verzending</dt><dd>${eur(d.verzending)}</dd><dt>Steun</dt><dd>${eur(d.donatie)}</dd>`
     : `<dt>Activiteit</dt><dd>${esc(d.activiteit_titel)}</dd><dt>Onderdelen</dt><dd><pre>${esc(lijnTekst(d))}</pre></dd>
        ${d.tijdslot ? `<dt>Tijdslot</dt><dd>${esc(d.tijdslot)}</dd>` : ""}${d.wagen ? `<dt>Land Rover</dt><dd>${esc(d.wagen)}</dd>` : ""}`;
-  return pagina(r.nummer, `
+  return pagina(r.nummer, `<!--aan:${r.soort}-->
 <p><a href="/beheer?soort=${r.soort}">← Terug naar ${r.soort === "bestelling" ? "bestellingen" : "inschrijvingen"}</a></p>
 ${melding ? `<div class="kaart">${esc(melding)}</div>` : ""}
 <div class="kaart"><h2>${esc(r.nummer)} ${badge(r.status)}${r.test ? ' <span class="badge b-test">test</span>' : ""}</h2>
@@ -282,6 +333,7 @@ export async function beheer(request, env, url) {
     const origin = request.headers.get("origin");
     if (origin && origin !== url.origin) return html("Geweigerd.", 403);
   }
+  if ((p === "/beheer" || p === "/beheer/") && !url.searchParams.get("soort")) return thuis(env, w.email);
   if (p === "/beheer" || p === "/beheer/") return lijst(url, env, w.email);
   const ld = await beheerLeden(request, env, url, w.email);
   if (ld) return ld;

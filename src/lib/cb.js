@@ -208,8 +208,9 @@ async function melden(request, env, url, lid, id) {
   const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
   await mail(env, {
     aan, onderwerp: `Melding op de CB: kanaal ${b.nr}`,
-    tekst: `Er werd een bericht gemeld op de CB.\n\nKanaal: ${b.nr} · ${b.kanaal}\nBericht van: ${b.gebruikersnaam || "?"}${b.nr === ALBERT ? " (toont als Albert)" : ""}\nGemeld door: ${lid.gebruikersnaam}\n\nBericht:\n${b.audio_id ? `(spraakbericht) ${url.origin}/cb/audio/${b.audio_id}` : b.tekst}\n\nVerwijderen kan op ${url.origin}/cb/${b.nr} (ingelogd als moderator). Het lid bekijken of blokkeren: ${url.origin}/beheer/leden/${b.lid_id}\nCB-berichten verdwijnen vanzelf na ${CB_UREN} uur.`,
+    tekst: `Er werd een bericht gemeld op de CB.\n\nKanaal: ${b.nr} · ${b.kanaal}\nBericht van: ${b.gebruikersnaam || "?"}${b.nr === ALBERT ? " (toont als Albert)" : ""}\nGemeld door: ${lid.gebruikersnaam}\n\nBericht:\n${b.audio_id ? `(spraakbericht) ${url.origin}/cb/audio/${b.audio_id}` : b.tekst}\n\nVerwijderen kan op ${url.origin}/cb/${b.nr} (ingelogd als moderator). Het lid bekijken of blokkeren: ${url.origin}/beheer/leden/${b.lid_id}\nAlle meldingen: ${url.origin}/beheer/meldingen\nCB-berichten verdwijnen vanzelf na ${CB_UREN} uur.`,
   });
+  await env.SHOP_DB.prepare("INSERT INTO forum_meldingen (bericht_id, cb_id, lid_id, reden, aangemaakt) VALUES (0, ?, ?, ?, ?)").bind(b.id, lid.id, "Gemeld op de CB", nu()).run();
   await log(env, lid.id, "cb", `CB-bericht gemeld op kanaal ${b.nr}`, `/cb/${b.nr}`);
   await log(env, b.lid_id, "cb", `CB-bericht van dit lid werd gemeld op kanaal ${b.nr}: ${b.audio_id ? "(spraakbericht)" : b.tekst.slice(0, 120)}`, `/cb/${b.nr}`);
   return json({ ok: true });
