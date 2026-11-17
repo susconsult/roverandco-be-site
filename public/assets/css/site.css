@@ -608,3 +608,9 @@ span.f-like{cursor:default}
 }
 .volgende{padding-right:56px}
 @media(max-width:880px){.garage-rij{grid-template-columns:1fr 1fr;gap:12px}.garage-kaart>span{padding:10px 12px;font-size:13px}.tegel-b b{font-size:24px}}
+/* hero v2: titel schaalt mee met de hoogte van het scherm en schuift nooit onder de menubalk */
+.hero-nieuw{min-height:max(88svh,640px);align-items:flex-end}
+.hero-nieuw .hero-in{padding-top:120px}
+.hero-nieuw h1{font-size:clamp(48px,min(7.2vw,11.5vh),116px);max-width:16ch;line-height:.92}
+.hero-nieuw p{font-size:clamp(17px,1.6vw,21px);margin:16px 0 26px}
+@media(max-width:880px){.hero-nieuw h1{font-size:clamp(44px,12vw,64px)}.hero-nieuw .hero-in{padding-top:100px}}
