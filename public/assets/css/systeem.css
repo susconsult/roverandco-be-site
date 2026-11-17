@@ -218,3 +218,6 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 @media(max-width:600px){.acc-menu{position:fixed;left:12px;right:12px;top:76px;width:auto}}
 .oo-intro{color:rgba(255,255,255,.85);max-width:640px;margin:-6px 0 24px}.forum-band .oo-partners a{box-shadow:none}
 .forum-band .oo-partners{grid-template-columns:repeat(4,1fr)}@media(max-width:880px){.forum-band .oo-partners{grid-template-columns:repeat(2,1fr)}}
+fieldset{min-width:0;max-width:100%}.co-blok input,.co-blok select,.co-blok textarea{max-width:100%}
+@media(max-width:880px){.checkout{grid-template-columns:minmax(0,1fr)}.checkout>*{min-width:0}}
+.akkoord{min-width:0;overflow-wrap:anywhere}.akkoord>*{min-width:0}.akkoord a,.akkoord span{white-space:normal}

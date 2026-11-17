@@ -496,7 +496,7 @@ async function profiel(request, env, url, lid, naam) {
   const wagens = (await garages(env, [p.id]))[p.id] || [];
   return pagina(env, request, {
     titel: `${p.gebruikersnaam} – Forum`, noindex: true,
-    inhoud: banner("Forum", p.gebruikersnaam, "Lid van het Rover & Co-forum.") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel(esc(p.gebruikersnaam))}
+    inhoud: sjabloonBanner("Forum", p.gebruikersnaam, "Lid van het Rover & Co-forum.", [["Forum", "/forum"], [p.gebruikersnaam]], wagens.find((w) => w.foto_id) ? `/forum/foto/${wagens.find((w) => w.foto_id).foto_id}` : "leden-vuur-avond") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Garage</h2>
       ${url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : ""}

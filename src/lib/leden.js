@@ -498,6 +498,8 @@ async function garage(request, env, url, lid) {
     const v = [tekst(f.get("naam"), 60) || null, type, bouwjaar, foto, tekst(f.get("omschrijving"), 300) || null];
     if (eigen) await env.SHOP_DB.prepare("UPDATE lid_wagens SET naam = ?, type = ?, bouwjaar = ?, foto_id = ?, omschrijving = ? WHERE id = ? AND lid_id = ?").bind(...v, id, lid.id).run();
     else if (wagens.length < 30) await env.SHOP_DB.prepare("INSERT INTO lid_wagens (naam, type, bouwjaar, foto_id, omschrijving, lid_id, volgorde, aangemaakt) VALUES (?, ?, ?, ?, ?, ?, ?, ?)").bind(...v, lid.id, wagens.length, new Date().toISOString()).run();
+    // Geen eigen profielfoto? Dan wordt de foto van je eerste Land Rover je profielfoto.
+    if (!lid.avatar_id) await env.SHOP_DB.prepare("UPDATE leden SET avatar_id = (SELECT foto_id FROM lid_wagens WHERE lid_id = ? AND foto_id IS NOT NULL ORDER BY volgorde, id LIMIT 1) WHERE id = ? AND avatar_id IS NULL").bind(lid.id, lid.id).run();
     await log(env, lid.id, "garage", `${eigen ? "Wagen gewijzigd" : "Wagen toegevoegd"}: ${type}${foto && foto !== eigen?.foto_id ? " (nieuwe foto)" : ""}`, foto ? `/forum/foto/${foto}` : null);
     return naar("/account/garage?ok=1");
   }

@@ -12,7 +12,7 @@ export const datum = (iso, kort = false) => {
 // Kruimelpad: [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
 export const kruimel = (delen = []) => delen === "slot" ? "<!--kruim-->" : delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
 const BANNERFOTO = { "Mijn account": "leden-daktenten-rij", Forum: "leden-vuur-avond", "Rover & Co": "leden-vuur-avond" };
-export const bannerFoto = (naam) => `<img src="/assets/img/${naam}-s.webp" srcset="/assets/img/${naam}-s.webp 800w, /assets/img/${naam}.webp 1600w" sizes="100vw" alt="" fetchpriority="high">`;
+export const bannerFoto = (naam) => naam.startsWith("/") ? `<img src="${esc(naam)}" alt="" fetchpriority="high">` : `<img src="/assets/img/${naam}-s.webp" srcset="/assets/img/${naam}-s.webp 800w, /assets/img/${naam}.webp 1600w" sizes="100vw" alt="" fetchpriority="high">`;
 export function banner(eyebrow, titel, intro = "", kruim = null, foto = null) {
   return `<section class="banner banner-foto">${bannerFoto(foto || BANNERFOTO[eyebrow] || "968")}<div class="wrap">${kruimel(kruim || [[eyebrow === "Rover & Co" ? titel : eyebrow]])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
 }
