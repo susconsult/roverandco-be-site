@@ -78,7 +78,7 @@ const isNieuw = (lid, t, gelezen) => !!lid && t.laatste_op > (gelezen[t.id] || l
 
 /* ---------------- stukjes opmaak ---------------- */
 
-const banner = (a, b, c = "") => sjabloonBanner(a, b, c, []); // forum heeft zijn eigen kruimelpad onder de banner
+const banner = (a, b, c = "") => sjabloonBanner(a, b, c, "slot"); // forum heeft zijn eigen kruimelpad onder de banner
 const kruimel = (...delen) => `<nav class="f-kruimel" aria-label="Kruimelpad"><a href="/">Home</a> <span>›</span> <a href="/forum">Forum</a>${delen.map((d) => ` <span>›</span> ${d}`).join("")}</nav>`;
 
 function balk(lid, pad) {
@@ -142,11 +142,7 @@ async function index(request, env, url, lid) {
   const toonStats = stats.leden >= 25;
   return pagina(env, request, {
     titel: "Forum", pad: "/forum", desc: "Het forum van Rover & Co: techniek, onderdelen, ritten en alles over Land Rover. Lezen kan iedereen, posten met een gratis account.",
-    inhoud: `<section class="hero hero-nieuw forum-hero" style="padding:0">${bannerFoto("leden-vuur-avond").replace("<img ", '<img class="hero-img" ')}
-      <div class="wrap hero-in">${hoofdKruimel([["Forum"]])}<div class="eyebrow" style="color:#CFE3D4">Rover &amp; Co forum</div><h1>Rond het kampvuur</h1>
-      <p>Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.</p>
-      <div class="ctas"><a href="${lid ? "/forum/c/cafe/nieuw" : "/account/registreren?terug=/forum"}" class="btn btn-white">${lid ? "Start een topic" : "Maak je gratis account"}</a><a href="/forum/nieuw" class="btn btn-ghost-w">Recente berichten</a></div></div>
-      ${toonStats ? `<div class="forum-stats"><span><b>${stats.leden}</b>leden</span><span><b>${stats.topics}</b>topics</span><span><b>${stats.berichten}</b>berichten</span></div>` : ""}</section>
+    inhoud: sjabloonBanner("Rover & Co forum", "Rond het kampvuur", "Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.", [["Forum"]], "leden-vuur-avond") + `
     <div class="wrap waarom-kaarten">
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg><b>Geen algoritme, geen reclame</b><span>Niemand verdient aan jouw foto's. Gewoon delen en elkaar helpen.</span></div>
       <div>${ico("pin")}<b>Spreek af om samen te rijden</b><span>Zin in een roadbook zaterdag? Post het, wie meewil reageert.</span></div>

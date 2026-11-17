@@ -608,7 +608,7 @@ def gerelateerd(a, n=3):
 for a in artikels:
     concept = a.get("status") == "concept"
     body = f"""
-<section class="banner">{'' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap">{kruimel([("Blog", "/blog"), (a['titel'],)])}<div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
+<section class="banner banner-foto">{'' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else img(a['foto'], a['foto_alt'], prio=True)}<div class="wrap">{kruimel([("Blog", "/blog"), (a['titel'],)])}<div class="eyebrow">{e(a['rubriek'])}{' · Cornerstone' if a.get('cornerstone') == 'ja' else ''}</div><h1>{e(a['titel'])}</h1></div></section>
 <section><article class="narrow prose blogtekst">
   {'<div class="testbanner" role="note"><strong>Concept.</strong> Dit artikel is nog niet gepubliceerd en niet zichtbaar voor zoekmachines.</div>' if concept else ''}
   <p class="artikel-meta">{nl_datum(a['datum'])} · {a['minuten']} min lezen</p>

@@ -10,7 +10,7 @@ export const datum = (iso, kort = false) => {
 };
 
 // Kruimelpad: [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
-export const kruimel = (delen = []) => delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
+export const kruimel = (delen = []) => delen === "slot" ? "<!--kruim-->" : delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
 const BANNERFOTO = { "Mijn account": "leden-daktenten-rij", Forum: "leden-vuur-avond", "Rover & Co": "leden-vuur-avond" };
 export const bannerFoto = (naam) => `<img src="/assets/img/${naam}-s.webp" srcset="/assets/img/${naam}-s.webp 800w, /assets/img/${naam}.webp 1600w" sizes="100vw" alt="" fetchpriority="high">`;
 export function banner(eyebrow, titel, intro = "", kruim = null, foto = null) {
@@ -34,6 +34,12 @@ export async function pagina(env, request, { titel, desc = "", inhoud, pad, noin
   if (noindex) h = h.replace("</title>", '</title>\n<meta name="robots" content="noindex">');
   const deel = "/" + (pad.split("/")[1] || "");
   h = h.replace(`<a href="${deel}">`, `<a href="${deel}" aria-current="page">`);
+  // Een kruimelpad dat in de inhoud staat (forum) verhuist naar de banner, zodat elke pagina hetzelfde oogt.
+  if (inhoud.includes("<!--kruim-->")) {
+    const m = inhoud.match(/<nav class="f-kruimel"[^>]*>[\s\S]*?<\/nav>/);
+    inhoud = inhoud.replace("<!--kruim-->", m ? m[0].replace('class="f-kruimel"', 'class="kruimel"') : "");
+    if (m) inhoud = inhoud.replace(/(<\/section>[\s\S]*?)<nav class="f-kruimel"[^>]*>[\s\S]*?<\/nav>/, "$1");
+  }
   h = h.replace("__INHOUD__", () => inhoud);
   const hdr = { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", ...headers };
   if (noindex || url.hostname.endsWith(".workers.dev")) hdr["x-robots-tag"] = "noindex, nofollow";

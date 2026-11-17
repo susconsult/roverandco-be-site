@@ -34,3 +34,20 @@ small{font-size:var(--fs-sm)}
 .ev-stack .ev h3{font-size:var(--fs-h3)}
 .lines p,.f-citaat,.f-citaat cite,.betaal-met{font-family:var(--body)}
 .lines p{font-size:var(--fs-ui)}
+/* elke banner even hoog; kruimelpad, label en titel staan op elke pagina op dezelfde plek */
+.banner-foto{min-height:440px;padding:150px 0 56px;box-sizing:border-box}
+.banner-foto p{max-width:60ch}
+@media(max-width:880px){.banner-foto{min-height:340px;padding:118px 0 40px}}
+/* home: geen dubbele witruimte tussen secties met dezelfde achtergrond */
+.tegels-sec{padding:48px 0 0}
+.tegels-sec+section,.garage-sec+section{padding-top:var(--sec-kort)}
+.garage-sec{padding-bottom:0}
+/* forum: waarom-kaarten liggen over de banner, net als op de home */
+.forum-layout{padding-top:var(--sec-kort)}
+.waarom-kaarten{margin-top:-48px}
+@media(max-width:880px){.waarom-kaarten{margin-top:-28px}}
+@media(max-width:880px){.banner-foto{min-height:410px}}
+.kruimel{flex-wrap:nowrap;white-space:nowrap;min-width:0}.kruimel [aria-current]{min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* kaders met korte uitleg: interfaceletter */
+.kal-indienen p,.schrijf-mee p,.schrijf-mee a,.contact-grid .rubriek p,.contact-grid .rubriek a{font-family:var(--body);font-size:var(--fs-ui)}
+.forum-band p{font-family:var(--tekst);font-size:var(--fs-lead)}
