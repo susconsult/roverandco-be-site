@@ -29,7 +29,7 @@ Neem telkens het eerste onderwerp dat nog niet afgevinkt is, in de lijst van die
 
 ## Onderwerpen Dolf (technisch)
 
-- [ ] Remmen van een Series: trommelremmen afstellen en ontluchten
+- [x] Remmen van een Series: trommelremmen afstellen en ontluchten
 - [ ] Het koelsysteem van een klassieke Land Rover
 - [ ] 200Tdi en 300Tdi: de verschillen
 - [ ] De distributieriem van een Tdi
