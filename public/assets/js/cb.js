@@ -82,7 +82,7 @@
     fetch("/api/cb/" + nr + "?na=" + laatste, { credentials: "same-origin" }).then(function (r) {
       if (r.status === 401) { location.href = "/account/inloggen?terug=/cb/" + nr; return null; }
       return r.json();
-    }).then(function (d) { if (d) { toon(d.berichten || []); if (d.reacties) zetReacties(d.reacties); meter(d.online || 0); badges(d.kanalen); } })
+    }).then(function (d) { if (d) { toon(d.berichten || []); if (d.reacties) zetReacties(d.reacties); (d.weg || []).forEach(function (id) { var x = document.getElementById("c" + id); if (x) x.remove(); }); meter(d.online || 0); badges(d.kanalen); } })
       .catch(function () {}).then(function () { bezig = false; });
   }
   (function lus() { setTimeout(function () { haal(); lus(); }, document.hidden ? 20000 : 4000); })();

@@ -206,7 +206,8 @@ async function ophalen(env, url, lid, nr) {
   await gelezen(env, lid, nr, b.at(-1)?.id);
   await aanwezig(env, lid);
   const lijst = await kanalen(env, lid);
-  return json({ berichten: b, reacties: await reacties(env, nr, lid), online: await online(env), kanalen: lijst.map((x) => ({ nr: x.nr, naam: x.naam, ongelezen: x.nr === nr ? 0 : x.ongelezen, lamp: lamp(x) })) });
+  const weg = ((await env.SHOP_DB.prepare("SELECT id FROM cb_berichten WHERE nr = ? AND verwijderd = 1 AND aangemaakt > ?").bind(nr, grens()).all()).results || []).map((x) => x.id);
+  return json({ berichten: b, weg, reacties: await reacties(env, nr, lid), online: await online(env), kanalen: lijst.map((x) => ({ nr: x.nr, naam: x.naam, ongelezen: x.nr === nr ? 0 : x.ongelezen, lamp: lamp(x) })) });
 }
 
 async function zenden(request, env, url, lid, nr) {
