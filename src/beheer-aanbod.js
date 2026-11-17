@@ -43,7 +43,7 @@ const STIJL = `<style>
 .veld label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}.veld input,.veld select,.veld textarea{width:100%}
 .veld small{display:block;color:var(--m);font-size:12px;margin-top:3px}
 .kaart h3{margin:0 0 8px;font-size:16px}.rij{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:6px}
-.rij input[type=text],.rij input:not([type]){flex:1;min-width:90px}.rij .smal{width:90px;flex:none}
+.rij input[type=text],.rij input:not([type]){flex:1;min-width:90px}.rij input.smal,.rij .smal{width:90px;flex:none;min-width:0}
 .groep{border:1px solid #e3ddcc;border-radius:10px;padding:12px;margin-bottom:10px;background:#fbfaf6}
 .knop.klein{padding:5px 10px;font-size:13px}.knop.rood{background:#a32d2d;border-color:#a32d2d}.knop.grijs{background:#fff;color:var(--i);border-color:#ccc}
 .fotos{display:flex;gap:10px;flex-wrap:wrap}.foto{width:120px;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff;font-size:12px}
