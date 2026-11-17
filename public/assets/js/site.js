@@ -154,22 +154,44 @@
     document.addEventListener("click", function (e) { if (box && !box.contains(e.target)) sluit(); });
   })();
 
-  /* ---------- lightbox ---------- */
-  var lb = document.getElementById("lightbox");
+  /* ---------- lightbox (met bladeren binnen een galerij) ---------- */
+  var lb = document.getElementById("lightbox"), lbGroep = [], lbI = 0;
   function closeLightbox() { if (lb) lb.classList.remove("open"); }
-  document.querySelectorAll("[data-full]").forEach(function (b) {
-    b.addEventListener("click", function () {
-      lb.querySelector("img").src = b.dataset.full;
-      lb.querySelector("img").alt = b.querySelector("img").alt;
-      var cap = lb.querySelector(".lb-onderschrift");
-      if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
-      cap.textContent = b.dataset.onderschrift || "";
-      if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
-      cap.hidden = !b.dataset.onderschrift;
-      lb.classList.add("open");
-    });
+  function lbToon(b) {
+    lb.querySelector("img").src = b.dataset.full;
+    lb.querySelector("img").alt = (b.querySelector("img") || {}).alt || "";
+    var cap = lb.querySelector(".lb-onderschrift");
+    if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
+    cap.textContent = b.dataset.onderschrift || (lbGroep.length > 1 ? (lbI + 1) + " / " + lbGroep.length : "");
+    if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
+    cap.hidden = !cap.textContent;
+    lb.classList.toggle("meer", lbGroep.length > 1);
+  }
+  function lbStap(d) { if (lbGroep.length < 2) return; lbI = (lbI + d + lbGroep.length) % lbGroep.length; lbToon(lbGroep[lbI]); }
+  if (lb && !lb.querySelector(".lb-vorige")) {
+    lb.insertAdjacentHTML("beforeend", '<span class="lb-pijl lb-vorige" role="button" tabindex="0" aria-label="Vorige foto">‹</span><span class="lb-pijl lb-volgende" role="button" tabindex="0" aria-label="Volgende foto">›</span>');
+  }
+  document.addEventListener("click", function (e) {
+    var b = e.target.closest("[data-full]");
+    if (!b || !lb) return;
+    lbGroep = b.dataset.groep ? Array.prototype.slice.call(document.querySelectorAll('[data-full][data-groep="' + b.dataset.groep + '"]')) : [b];
+    lbI = Math.max(0, lbGroep.indexOf(b));
+    lbToon(b); lb.classList.add("open");
   });
-  if (lb) lb.addEventListener("click", function (e) { if (e.target === lb || e.target.tagName === "BUTTON") closeLightbox(); });
+  if (lb) {
+    lb.addEventListener("click", function (e) {
+      if (e.target.closest(".lb-vorige")) return lbStap(-1);
+      if (e.target.closest(".lb-volgende")) return lbStap(1);
+      if (e.target === lb || e.target.closest("button")) closeLightbox();
+    });
+    document.addEventListener("keydown", function (e) {
+      if (!lb.classList.contains("open")) return;
+      if (e.key === "Escape") closeLightbox(); else if (e.key === "ArrowLeft") lbStap(-1); else if (e.key === "ArrowRight") lbStap(1);
+    });
+    var x0 = null;
+    lb.addEventListener("touchstart", function (e) { x0 = e.touches[0].clientX; }, { passive: true });
+    lb.addEventListener("touchend", function (e) { if (x0 === null) return; var dx = e.changedTouches[0].clientX - x0; if (Math.abs(dx) > 50) lbStap(dx < 0 ? 1 : -1); x0 = null; });
+  }
 
   /* ---------- afrekenen ---------- */
   var co = document.getElementById("checkout-form");

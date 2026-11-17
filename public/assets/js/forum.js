@@ -35,23 +35,54 @@
     ed.querySelectorAll("[data-tag]").forEach(function (k) {
       k.addEventListener("click", function () { var t = k.dataset.tag; invoegen(ta, "[" + t + "]", "[/" + t + "]"); });
     });
-    var inp = ed.querySelector("[data-foto]");
-    if (inp) inp.addEventListener("change", function () {
-      var lijst = Array.prototype.slice.call(inp.files || [], 0, 10), klaar = 0;
-      if (!lijst.length) return;
-      st.textContent = "Foto's opladen…";
-      lijst.reduce(function (p, f) {
+    var inp = ed.querySelector("[data-foto]"), prev = ed.querySelector(".f-fotos-preview");
+    function toonVoorbeeld() {
+      if (!prev) return;
+      var ids = (ta.value.match(/\[foto=(\d{1,10})\]/g) || []).map(function (x) { return x.replace(/\D/g, ""); });
+      prev.innerHTML = ids.map(function (id) { return '<span class="f-pv"><img src="/forum/foto/' + id + '" alt=""><button type="button" data-weg-foto="' + id + '" aria-label="Foto weghalen">×</button></span>'; }).join("");
+    }
+    if (prev) prev.addEventListener("click", function (e) {
+      var w = e.target.closest("[data-weg-foto]"); if (!w) return;
+      ta.value = ta.value.replace(new RegExp("\\[foto=" + w.dataset.wegFoto + "\\]\\n?"), ""); toonVoorbeeld();
+    });
+    ta.addEventListener("input", toonVoorbeeld); toonVoorbeeld();
+    function voegToe(bestanden) {
+      var lijst = Array.prototype.filter.call(bestanden || [], function (f) { return /^image\//.test(f.type); }).slice(0, 10), klaar = 0, n = lijst.length;
+      if (!n) return;
+      ed.classList.add("laadt");
+      st.textContent = "Foto 1 van " + n + " opladen…";
+      lijst.reduce(function (p, f, i) {
         return p.then(function () {
+          st.textContent = "Foto " + (i + 1) + " van " + n + " opladen…";
           return oplaad(f, 1600).then(function (d) {
-            if (d && d.ok) { invoegen(ta, (ta.value && !/\n$/.test(ta.value) ? "\n" : "") + "[foto=" + d.id + "]\n"); klaar++; }
+            if (d && d.ok) { invoegen(ta, (ta.value && !/\n$/.test(ta.value) ? "\n" : "") + "[foto=" + d.id + "]\n"); klaar++; toonVoorbeeld(); }
             else st.textContent = (d && d.fout) || "Opladen mislukt.";
           });
         });
       }, Promise.resolve()).then(function () {
         if (klaar) st.textContent = klaar === 1 ? "Foto toegevoegd." : klaar + " foto's toegevoegd.";
-        inp.value = "";
-      }).catch(function () { st.textContent = "Opladen mislukt. Probeer een andere foto."; inp.value = ""; });
+        if (inp) inp.value = ""; ed.classList.remove("laadt");
+      }).catch(function () { st.textContent = "Opladen mislukt. Probeer een andere foto."; if (inp) inp.value = ""; ed.classList.remove("laadt"); });
+    }
+    if (inp) inp.addEventListener("change", function () { voegToe(inp.files); });
+    ["dragenter", "dragover"].forEach(function (t) { ed.addEventListener(t, function (e) { if (e.dataTransfer && Array.prototype.indexOf.call(e.dataTransfer.types, "Files") > -1) { e.preventDefault(); ed.classList.add("sleep"); } }); });
+    ["dragleave", "drop"].forEach(function (t) { ed.addEventListener(t, function () { ed.classList.remove("sleep"); }); });
+    ed.addEventListener("drop", function (e) { if (e.dataTransfer && e.dataTransfer.files.length) { e.preventDefault(); voegToe(e.dataTransfer.files); } });
+    ta.addEventListener("paste", function (e) {
+      var f = Array.prototype.map.call((e.clipboardData && e.clipboardData.items) || [], function (i) { return i.kind === "file" ? i.getAsFile() : null; }).filter(Boolean);
+      if (f.length) { e.preventDefault(); voegToe(f); }
     });
+    // emoji-kiezer
+    var ek = ed.querySelector("[data-emoji]");
+    if (ek) {
+      var EMO = "👍 👌 🙌 👏 🤝 💪 😀 😂 🤣 😅 😉 😎 🤔 😬 😮 🥲 ❤️ 🔥 ⭐ ✅ ❌ ⚠️ 🚙 🛻 🚜 🏕️ ⛺ 🔥 🌲 🏔️ 🌧️ ❄️ ☀️ 🌙 🗺️ 🧭 🔧 🔩 🛠️ ⚙️ 🪛 🧰 🔋 💡 ⛽ 🍺 ☕ 🍔 🎉 📸".split(" ");
+      var pop = document.createElement("div"); pop.className = "f-emoji-pop"; pop.hidden = true; pop.setAttribute("role", "dialog"); pop.setAttribute("aria-label", "Kies een emoji");
+      pop.innerHTML = EMO.filter(function (x, i) { return EMO.indexOf(x) === i; }).map(function (x) { return '<button type="button" data-e="' + x + '">' + x + "</button>"; }).join("");
+      ek.parentNode.appendChild(pop);
+      ek.addEventListener("click", function () { pop.hidden = !pop.hidden; ek.setAttribute("aria-expanded", pop.hidden ? "false" : "true"); });
+      pop.addEventListener("click", function (e) { var b = e.target.closest("[data-e]"); if (b) { invoegen(ta, b.dataset.e); pop.hidden = true; ek.setAttribute("aria-expanded", "false"); toonVoorbeeld(); } });
+      document.addEventListener("click", function (e) { if (!pop.hidden && !pop.contains(e.target) && !ek.contains(e.target)) { pop.hidden = true; ek.setAttribute("aria-expanded", "false"); } });
+    }
   });
 
   document.querySelectorAll("[data-citeer]").forEach(function (k) {

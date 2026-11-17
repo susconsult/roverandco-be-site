@@ -61,7 +61,12 @@ export function opmaak(ruw) {
     h = v;
   }
   h = h.replace(/\[b\]([\s\S]*?)\[\/b\]/gi, "<b>$1</b>").replace(/\[i\]([\s\S]*?)\[\/i\]/gi, "<i>$1</i>");
-  h = h.replace(/\[foto=(\d{1,10})\]/gi, (_, id) => `<a class="f-foto" href="/forum/foto/${id}" target="_blank"><img src="/forum/foto/${id}" alt="Foto" loading="lazy"></a>`);
+  // Foto's die na elkaar staan (alleen witruimte ertussen) worden één galerij.
+  h = h.replace(/\[foto=\d{1,10}\](?:\s*\[foto=\d{1,10}\])*/gi, (blok) => {
+    const ids = [...blok.matchAll(/\[foto=(\d{1,10})\]/gi)].map((m) => m[1]);
+    const n = ids.length;
+    return `<div class="f-galerij f-g${Math.min(n, 5)}" data-aantal="${n}">${ids.map((id, i) => `<button type="button" class="f-foto" data-full="/forum/foto/${id}" data-groep="g${ids[0]}" aria-label="Foto ${i + 1} van ${n} groot bekijken"><img src="/forum/foto/${id}" alt="" loading="lazy"></button>`).join("")}</div>`;
+  });
   h = h.replace(/(^|[\s>(])(https?:\/\/[^\s<]+[^\s<.,;:!?)\]'"])/g, (_, voor, u) => `${voor}<a href="${u}" rel="nofollow ugc noopener" target="_blank">${u.length > 60 ? u.slice(0, 57) + "…" : u}</a>`);
   h = tagLinks(h);
   h = h.replace(/(^|[\s>(])@([A-Za-z0-9._-]{3,20})/g, (_, voor, n) => `${voor}<a class="f-noem" href="/forum/lid/${encodeURIComponent(n)}">@${n}</a>`);
@@ -121,10 +126,13 @@ const editor = (naam, waarde = "", extra = "") => `
       <button type="button" data-tag="b" title="Vet"><b>B</b></button>
       <button type="button" data-tag="i" title="Schuin"><i>I</i></button>
       <button type="button" data-tag="quote" title="Citaat">“ ”</button>
-      <label class="f-fotoknop" title="Foto toevoegen">Foto<input type="file" accept="image/*" multiple data-foto hidden></label>
+      <button type="button" class="f-emojiknop" data-emoji title="Emoji toevoegen" aria-label="Emoji toevoegen" aria-expanded="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8.5"/><path d="M8.5 14a4 4 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01" stroke-width="2.6"/></svg></button>
+      <label class="f-fotoknop" title="Foto's toevoegen"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="9" cy="10.5" r="1.8"/><path d="M21 16l-5-5-8 8"/></svg>Foto's<input type="file" accept="image/*" multiple data-foto hidden></label>
       <span class="f-status" aria-live="polite"></span>
     </div>
     <textarea name="${naam}" rows="8" required maxlength="20000" ${extra}>${esc(waarde)}</textarea>
+    <div class="f-fotos-preview" aria-label="Toegevoegde foto's"></div>
+    <p class="f-sleep">Sleep foto's hierheen of plak ze, tot 10 tegelijk.</p>
   </div>`;
 
 /* ---------------- pagina's ---------------- */
