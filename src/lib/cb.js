@@ -39,7 +39,7 @@ async function kanalen(env, lid) {
 
 function berichtJson(b, lid) {
   const albert = b.nr === ALBERT;
-  return { id: b.id, naam: albert ? "Albert" : b.gebruikersnaam || "lid", av: albert ? null : b.avatar_id || null, tekst: b.tekst, t: b.aangemaakt, eigen: b.lid_id === lid.id };
+  return { id: b.id, naam: albert ? "Albert" : b.gebruikersnaam || "lid", av: albert ? null : b.avatar_id || null, tekst: b.tekst, t: b.aangemaakt, eigen: b.lid_id === lid.id, audio: b.audio_id || null, duur: b.duur || null };
 }
 
 async function berichten(env, nr, lid, na = 0) {
@@ -61,6 +61,48 @@ async function gelezen(env, lid, nr, id) {
 }
 
 const mag = (lid) => !!lid?.bevestigd_op;
+
+async function opruimen(env) {
+  await env.SHOP_DB.batch([
+    env.SHOP_DB.prepare("DELETE FROM cb_berichten WHERE aangemaakt < ?").bind(grens()),
+    env.SHOP_DB.prepare("DELETE FROM cb_audio WHERE aangemaakt < ?").bind(grens()),
+  ]);
+}
+
+const sinds = (s) => new Date(Date.now() - s * 1000).toISOString();
+async function teSnel(env, lid) {
+  const r = await env.SHOP_DB.prepare("SELECT SUM(aangemaakt > ?) kort, COUNT(*) minuut FROM cb_berichten WHERE lid_id = ? AND aangemaakt > ?").bind(sinds(2), lid.id, sinds(60)).first();
+  return r.kort > 0 || r.minuut >= 20;
+}
+
+// Spraakbericht: ruwe opname (webm/ogg/mp4) in de body, hoogstens 20 s en 600 kB.
+const AUDIO = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac"];
+async function zendAudio(request, env, lid, nr) {
+  if (!mag(lid)) return json({ ok: false, fout: "Bevestig eerst je mailadres." }, 403);
+  if (!(await env.SHOP_DB.prepare("SELECT nr FROM cb_kanalen WHERE nr = ?").bind(nr).first())) return json({ ok: false, fout: "Dit kanaal bestaat niet meer." }, 404);
+  const type = String(request.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+  if (!AUDIO.includes(type)) return json({ ok: false, fout: "Dit soort opname wordt niet ondersteund." }, 415);
+  const data = await request.arrayBuffer();
+  if (data.byteLength < 500) return json({ ok: false, fout: "De opname is leeg." }, 400);
+  if (data.byteLength > 600_000) return json({ ok: false, fout: "De opname is te lang (max. 20 seconden)." }, 413);
+  if (await teSnel(env, lid)) return json({ ok: false, fout: "Rustig aan, wacht even voor je opnieuw zendt." }, 429);
+  const duur = Math.max(1, Math.min(20, Math.round(Number(new URL(request.url).searchParams.get("duur")) || 0))) || null;
+  const t = nu();
+  const a = await env.SHOP_DB.prepare("INSERT INTO cb_audio (lid_id, type, data, aangemaakt) VALUES (?, ?, ?, ?)").bind(lid.id, type, data, t).run();
+  const ins = await env.SHOP_DB.prepare("INSERT INTO cb_berichten (nr, lid_id, tekst, audio_id, duur, aangemaakt) VALUES (?, ?, '', ?, ?, ?)").bind(nr, lid.id, a.meta.last_row_id, duur, t).run();
+  const id = ins.meta.last_row_id;
+  await gelezen(env, lid, nr, id);
+  await aanwezig(env, lid);
+  if (Math.random() < 0.1) await opruimen(env);
+  return json({ ok: true, bericht: berichtJson({ id, nr, lid_id: lid.id, tekst: "", audio_id: a.meta.last_row_id, duur, aangemaakt: t, gebruikersnaam: lid.gebruikersnaam, avatar_id: lid.avatar_id }, lid) });
+}
+
+async function audioTonen(env, id) {
+  const a = await env.SHOP_DB.prepare("SELECT type, data FROM cb_audio WHERE id = ? AND aangemaakt > ?").bind(id, grens()).first();
+  if (!a) return new Response("Niet meer beschikbaar", { status: 404 });
+  const bytes = a.data instanceof ArrayBuffer ? a.data : new Uint8Array(a.data);
+  return new Response(bytes, { headers: { "content-type": a.type, "cache-control": "private, max-age=86400", "x-content-type-options": "nosniff" } });
+}
 
 /* ---------------- pagina ---------------- */
 
@@ -101,8 +143,9 @@ async function radio(request, env, url, lid, nr) {
     <div class="cb-log" id="cb-log" aria-live="polite">${eerste.length ? "" : `<p class="cb-stil">Stilte op kanaal ${nr}. Breek de stilte!</p>`}</div>
     <form class="cb-zend" id="cb-zend" autocomplete="off">
       ${mag(lid) ? `<input id="cb-tekst" maxlength="500" placeholder="${albert ? "Zeg iets, Albert" : `Bericht op kanaal ${nr}`}" aria-label="Bericht" required>
-      <button class="cb-ptt" type="submit">Zenden</button>` : `<p>Bevestig eerst je mailadres om te zenden. <a href="/account">Naar mijn account</a></p>`}
+      <button class="cb-ptt" type="submit" id="cb-ptt" aria-label="Zenden. Houd ingedrukt om een spraakbericht op te nemen."><span>PTT</span><small>Zenden</small></button>` : `<p>Bevestig eerst je mailadres om te zenden. <a href="/account">Naar mijn account</a></p>`}
     </form>
+    ${mag(lid) ? `<p class="cb-hint" id="cb-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> om te praten (max. 20 s).</p>` : ""}
   </div>
   <script type="application/json" id="cb-data">${JSON.stringify(eerste).replace(/</g, "\\u003c")}</script>
 
@@ -139,14 +182,12 @@ async function zenden(request, env, url, lid, nr) {
   let d = {}; try { d = await request.json(); } catch { /* leeg */ }
   const tekst = String(d.tekst || "").replace(/\s+/g, " ").trim().slice(0, 500);
   if (!tekst) return json({ ok: false, fout: "Leeg bericht." }, 400);
-  const sinds = (s) => new Date(Date.now() - s * 1000).toISOString();
-  const r = await env.SHOP_DB.prepare("SELECT SUM(aangemaakt > ?) kort, COUNT(*) minuut FROM cb_berichten WHERE lid_id = ? AND aangemaakt > ?").bind(sinds(2), lid.id, sinds(60)).first();
-  if (r.kort > 0 || r.minuut >= 20) return json({ ok: false, fout: "Rustig aan, wacht even voor je opnieuw zendt." }, 429);
+  if (await teSnel(env, lid)) return json({ ok: false, fout: "Rustig aan, wacht even voor je opnieuw zendt." }, 429);
   const t = nu();
   const ins = await env.SHOP_DB.prepare("INSERT INTO cb_berichten (nr, lid_id, tekst, aangemaakt) VALUES (?, ?, ?, ?)").bind(nr, lid.id, tekst, t).run();
   const id = ins.meta.last_row_id;
   await gelezen(env, lid, nr, id);
-  if (Math.random() < 0.1) await env.SHOP_DB.prepare("DELETE FROM cb_berichten WHERE aangemaakt < ?").bind(grens()).run();
+  if (Math.random() < 0.1) await opruimen(env);
   // @gebruikersnaam: melding in de bel (niet op het Albertkanaal, daar is iedereen Albert).
   if (nr !== ALBERT) {
     const namen = [...new Set((tekst.match(/@([A-Za-z0-9._-]{3,20})/g) || []).map((x) => x.slice(1).toLowerCase()))].slice(0, 10);
@@ -167,10 +208,10 @@ async function melden(request, env, url, lid, id) {
   const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
   await mail(env, {
     aan, onderwerp: `Melding op de CB: kanaal ${b.nr}`,
-    tekst: `Er werd een bericht gemeld op de CB.\n\nKanaal: ${b.nr} · ${b.kanaal}\nBericht van: ${b.gebruikersnaam || "?"}${b.nr === ALBERT ? " (toont als Albert)" : ""}\nGemeld door: ${lid.gebruikersnaam}\n\nBericht:\n${b.tekst}\n\nVerwijderen kan op ${url.origin}/cb/${b.nr} (ingelogd als moderator). Het lid bekijken of blokkeren: ${url.origin}/beheer/leden/${b.lid_id}\nCB-berichten verdwijnen vanzelf na ${CB_UREN} uur.`,
+    tekst: `Er werd een bericht gemeld op de CB.\n\nKanaal: ${b.nr} · ${b.kanaal}\nBericht van: ${b.gebruikersnaam || "?"}${b.nr === ALBERT ? " (toont als Albert)" : ""}\nGemeld door: ${lid.gebruikersnaam}\n\nBericht:\n${b.audio_id ? `(spraakbericht) ${url.origin}/cb/audio/${b.audio_id}` : b.tekst}\n\nVerwijderen kan op ${url.origin}/cb/${b.nr} (ingelogd als moderator). Het lid bekijken of blokkeren: ${url.origin}/beheer/leden/${b.lid_id}\nCB-berichten verdwijnen vanzelf na ${CB_UREN} uur.`,
   });
   await log(env, lid.id, "cb", `CB-bericht gemeld op kanaal ${b.nr}`, `/cb/${b.nr}`);
-  await log(env, b.lid_id, "cb", `CB-bericht van dit lid werd gemeld op kanaal ${b.nr}: ${b.tekst.slice(0, 120)}`, `/cb/${b.nr}`);
+  await log(env, b.lid_id, "cb", `CB-bericht van dit lid werd gemeld op kanaal ${b.nr}: ${b.audio_id ? "(spraakbericht)" : b.tekst.slice(0, 120)}`, `/cb/${b.nr}`);
   return json({ ok: true });
 }
 
@@ -227,6 +268,8 @@ export async function cb(request, env, url) {
   if (p === "/cb/nieuw" && request.method === "POST") return nieuwKanaal(request, env, lid);
   if ((m = p.match(/^\/cb\/(\d{1,2})\/opheffen$/)) && request.method === "POST") return opheffen(env, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})$/))) return request.method === "POST" ? zenden(request, env, url, lid, +m[1]) : ophalen(env, url, lid, +m[1]);
+  if ((m = p.match(/^\/api\/cb\/(\d{1,2})\/audio$/)) && request.method === "POST") return zendAudio(request, env, lid, +m[1]);
+  if ((m = p.match(/^\/cb\/audio\/(\d{1,10})$/))) return audioTonen(env, +m[1]);
   if ((m = p.match(/^\/api\/cb\/meld\/(\d{1,10})$/)) && request.method === "POST") return melden(request, env, url, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/weg\/(\d{1,10})$/)) && request.method === "POST") return wegdoen(env, lid, +m[1]);
   return null;

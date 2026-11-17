@@ -91,3 +91,6 @@ CREATE INDEX IF NOT EXISTS cb_berichten_nr ON cb_berichten (nr, id);
 CREATE INDEX IF NOT EXISTS cb_berichten_tijd ON cb_berichten (aangemaakt);
 CREATE TABLE IF NOT EXISTS cb_gelezen (lid_id INTEGER NOT NULL, nr INTEGER NOT NULL, laatste_id INTEGER NOT NULL, PRIMARY KEY (lid_id, nr));
 ALTER TABLE leden ADD COLUMN laatst_cb TEXT;
+CREATE TABLE IF NOT EXISTS cb_audio (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, type TEXT NOT NULL, data BLOB NOT NULL, aangemaakt TEXT NOT NULL);
+ALTER TABLE cb_berichten ADD COLUMN audio_id INTEGER;
+ALTER TABLE cb_berichten ADD COLUMN duur INTEGER;
