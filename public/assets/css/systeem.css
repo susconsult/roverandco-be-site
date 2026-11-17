@@ -1,0 +1,36 @@
+/* ===== Designsysteem Rover & Co =====
+   Lettertypes: Big Shoulders Display (titels, 800/900), Manrope (interface, 400/700), Source Serif 4 (lopende tekst, 400/600).
+   Maten: --fs-display, --fs-h1, --fs-h2, --fs-h3, --fs-label, --fs-knop | --fs-lead, --fs-tekst | --fs-ui-groot, --fs-ui, --fs-sm (zie :root in site.css).
+   Afstanden: secties --sec (96/64), na een banner --sec-kort. Eén linkerrand: .wrap (1200px). */
+button,input,select,textarea{font:inherit}
+.cart-count{font-family:var(--body);font-weight:700}
+.ico{width:1.15em;height:1.15em;vertical-align:-.2em;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* één linkerrand: smalle inhoud blijft smal maar staat links, onder de titel */
+.narrow{width:min(1200px,100% - 40px);margin-inline:auto}
+.narrow>*,.narrow.prose>*{max-width:780px}
+.narrow.acc-sectie>.acc-kaart{max-width:640px}
+/* vaste afstanden */
+section{padding:var(--sec) 0}
+.banner-foto+section,.banner+section,.acc-sectie,.f-sectie{padding-top:var(--sec-kort)}
+.acc-sectie,.f-sectie{padding-bottom:var(--sec)}
+.forum-layout{padding-top:var(--sec-kort)}
+@media(max-width:880px){:root{--sec:64px;--sec-kort:40px;--fs-tekst:17px}}
+/* titels: altijd dezelfde lijnhoogte */
+h1,h2,h3{line-height:.95}
+.prose h2,.prose h3,.blogtekst h2,.blogtekst h3{margin:1.4em 0 .5em;line-height:1.05}
+/* titels in kaarten en tegels: één maat (h3), titeldikte 900 */
+.tegel-b b,.fc-b b,.kal-maand,.fc-groep{font-size:var(--fs-h3)}
+.tegel-b b,.pillar b,.volgende strong,.next-pill strong,.fc-b b,.forum-stats b,.f-profielkop b,.ct-vak b,.kal-datum b,.foot h4,h4{font-weight:900}
+.foot h4{font-size:var(--fs-label);letter-spacing:2px}
+/* korte teksten in kaarten en notities = interfaceletter */
+.ev p,.bk-tekst p,.kal-info,.note,.fotocredit,.waarom-kaarten>div,.forum-band p,.lid-band p{font-family:var(--body)}
+.ev p,.bk-tekst p,.kal-info{font-size:var(--fs-ui)}
+small{font-size:var(--fs-sm)}
+.price{font-size:var(--fs-ui-groot)}
+.prod .eyebrow{font-size:var(--fs-label)!important}
+.chip{font-size:var(--fs-ui);font-weight:700}
+.btn.f-volg{font-size:var(--fs-knop)}
+.contact-grid .rubriek a,.weetje-tekst{font-weight:600}
+.ev-stack .ev h3{font-size:var(--fs-h3)}
+.lines p,.f-citaat,.f-citaat cite,.betaal-met{font-family:var(--body)}
+.lines p{font-size:var(--fs-ui)}

@@ -19,7 +19,7 @@ acts = [a for a in alle_acts if not a.get("verborgen")]  # verborgen = testactiv
 shop = json.load(open(os.path.join(DATA, "shop.json"), encoding="utf-8"))["producten"]
 ecwid = {p["ecwid_id"]: p for p in json.load(open(os.path.join(DATA, "ecwid", "producten.json"), encoding="utf-8"))}
 import hashlib as _h
-VERSIE = _h.sha1(b"".join(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "assets", f), "rb").read() for f in ("css/site.css", "js/site.js", "js/forum.js"))).hexdigest()[:10]
+VERSIE = _h.sha1(b"".join(open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "public", "assets", f), "rb").read() for f in ("css/site.css", "css/systeem.css", "js/site.js", "js/forum.js"))).hexdigest()[:10]
 pages = []  # voor sitemap
 
 e = html.escape
@@ -71,6 +71,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
 <link rel="icon" href="/favicon.png">
 <link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css?v={VERSIE}">
+<link rel="stylesheet" href="/assets/css/systeem.css?v={VERSIE}">
 </head>
 <body{"" if hero else ' class="no-hero"'}>
 <a class="sr-only" href="#inhoud">Naar de inhoud</a>
@@ -125,14 +126,14 @@ def layout(path, title, desc, body, hero=False, noindex=False):
 </footer>
 <div class="drawer-bg" data-close-cart></div>
 <aside class="drawer" aria-label="Winkelmandje">
-  <div class="drawer-h"><h2>Je mandje</h2><button type="button" data-close-cart aria-label="Mandje sluiten">×</button></div>
+  <div class="drawer-h"><h2>Je mandje</h2><button type="button" data-close-cart aria-label="Mandje sluiten"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
   <div class="lines" id="lines"></div>
   <div class="drawer-f">
     <div class="total"><span>Totaal</span><span id="total">€0,00</span></div>
     <a class="btn btn-solid" id="checkout" href="/afrekenen" style="width:100%;justify-content:center">Afrekenen</a>
   </div>
 </aside>
-<div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten">×</button><img alt=""></div>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><img alt=""></div>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="/assets/js/site.js?v={VERSIE}" defer></script>
 </body>
@@ -197,7 +198,7 @@ def product_card(pr):
     lint = f'<span class="tag">{e(pr["lint"])}</span>' if pr["lint"] else ""
     return (f'<a class="prod" href="/shop/{pr["slug"]}"><div class="prod-img">'
             f'<img src="{pr["fotos"][0]}-s.webp" alt="{e(pr["naam"])}" loading="lazy">{lint}</div>'
-            f'<div class="prod-b"><span class="eyebrow" style="font-size:12px">{e(pr["categorie"])}</span>'
+            f'<div class="prod-b"><span class="eyebrow">{e(pr["categorie"])}</span>'
             f'<h3>{e(pr["naam"])}</h3><span class="price">{eur(pr["prijs"])}</span></div></a>')
 
 

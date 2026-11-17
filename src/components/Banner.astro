@@ -1,0 +1,11 @@
+---
+// Paginabanner met foto, verloop en kruimelpad. Eén vorm voor elke subpagina.
+import Kruimel from "./Kruimel.astro";
+import Foto from "./Foto.astro";
+interface Props { label: string; titel: string; intro?: string; foto?: string; alt?: string; pos?: string; kruim?: [string, string?][] }
+const { label, titel, intro = "", foto = "leden-zonsondergang", alt = "", pos, kruim = [[label]] } = Astro.props;
+---
+<section class="banner banner-foto">
+  <Foto naam={foto} alt={alt} prio pos={pos} />
+  <div class="wrap"><Kruimel delen={kruim} /><div class="eyebrow">{label}</div><h1>{titel}</h1>{intro && <p>{intro}</p>}<slot /></div>
+</section>

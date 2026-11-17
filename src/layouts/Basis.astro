@@ -1,0 +1,66 @@
+---
+// Basislayout voor elke pagina: head, header, footer, mandje, lightbox.
+import site from "../../data/site.json";
+interface Props { titel: string; desc?: string; noindex?: boolean; hero?: boolean; }
+const { titel, desc = "", noindex = false, hero = false } = Astro.props;
+const pad = Astro.url.pathname.replace(/\/$/, "") || "/";
+const volledig = pad === "/" ? "Rover & Co VZW | Land Rover-club in België" : `${titel} | Rover & Co`;
+const testadres = Astro.url.hostname.endsWith(".workers.dev");
+if (noindex || testadres) Astro.response.headers.set("x-robots-tag", "noindex, nofollow");
+const actief = (href: string) => pad === href || (href !== "/" && pad.startsWith(href + "/"));
+const VERSIE = import.meta.env.VERSIE || "astro1";
+---
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{volledig}</title>
+<meta name="description" content={desc}>
+{(noindex || testadres) && <meta name="robots" content="noindex">}
+<link rel="canonical" href={site.domein + pad}>
+<meta property="og:title" content={volledig}>
+<meta property="og:description" content={desc}>
+<meta property="og:image" content={`${site.domein}/assets/img/964.webp`}>
+<meta property="og:locale" content="nl_BE">
+<link rel="icon" href="/favicon.png">
+<link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="stylesheet" href={`/assets/css/site.css?v=${VERSIE}`}>
+<link rel="stylesheet" href={`/assets/css/systeem.css?v=${VERSIE}`}>
+</head>
+<body class={hero ? undefined : "no-hero"}>
+<a class="sr-only" href="#inhoud">Naar de inhoud</a>
+<header class="site">
+  <div class="wrap nav">
+    <a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="84" height="84"></a>
+    <ul class="menu" id="menu">{site.menu.map(([l, h]) => <li><a href={h} aria-current={actief(h) ? "page" : undefined}>{l}</a></li>)}</ul>
+    <div class="nav-right">
+      <a class="cart-btn acct-btn" href="/account" aria-label="Mijn account" title="Mijn account"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg></a>
+      <button class="cart-btn" type="button" aria-label="Winkelmandje openen" data-open-cart><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M6 6h15l-1.5 9h-12z"/><path d="M6 6 5 3H2"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg><span class="cart-count">0</span></button>
+      <button class="burger" type="button" aria-label="Menu" aria-controls="menu" aria-expanded="false"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18"/></svg></button>
+    </div>
+  </div>
+</header>
+<main id="inhoud"><slot /></main>
+<footer class="site">
+  <div class="wrap">
+    <div class="foot">
+      <div><a href="/" class="logo"><img src="/assets/img/logo-licht.webp" alt="Rover &amp; Co" width="110" height="110" loading="lazy"></a><p>Land Rover-liefhebbers die elkaar vinden. Op de weg, ernaast en rond het kampvuur.</p></div>
+      <div><h4>Contact</h4><p><a href={`mailto:${site.email}`}>{site.email}</a></p><p><a href={`tel:${site.telefoon_link}`}>{site.telefoon}</a></p><p set:html={site.adres.join("<br>")} /></div>
+      <div><h4>Site</h4><ul>{site.menu.map(([l, h]) => <li><a href={h}>{l}</a></li>)}</ul></div>
+      <div><h4>Volg ons</h4><ul><li><a href={site.instagram} target="_blank" rel="noopener">Instagram</a></li><li><a href={site.facebook} target="_blank" rel="noopener">Facebook</a></li></ul></div>
+    </div>
+    <div class="legal"><span>{site.naam} · {site.ondernemingsnummer} · <a href="/voorwaarden">Voorwaarden</a> · <a href="/privacy">Privacy</a></span><span>Made with love by <a href="https://susconsult.be" rel="noopener">SUS Consult</a></span></div>
+  </div>
+</footer>
+<div class="drawer-bg" data-close-cart></div>
+<aside class="drawer" aria-label="Winkelmandje">
+  <div class="drawer-h"><h2>Je mandje</h2><button type="button" data-close-cart aria-label="Mandje sluiten"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button></div>
+  <div class="lines" id="lines"></div>
+  <div class="drawer-f"><div class="total"><span>Totaal</span><span id="total">€0,00</span></div><a class="btn btn-solid" id="checkout" href="/afrekenen" style="width:100%;justify-content:center">Afrekenen</a></div>
+</aside>
+<div class="lightbox" id="lightbox" role="dialog" aria-label="Foto"><button type="button" aria-label="Sluiten"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg></button><img alt=""></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script is:inline src={`/assets/js/site.js?v=${VERSIE}`} defer></script>
+</body>
+</html>

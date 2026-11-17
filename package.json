@@ -4,7 +4,8 @@
   "type": "module",
   "scripts": {
     "dev": "astro dev",
-    "build": "python3 bouw/build.py && astro build",
+    "build": "astro build",
+    "pagina": "python3 bouw/build.py",
     "preview": "astro preview"
   },
   "dependencies": {

@@ -1,0 +1,6 @@
+---
+// Kruimelpad: delen = [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
+interface Props { delen: [string, string?][]; donker?: boolean }
+const { delen, donker = false } = Astro.props;
+---
+{delen.length > 0 && <nav class={`kruimel${donker ? " donker" : ""}`} aria-label="Kruimelpad"><a href="/">Home</a>{delen.map(([t, h]) => <><span aria-hidden="true">›</span>{h ? <a href={h}>{t}</a> : <span aria-current="page">{t}</span>}</>)}</nav>}

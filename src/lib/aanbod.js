@@ -94,7 +94,7 @@ const pf = (p, i = 0) => p.fotos?.[i] || { klein: "/assets/img/870-s.webp", groo
 export function productKaart(p) {
   const lint = p.lint ? `<span class="tag">${e(p.lint)}</span>` : "";
   return `<a class="prod" href="/shop/${e(p.slug)}"><div class="prod-img"><img src="${e(pf(p).klein)}" alt="${e(p.naam)}" loading="lazy">${lint}</div>`
-    + `<div class="prod-b"><span class="eyebrow" style="font-size:12px">${e(p.categorie || "")}</span><h3>${e(p.naam)}</h3><span class="price">${eur(p.prijs)}</span></div></a>`;
+    + `<div class="prod-b"><span class="eyebrow">${e(p.categorie || "")}</span><h3>${e(p.naam)}</h3><span class="price">${eur(p.prijs)}</span></div></a>`;
 }
 
 export function evKaart(a, groot = false) {
