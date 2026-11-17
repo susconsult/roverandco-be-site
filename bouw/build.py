@@ -672,7 +672,7 @@ write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",
 
 # ---------- over ons ----------
 write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit heel België samen. Onze missie en ons doel.",
-      banner("Over ons", "Missie en doel", "", "959", "Defenders in het stof op een bosweg") + f"""
+      banner("Over ons", "Missie en doel", "Een vereniging van en voor Land Rover-liefhebbers uit heel België.", "959", "Defenders in het stof op een bosweg") + f"""
 <section><div class="narrow prose">
   <p>{e(OVER_TEKST)}</p>
   <p>Elk evenement wil een unieke ervaring bieden, door de locatie of door de activiteit. Geen bijeenkomst op een parkeerplaats, wel een dag rond een kerktoren, in het bos of op een terrein waar je anders niet komt.</p>
@@ -698,7 +698,7 @@ write("/contact", "Contact", "Contacteer Rover & Co VZW in Oostham: e-mail, tele
 
 # ---------- algemene voorwaarden ----------
 write("/voorwaarden", "Algemene voorwaarden", "Algemene voorwaarden van Rover & Co VZW voor de webshop en inschrijvingen.",
-      banner("Voorwaarden", "Algemene voorwaarden", "", None) + f"""
+      banner("Voorwaarden", "Algemene voorwaarden", "Wat je mag verwachten als je bestelt in de shop of je inschrijft voor een activiteit.", None) + f"""
 <section><div class="narrow prose">
   <h2>Wie zijn we</h2>
   <p>{e(site['naam'])}, {', '.join(site['adres'])} · {site['ondernemingsnummer']} · <a href="mailto:{site['email']}">{site['email']}</a> · <a href="tel:{site['telefoon_link']}">{site['telefoon']}</a></p>
@@ -722,7 +722,7 @@ write("/voorwaarden", "Algemene voorwaarden", "Algemene voorwaarden van Rover & 
 
 # ---------- privacy ----------
 write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
-      banner("Privacy", "Privacyverklaring", "", None) + f"""
+      banner("Privacy", "Privacyverklaring", "Welke gegevens we bijhouden, waarom, en wat je rechten zijn.", None) + f"""
 <section><div class="narrow prose">
   <p>{e(site['naam'])} ({site['ondernemingsnummer']}, {', '.join(site['adres'])}) is verantwoordelijk voor de gegevens die je ons bezorgt.</p>
   <h2>Wat we gebruiken en waarom</h2>
@@ -842,7 +842,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
 
 # ---------- afrekenen ----------
 act_opts = "".join(f'<option value="{e(x)}">{e(x)}</option>' for x in cat["__activiteiten"])
-afrekenen = banner("Shop", "Afrekenen", "", None, kruim=[("Shop", "/shop"), ("Afrekenen",)]) + f"""
+afrekenen = banner("Shop", "Afrekenen", "Controleer je mandje, vul je gegevens in en betaal veilig via Viva.", None, kruim=[("Shop", "/shop"), ("Afrekenen",)]) + f"""
 <section><div class="wrap">
   <form id="checkout-form" class="checkout" novalidate data-verzendkost="7.5" data-gratis-vanaf="100">
     <div class="co-main">
@@ -906,7 +906,7 @@ afrekenen = banner("Shop", "Afrekenen", "", None, kruim=[("Shop", "/shop"), ("Af
 write("/afrekenen", "Afrekenen", "Rond je bestelling bij Rover & Co af.", afrekenen)
 
 write("/bedankt", "Bedankt", "Bedankt voor je bestelling of inschrijving bij Rover & Co.",
-      banner("Rover & Co", "Bedankt!", "", None) + """
+      banner("Rover & Co", "Bedankt!", "We hebben je bestelling of inschrijving goed ontvangen.", None) + """
 <section><div class="narrow prose" id="bedankt" data-status="">
   <div class="testbanner" role="note" data-toon-als="test" hidden><strong>Test.</strong> Er werd niets aangerekend.</div>
   <p data-toon-als="betaald" hidden>Je betaling is gelukt. Je nummer is <strong class="bedankt-nr">–</strong>. Je krijgt zo meteen een bevestiging per mail.</p>
@@ -918,7 +918,7 @@ write("/bedankt", "Bedankt", "Bedankt voor je bestelling of inschrijving bij Rov
 </div></section>""", noindex=True)
 
 write("/betaling-mislukt", "Betaling niet gelukt", "De betaling bij Rover & Co is niet gelukt.",
-      banner("Rover & Co", "Betaling niet gelukt", "", None) + """
+      banner("Rover & Co", "Betaling niet gelukt", "Er is niets afgeschreven. Je kan het gewoon opnieuw proberen.", None) + """
 <section><div class="narrow prose">
   <p>Je betaling is niet gelukt of je hebt ze geannuleerd. Er is niets aangerekend.</p>
   <p>Je gegevens staan nog klaar. Je kan het meteen opnieuw proberen.</p>

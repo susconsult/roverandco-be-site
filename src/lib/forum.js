@@ -240,7 +240,7 @@ async function topic(request, env, url, lid, id) {
   const m = url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : "";
   return pagina(env, request, {
     titel: `${t.titel} – ${t.cnaam}`, pad: topicUrl(t, pag), desc: String(berichten[0]?.tekst || t.titel).replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").slice(0, 155),
-    inhoud: banner(t.cnaam, t.titel) + `<section class="wrap f-sectie">
+    inhoud: banner(t.cnaam, t.titel, `Een topic in ${t.cnaam} · ${t.berichten} ${t.berichten === 1 ? "bericht" : "berichten"}`) + `<section class="wrap f-sectie">
       ${balk(lid, topicUrl(t, pag))}${kruimel(`<a href="/forum/c/${t.cslug}">${esc(t.cnaam)}</a>`, esc(t.titel))}${m}${mod}
       ${t.rit_datum ? `<div class="f-ritblok"><b>Samen rijden</b><span>${ico("kalender")} ${ritDatum(t.rit_datum)}</span>${t.rit_plaats ? `<span>${ico("pin")} ${esc(t.rit_plaats)}</span>` : ""}<small>Rij je mee? Reageer hieronder.</small></div>` : ""}
       <div class="f-kop"><div class="f-knoppen">${t.gesloten ? '<span class="f-label grijs">Gesloten</span>' : lid ? '<a class="btn btn-solid" href="#antwoord">Antwoorden</a>' : ""}${volgT}</div>${pg}</div>
@@ -254,7 +254,7 @@ async function topic(request, env, url, lid, id) {
 function postFormulier(env, request, { titel, kop, actie, toonTitel, w = {}, m = "", terug, rit = false }) {
   return pagina(env, request, {
     titel, noindex: true,
-    inhoud: banner("Forum", kop) + `<section class="wrap f-sectie">${terug}
+    inhoud: banner("Forum", kop, "Schrijf je bericht hieronder. Foto's toevoegen kan met de knop Foto.") + `<section class="wrap f-sectie">${terug}
       ${m ? `<div class="melding melding-fout" role="alert">${esc(m)}</div>` : ""}
       <form class="f-antwoord" method="post" action="${actie}">
         ${toonTitel ? `<div class="veld"><label for="f-titel">Titel</label><input id="f-titel" name="titel" maxlength="120" minlength="5" required value="${esc(w.titel || "")}"></div>` : ""}
@@ -426,7 +426,7 @@ async function recent(request, env, url, lid) {
   }).join("");
   return pagina(env, request, {
     titel: "Recente berichten – Forum", noindex: true,
-    inhoud: banner("Forum", "Recente berichten") + `<section class="wrap f-sectie">${balk(lid, "/forum/nieuw")}${kruimel("Recente berichten")}
+    inhoud: banner("Forum", "Recente berichten", "De laatste activiteit op het forum.") + `<section class="wrap f-sectie">${balk(lid, "/forum/nieuw")}${kruimel("Recente berichten")}
       ${topics.length ? `<table class="f-tabel"><thead><tr><th>Topic</th><th class="f-num">Antwoorden</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>` : `<div class="f-leeg"><p>Nog geen berichten.</p></div>`}
     </section>`,
   });
@@ -439,7 +439,7 @@ async function profiel(request, env, url, lid, naam) {
   const wagens = (await garages(env, [p.id]))[p.id] || [];
   return pagina(env, request, {
     titel: `${p.gebruikersnaam} – Forum`, noindex: true,
-    inhoud: banner("Forum", p.gebruikersnaam) + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel(esc(p.gebruikersnaam))}
+    inhoud: banner("Forum", p.gebruikersnaam, "Lid van het Rover & Co-forum.") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}${kruimel(esc(p.gebruikersnaam))}
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Garage</h2>
       ${wagens.length ? garageKaarten(wagens) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
@@ -494,7 +494,7 @@ async function tagPagina(request, env, url, lid, tag) {
   const pad = `/forum/tag/${encodeURIComponent(tag)}`;
   return pagina(env, request, {
     titel: `#${tag} – Forum`, pad, noindex: !topics.length,
-    inhoud: banner("Forum", `#${tag}`) + `<section class="wrap f-sectie">${balk(lid, pad)}${kruimel(`#${esc(tag)}`)}
+    inhoud: banner("Forum", `#${tag}`, "Alle topics met deze hashtag.") + `<section class="wrap f-sectie">${balk(lid, pad)}${kruimel(`#${esc(tag)}`)}
       <div class="f-kop"><div class="f-knoppen">${volgKnop(lid, "tag", tag, await volgt(env, lid, "tag", tag), pad, "#" + tag)}</div></div>
       ${topics.length ? `<table class="f-tabel"><thead><tr><th>Topic</th><th class="f-num">Antwoorden</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>` : `<div class="f-leeg"><p>Nog geen berichten met #${esc(tag)}. Volg de hashtag en je krijgt een melding zodra iemand hem gebruikt.</p></div>`}
     </section>`,
@@ -533,5 +533,5 @@ export async function forum(request, env, url) {
 
   if (res) return metVlag(request, res, lid);
   return pagina(env, request, { titel: "Niet gevonden", noindex: true, status: 404,
-    inhoud: banner("Forum", "Niet gevonden") + `<section class="narrow acc-sectie"><div class="acc-kaart"><p>Deze pagina bestaat niet (meer).</p><a class="btn btn-solid" href="/forum">Naar het forum</a></div></section>` });
+    inhoud: banner("Forum", "Niet gevonden", "Deze pagina bestaat niet (meer).") + `<section class="narrow acc-sectie"><div class="acc-kaart"><p>Deze pagina bestaat niet (meer).</p><a class="btn btn-solid" href="/forum">Naar het forum</a></div></section>` });
 }

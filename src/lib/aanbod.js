@@ -148,7 +148,7 @@ async function productPagina(env, request, slug) {
   const tekst = String(p.omschrijving || "").replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
   return pagina(env, request, {
     titel: p.naam, pad: `/shop/${p.slug}`, desc: tekst.slice(0, 155),
-    inhoud: banner("Shop", p.naam, "", "5577", "", null, false, [["Shop", "/shop"], [p.naam]]) + `<section class="pdp-sec"><div class="wrap pdp"><div><div class="pdp-main"><img id="pdp-main" src="${e(fotos[0].groot)}" alt="${e(p.naam)}" fetchpriority="high"></div><div class="thumbs">${thumbs}</div></div>
+    inhoud: banner("Shop", p.naam, [p.categorie, eur(p.prijs)].filter(Boolean).join(" · "), "5577", "", null, false, [["Shop", "/shop"], [p.naam]]) + `<section class="pdp-sec"><div class="wrap pdp"><div><div class="pdp-main"><img id="pdp-main" src="${e(fotos[0].groot)}" alt="${e(p.naam)}" fetchpriority="high"></div><div class="thumbs">${thumbs}</div></div>
   <div><div class="price" id="prijs">${eur(p.prijs)}</div>
     <form id="product-form" data-id="${e(p.slug)}" data-naam="${e(p.naam)}" data-prijs="${Number(p.prijs) || 0}" novalidate>${opts}
       <div class="opt"><label for="aantal">Aantal</label><input class="qty" id="aantal" type="number" min="1" value="1"></div>
