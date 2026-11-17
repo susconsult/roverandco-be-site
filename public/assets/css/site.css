@@ -422,8 +422,14 @@ p strong,p b,.prose li strong{font-weight:600}
 .acc-tabel{width:100%;border-collapse:collapse;font-size:15px}.acc-tabel th,.acc-tabel td{text-align:left;padding:10px 6px;border-bottom:1px solid var(--sand-2);vertical-align:top}
 .acc-tabel th{font-family:var(--head);text-transform:uppercase;letter-spacing:1px;font-size:14px;color:var(--muted)}.acc-tabel .r{text-align:right;white-space:nowrap}
 .acc-tabel small{color:var(--muted)}
-.acc-status{display:inline-block;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:700;background:var(--sand)}
-.acc-status.ok{background:#DCEFE2;color:var(--green)}.acc-status.wacht{background:#FBEFD5;color:#7A5200}
+.acc-status{display:inline-block;white-space:nowrap;padding:2px 10px;border-radius:99px;font-size:13px;font-weight:700;background:var(--sand)}
+.acc-status.ok{background:#DCEFE2;color:var(--green)}.acc-status.wacht{background:#FBEFD5;color:#7A5200}.acc-status.nee{background:#F3DADA;color:#8A2A2A}
+.acc-rij{border-bottom:1px solid var(--sand-2);padding:14px 0}.acc-rij:last-child{border-bottom:0}
+.acc-kop{display:flex;justify-content:space-between;align-items:center;gap:10px}.acc-kop b{font-size:15px;letter-spacing:.3px}
+.acc-meta{color:var(--muted);font-size:14px}
+.acc-rij ul{list-style:none;margin:8px 0 0;padding:0;font-size:15px}.acc-rij li{display:flex;justify-content:space-between;gap:12px;padding:3px 0}.acc-rij li small{color:var(--muted)}.acc-rij li span:last-child{white-space:nowrap}
+.acc-wat{margin:6px 0 0;font-family:var(--body);font-size:15px}
+.acc-tot{display:flex;justify-content:space-between;margin-top:8px;padding-top:8px;border-top:1px dashed var(--sand-2);font-size:15px}
 .acc-leeg{color:var(--muted)}
 .hulp{display:block;color:var(--muted);font-size:14px;margin-top:4px}
 .vink{display:flex;gap:10px;align-items:flex-start;margin:6px 0 16px;font-size:15px}.vink input{margin-top:5px}
@@ -514,3 +520,5 @@ span.f-like{cursor:default}
 .meldingen{list-style:none;padding:0;margin:0}.meldingen li{padding:12px 0;border-bottom:1px solid var(--sand-2);display:flex;justify-content:space-between;gap:12px}
 .meldingen li.nieuw a{font-weight:800}.meldingen small{color:var(--muted);white-space:nowrap}
 .acc-dl dt,.acc-dl dd{font-family:var(--tekst)}
+
+.acc-h{display:flex;align-items:center;gap:12px}.acc-ic{flex:none;display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--green);color:var(--white)}.acc-ic svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}

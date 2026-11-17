@@ -327,7 +327,7 @@ async function bevestig(request, env, url) {
 
 /* ---------------- mijn account ---------------- */
 
-const STATUS_KLAS = (s) => /betaald|bevestigd/i.test(s) ? "ok" : /wacht/i.test(s) ? "wacht" : "";
+const STATUS_KLAS = (s) => /niet betaald/i.test(s) ? "nee" : /betaald|bevestigd/i.test(s) ? "ok" : /wacht/i.test(s) ? "wacht" : "";
 
 async function overzicht(request, env, url, lid) {
   const rijen = (await env.SHOP_DB.prepare(
@@ -337,11 +337,20 @@ async function overzicht(request, env, url, lid) {
   const lijst = (soort) => {
     const r = rijen.filter((x) => x.soort === soort);
     if (!r.length) return `<p class="acc-leeg">${soort === "bestelling" ? "Nog geen bestellingen." : "Nog geen inschrijvingen."}</p>`;
-    return `<table class="acc-tabel"><thead><tr><th>Datum</th><th>${soort === "bestelling" ? "Bestelling" : "Activiteit"}</th><th>Status</th><th class="r">Totaal</th></tr></thead><tbody>${r.map((x) => {
+    return `<div class="acc-lijst">${r.map((x) => {
       let d = {}; try { d = JSON.parse(x.data); } catch {}
-      const wat = soort === "bestelling" ? (d.artikels || []).map((a) => `${a.aantal} × ${esc(a.naam)}`).join("<br>") : esc(d.activiteit_titel || x.activiteit);
-      return `<tr><td>${datum(x.aangemaakt, true)}</td><td><small>${esc(x.nummer)}</small><br>${wat}</td><td><span class="acc-status ${STATUS_KLAS(x.status)}">${esc(x.status)}</span></td><td class="r">${eur(x.totaal)}</td></tr>`;
-    }).join("")}</tbody></table>`;
+      // Niet betaald binnen de betaaltijd? Dan is de betaling verlopen.
+      let status = x.status;
+      if (/wacht/i.test(status) && Date.now() - Date.parse(x.aangemaakt) > ((d.betaaltijd_min || 15) + 5) * 60_000) status = "Niet betaald";
+      const wat = soort === "bestelling"
+        ? `<ul>${(d.artikels || []).map((a) => {
+            const k = Object.values(a.keuzes || {}).filter(Boolean).join(", ");
+            return `<li><span>${a.aantal} × ${esc(a.naam)}${k ? ` <small>(${esc(k)})</small>` : ""}</span><span>${eur(a.lijn ?? a.prijs * a.aantal)}</span></li>`;
+          }).join("")}</ul>`
+        : `<p class="acc-wat">${esc(d.activiteit_titel || x.activiteit)}</p>`;
+      return `<div class="acc-rij"><div class="acc-kop"><b>${esc(x.nummer)}</b><span class="acc-status ${STATUS_KLAS(status)}">${esc(status)}</span></div>
+        <small class="acc-meta">${datum(x.aangemaakt, true)}</small>${wat}<div class="acc-tot"><span>Totaal</span><b>${eur(x.totaal)}</b></div></div>`;
+    }).join("")}</div>`;
   };
   const m = url.searchParams.has("welkom") ? melding("Welkom! Je account is klaar. Bevestig nog je mailadres via de mail die we je stuurden.", "ok")
     : url.searchParams.has("bevestigd") ? melding("Je mailadres is bevestigd.", "ok")
@@ -354,15 +363,15 @@ async function overzicht(request, env, url, lid) {
     titel: "Mijn account", noindex: true, pad: "/account",
     inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account") + `<section class="wrap acc-sectie">${m}${onbevestigd}
       <div class="acc-grid">
-        <div class="acc-kaart"><h2>Mijn inschrijvingen</h2>${lijst("inschrijving")}</div>
-        <div class="acc-kaart"><h2>Mijn bestellingen</h2>${lijst("bestelling")}</div>
-        <div class="acc-kaart"><h2>Mijn gegevens</h2>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="m9 15 2 2 4-4"/></svg></span>Mijn inschrijvingen</h2>${lijst("inschrijving")}</div>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h14l-1.2 12H6.2L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/></svg></span>Mijn bestellingen</h2>${lijst("bestelling")}</div>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>Mijn gegevens</h2>
           <dl class="acc-dl"><dt>Gebruikersnaam</dt><dd>${esc(lid.gebruikersnaam || "–")}</dd><dt>E-mail</dt><dd>${esc(lid.email)}</dd>
-          <dt>Naam</dt><dd>${esc(lid.naam || "–")}</dd><dt>Telefoon</dt><dd>${esc(lid.telefoon || "–")}</dd><dt>Woonplaats</dt><dd>${esc(lid.woonplaats || "–")}</dd><dt>Mijn Land Rover</dt><dd>${esc(lid.landrover || "–")}</dd></dl>
+          <dt>Naam</dt><dd>${esc(lid.naam || "–")}</dd><dt>Telefoon</dt><dd>${esc(lid.telefoon || "–")}</dd><dt>Woonplaats</dt><dd>${esc(lid.woonplaats || "–")}</dd></dl>
           <p class="acc-knoppen"><a class="btn btn-solid" href="/account/gegevens">Gegevens wijzigen</a> <a class="btn" href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a></p></div>
-        <div class="acc-kaart"><h2>Mijn garage</h2>${await garageMini(env, lid)}<p class="acc-knoppen"><a class="btn btn-solid" href="/account/garage">Garage beheren</a></p></div>
-        <div class="acc-kaart"><h2>Meldingen</h2><p>${(n => n ? `Je hebt <b>${n}</b> nieuwe ${n === 1 ? "melding" : "meldingen"}.` : "Geen nieuwe meldingen.")(await aantalOngelezen(env, lid.id))}</p><p class="acc-knoppen"><a class="btn btn-solid" href="/account/meldingen">Bekijk meldingen</a></p></div>
-        <div class="acc-kaart"><h2>Forum</h2><p>${lid.gebruikersnaam ? `Je profiel: <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}">${esc(lid.gebruikersnaam)}</a>` : "Kies eerst een gebruikersnaam bij je gegevens."}</p>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg></span>Mijn garage</h2>${await garageMini(env, lid)}<p class="acc-knoppen"><a class="btn btn-solid" href="/account/garage">Garage beheren</a></p></div>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/></svg></span>Meldingen</h2><p>${(n => n ? `Je hebt <b>${n}</b> nieuwe ${n === 1 ? "melding" : "meldingen"}.` : "Geen nieuwe meldingen.")(await aantalOngelezen(env, lid.id))}</p><p class="acc-knoppen"><a class="btn btn-solid" href="/account/meldingen">Bekijk meldingen</a></p></div>
+        <div class="acc-kaart"><h2 class="acc-h"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></svg></span>Forum</h2><p>${lid.gebruikersnaam ? `Je profiel: <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}">${esc(lid.gebruikersnaam)}</a>` : "Kies eerst een gebruikersnaam bij je gegevens."}</p>
           <p class="acc-knoppen"><a class="btn btn-solid" href="/forum">Naar het forum</a> <a class="btn" href="/account/uitloggen">Uitloggen</a></p></div>
       </div></section>`,
   });
