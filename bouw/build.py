@@ -123,7 +123,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
     </div>
     <div class="legal">
       <span>{e(site['naam'])} · {site['ondernemingsnummer']} · <a href="/voorwaarden">Voorwaarden</a> · <a href="/privacy">Privacy</a></span>
-      <span>Made with love by <a href="https://susconsult.be" rel="noopener">SUS Consult</a></span>
+      <span class="made-by">Made with <span class="hartje" aria-label="liefde">♥</span> by <a href="https://susconsult.be/?ref=roverandco&amp;utm_source=roverandco.be&amp;utm_medium=referral&amp;utm_campaign=roverandco-site" target="_blank" rel="noopener"><img src="/assets/img/susconsult-wit.webp" alt="SUS Consult" width="160" height="32"></a></span>
     </div>
   </div>
 </footer>
