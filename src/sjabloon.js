@@ -72,3 +72,14 @@ export function metVlag(request, res, lid) {
   try { res.headers.append("set-cookie", "rc_lid_aan=1; Path=/; Max-Age=7776000; Secure; SameSite=Lax"); } catch {}
   return res;
 }
+
+// Eenvoudige lijn-icoontjes (geen emoji), kleur via currentColor.
+const ICONEN = {
+  auto: '<path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
+  bel: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>',
+  hart: '<path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/>',
+  kalender: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
+  pin: '<path d="M12 21s-6-5.6-6-11a6 6 0 0 1 12 0c0 5.4-6 11-6 11Z"/><circle cx="12" cy="10" r="2.2"/>',
+  vink: '<path d="m5 12 4.5 4.5L19 7"/>',
+};
+export const ico = (naam) => `<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">${ICONEN[naam] || ""}</svg>`;

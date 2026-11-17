@@ -1,5 +1,5 @@
 // Forum: garage, likes, volgen (categorie, topic, hashtag), hashtags en meldingen (het belletje).
-import { esc } from "./sjabloon.js";
+import { esc, ico } from "./sjabloon.js";
 
 const nu = () => new Date().toISOString();
 
@@ -32,9 +32,9 @@ export async function zetVolgen(env, lidId, soort, sleutel, aan) {
   else await env.SHOP_DB.prepare("DELETE FROM forum_volgen WHERE lid_id = ? AND soort = ? AND sleutel = ?").bind(lidId, soort, String(sleutel)).run();
 }
 export function volgKnop(lid, soort, sleutel, aan, terug, label) {
-  if (!lid) return `<a class="btn f-volg" href="/account/inloggen?terug=${encodeURIComponent(terug)}">🔔 ${esc(label)} volgen</a>`;
+  if (!lid) return `<a class="btn f-volg" href="/account/inloggen?terug=${encodeURIComponent(terug)}">${ico("bel")} ${esc(label)} volgen</a>`;
   return `<form method="post" action="/forum/volg" class="f-volgform"><input type="hidden" name="soort" value="${soort}"><input type="hidden" name="sleutel" value="${esc(sleutel)}"><input type="hidden" name="aan" value="${aan ? "0" : "1"}"><input type="hidden" name="terug" value="${esc(terug)}">
-    <button class="btn f-volg${aan ? " aan" : ""}" type="submit" title="${aan ? "Je krijgt een melding bij nieuwe berichten. Klik om te stoppen." : "Krijg een melding bij nieuwe berichten"}">${aan ? "✓ Je volgt " : "🔔 Volg "}${esc(label)}</button></form>`;
+    <button class="btn f-volg${aan ? " aan" : ""}" type="submit" title="${aan ? "Je krijgt een melding bij nieuwe berichten. Klik om te stoppen." : "Krijg een melding bij nieuwe berichten"}">${aan ? ico("vink") + " Je volgt " : ico("bel") + " Volg "}${esc(label)}</button></form>`;
 }
 
 /* ---------------- meldingen ---------------- */
@@ -72,7 +72,7 @@ export async function likes(env, lid, berichtIds) {
   return { aantal: Object.fromEntries(a.map((x) => [x.bericht_id, x.n])), mijn: new Set(m.map((x) => x.bericht_id)) };
 }
 export function likeKnop(lid, berichtId, n, mijn) {
-  const tekst = `♥ <span>${n || ""}</span>`;
+  const tekst = `${ico("hart")} <span>${n || ""}</span>`;
   if (!lid) return `<span class="f-like" title="Log in om te liken">${tekst}</span>`;
   return `<form method="post" action="/forum/b/${berichtId}/like" class="f-likeform"><button type="submit" class="f-like${mijn ? " aan" : ""}" aria-pressed="${mijn}" title="${mijn ? "Niet meer leuk" : "Leuk"}">${tekst}</button></form>`;
 }

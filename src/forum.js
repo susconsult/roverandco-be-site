@@ -2,7 +2,7 @@
 // Lezen kan iedereen; posten met een account (zie src/leden.js). Moderatie: alleen beheerders (BEHEER_EMAILS).
 // Opmaak in berichten: [b]vet[/b], [i]schuin[/i], [quote=naam]...[/quote], [foto=123], links worden klikbaar.
 // Foto's worden in de browser verkleind (public/assets/js/forum.js) en in D1 bewaard (tabel forum_fotos).
-import { esc, datum, banner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
+import { esc, ico, datum, banner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
 
@@ -138,7 +138,7 @@ async function index(request, env, url, lid) {
     inhoud: banner("Rover & Co", "Forum", "Techniek, onderdelen, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.") + `<section class="wrap f-sectie">
       ${balk(lid, "/forum")}
       <div class="f-waarom"><h2>Waarom een forum in 2026?</h2><p>Omdat we het beu zijn. Geen algoritme, geen reclame, niemand die aan jouw foto's verdient. Hier deel je kennis en vakantiekiekjes, en spreek je af: zin om zaterdag samen een roadbook te rijden? Post het, en wie meewil, reageert. Jouw berichten blijven van jou. Gewoon elkaar helpen, samen rijden en een echte community bouwen.</p>
-        <p class="f-waarom-tips"><span>🚙 Zet je Land Rovers in je <a href="/account/garage">garage</a></span><span>🔔 Volg categorieën, topics en #hashtags</span><span>♥ Like wat je goed vindt</span></div>
+        <p class="f-waarom-tips"><span>${ico("auto")} Zet je Land Rovers in je <a href="/account/garage">garage</a></span><span>${ico("bel")} Volg categorieën, topics en #hashtags</span><span>${ico("hart")} Like wat je goed vindt</span></div>
       <table class="f-tabel"><thead><tr><th>Forum</th><th class="f-num">Topics</th><th class="f-num">Berichten</th><th class="f-laatste">Laatste bericht</th></tr></thead><tbody>${rijen}</tbody></table>
       <p class="f-stats">${stats.leden} leden · ${stats.topics} topics · ${stats.berichten} berichten${stats.nieuwste ? ` · Nieuwste lid: ${lidLink(stats.nieuwste)}` : ""}</p>
       ${lid ? "" : `<div class="f-oproep"><p><b>Zelf iets vragen of vertellen?</b> Maak een gratis account. Met hetzelfde account bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-solid" href="/account/registreren?terug=/forum">Account maken</a></div>`}
@@ -232,7 +232,7 @@ async function topic(request, env, url, lid, id) {
     titel: `${t.titel} – ${t.cnaam}`, pad: topicUrl(t, pag), desc: String(berichten[0]?.tekst || t.titel).replace(/\[[^\]]*\]/g, "").replace(/\s+/g, " ").slice(0, 155),
     inhoud: banner(t.cnaam, t.titel) + `<section class="wrap f-sectie">
       ${balk(lid, topicUrl(t, pag))}${kruimel(`<a href="/forum/c/${t.cslug}">${esc(t.cnaam)}</a>`, esc(t.titel))}${m}${mod}
-      ${t.rit_datum ? `<div class="f-ritblok"><b>Samen rijden</b><span>📅 ${ritDatum(t.rit_datum)}</span>${t.rit_plaats ? `<span>📍 ${esc(t.rit_plaats)}</span>` : ""}<small>Rij je mee? Reageer hieronder.</small></div>` : ""}
+      ${t.rit_datum ? `<div class="f-ritblok"><b>Samen rijden</b><span>${ico("kalender")} ${ritDatum(t.rit_datum)}</span>${t.rit_plaats ? `<span>${ico("pin")} ${esc(t.rit_plaats)}</span>` : ""}<small>Rij je mee? Reageer hieronder.</small></div>` : ""}
       <div class="f-kop"><div class="f-knoppen">${t.gesloten ? '<span class="f-label grijs">Gesloten</span>' : lid ? '<a class="btn btn-solid" href="#antwoord">Antwoorden</a>' : ""}${volgT}</div>${pg}</div>
       ${posts}
       <div class="f-kop">${pg}</div>

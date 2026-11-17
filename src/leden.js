@@ -10,7 +10,7 @@
 // - /api/account/ik           : gegevens van wie ingelogd is (om formulieren in te vullen)
 // Wachtwoorden: PBKDF2-SHA256, 100 000 rondes, eigen zout per lid. Sessie: cookie rc_lid (HttpOnly, Secure), 90 dagen.
 // Variabelen: TURNSTILE_SITEKEY + TURNSTILE_SECRET (zonder deze twee: geen spamcheck), RESEND_API_KEY, BEHEER_EMAILS.
-import { esc, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail, metVlag } from "./sjabloon.js";
+import { esc, ico, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail, metVlag } from "./sjabloon.js";
 import { eur } from "./opslag.js";
 import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
 
@@ -458,7 +458,7 @@ async function garage(request, env, url, lid) {
   }
   const formulier = (w = {}) => `<form method="post" action="/account/garage" class="garage-form">
       <input type="hidden" name="id" value="${w.id || ""}">
-      <div class="avatar-kies">${w.foto_id ? `<img class="wagen-mini" src="/forum/foto/${w.foto_id}" alt="">` : '<span class="wagen-mini leeg">🚙</span>'}<label class="btn">Foto kiezen<input type="file" accept="image/*" data-wagenfoto hidden></label><input type="hidden" name="foto_id" value="${w.foto_id || ""}"></div>
+      <div class="avatar-kies">${w.foto_id ? `<img class="wagen-mini" src="/forum/foto/${w.foto_id}" alt="">` : `<span class="wagen-mini leeg">${ico("auto")}</span>`}<label class="btn">Foto kiezen<input type="file" accept="image/*" data-wagenfoto hidden></label><input type="hidden" name="foto_id" value="${w.foto_id || ""}"></div>
       <div class="veld2">${veld("type" + (w.id || ""), "Type", { waarde: w.type, extra: 'name="type" required maxlength="80" placeholder="Defender 110 Td5"' }).replace(`name="type${w.id || ""}"`, "")}
         ${veld("bouwjaar" + (w.id || ""), "Bouwjaar", { type: "number", waarde: w.bouwjaar || "", extra: 'name="bouwjaar" min="1948" max="2030"' }).replace(`name="bouwjaar${w.id || ""}"`, "")}</div>
       <div class="veld2">${veld("naam" + (w.id || ""), "Bijnaam <small>(optioneel)</small>", { waarde: w.naam, extra: 'name="naam" maxlength="60" placeholder="Otis"' }).replace(`name="naam${w.id || ""}"`, "")}
