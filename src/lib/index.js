@@ -25,6 +25,7 @@ import { opslag } from "./opslag.js";
 import { beheer } from "./beheer.js";
 import { leden, lidVoorBestelling, wachtwoordLink } from "./leden.js";
 import { forum } from "./forum.js";
+import { cb } from "./cb.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
 
 const VERZENDKOST = 7.5;
@@ -370,6 +371,8 @@ export default {
     if (ld) return ld;
     const fo = await forum(request, env, url);
     if (fo) return fo;
+    const cbr = await cb(request, env, url);
+    if (cbr) return cbr;
     const bh = await beheer(request, env, url);
     if (bh) return bh;
     const pl = await planner(request, env, url);

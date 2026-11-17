@@ -22,7 +22,7 @@ const STIJL = `<style>
 .acties{display:flex;gap:8px;flex-wrap:wrap}.acties form{margin:0}.knop.rood,button.rood{background:#fff;color:#a32d2d;border-color:#e2b4b4}
 .form-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}.form-grid label{display:block;font-size:13px;color:var(--m);margin-bottom:4px}.form-grid input{width:100%}
 .log li{display:grid;grid-template-columns:130px 80px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid #eee;font-size:14px}.log{list-style:none;margin:0;padding:0}.log time{color:var(--m)}
-.soort{font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:#eee;justify-self:start}.s-account{background:#e6e6f6;color:#3c3489}.s-forum{background:#dcefe2;color:#1F3B2A}.s-garage,.s-profiel{background:#fbefd5;color:#7a5200}.s-beheer{background:#f7dede;color:#791f1f}
+.soort{font-size:12px;font-weight:600;padding:1px 7px;border-radius:99px;background:#eee;justify-self:start}.s-account{background:#e6e6f6;color:#3c3489}.s-forum,.s-cb{background:#dcefe2;color:#1F3B2A}.s-garage,.s-profiel{background:#fbefd5;color:#7a5200}.s-beheer{background:#f7dede;color:#791f1f}
 .wagens{display:flex;gap:10px;flex-wrap:wrap}.wagens figure{margin:0;width:150px;font-size:13px}.wagens img{width:150px;height:100px;object-fit:cover;border-radius:8px;display:block;margin-bottom:4px}
 .melding-ok{background:#dcefe2;padding:10px 14px;border-radius:8px;margin-bottom:12px}.melding-fout{background:#f7dede;padding:10px 14px;border-radius:8px;margin-bottom:12px}
 @media(max-width:700px){.form-grid{grid-template-columns:1fr}.log li{grid-template-columns:1fr}}
@@ -191,11 +191,11 @@ async function actie(request, env, url, id, email) {
 
 async function activiteit(url, env, email) {
   await opruimen(env);
-  const soort = ["account", "forum", "garage", "profiel", "beheer"].includes(url.searchParams.get("soort")) ? url.searchParams.get("soort") : "";
+  const soort = ["account", "forum", "cb", "garage", "profiel", "beheer"].includes(url.searchParams.get("soort")) ? url.searchParams.get("soort") : "";
   const r = (await env.SHOP_DB.prepare(`SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id ${soort ? "WHERE g.soort = ?" : ""} ORDER BY g.id DESC LIMIT 300`).bind(...(soort ? [soort] : [])).all()).results || [];
   const t = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer/log${s ? "?soort=" + s : ""}">${label}</a>`;
   return pagina("Log", `${STIJL}${hoofdTabs("log")}
-<nav class="tabs">${t("", "Alles")}${t("account", "Account")}${t("forum", "Forum")}${t("garage", "Garage")}${t("profiel", "Profiel")}${t("beheer", "Beheer")}</nav>
+<nav class="tabs">${t("", "Alles")}${t("account", "Account")}${t("forum", "Forum")}${t("cb", "CB")}${t("garage", "Garage")}${t("profiel", "Profiel")}${t("beheer", "Beheer")}</nav>
 <div class="kaart"><p style="margin-top:0;color:var(--m)">Laatste 300 acties. Alles ouder dan ${LOG_DAGEN} dagen wordt automatisch gewist.</p>
 ${r.length ? `<ul class="log">${r.map((x) => logRij(x, true)).join("")}</ul>` : `<p class="leeg">Nog geen activiteit.</p>`}</div>`, email);
 }

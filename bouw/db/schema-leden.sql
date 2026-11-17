@@ -84,3 +84,10 @@ CREATE TABLE IF NOT EXISTS lid_log (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id
 CREATE INDEX IF NOT EXISTS lid_log_lid ON lid_log (lid_id, aangemaakt);
 CREATE INDEX IF NOT EXISTS lid_log_tijd ON lid_log (aangemaakt);
 ALTER TABLE leden ADD COLUMN verwijderd_op TEXT;
+
+CREATE TABLE IF NOT EXISTS cb_kanalen (nr INTEGER PRIMARY KEY, naam TEXT NOT NULL, omschrijving TEXT, lid_id INTEGER, vast INTEGER NOT NULL DEFAULT 0, aangemaakt TEXT NOT NULL);
+CREATE TABLE IF NOT EXISTS cb_berichten (id INTEGER PRIMARY KEY AUTOINCREMENT, nr INTEGER NOT NULL, lid_id INTEGER NOT NULL, tekst TEXT NOT NULL, aangemaakt TEXT NOT NULL, verwijderd INTEGER NOT NULL DEFAULT 0);
+CREATE INDEX IF NOT EXISTS cb_berichten_nr ON cb_berichten (nr, id);
+CREATE INDEX IF NOT EXISTS cb_berichten_tijd ON cb_berichten (aangemaakt);
+CREATE TABLE IF NOT EXISTS cb_gelezen (lid_id INTEGER NOT NULL, nr INTEGER NOT NULL, laatste_id INTEGER NOT NULL, PRIMARY KEY (lid_id, nr));
+ALTER TABLE leden ADD COLUMN laatst_cb TEXT;
