@@ -614,3 +614,5 @@ span.f-like{cursor:default}
 .hero-nieuw h1{font-size:clamp(48px,min(7.2vw,11.5vh),116px);max-width:16ch;line-height:.92}
 .hero-nieuw p{font-size:clamp(17px,1.6vw,21px);margin:16px 0 26px}
 @media(max-width:880px){.hero-nieuw h1{font-size:clamp(44px,12vw,64px)}.hero-nieuw .hero-in{padding-top:100px}}
+.hero-nieuw h1{font-size:clamp(42px,min(5.4vw,9.5vh),88px);max-width:18ch}
+@media(max-width:880px){.hero-nieuw h1{font-size:clamp(40px,11vw,56px)}}
