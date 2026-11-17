@@ -759,23 +759,45 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
       banner("Privacy", "Privacyverklaring", "Welke gegevens we bijhouden, waarom, en wat je rechten zijn.", None) + f"""
 <section><div class="narrow prose">
   <p>{e(site['naam'])} ({site['ondernemingsnummer']}, {', '.join(site['adres'])}) is verantwoordelijk voor de gegevens die je ons bezorgt.</p>
-  <h2>Wat we gebruiken en waarom</h2>
-  <p>We gebruiken je naam, e-mailadres, telefoonnummer en adres alleen om je inschrijving of bestelling af te handelen, je account te beheren en je te contacteren over onze activiteiten. We verkopen je gegevens niet.</p>
-  <h2>Je account en het forum</h2>
-  <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug. Je kiest zelf een wachtwoord via de link in je bevestigingsmail. Je wachtwoord bewaren we alleen versleuteld.</p>
-  <p>Met je account kan je ook berichten plaatsen op het forum. Je gebruikersnaam, je berichten en wat je zelf op je profiel zet (woonplaats, je Land Rover, profielfoto) zijn voor iedereen zichtbaar. Je e-mailadres en telefoonnummer niet.</p>
+  <p>Laatst bijgewerkt: 18 november 2026. Vragen? Mail naar <a href="mailto:{site['email']}">{site['email']}</a>.</p>
+  <h2>Wat we bijhouden en waarom</h2>
+  <ul>
+    <li><b>Bestellingen en inschrijvingen</b>: naam, e-mailadres, telefoon, wat je kiest, je opmerking, eventueel met welke Land Rover je komt en bij verzending je adres. Nodig om je bestelling of inschrijving uit te voeren (overeenkomst).</li>
+    <li><b>Je account</b>: e-mailadres, gebruikersnaam, wachtwoord (alleen versleuteld bewaard) en wat je zelf invult: naam, telefoon, adres, profielfoto en je garage. Zo vullen we je gegevens automatisch in bij een volgende bestelling of inschrijving.</li>
+    <li><b>Forum en CB</b>: je berichten, foto's, spraakberichten, likes en reacties, wat je volgt en bewaart.</li>
+    <li><b>Veiligheid</b>: een activiteitenlog per account (inloggen, berichten, wijzigingen) en bij een melding een versleutelde code van je IP-adres. Zo houden we misbruik en spam tegen (gerechtvaardigd belang).</li>
+  </ul>
+  <p>We verkopen je gegevens niet en gebruiken ze niet voor reclame.</p>
+  <h2>Wat anderen zien</h2>
+  <p>Iedereen ziet je gebruikersnaam, je profielfoto, je garage en je forumberichten. Je naam, e-mailadres, telefoon en adres ziet niemand behalve jij en de beheerder. De CB en de spraakberichten zijn alleen zichtbaar voor ingelogde leden. Op het Albertkanaal ziet niemand wie wat zegt, maar de beheerder kan het wel nagaan als een bericht gemeld wordt.</p>
+  <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug.</p>
+  <h2>Meldingen en moderatie</h2>
+  <p>Leden kunnen een bericht, foto of CB-bericht melden. De beheerder krijgt dan een mail met de inhoud en de reden en kan ze verwijderen of een lid blokkeren. Wie het bericht schreef, ziet niet wie het meldde. Andere CB-berichten leest de beheerder niet.</p>
+  <h2>Je microfoon</h2>
+  <p>Je microfoon wordt alleen gebruikt zolang je de PTT-knop op de CB ingedrukt houdt, en alleen als je dat zelf toelaat in je browser.</p>
+  <h2>Hoe lang</h2>
+  <ul>
+    <li>CB-berichten, spraakberichten, reacties en eigen CB-kanalen: 24 uur.</li>
+    <li>Activiteitenlog: 90 dagen.</li>
+    <li>Je account, garage en forumberichten: tot je je account verwijdert.</li>
+    <li>Bestellingen, inschrijvingen en betaalgegevens: zo lang als de wettelijke boekhoudplicht vraagt, ook als je je account verwijdert.</li>
+  </ul>
   <h2>Wie helpt ons daarbij</h2>
   <ul>
-    <li>Betalingen verlopen via Viva. Wij zien je kaartgegevens niet.</li>
-    <li>De website, je account, het forum, bestellingen en inschrijvingen draaien bij Cloudflare. Bij het registreren gebruiken we Cloudflare Turnstile om spambots tegen te houden.</li>
-    <li>Mails (bevestigingen, wachtwoordlinks) versturen we via Resend.</li>
+    <li>Cloudflare: de website, je account, het forum, de CB, foto's en de database. Bij het registreren houdt Cloudflare Turnstile spambots tegen.</li>
+    <li>Resend: verstuurt onze mails (bevestigingen, wachtwoordlinks, meldingen), vanuit de EU.</li>
+    <li>Viva: verwerkt de betalingen. Wij zien je kaartgegevens niet.</li>
   </ul>
-  <h2>Hoe lang</h2>
-  <p>We bewaren bestel- en betaalgegevens zo lang als de wettelijke boekhoudplicht vraagt.</p>
   <h2>Cookies</h2>
   <p>Deze website plaatst geen tracking- of advertentiecookies. Als je inlogt, zetten we twee kleine cookies die nodig zijn om je ingelogd te houden en je meldingen te tonen. Je winkelmandje wordt alleen in je eigen browser bewaard.</p>
   <h2>Jouw rechten</h2>
-  <p>Je kan je gegevens altijd opvragen, laten aanpassen of laten verwijderen via <a href="mailto:{site['email']}">{site['email']}</a>. Ben je niet tevreden, dan kan je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
+  <ul>
+    <li><b>Inzien en meenemen</b>: download al je gegevens via Mijn account, Gegevens en wachtwoord.</li>
+    <li><b>Aanpassen</b>: pas je gegevens zelf aan in Mijn account.</li>
+    <li><b>Verwijderen</b>: verwijder je account zelf via Mijn account, Gegevens en wachtwoord.</li>
+    <li><b>Bezwaar of een andere vraag</b>: mail naar <a href="mailto:{site['email']}">{site['email']}</a>.</li>
+  </ul>
+  <p>Ben je niet tevreden, dan kan je een klacht indienen bij de <a href="https://www.gegevensbeschermingsautoriteit.be" rel="noopener">Gegevensbeschermingsautoriteit</a>.</p>
 </div></section>""")
 
 # ---------- 404 ----------

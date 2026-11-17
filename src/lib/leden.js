@@ -13,6 +13,7 @@
 import { esc, ico, datum, banner, pagina, naar, eigenOrigin, sha, willekeurig, mail, metVlag } from "./sjabloon.js";
 import { eur } from "./opslag.js";
 import { log } from "./log.js";
+import { anonimiseer } from "./anoniem.js";
 import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
 
 const COOKIE = "rc_lid";
@@ -432,7 +433,7 @@ async function gegevens(request, env, url, lid) {
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
         <button class="btn btn-solid" type="submit">Bewaren</button> <a class="btn" href="/account">Annuleren</a>
-      </form><p class="acc-links"><a href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a></p><script src="/assets/js/forum.js" defer></script>`),
+      </form><p class="acc-links"><a href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a> · <a href="/account/mijn-gegevens.json" download>Download al mijn gegevens</a> · <a href="/account/verwijderen">Account verwijderen</a></p><script src="/assets/js/forum.js" defer></script>`),
   });
   if (request.method !== "POST") return toon();
   const f = await request.formData();
@@ -541,6 +542,53 @@ async function meldingen(request, env, lid) {
 
 /* ---------------- router ---------------- */
 
+/* ---------------- privacy: gegevens downloaden en account verwijderen ---------------- */
+
+async function export_(env, lid) {
+  const db = env.SHOP_DB;
+  const alle = async (sql, ...a) => (await db.prepare(sql).bind(...a).all()).results || [];
+  const data = {
+    uitgevoerd_op: new Date().toISOString(),
+    account: { gebruikersnaam: lid.gebruikersnaam, email: lid.email, naam: lid.naam, telefoon: lid.telefoon, straat: lid.straat, postcode: lid.postcode, gemeente: lid.gemeente, land: lid.land, aangemaakt: lid.aangemaakt, mail_bevestigd: lid.bevestigd_op, laatst_ingelogd: lid.laatst_gezien },
+    garage: await alle("SELECT naam, type, bouwjaar, omschrijving, foto_id, aangemaakt FROM lid_wagens WHERE lid_id = ?", lid.id),
+    bestellingen_en_inschrijvingen: (await alle("SELECT nummer, soort, aangemaakt, status, totaal, activiteit, data FROM registraties WHERE lid_id = ?1 OR (?2 = 1 AND email = ?3 COLLATE NOCASE) ORDER BY aangemaakt", lid.id, lid.bevestigd_op ? 1 : 0, lid.email)).map((r) => { try { r.data = JSON.parse(r.data); } catch {} return r; }),
+    forumberichten: await alle("SELECT b.id, t.titel AS topic, b.tekst, b.aangemaakt, b.bewerkt_op FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id WHERE b.lid_id = ? AND b.verwijderd = 0 ORDER BY b.id", lid.id),
+    likes: await alle("SELECT bericht_id, aangemaakt FROM forum_likes WHERE lid_id = ?", lid.id),
+    volgt: await alle("SELECT soort, sleutel, aangemaakt FROM forum_volgen WHERE lid_id = ?", lid.id),
+    bewaard: await alle("SELECT soort, sleutel, aangemaakt FROM lid_bewaard WHERE lid_id = ?", lid.id),
+    cb_berichten_laatste_24u: await alle("SELECT nr AS kanaal, tekst, audio_id, aangemaakt FROM cb_berichten WHERE lid_id = ?", lid.id),
+    meldingen: await alle("SELECT tekst, link, gelezen, aangemaakt FROM lid_meldingen WHERE lid_id = ?", lid.id),
+    activiteit_laatste_90_dagen: await alle("SELECT soort, tekst, aangemaakt FROM lid_log WHERE lid_id = ? ORDER BY id", lid.id),
+    fotos: "Je foto's staan op /forum/foto/<foto_id> (zie garage en forumberichten).",
+  };
+  await log(env, lid.id, "account", "Gegevens gedownload");
+  return new Response(JSON.stringify(data, null, 2), { headers: { "content-type": "application/json; charset=utf-8", "content-disposition": `attachment; filename="rover-en-co-mijn-gegevens.json"`, "cache-control": "no-store" } });
+}
+
+async function verwijderen(request, env, url, lid) {
+  const toon = (m = "") => pagina(env, request, {
+    titel: "Account verwijderen", noindex: true,
+    inhoud: banner("Mijn account", "Account verwijderen", "Je gegevens worden gewist. Dit kan niet ongedaan gemaakt worden.", [["Mijn account", "/account"], ["Account verwijderen"]]) + kader(`${melding(m)}
+      <p>Dit gebeurt er:</p>
+      <ul><li>Je naam, e-mail, telefoon, adres, profielfoto en garage worden gewist.</li>
+      <li>Je CB-berichten, bewaarde items, meldingen en activiteitenlog worden gewist.</li>
+      <li>Je forumberichten blijven staan, maar onder een anonieme naam. Wil je ze ook weg? Verwijder ze eerst zelf of mail ons.</li>
+      <li>Bestellingen en inschrijvingen bewaren we zolang de boekhoudwet dat vraagt.</li></ul>
+      <form method="post" action="/account/verwijderen">
+        ${lid.wachtwoord ? veld("wachtwoord", "Je wachtwoord ter bevestiging", { type: "password", auto: "current-password", extra: "required" }) : ""}
+        <label class="akkoord"><input type="checkbox" name="zeker" value="ja" required> <span>Ik begrijp het en wil mijn account verwijderen.</span></label>
+        <p><button class="btn btn-solid" type="submit">Account definitief verwijderen</button> <a class="btn" href="/account">Annuleren</a></p>
+      </form><p class="acc-links"><a href="/account/mijn-gegevens.json" download>Eerst al je gegevens downloaden</a></p>`),
+  });
+  if (request.method !== "POST") return toon();
+  const f = await request.formData();
+  if (f.get("zeker") !== "ja") return toon("Vink aan dat je je account wil verwijderen.");
+  if (lid.wachtwoord && !(await klopt(String(f.get("wachtwoord") || ""), lid.wachtwoord))) return toon("Je wachtwoord klopt niet.");
+  await anonimiseer(env, lid.id);
+  await log(env, lid.id, "account", "Account verwijderd door het lid zelf");
+  return naar("/?account=verwijderd", { "set-cookie": [`${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`, "rc_lid_aan=; Path=/; Max-Age=0; Secure; SameSite=Lax"] });
+}
+
 export async function leden(request, env, url) {
   const p = url.pathname.replace(/\/$/, "") || "/";
   if (p === "/api/account/ik") {
@@ -565,6 +613,8 @@ export async function leden(request, env, url) {
   if (!lid) return naar("/account/inloggen?terug=" + encodeURIComponent(p));
   if (p === "/account") return metVlag(request, await overzicht(request, env, url, lid), lid);
   if (p === "/account/bestellingen") return bestellingen(request, env, url, lid);
+  if (p === "/account/mijn-gegevens.json") return export_(env, lid);
+  if (p === "/account/verwijderen") return verwijderen(request, env, url, lid);
   if (p === "/account/gegevens") return gegevens(request, env, url, lid);
   if (p === "/account/nieuw-wachtwoord") return nieuwWachtwoord(request, env, url, lid);
   if (p === "/account/garage") return garage(request, env, url, lid);

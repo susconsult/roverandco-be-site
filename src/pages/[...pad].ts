@@ -2,6 +2,8 @@
 import type { APIRoute } from "astro";
 import { env } from "cloudflare:workers";
 import oud from "../lib/index.js";
+import { veiligheid } from "../lib/veiligheid.js";
 
 export const prerender = false;
-export const ALL: APIRoute = ({ request, locals }) => oud.fetch(request, env, (locals as any).cfContext ?? { waitUntil() {}, passThroughOnException() {} });
+export const ALL: APIRoute = async ({ request, locals }) =>
+  veiligheid(await oud.fetch(request, env, (locals as any).cfContext ?? { waitUntil() {}, passThroughOnException() {} }));

@@ -79,7 +79,7 @@ async function meldVersturen(request, env, url, lid) {
   const toel = String(f.get("toelichting") || "").replace(/\s+/g, " ").trim().slice(0, 300);
   const reden = (r ? r[1] : "Iets anders") + (toel ? `: ${toel}` : "");
   const terugOk = `/melden?soort=${soort}&id=${id}&ok=1`;
-  const ip = await sha("ip:" + (request.headers.get("cf-connecting-ip") || ""));
+  const ip = await sha("ip:" + (env.TURNSTILE_SECRET || env.RESEND_API_KEY || "") + ":" + (request.headers.get("cf-connecting-ip") || ""));
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
   if (recent.n >= 5) return naar(terugOk);
   await env.SHOP_DB.prepare(`INSERT INTO forum_meldingen (bericht_id, ${it.kolom === "bericht_id" ? "" : it.kolom + ", "}lid_id, ip_hash, reden, aangemaakt) VALUES (${it.kolom === "bericht_id" ? "?" : "0, ?"}, ?, ?, ?, ?)`)

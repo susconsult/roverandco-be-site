@@ -2,6 +2,7 @@
 import { esc, pagina } from "./beheer.js";
 import { stuurWachtwoordLink, stuurBevestiging } from "./leden.js";
 import { log, opruimen, LOG_DAGEN } from "./log.js";
+import { anonimiseer } from "./anoniem.js";
 
 const naar = (pad) => new Response(null, { status: 303, headers: { location: pad, "cache-control": "no-store" } });
 const nu = () => new Date().toISOString();
@@ -168,18 +169,7 @@ async function actie(request, env, url, id, email) {
     return detail(id, env, email, "Bewaard.");
   }
   if (a === "anoniem") {
-    const fotos = [l.avatar_id, ...(((await db.prepare("SELECT foto_id FROM lid_wagens WHERE lid_id = ?").bind(l.id).all()).results || []).map((x) => x.foto_id))].filter(Boolean);
-    await db.batch([
-      db.prepare("UPDATE leden SET email = ?, gebruikersnaam = ?, wachtwoord = NULL, naam = NULL, telefoon = NULL, woonplaats = NULL, landrover = NULL, avatar_id = NULL, bevestigd_op = NULL, geblokkeerd = 0, verwijderd_op = ? WHERE id = ?")
-        .bind(`verwijderd-${l.id}@roverandco.invalid`, `verwijderd-${l.id}`, nu(), l.id),
-      db.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(l.id),
-      db.prepare("DELETE FROM lid_tokens WHERE lid_id = ?").bind(l.id),
-      db.prepare("DELETE FROM lid_wagens WHERE lid_id = ?").bind(l.id),
-      db.prepare("DELETE FROM lid_meldingen WHERE lid_id = ?").bind(l.id),
-      db.prepare("DELETE FROM forum_volgen WHERE lid_id = ?").bind(l.id),
-      db.prepare("DELETE FROM lid_log WHERE lid_id = ?").bind(l.id),
-      ...fotos.map((fid) => db.prepare("DELETE FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(fid, l.id)),
-    ]);
+    await anonimiseer(env, l.id);
     await log(env, l.id, "beheer", "Account anoniem gemaakt door beheer");
     return detail(id, env, email, "Account anoniem gemaakt.");
   }

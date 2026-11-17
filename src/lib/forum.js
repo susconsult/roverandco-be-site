@@ -398,7 +398,7 @@ async function meld(request, env, url, lid, id) {
   if (!b) return null;
   const f = await request.formData();
   const reden = tekst(f.get("reden"), 300);
-  const ip = await sha("ip:" + (request.headers.get("cf-connecting-ip") || ""));
+  const ip = await sha("ip:" + (env.TURNSTILE_SECRET || env.RESEND_API_KEY || "") + ":" + (request.headers.get("cf-connecting-ip") || ""));
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
   const terug = topicUrl({ id: b.topic_id, titel: b.titel });
   if (recent.n >= 5) return naar(`${terug}?gemeld=1#b${b.id}`);
@@ -418,7 +418,7 @@ async function meldWagen(request, env, url, lid, id) {
   if (!w || !w.gebruikersnaam) return null;
   const f = await request.formData();
   const reden = tekst(f.get("reden"), 300);
-  const ip = await sha("ip:" + (request.headers.get("cf-connecting-ip") || ""));
+  const ip = await sha("ip:" + (env.TURNSTILE_SECRET || env.RESEND_API_KEY || "") + ":" + (request.headers.get("cf-connecting-ip") || ""));
   const terug = `/forum/lid/${encodeURIComponent(w.gebruikersnaam)}`;
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
   if (recent.n >= 5) return naar(`${terug}?gemeld=1#wagen-${w.id}`);
