@@ -267,6 +267,10 @@ def tegel(href, foto, titel, tekst, label=""):
     return (f'<a class="tegel" href="{href}">{img(foto, "", sizes="(max-width:880px) 50vw, 25vw")}'
             f'<div class="tegel-b">{f"<span class=tegel-label>{e(label)}</span>" if label else ""}<b>{e(titel)}</b><span>{e(tekst)}</span></div></a>')
 
+PARTNERS_ALLE = [("partner-the-wolfgarage", "The Wolfgarage", "blog/partner-the-wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk", "blog/partner-pp-hekwerk"),
+                 ("partner-kerkhofs-grondwerken", "Kerkhofs Grondwerken", "959"), ("partner-pakawi", "Pakawi Park", "blog/partner-pakawi"),
+                 ("partner-epc-verbeteraars", "EPC Verbeteraars", "blog/partner-epc-verbeteraars"), ("partner-elektrofix", "ElektroFix", "blog/partner-elektrofix"),
+                 ("partner-sus-consult", "SUS Consult", "blog/partner-sus-consult")]
 PARTNERS_HOME = [("partner-the-wolfgarage", "The Wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk"), ("partner-pakawi", "Pakawi Park"),
                  ("partner-epc-verbeteraars", "EPC Verbeteraars"), ("partner-elektrofix", "ElektroFix"), ("partner-sus-consult", "SUS Consult")]
 
@@ -696,23 +700,10 @@ write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit
   </div>
 </div></section>
 <section class="forum-band topo">
-  <div class="wrap forum-in">
-    <div>
-      <div class="eyebrow">Achter de schermen</div>
-      <h2>Wie zit erachter</h2>
-      <p>Rover &amp; Co draait op vrijwilligers en partners die er hun tijd, kennis en materiaal in steken. Zonder hen geen ritten, geen roadbooks en geen kampvuur.</p>
-      <div class="ctas"><a href="/contact" class="btn btn-wit">Contacteer ons</a></div>
-    </div>
-    <div class="oo-mensen">
-      <div class="oo-mens"><img src="/assets/img/auteurs/dolf-borre.webp" alt="" loading="lazy" width="72" height="72"><div><b>Dolf Borré</b><span>Medeoprichter, The Wolfgarage. De Land Rover-kennis van de club.</span></div></div>
-      <div class="oo-mens"><img src="/assets/img/auteurs/pieter-van-baekel.webp" alt="" loading="lazy" width="72" height="72"><div><b>Pieter Van Baekel</b><span>Communicatie, website en de techniek achter de evenementen.</span></div></div>
-    </div>
-  </div>
-</section>
-<section>
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Partners</div><h2>Met dank aan</h2></div><a href="/blog" class="btn">Lees hun verhaal</a></div>
-    <div class="oo-partners">{''.join(f'<a href="/blog/{s}" title="{e(n)}"><img src="/assets/img/blog/{s}-s.webp" alt="{e(n)}" loading="lazy"><span>{e(n)}</span></a>' for s, n in PARTNERS_HOME)}</div>
+    <div class="sec-head"><div><div class="eyebrow">Partners</div><h2>Gedragen door onze partners</h2></div><a href="/blog/onze-partners" class="btn btn-wit">Lees hun verhaal</a></div>
+    <p class="oo-intro">Rover &amp; Co draait op vrijwilligers en op partners die er hun tijd, kennis, materiaal en machines in steken. Zonder hen geen ritten, geen roadbooks en geen kampvuur.</p>
+    <div class="oo-partners">{''.join(f'<a href="/blog/{s}" title="{e(n)}"><img src="/assets/img/{f}-s.webp" alt="{e(n)}" loading="lazy"><span>{e(n)}</span></a>' for s, n, f in PARTNERS_ALLE)}</div>
   </div>
 </section>
 <section class="gallery-sec">

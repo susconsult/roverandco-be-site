@@ -216,3 +216,5 @@ details.drie>summary:hover,details.drie[open]>summary{background:rgba(31,59,42,.
 .acc-nieuw{color:#c0392b}
 .acc-uit{margin-top:24px}
 @media(max-width:600px){.acc-menu{position:fixed;left:12px;right:12px;top:76px;width:auto}}
+.oo-intro{color:rgba(255,255,255,.85);max-width:640px;margin:-6px 0 24px}.forum-band .oo-partners a{box-shadow:none}
+.forum-band .oo-partners{grid-template-columns:repeat(4,1fr)}@media(max-width:880px){.forum-band .oo-partners{grid-template-columns:repeat(2,1fr)}}
