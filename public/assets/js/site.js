@@ -279,6 +279,9 @@
   var opn = document.getElementById("opnieuw");
   if (opn) { try { var t = sessionStorage.getItem("rc-terug"); if (t && t.charAt(0) === "/") opn.href = t; } catch (x) {} }
 
+  /* ---------- gratis-account-band op home verbergen voor wie al een account heeft ---------- */
+  if (/(^|; )rc_lid_aan=1/.test(document.cookie)) { var lb = document.getElementById("lid-band"); if (lb) lb.hidden = true; }
+
   /* ---------- ingelogd? belletje met meldingen + gegevens invullen in afrekenen en inschrijven ---------- */
   var formulieren = ["checkout-form", "inschrijf-form"].map(function (id) { return document.getElementById(id); }).filter(Boolean);
   if (/(^|; )rc_lid_aan=1/.test(document.cookie) || formulieren.length) {

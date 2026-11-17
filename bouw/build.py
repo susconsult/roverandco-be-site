@@ -273,6 +273,15 @@ home = f"""
     <div class="events" data-dyn="events">{ev_card(acts[0], True)}<div class="ev-stack">{''.join(ev_card(a) for a in acts[1:3])}</div></div>
   </div>
 </section>
+<section class="lid-band" id="lid-band"><div class="wrap lid-in">
+  <div><div class="eyebrow">Gratis account</div><h2>Word deel van de club</h2><p>Eén account voor alles. Geen reclame, geen algoritme.</p></div>
+  <ul class="lid-lijst">
+    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg></span><span><b>Je garage</b>Toon je Land Rovers aan de club</span></li>
+    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4V5Z"/><path d="M8 9h8M8 12h5"/></svg></span><span><b>Forum en samen rijden</b>Vragen, roadbooks en afspreken</span></li>
+    <li><span class="lid-ic"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/><path d="m9 15 2 2 4-4"/></svg></span><span><b>Sneller inschrijven</b>Je gegevens staan klaar, alles op één plek</span></li>
+  </ul>
+  <div class="lid-knoppen"><a class="btn btn-wit" href="/account/registreren">Maak je account</a><a class="btn" href="/forum">Bekijk het forum</a></div>
+</div></section>
 {weetje_blok()}
 <section class="gallery-sec">
   <div class="wrap">

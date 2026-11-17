@@ -534,3 +534,16 @@ span.f-like{cursor:default}
 .kruimel.donker{color:var(--muted);margin:0 0 18px}.kruimel.donker a{border-color:var(--sand-2)}
 .pdp-sec .pdp{margin-top:0}
 .f-kruimel a{color:inherit}
+
+/* gratis-account-band op home */
+.lid-band{background:var(--green);color:var(--white);padding:70px 0}.lid-band[hidden]{display:none}
+.lid-in{display:grid;grid-template-columns:1.1fr 1fr;gap:28px 60px;align-items:center}
+.lid-band h2{font-size:clamp(40px,6vw,64px);margin:6px 0 12px}.lid-band p{font-size:18px;opacity:.9;max-width:40ch}
+.lid-lijst{list-style:none;margin:0;padding:0;display:grid;gap:16px}
+.lid-lijst li{display:flex;gap:14px;align-items:flex-start;font-family:var(--body);font-size:15px;line-height:1.45}
+.lid-lijst b{display:block;font-weight:700;font-size:16px}.lid-lijst span span{opacity:.85}
+.lid-ic{flex:none;width:40px;height:40px;border-radius:50%;background:rgba(255,255,255,.12);display:grid;place-items:center}.lid-ic .ico{width:22px;height:22px}
+.lid-knoppen{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:12px}
+.btn-wit{background:var(--white);color:var(--green);border-color:var(--white)}.btn-wit:hover{background:var(--sand)}
+@media(max-width:880px){.lid-in{grid-template-columns:1fr}.lid-band{padding:50px 0}}
+.lid-band .eyebrow{color:#CFE3D4}
