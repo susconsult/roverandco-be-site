@@ -371,6 +371,7 @@ const ACC_IC = {
   bel: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>',
   profiel: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
   instel: '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z"/>',
+  kassa: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3h-3z"/>',
   cb: '<path d="M4 14a8 8 0 0 1 16 0"/><path d="M8 14a4 4 0 0 1 8 0"/><circle cx="12" cy="15" r="1.5"/><path d="M12 16.5V21"/>',
 };
 const accTegel = (href, ic, titel, sub) => `<a class="acc-tegel" href="${href}"><span class="acc-ic"><svg viewBox="0 0 24 24" aria-hidden="true">${ACC_IC[ic]}</svg></span><b>${titel}</b><small>${sub}</small></a>`;
@@ -402,6 +403,7 @@ async function overzicht(request, env, url, lid) {
         ${lid.gebruikersnaam ? accTegel(`/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}`, "profiel", "Mijn profiel", "Zo zien anderen je op het forum") : ""}
         ${accTegel("/account/gegevens", "instel", "Gegevens en wachtwoord", esc(lid.email))}
         ${accTegel("/cb", "cb", "Op de CB", "Live praten met andere leden")}
+        ${lid.kassa || lid.beheerder ? accTegel("/kassa", "kassa", "Kassa", "Tickets scannen aan de ingang") : ""}
       </div>
       <p class="acc-uit"><a href="/account/uitloggen">Uitloggen</a></p></section>`,
   });
@@ -610,7 +612,7 @@ export async function leden(request, env, url) {
     const lid = await huidigLid(request, env);
     return new Response(JSON.stringify(lid ? { ingelogd: true, gebruikersnaam: lid.gebruikersnaam, naam: lid.naam, email: lid.email, telefoon: lid.telefoon, straat: lid.straat, postcode: lid.postcode, gemeente: lid.gemeente, land: lid.land,
       wagen: await env.SHOP_DB.prepare("SELECT type, bouwjaar FROM lid_wagens WHERE lid_id = ? ORDER BY volgorde, id LIMIT 1").bind(lid.id).first().then((w) => w ? [w.type, w.bouwjaar].filter(Boolean).join(", ") : null).catch(() => null),
-      beheerder: !!lid.beheerder, meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
+      beheerder: !!lid.beheerder, kassa: !!(lid.kassa || lid.beheerder), meldingen: await aantalOngelezen(env, lid.id) } : { ingelogd: false }),
       { headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
   }
   if (p !== "/account" && !p.startsWith("/account/")) return null;

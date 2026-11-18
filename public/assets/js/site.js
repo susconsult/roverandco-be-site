@@ -410,6 +410,7 @@
       bewaar: '<path d="M6 4h12v17l-6-4-6 4V4Z"/>', bel: '<path d="M6 16V11a6 6 0 0 1 12 0v5l2 2H4l2-2Z"/><path d="M10 21h4"/>',
       profiel: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', instel: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
       beheer: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
+      kassa: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3h-3z"/>',
       uit: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>'
     };
     function item(href, ic, label, extra) { return '<a href="' + href + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + I[ic] + "</svg><span>" + label + "</span>" + (extra || "") + "</a>"; }
@@ -421,7 +422,7 @@
       item("/account/meldingen", "bel", "Meldingen", ik.meldingen ? '<em>' + (ik.meldingen > 99 ? "99+" : ik.meldingen) + "</em>" : "") +
       (ik.gebruikersnaam ? item("/forum/lid/" + encodeURIComponent(ik.gebruikersnaam), "profiel", "Mijn profiel op het forum") : "") +
       item("/account/gegevens", "instel", "Gegevens en wachtwoord") + "<hr>" +
-      (ik.beheerder ? item("/beheer", "beheer", "Beheer") : "") + item("/account/uitloggen", "uit", "Uitloggen");
+      (ik.kassa ? item("/kassa", "kassa", "Kassa (tickets scannen)") : "") + (ik.beheerder ? item("/beheer", "beheer", "Beheer") : "") + item("/account/uitloggen", "uit", "Uitloggen");
     acc.parentNode.appendChild(m);
     acc.setAttribute("aria-haspopup", "true"); acc.setAttribute("aria-expanded", "false"); acc.setAttribute("aria-controls", "acc-menu");
     acc.addEventListener("click", function (e) { e.preventDefault(); var open = m.hidden; m.hidden = !open; acc.setAttribute("aria-expanded", open ? "true" : "false"); });
