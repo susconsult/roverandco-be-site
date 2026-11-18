@@ -118,7 +118,7 @@ function aftellen(a) {
 const affiche = (a) => a.affiche
   ? `<button type="button" class="affiche" data-full="${e(fotoGroot(a.affiche))}" aria-label="Affiche groot bekijken"><img src="${e(fotoKlein(a.affiche))}" alt="Affiche ${e(a.titel)}" loading="lazy"></button>` : "";
 const fotoblok = (a) => (a.fotos || []).length
-  ? `<section class="gallery-sec"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>${e(a.fotos_titel || "Sfeerbeelden")}</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>${galerij(a.fotos)}</div></section>` : "";
+  ? `<section class="gallery-sec"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>${e(a.fotos_titel || "Sfeerbeelden")}</h2></div><div class="sec-knoppen"><a href="https://www.facebook.com/roverandcobe/" class="btn btn-ghost-w" target="_blank" rel="noopener">Facebook</a><a href="https://www.instagram.com/roverandco.be/" class="btn btn-ghost-w" target="_blank" rel="noopener">Instagram</a></div></div>${galerij(a.fotos)}</div></section>` : "";
 
 /* ---------------- pagina's ---------------- */
 

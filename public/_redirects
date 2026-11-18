@@ -2,3 +2,7 @@
 /activiteiten/kerstmeeting /activiteiten 301
 /activiteiten/kerstmeeting/* /activiteiten 301
 
+
+# Foto's staan op Facebook en Instagram, geen eigen pagina meer.
+/fotos https://www.instagram.com/roverandco.be/ 301
+/fotos.html https://www.instagram.com/roverandco.be/ 301

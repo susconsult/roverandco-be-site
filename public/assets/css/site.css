@@ -655,3 +655,4 @@ span.f-like{cursor:default}
 button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-in;width:100%}
 .lb-onderschrift{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-weight:700;font-size:var(--fs-ui-groot);text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .f-profielkop{display:flex;align-items:center;gap:16px;margin:10px 0 6px}.f-profielkop b{font-family:var(--head);font-size:var(--fs-h2);text-transform:uppercase}
+.sec-knoppen{display:flex;gap:10px;flex-wrap:wrap}

@@ -324,7 +324,7 @@ __BLOGHOME__
 </section>
 <section class="gallery-sec">
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><div class="sec-knoppen"><a href="{site['facebook']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Facebook</a><a href="{site['instagram']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Instagram</a></div></div>
     {galerij(GALERIJ[:8])}
   </div>
 </section>
@@ -672,11 +672,6 @@ write("/blog/concepten", "Concepten", "Overzicht van de blogconcepten.",
       '<section><div class="wrap"><div class="rubrieken">' + "".join(
           kaart(a).replace("</small>", f' · {a["woorden"]} woorden</small>') for a in artikels if a.get("status") == "concept") + "</div></div></section>", noindex=True)
 
-# ---------- foto's ----------
-write("/fotos", "Foto's", "Foto's van de ritten en evenementen van Rover & Co.",
-      banner("Foto's", "Onderweg", "Een greep uit onze ritten en evenementen.", "968", "Colonne op een landweg") +
-      f'<section class="gallery-sec"><div class="wrap">{galerij(GALERIJ)}</div></section>')
-
 # ---------- over ons ----------
 write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit heel België samen. Onze missie en ons doel.",
       banner("Over ons", "Missie en doel", "Een vereniging van en voor Land Rover-liefhebbers uit heel België.", "959", "Defenders in het stof op een bosweg") + f"""
@@ -708,7 +703,7 @@ write("/over-ons", "Over ons", "Rover & Co VZW brengt Land Rover-liefhebbers uit
 </section>
 <section class="gallery-sec">
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><a href="/fotos" class="btn btn-ghost-w">Alle foto's</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Foto's</div><h2>Onderweg</h2></div><div class="sec-knoppen"><a href="{site['facebook']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Facebook</a><a href="{site['instagram']}" class="btn btn-ghost-w" target="_blank" rel="noopener">Instagram</a></div></div>
     {galerij(GALERIJ[8:16])}
   </div>
 </section>
