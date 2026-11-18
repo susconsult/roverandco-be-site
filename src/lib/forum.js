@@ -167,7 +167,7 @@ async function index(request, env, url, lid) {
   const toonStats = stats.leden >= 25;
   return pagina(env, request, {
     titel: "Forum", pad: "/forum", desc: "Het forum van Rover & Co: techniek, onderdelen, ritten en alles over Land Rover. Lezen kan iedereen, posten met een gratis account.",
-    inhoud: sjabloonBanner("Rover & Co forum", "Rond het kampvuur", "Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.", [["Forum"]], "leden-vuur-avond") + `
+    inhoud: sjabloonBanner("Rover & Co forum", "Rond het kampvuur", "Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.", [["Forum"]], "leden-lightweight-110") + `
     <div class="wrap waarom-kaarten">
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg><b>Geen algoritme, geen reclame</b><span>Niemand verdient aan jouw foto's. Gewoon delen en elkaar helpen.</span></div>
       <div>${ico("pin")}<b>Spreek af om samen te rijden</b><span>Zin in een roadbook zaterdag? Post het, wie meewil reageert.</span></div>
