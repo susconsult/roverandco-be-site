@@ -30,7 +30,7 @@ import { melden } from "./melden.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
 import { verstuur } from "./mail.js";
 import { kassa } from "./kassa.js";
-import { klantMailOpmaak } from "./mails-klant.js";
+import { klantMailOpmaak } from "./mails-bevestiging.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;

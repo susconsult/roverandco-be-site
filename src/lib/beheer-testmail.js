@@ -2,7 +2,7 @@
 // De QR in de testmail is een willekeurige code die niet in de database staat (werkt dus niet aan de kassa).
 import { esc, pagina } from "./beheer.js";
 import { verstuur } from "./mail.js";
-import { klantMailOpmaak } from "./mails-klant.js";
+import { klantMailOpmaak } from "./mails-bevestiging.js";
 import { nieuweTicketCode } from "./ticket.js";
 
 const VOORBEELD_INSCHRIJVING = {
