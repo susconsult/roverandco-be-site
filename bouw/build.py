@@ -890,7 +890,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
         </ul>
         <div id="co-lijnen"></div>
         <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
@@ -954,7 +954,7 @@ afrekenen = banner("Shop", "Afrekenen", "Controleer je mandje, vul je gegevens i
           <li><span>Steun</span><span id="co-donatie">€0,00</span></li>
           <li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li>
         </ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>

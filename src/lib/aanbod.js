@@ -208,7 +208,7 @@ function inschrijfFormulier(a) {
       <ul class="facts"><li><span>Activiteit</span><span>${e(a.titel)}</span></li><li><span>Datum</span><span>${e(a.datum_lang || "")}</span></li></ul>
       <div id="co-lijnen"></div>
       <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
-      <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</label>
+      <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
       <div class="err" data-voor="akkoord"></div>
       <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">${g ? "Inschrijven" : "Verder naar betalen"}</button>
       <div class="err" id="co-fout" role="alert"></div>
