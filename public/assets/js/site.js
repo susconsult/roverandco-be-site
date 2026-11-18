@@ -149,7 +149,6 @@
       box.style.top = (r.bottom + h + 8 > window.innerHeight ? r.top + window.scrollY - h - 6 : r.bottom + window.scrollY + 6) + "px";
       box.addEventListener("mousedown", function (e) { var b = e.target.closest("[data-n]"); if (b) { e.preventDefault(); zet(b.dataset.n); } });
     }
-    document.addEventListener("mandje", function () { toon(); });
     document.addEventListener("input", function (e) {
       var el = e.target;
       if (!el.matches || !el.matches('textarea[name="tekst"], #cb-tekst, #mini-tekst')) return;
@@ -249,6 +248,7 @@
       co.querySelectorAll(".co-blok").forEach(function (f) { f.hidden = leeg; });
       document.getElementById("co-knop").disabled = leeg;
     }
+    document.addEventListener("mandje", function () { toon(); });
     function fout(veld, msg) {
       var el = co.querySelector('.err[data-voor="' + veld + '"]'); if (el) el.textContent = msg;
       var inp = co.elements[veld]; if (inp && inp.setAttribute) inp.setAttribute("aria-invalid", "true");
