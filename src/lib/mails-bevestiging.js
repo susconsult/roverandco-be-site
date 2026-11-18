@@ -23,7 +23,7 @@ async function inschrijving(env, b, site, wachtwoordLink) {
   const code = await ticketVoor(env, b.nummer);
   const qr = await qrPng(ticketInhoud(code), 8, 4);
   const titel = b.activiteit_naam || String(b.activiteit_titel || "").replace(/\s*\([^)]*\)$/, "");
-  const lijnen = (b.lijnen || []).map((l) => ({ naam: `${l.aantal} × ${l.naam}`, sub: l.prijs > 0 ? `${eur(l.prijs)} ${PER[l.per] || ""}`.trim() : "gratis", bedrag: l.prijs > 0 ? eur(l.lijn) : "gratis" }));
+  const lijnen = (b.lijnen || []).map((l) => ({ naam: `${l.aantal} × ${l.naam}`, sub: l.prijs > 0 ? `${eur(l.prijs)} ${PER[l.per] || ""}`.trim() : "", bedrag: l.prijs > 0 ? eur(l.lijn) : "gratis" }));
   const rijen = [
     ["Wanneer", b.activiteit_datum_lang || b.activiteit_datum_label || ""],
     ["Uur", b.activiteit_uren || ""],
