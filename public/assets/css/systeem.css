@@ -276,3 +276,39 @@ fieldset{min-width:0;max-width:100%}.co-blok input,.co-blok select,.co-blok text
 @media(max-width:900px){input,select,textarea{font-size:16px!important}}
 /* niet in- of uitzoomen op gsm (ook iPhone, die user-scalable negeert) */
 html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100%}
+
+/* ---------- Activiteitpagina met inschrijfkaart (18 nov 2026) ---------- */
+.act-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-areas:"intro kaart" "meer kaart";column-gap:48px;align-items:start}
+.act-intro{grid-area:intro}.act-meer{grid-area:meer}
+.act-kaart{grid-area:kaart;position:sticky;top:96px;background:#fff;border-radius:18px;padding:22px 22px 18px;box-shadow:0 10px 34px rgba(20,24,21,.12);border:2px solid var(--green)}
+.act-kaart-titel{font-size:var(--fs-h3);margin:0 0 4px}
+.act-labels{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
+.act-labels span{background:#fff;border:1px solid var(--sand-2,#DED5BF);border-radius:999px;padding:6px 14px;font-size:var(--fs-sm);font-weight:600}
+.act-affiche{display:flex;align-items:center;gap:14px;margin:22px 0 0}
+.act-affiche .affiche{width:110px;flex:none}.act-affiche span{color:var(--muted);font-size:var(--fs-sm)}
+.act-kaart .ins-rij{padding:12px 0;gap:12px}
+.act-kaart .teller button{width:34px;height:34px;font-size:18px}.act-kaart .teller input{width:44px;padding:6px 2px}
+.ins-slots{border:0;margin:10px 0 4px;padding:0;min-width:0}.ins-slots legend{font-weight:700;font-size:var(--fs-sm);margin-bottom:8px}
+.ins-slots .chips{gap:6px}.ins-slots .chips span{padding:6px 12px;font-size:var(--fs-sm)}
+.ins-gegevens{margin:12px 0 0}
+.act-kaart form:not(.gekozen) .ins-gegevens:not(.kort){display:none}
+.ins-gegevens.kort .ins-velden{display:none}
+.ins-als{margin:0;font-size:var(--fs-sm);color:var(--muted)}.ins-als b{color:var(--ink,#141815)}
+.linkknop{background:none;border:0;padding:0;color:var(--green);text-decoration:underline;cursor:pointer;font:inherit}
+.ins-velden .veld{margin:0 0 10px}
+.ins-wagen{margin:10px 0 0}.ins-wagen small{color:var(--muted);font-weight:400}
+.ins-opm{margin:12px 0 0}.ins-opm summary{cursor:pointer;color:var(--green);font-size:var(--fs-sm);font-weight:600}.ins-opm textarea{margin-top:8px;width:100%}
+.ins-totaal{display:flex;justify-content:space-between;align-items:baseline;border-top:1px solid #e6e0d0;margin:14px 0 10px;padding-top:12px;font-weight:700}
+.ins-totaal b{font-size:1.35em}
+.act-kaart .akkoord{font-size:var(--fs-sm)}
+.ins-knop{width:100%;justify-content:center;margin-top:6px}
+.act-kaart .note{font-size:var(--fs-sm);margin:10px 0 0}
+.ins-balk{display:none}
+@media(max-width:880px){
+  .act-grid{grid-template-columns:minmax(0,1fr);grid-template-areas:"intro" "kaart" "meer";row-gap:22px}
+  .act-kaart{position:static;padding:18px 16px}
+  .ins-balk{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:40;align-items:center;justify-content:space-between;gap:12px;background:var(--green);color:#fff;padding:10px 16px calc(10px + env(safe-area-inset-bottom))}
+  .ins-balk[hidden]{display:none}
+  .ins-balk small{display:block;font-size:12px;opacity:.8}.ins-balk b{font-size:18px}
+  .ins-balk .btn{background:#fff;color:var(--green);padding:10px 20px}
+}

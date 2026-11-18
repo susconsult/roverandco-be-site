@@ -327,6 +327,24 @@
       document.getElementById("co-lijnen").innerHTML = html;
       document.getElementById("co-totaal").textContent = eur(Math.round(tot * 100) / 100);
       document.getElementById("co-knop").textContent = tot > 0 ? "Verder naar betalen" : "Inschrijven";
+      var bt = document.getElementById("ins-balk-tot"); if (bt) bt.textContent = eur(Math.round(tot * 100) / 100);
+      var gekozen = rijen().some(function (r) { return aantal(r) > 0; });
+      ins.classList.toggle("gekozen", gekozen);
+    }
+    // Gegevens: ingelogd en alles ingevuld = één regel "Ingeschreven als ..."; anders de velden (pas na een keuze).
+    var geg = ins.querySelector("[data-gegevens]");
+    function gegevensKort(aan) {
+      if (!geg) return;
+      var als = geg.querySelector(".ins-als");
+      if (aan) { geg.querySelector("[data-als]").textContent = iw("naam") + " (" + iw("email") + ")"; }
+      als.hidden = !aan; geg.classList.toggle("kort", !!aan);
+    }
+    ins.addEventListener("ik-geladen", function () { if (iw("naam") && iw("email") && iw("telefoon")) gegevensKort(true); });
+    if (geg) geg.querySelector("[data-wijzig]").addEventListener("click", function () { gegevensKort(false); ins.elements.naam.focus(); });
+    // Vaste balk onderaan op gsm zolang de kaart niet in beeld is.
+    var balk = document.getElementById("ins-balk"), kaart = document.getElementById("inschrijven");
+    if (balk && kaart && "IntersectionObserver" in window) {
+      new IntersectionObserver(function (en) { balk.hidden = en[0].isIntersecting; }, { rootMargin: "0px 0px -80px 0px" }).observe(kaart);
     }
     function ifout(veld, msg) { var el = ins.querySelector('.err[data-voor="' + veld + '"]'); if (el) el.textContent = msg; }
     ins.addEventListener("click", function (e) {
@@ -351,7 +369,8 @@
       var slotVak = ins.querySelector("[data-slot-voor]");
       if (slotVak && !slotVak.hidden && !iw("tijdslot")) { ifout("tijdslot", "Kies een tijdslot"); ok = false; }
       if (!document.getElementById("akkoord").checked) { ifout("akkoord", "Vink dit aan om in te schrijven"); ok = false; }
-      if (!ok) { var eerste = ins.querySelector(".err:not(:empty)"); if (eerste) eerste.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
+      if (!ok && geg && geg.classList.contains("kort") && (ins.querySelector('.err[data-voor="naam"]').textContent || ins.querySelector('.err[data-voor="email"]').textContent || ins.querySelector('.err[data-voor="telefoon"]').textContent)) gegevensKort(false);
+      if (!ok) { ins.classList.add("gekozen"); var eerste = ins.querySelector(".err:not(:empty)"); if (eerste) eerste.scrollIntoView({ block: "center", behavior: "smooth" }); return; }
       var nr = ""; try { nr = sessionStorage.getItem(NRKEY) || ""; } catch (x) {}
       var payload = {
         nummer: nr, activiteit: slug,
@@ -454,6 +473,7 @@
       formulieren.forEach(function (f) {
         ["naam", "email", "telefoon", "straat", "postcode", "gemeente", "wagen"].forEach(function (n) { var el = f.elements[n]; if (el && !el.value && ik[n]) el.value = ik[n]; });
         if (f.elements.land && ik.land) f.elements.land.value = ik.land;
+        f.dispatchEvent(new Event("ik-geladen"));
       });
     }).catch(function () {});
   }

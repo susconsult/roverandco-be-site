@@ -167,55 +167,46 @@ async function activiteitenPagina(env, request) {
   });
 }
 
-function inschrijfFormulier(a) {
-  const i = a.inschrijving, ts = i.tijdsloten;
+// Compacte inschrijfkaart: kiezen, (gegevens), totaal en betalen in één kaart naast de tekst.
+function inschrijfKaart(a) {
+  const i = a.inschrijving, ts = i.tijdsloten, g = gratis(a);
   const rijen = i.onderdelen.map((o) => `
-        <div class="ins-rij" data-onderdeel="${e(o.id)}" data-prijs="${Number(o.prijs) || 0}">
-          <div><b>${e(o.naam)}</b><small>${o.prijs ? `${eur(o.prijs)} ${PER[o.per] || ""}` : "Gratis"}${o.beperkt || o.capaciteit ? " · Beperkte plaatsen" : ""}</small>${o.uitleg ? `<small class="uitleg">${e(o.uitleg)}</small>` : ""}</div>
-          <div class="teller"><button type="button" data-min aria-label="Minder ${e(o.naam)}">−</button>
-            <input type="number" name="aantal_${e(o.id)}" value="0" min="0" max="${o.max || 20}" inputmode="numeric" aria-label="Aantal ${e(o.naam)}">
-            <button type="button" data-plus aria-label="Meer ${e(o.naam)}">+</button></div>
-        </div>`).join("");
+      <div class="ins-rij" data-onderdeel="${e(o.id)}" data-prijs="${Number(o.prijs) || 0}">
+        <div><b>${e(o.naam)}</b><small>${o.prijs ? `${eur(o.prijs)} ${PER[o.per] || ""}` : "Gratis"}${o.beperkt || o.capaciteit ? " · beperkte plaatsen" : ""}</small>${o.uitleg ? `<small class="uitleg">${e(o.uitleg)}</small>` : ""}</div>
+        <div class="teller"><button type="button" data-min aria-label="Minder ${e(o.naam)}">−</button>
+          <input type="number" name="aantal_${e(o.id)}" value="0" min="0" max="${o.max || 20}" inputmode="numeric" aria-label="Aantal ${e(o.naam)}">
+          <button type="button" data-plus aria-label="Meer ${e(o.naam)}">+</button></div>
+      </div>`).join("");
   const slot = ts?.onderdeel && ts.slots?.length ? `
-        <div class="sub" data-slot-voor="${e(ts.onderdeel)}" hidden><label for="tijdslot">Kies je tijdslot</label>
-          <select id="tijdslot" name="tijdslot"><option value="">Kies een tijdslot</option>${ts.slots.map((x) => `<option value="${e(x)}">${e(x)}</option>`).join("")}</select><div class="err" data-voor="tijdslot"></div></div>` : "";
-  const wagen = i.wagen ? `
-      <fieldset class="co-blok"><legend><span>3</span> Je Land Rover <small>(optioneel)</small></legend>
-        <div class="veld"><label for="wagen">Met welke Land Rover kom je?</label><input id="wagen" name="wagen" placeholder="Bv. Defender 110, 1998"></div></fieldset>` : "";
-  const g = gratis(a);
+      <fieldset class="ins-slots" data-slot-voor="${e(ts.onderdeel)}" hidden><legend>Kies je tijdslot</legend>
+        <div class="chips">${ts.slots.map((x) => `<label><input type="radio" name="tijdslot" value="${e(x)}"><span>${e(x)}</span></label>`).join("")}</div>
+        <div class="err" data-voor="tijdslot"></div></fieldset>` : "";
+  const wagen = i.wagen ? `<div class="veld ins-wagen"><label for="wagen">Met welke Land Rover kom je? <small>(optioneel)</small></label><input id="wagen" name="wagen" placeholder="Bv. Defender 110, 1998"></div>` : "";
   return `
-<section id="inschrijven" class="inschrijf-sec"><div class="wrap">
-  <div class="sec-head"><div><div class="eyebrow">Inschrijven</div><h2>Schrijf je in voor ${e(a.titel)}</h2></div></div>
-  <form id="inschrijf-form" class="checkout" novalidate data-slug="${e(a.slug)}">
-    <div class="co-main">
-      <fieldset class="co-blok"><legend><span>1</span> Jouw gegevens</legend>
-        <div class="veld"><label for="naam">Voor- en achternaam</label><input id="naam" name="naam" autocomplete="name" required><div class="err" data-voor="naam"></div></div>
-        <div class="veld2">
-          <div class="veld"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div>
-          <div class="veld"><label for="telefoon">Telefoon</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required><div class="err" data-voor="telefoon"></div></div>
-        </div>
-      </fieldset>
-      <fieldset class="co-blok"><legend><span>2</span> Waarvoor schrijf je in?</legend>${rijen}
-        <div class="err" data-voor="aantal"></div>${slot}
-      </fieldset>${wagen}
-      <fieldset class="co-blok"><legend><span>${i.wagen ? 4 : 3}</span> Opmerking <small>(optioneel)</small></legend>
-        <div class="veld"><label for="opmerking" class="sr-only">Opmerking</label><textarea id="opmerking" name="opmerking" rows="3"></textarea></div>
-      </fieldset>
-      <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+<aside id="inschrijven" class="act-kaart"><form id="inschrijf-form" novalidate data-slug="${e(a.slug)}">
+  <h2 class="act-kaart-titel">Inschrijven</h2>
+  ${rijen}
+  <div class="err" data-voor="aantal"></div>${slot}
+  <div class="ins-gegevens" data-gegevens>
+    <p class="ins-als" hidden>Ingeschreven als <b data-als></b> · <button type="button" class="linkknop" data-wijzig>wijzig</button></p>
+    <div class="ins-velden">
+      <div class="veld"><label for="naam">Voor- en achternaam</label><input id="naam" name="naam" autocomplete="name" required><div class="err" data-voor="naam"></div></div>
+      <div class="veld"><label for="email">E-mailadres</label><input id="email" name="email" type="email" autocomplete="email" required><div class="err" data-voor="email"></div></div>
+      <div class="veld"><label for="telefoon">Telefoon</label><input id="telefoon" name="telefoon" type="tel" autocomplete="tel" required><div class="err" data-voor="telefoon"></div></div>
     </div>
-    <aside class="co-side"><div class="card">
-      <h3>Overzicht</h3>
-      <ul class="facts"><li><span>Activiteit</span><span>${e(a.titel)}</span></li><li><span>Datum</span><span>${e(a.datum_lang || "")}</span></li></ul>
-      <div id="co-lijnen"></div>
-      <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
-      <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
-      <div class="err" data-voor="akkoord"></div>
-      <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">${g ? "Inschrijven" : "Verder naar betalen"}</button>
-      <div class="err" id="co-fout" role="alert"></div>
-      <p class="note">${g ? "Inschrijven is gratis. Daarna krijg je een bevestiging per mail." : "Je betaalt veilig online via Viva. Daarna krijg je een bevestiging per mail."} Je inschrijving komt in je <a href="/account">account</a>; heb je er nog geen, dan maken we er een voor je aan.</p>${g ? "" : '<p class="betaal-met">Betalen via <img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13"></p>'}
-    </div></aside>
-  </form>
-</div></section>`;
+  </div>
+  ${wagen}
+  <details class="ins-opm"><summary>Opmerking toevoegen</summary><label for="opmerking" class="sr-only">Opmerking</label><textarea id="opmerking" name="opmerking" rows="3"></textarea></details>
+  <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
+  <div id="co-lijnen" hidden></div>
+  <div class="ins-totaal"><span>Totaal</span><b id="co-totaal">€0,00</b></div>
+  <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
+  <div class="err" data-voor="akkoord"></div>
+  <button class="btn btn-solid ins-knop" type="submit" id="co-knop">${g ? "Inschrijven" : "Verder naar betalen"}</button>
+  <div class="err" id="co-fout" role="alert"></div>
+  <p class="note">${g ? "Gratis. Je krijgt een bevestiging met ticket per mail." : "Je betaalt veilig via Viva en krijgt een bevestiging met ticket per mail."}</p>${g ? "" : '<p class="betaal-met">Betalen via <img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13"></p>'}
+</form></aside>
+<div class="ins-balk" id="ins-balk" hidden><span><small>Totaal</small><b id="ins-balk-tot">€0,00</b></span><a class="btn" href="#inschrijven">Inschrijven</a></div>`;
 }
 
 async function activiteitPagina(env, request, slug) {
@@ -227,7 +218,22 @@ async function activiteitPagina(env, request, slug) {
     ? `<a class="btn btn-solid" href="#inschrijven" style="width:100%;justify-content:center">Inschrijven</a><p class="note">Het formulier staat onderaan deze pagina. ${gratis(a) ? "Inschrijven is gratis." : "Je betaalt veilig online via Viva."}</p>`
     : a.inschrijven_url ? `<a class="btn btn-solid" href="${e(a.inschrijven_url)}" rel="noopener" style="width:100%;justify-content:center">${e(a.inschrijven_label || "Inschrijven")}</a><p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>`
     : a.inschrijven_label ? `<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">${e(a.inschrijven_label)}</span>` : "";
-  let body = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen, [["Activiteiten", "/activiteiten"], [a.titel]], true) + aftellen(a) + `
+  const kop = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen, [["Activiteiten", "/activiteiten"], [a.titel]], true) + aftellen(a);
+  if (open) {
+    // Eerste alinea als intro (op gsm boven de inschrijfkaart), de rest eronder.
+    const html = a.omschrijving_html || "", k = html.indexOf("</p>");
+    const intro = k > 0 ? html.slice(0, k + 4) : html, rest = k > 0 ? html.slice(k + 4) : "";
+    const labels = [a.datum_lang, a.locatie, a.uren].filter(Boolean).map((x) => `<span>${e(x)}</span>`).join("");
+    let body = kop + `
+<section class="act-sec"><div class="wrap act-grid">
+  <div class="act-intro">${labels ? `<div class="act-labels">${labels}</div>` : ""}<div class="prose">${intro}</div></div>
+  ${inschrijfKaart(a)}
+  <div class="act-meer"><div class="prose">${rest}</div>${a.affiche ? `<div class="act-affiche">${affiche(a)}<span>Affiche, klik om te vergroten</span></div>` : ""}</div>
+</div></section>` + fotoblok(a);
+    if (a.foto_credit) body += `<section style="padding-top:0"><div class="wrap"><p class="fotocredit">Foto bovenaan: ${e(a.foto_credit)}</p></div></section>`;
+    return pagina(env, request, { titel: a.titel, pad: `/activiteiten/${a.slug}`, desc: `${a.titel}: ${a.kort || ""}`, inhoud: body, noindex: a.verborgen });
+  }
+  let body = kop + `
 <section><div class="wrap detail">
   <div class="prose">${a.omschrijving_html || ""}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">
@@ -237,7 +243,6 @@ async function activiteitPagina(env, request, slug) {
   </ul>${knop}</aside>${affiche(a)}</div>
 </div></section>` + fotoblok(a);
   if (a.foto_credit) body += `<section style="padding-top:0"><div class="wrap"><p class="fotocredit">Foto bovenaan: ${e(a.foto_credit)}</p></div></section>`;
-  if (open) body += inschrijfFormulier(a);
   return pagina(env, request, { titel: a.titel, pad: `/activiteiten/${a.slug}`, desc: `${a.titel}: ${a.kort || ""}`, inhoud: body, noindex: a.verborgen });
 }
 
