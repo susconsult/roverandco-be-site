@@ -94,7 +94,7 @@ ${!l.bevestigd_op ? knop("bevestigmail", "Bevestigingsmail opnieuw") : ""}
 ${knop("uitloggen", "Overal uitloggen")}
 ${l.kassa ? knop("kassa-uit", "Kassa-rechten intrekken") : knop("kassa-aan", "Kassa-rechten geven", { bevestig: "Dit lid mag dan tickets scannen op /kassa." })}
 ${l.geblokkeerd ? knop("deblokkeer", "Deblokkeren") : knop("blokkeer", "Blokkeren", { rood: true, bevestig: "Dit lid blokkeren? Inloggen lukt dan niet meer." })}
-${knop("anoniem", "Account verwijderen", { rood: true, bevestig: "Account anoniem maken? Naam, e-mail, telefoon, garage en profielfoto worden gewist. Forumberichten blijven staan als 'verwijderd lid', bestellingen blijven voor de boekhouding. Dit kan niet ongedaan worden." })}
+${knop("anoniem", "Account verwijderen", { rood: true, bevestig: "Account anoniem maken? Naam, e-mail, telefoon, Land Rovers en profielfoto worden gewist. Forumberichten blijven staan als 'verwijderd lid', bestellingen blijven voor de boekhouding. Dit kan niet ongedaan worden." })}
 </div>`}</div>
 ${weg ? "" : `<div class="kaart"><h2>Gegevens</h2><form method="post" action="/beheer/leden/${l.id}"><input type="hidden" name="actie" value="gegevens">
 <div class="form-grid"><div><label>Gebruikersnaam</label><input name="gebruikersnaam" value="${esc(l.gebruikersnaam || "")}" maxlength="20"></div>
@@ -103,7 +103,7 @@ ${weg ? "" : `<div class="kaart"><h2>Gegevens</h2><form method="post" action="/b
 <div><label>Telefoon</label><input name="telefoon" value="${esc(l.telefoon || "")}" maxlength="40"></div>
 <div><label>Woonplaats</label><input name="woonplaats" value="${esc(l.woonplaats || "")}" maxlength="80"></div></div>
 <p><button type="submit">Bewaren</button></p></form></div>`}
-<div class="kaart"><h2>Garage</h2>${ws.length ? `<div class="wagens">${ws.map((w) => `<figure>${w.foto_id ? `<a href="/forum/foto/${w.foto_id}" target="_blank" rel="noopener"><img src="/forum/foto/${w.foto_id}" alt=""></a>` : ""}<b>${esc(w.naam || w.type)}</b>${w.naam ? `<br><small>${esc(w.type)}</small>` : ""}${w.foto_id ? `<form method="post" action="/beheer/leden/${l.id}" onsubmit="return confirm('Deze foto verwijderen?')"><input type="hidden" name="actie" value="wagenfoto"><input type="hidden" name="wagen" value="${w.id}"><button class="rood" type="submit" style="padding:4px 8px;font-size:12px;margin-top:4px">Foto verwijderen</button></form>` : ""}</figure>`).join("")}</div>` : `<p class="leeg" style="padding:0">Geen wagens.</p>`}</div>
+<div class="kaart"><h2>Land Rovers</h2>${ws.length ? `<div class="wagens">${ws.map((w) => `<figure>${w.foto_id ? `<a href="/forum/foto/${w.foto_id}" target="_blank" rel="noopener"><img src="/forum/foto/${w.foto_id}" alt=""></a>` : ""}<b>${esc(w.naam || w.type)}</b>${w.naam ? `<br><small>${esc(w.type)}</small>` : ""}${w.foto_id ? `<form method="post" action="/beheer/leden/${l.id}" onsubmit="return confirm('Deze foto verwijderen?')"><input type="hidden" name="actie" value="wagenfoto"><input type="hidden" name="wagen" value="${w.id}"><button class="rood" type="submit" style="padding:4px 8px;font-size:12px;margin-top:4px">Foto verwijderen</button></form>` : ""}</figure>`).join("")}</div>` : `<p class="leeg" style="padding:0">Geen wagens.</p>`}</div>
 <div class="kaart"><h2>Bestellingen en inschrijvingen</h2>${regs.length ? `<table><tbody>${regs.map((r) => `<tr><td><a href="/beheer/r/${esc(r.nummer)}">${esc(r.nummer)}</a></td><td class="mob">${dag(r.aangemaakt)}</td><td>${esc(r.soort === "inschrijving" ? r.activiteit || "Inschrijving" : "Bestelling")}</td><td><span class="badge">${esc(r.status)}</span></td></tr>`).join("")}</tbody></table>` : `<p class="leeg" style="padding:0">Nog niets.</p>`}</div>
 <div class="kaart"><h2>Laatste forumberichten</h2>${ps.length ? `<ul class="log">${ps.map((b) => `<li><time>${tijd(b.aangemaakt)}</time><span></span><span><a href="/forum/t/${b.tid}#b${b.id}" target="_blank" rel="noopener">${esc(b.titel)}</a></span></li>`).join("")}</ul>` : `<p class="leeg" style="padding:0">Nog geen berichten.</p>`}</div>
 <div class="kaart"><h2>Activiteit <small style="font-weight:400;color:var(--m)">(laatste ${LOG_DAGEN} dagen)</small></h2>${logs.length ? `<ul class="log">${logs.map((r) => logRij(r)).join("")}</ul>` : `<p class="leeg" style="padding:0">Nog geen activiteit gelogd.</p>`}</div>`, email);
@@ -147,7 +147,7 @@ async function actie(request, env, url, id, email) {
     if (w?.foto_id) {
       await db.prepare("UPDATE lid_wagens SET foto_id = NULL WHERE id = ?").bind(w.id).run();
       await db.prepare("UPDATE forum_meldingen SET afgehandeld = 1 WHERE wagen_id = ?").bind(w.id).run();
-      await log(env, l.id, "beheer", `Garagefoto verwijderd door beheer: ${w.type}`);
+      await log(env, l.id, "beheer", `Land Rover-foto verwijderd door beheer: ${w.type}`);
     }
     return detail(id, env, email, "Foto verwijderd.");
   }
@@ -188,7 +188,7 @@ async function activiteit(url, env, email) {
   const r = (await env.SHOP_DB.prepare(`SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id ${soort ? "WHERE g.soort = ?" : ""} ORDER BY g.id DESC LIMIT 300`).bind(...(soort ? [soort] : [])).all()).results || [];
   const t = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer/log${s ? "?soort=" + s : ""}">${label}</a>`;
   return pagina("Log", `${STIJL}${hoofdTabs("log")}
-<nav class="tabs">${t("", "Alles")}${t("account", "Account")}${t("forum", "Forum")}${t("cb", "CB")}${t("garage", "Garage")}${t("profiel", "Profiel")}${t("beheer", "Beheer")}</nav>
+<nav class="tabs">${t("", "Alles")}${t("account", "Account")}${t("forum", "Forum")}${t("cb", "CB")}${t("garage", "Land Rovers")}${t("profiel", "Profiel")}${t("beheer", "Beheer")}</nav>
 <div class="kaart"><p style="margin-top:0;color:var(--m)">Laatste 300 acties. Alles ouder dan ${LOG_DAGEN} dagen wordt automatisch gewist.</p>
 ${r.length ? `<ul class="log">${r.map((x) => logRij(x, true)).join("")}</ul>` : `<p class="leeg">Nog geen activiteit.</p>`}</div>`, email);
 }
@@ -238,7 +238,7 @@ async function meldingen(url, env, email) {
     ${alle ? "" : "WHERE m.afgehandeld = 0"} ORDER BY m.id DESC LIMIT 200`).all()).results || [];
   const kaart = (m) => {
     let wat, inhoud, lidId, lidNaam, weg = "";
-    if (m.wagen_id) { wat = "Garagefoto"; lidId = m.wlid; lidNaam = m.wnaam; inhoud = m.wfoto ? `<a href="/forum/foto/${m.wfoto}" target="_blank" rel="noopener"><img src="/forum/foto/${m.wfoto}" alt="" style="width:160px;height:110px;object-fit:cover;border-radius:8px"></a><br><small>${esc(m.wtype || "")}</small>` : "<i>Foto is al weg</i>"; if (m.wfoto) weg = "wagenfoto"; }
+    if (m.wagen_id) { wat = "Land Rover-foto"; lidId = m.wlid; lidNaam = m.wnaam; inhoud = m.wfoto ? `<a href="/forum/foto/${m.wfoto}" target="_blank" rel="noopener"><img src="/forum/foto/${m.wfoto}" alt="" style="width:160px;height:110px;object-fit:cover;border-radius:8px"></a><br><small>${esc(m.wtype || "")}</small>` : "<i>Foto is al weg</i>"; if (m.wfoto) weg = "wagenfoto"; }
     else if (m.cb_id) { wat = `CB-kanaal ${m.cnr ?? "?"}`; lidId = m.clid; lidNaam = m.cnaam; inhoud = m.ctekst == null ? "<i>Bericht is al verdwenen (na 24 uur)</i>" : m.caudio ? `<audio controls preload="none" src="/cb/audio/${m.caudio}"></audio>` : esc(m.ctekst); if (m.ctekst != null) weg = "cb"; }
     else { wat = "Forumbericht"; lidId = m.blid; lidNaam = m.bnaam; inhoud = m.btekst == null ? "<i>Bericht bestaat niet meer</i>" : `<a href="/forum/t/${m.tid}#b${m.bericht_id}" target="_blank" rel="noopener">${esc(m.ttitel || "")}</a><br>${esc(String(m.btekst).slice(0, 400))}`; if (m.btekst != null) weg = "bericht"; }
     return `<div class="kaart melding${m.afgehandeld ? " klaar" : ""}"><div class="mk-kop"><span class="badge">${wat}</span> <small>${tijd(m.aangemaakt)} · gemeld door ${esc(m.door || "bezoeker")}</small>${m.afgehandeld ? ' <span class="badge b-betaald">Afgehandeld</span>' : ""}</div>
@@ -262,7 +262,7 @@ async function meldingActie(request, env, email) {
     if (m.wagen_id) {
       const w = await env.SHOP_DB.prepare("SELECT lid_id, type FROM lid_wagens WHERE id = ?").bind(m.wagen_id).first();
       await env.SHOP_DB.prepare("UPDATE lid_wagens SET foto_id = NULL WHERE id = ?").bind(m.wagen_id).run();
-      if (w) await log(env, w.lid_id, "beheer", `Garagefoto verwijderd na melding: ${w.type}`);
+      if (w) await log(env, w.lid_id, "beheer", `Land Rover-foto verwijderd na melding: ${w.type}`);
     } else if (m.cb_id) {
       const c = await env.SHOP_DB.prepare("SELECT lid_id, nr FROM cb_berichten WHERE id = ?").bind(m.cb_id).first();
       await env.SHOP_DB.prepare("UPDATE cb_berichten SET verwijderd = 1 WHERE id = ?").bind(m.cb_id).run();

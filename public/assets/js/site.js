@@ -185,7 +185,7 @@
     var cap = lb.querySelector(".lb-onderschrift");
     if (!cap) { cap = document.createElement("p"); cap.className = "lb-onderschrift"; lb.appendChild(cap); }
     cap.textContent = b.dataset.onderschrift || (lbGroep.length > 1 ? (lbI + 1) + " / " + lbGroep.length : "");
-    if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk garage"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
+    if (b.dataset.link) { var a = document.createElement("a"); a.href = b.dataset.link; a.textContent = "Bekijk Land Rovers"; cap.appendChild(document.createTextNode(" · ")); cap.appendChild(a); }
     cap.hidden = !cap.textContent;
     lb.classList.toggle("meer", lbGroep.length > 1);
   }
@@ -418,7 +418,7 @@
     m.id = "acc-menu"; m.className = "acc-menu"; m.hidden = true; m.setAttribute("role", "menu");
     m.innerHTML = '<div class="acc-menu-kop"><b>' + esc(ik.gebruikersnaam || "Mijn account") + "</b><small>" + esc(ik.email || "") + "</small></div>" +
       item("/account", "home", "Mijn account") + item("/account/bestellingen", "bon", "Bestellingen en inschrijvingen") +
-      item("/account/garage", "auto", "Mijn garage") + item("/account/bewaard", "bewaar", "Bewaard") +
+      item("/account/garage", "auto", "Mijn Landy") + item("/account/bewaard", "bewaar", "Bewaard") +
       item("/account/meldingen", "bel", "Meldingen", ik.meldingen ? '<em>' + (ik.meldingen > 99 ? "99+" : ik.meldingen) + "</em>" : "") +
       (ik.gebruikersnaam ? item("/forum/lid/" + encodeURIComponent(ik.gebruikersnaam), "profiel", "Mijn profiel op het forum") : "") +
       item("/account/gegevens", "instel", "Gegevens en wachtwoord") + "<hr>" +

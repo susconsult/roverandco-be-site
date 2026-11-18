@@ -318,8 +318,8 @@ home = f"""
 </section>
 <section class="garage-sec">
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Uit de garage</div><h2>Wagens van leden</h2></div><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></div>
-    <div class="garage-rij" data-dyn="garage"><a class="garage-leeg" href="/account/garage">Nog niemand. Zet als eerste je Land Rover in de garage.</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Land Rovers van leden</div><h2>Wagens van leden</h2></div><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></div>
+    <div class="garage-rij" data-dyn="garage"><a class="garage-leeg" href="/account/garage">Nog niemand. Zet als eerste je Land Rover erbij.</a></div>
   </div>
 </section>
 __BLOGHOME__
@@ -765,13 +765,13 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <h2>Wat we bijhouden en waarom</h2>
   <ul>
     <li><b>Bestellingen en inschrijvingen</b>: naam, e-mailadres, telefoon, wat je kiest, je opmerking, eventueel met welke Land Rover je komt en bij verzending je adres. Nodig om je bestelling of inschrijving uit te voeren (overeenkomst).</li>
-    <li><b>Je account</b>: e-mailadres, gebruikersnaam, wachtwoord (alleen versleuteld bewaard) en wat je zelf invult: naam, telefoon, adres, profielfoto en je garage. Zo vullen we je gegevens automatisch in bij een volgende bestelling of inschrijving.</li>
+    <li><b>Je account</b>: e-mailadres, gebruikersnaam, wachtwoord (alleen versleuteld bewaard) en wat je zelf invult: naam, telefoon, adres, profielfoto en je Land Rovers. Zo vullen we je gegevens automatisch in bij een volgende bestelling of inschrijving.</li>
     <li><b>Forum en CB</b>: je berichten, foto's, spraakberichten, likes en reacties, wat je volgt en bewaart.</li>
     <li><b>Veiligheid</b>: een activiteitenlog per account (inloggen, berichten, wijzigingen) en bij een melding een versleutelde code van je IP-adres. Zo houden we misbruik en spam tegen (gerechtvaardigd belang).</li>
   </ul>
   <p>We verkopen je gegevens niet en gebruiken ze niet voor reclame.</p>
   <h2>Wat anderen zien</h2>
-  <p>Iedereen ziet je gebruikersnaam, je profielfoto, je garage en je forumberichten. Je naam, e-mailadres, telefoon en adres ziet niemand behalve jij en de beheerder. De CB en de spraakberichten zijn alleen zichtbaar voor ingelogde leden. Op het Albertkanaal ziet niemand wie wat zegt, maar de beheerder kan het wel nagaan als een bericht gemeld wordt.</p>
+  <p>Iedereen ziet je gebruikersnaam, je profielfoto, je Land Rovers en je forumberichten. Je naam, e-mailadres, telefoon en adres ziet niemand behalve jij en de beheerder. De CB en de spraakberichten zijn alleen zichtbaar voor ingelogde leden. Op het Albertkanaal ziet niemand wie wat zegt, maar de beheerder kan het wel nagaan als een bericht gemeld wordt.</p>
   <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug.</p>
   <h2>Meldingen en moderatie</h2>
   <p>Leden kunnen een bericht, foto of CB-bericht melden. De beheerder krijgt dan een mail met de inhoud en de reden en kan ze verwijderen of een lid blokkeren. Wie het bericht schreef, ziet niet wie het meldde. Andere CB-berichten leest de beheerder niet.</p>
@@ -784,7 +784,7 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <ul>
     <li>CB-berichten, spraakberichten, reacties en eigen CB-kanalen: 24 uur.</li>
     <li>Activiteitenlog: 90 dagen.</li>
-    <li>Je account, garage en forumberichten: tot je je account verwijdert.</li>
+    <li>Je account, je Land Rovers en je forumberichten: tot je je account verwijdert.</li>
     <li>Bestellingen, inschrijvingen en betaalgegevens: zo lang als de wettelijke boekhoudplicht vraagt, ook als je je account verwijdert.</li>
   </ul>
   <h2>Wie helpt ons daarbij</h2>

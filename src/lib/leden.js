@@ -397,7 +397,7 @@ async function overzicht(request, env, url, lid) {
     inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account", "Alles van jou op één plek. Kies hieronder waar je naartoe wil.", [["Mijn account"]]) + `<section class="wrap acc-sectie">${m}${onbevestigd}
       <div class="acc-tegels">
         ${accTegel("/account/bestellingen", "bon", "Bestellingen en inschrijvingen", reg.n ? meer(reg.n, "bestelling of inschrijving", "bestellingen en inschrijvingen") : "Nog niets besteld")}
-        ${accTegel("/account/garage", "auto", "Mijn garage", wagens.n ? meer(wagens.n, "Land Rover", "Land Rovers") : "Zet je Land Rover erin")}
+        ${accTegel("/account/garage", "auto", "Mijn Landy", wagens.n ? meer(wagens.n, "Land Rover", "Land Rovers") : "Zet je Land Rover erin")}
         ${accTegel("/account/meldingen", "bel", "Meldingen", nieuw ? `<b class="acc-nieuw">${nieuw} nieuw</b>` : "Geen nieuwe meldingen")}
         ${accTegel("/account/bewaard", "bewaar", "Bewaard", bewaard.n ? meer(bewaard.n, "item", "items") : "Berichten en foto's om terug te vinden")}
         ${lid.gebruikersnaam ? accTegel(`/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}`, "profiel", "Mijn profiel", "Zo zien anderen je op het forum") : ""}
@@ -446,7 +446,7 @@ async function gegevens(request, env, url, lid) {
         ${veld("telefoon", "Telefoon", { type: "tel", waarde: w.telefoon, auto: "tel" })}
         ${veld("straat", "Straat en nummer", { waarde: w.straat, auto: "street-address", hulp: "Voor verzendingen uit de shop. Alleen zichtbaar voor jou." })}
         <div class="veld2">${veld("postcode", "Postcode", { waarde: w.postcode, auto: "postal-code" })}${veld("gemeente", "Gemeente", { waarde: w.gemeente || w.woonplaats, auto: "address-level2" })}</div>
-        <p>Je Land Rovers zet je in je <a href="/account/garage">garage</a>.</p>
+        <p>Je Land Rovers zet je bij <a href="/account/garage">Mijn Landy</a>.</p>
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
         <button class="btn btn-solid" type="submit">Bewaren</button> <a class="btn" href="/account">Annuleren</a>
@@ -530,13 +530,13 @@ async function garage(request, env, url, lid) {
         ${veld("bouwjaar" + (w.id || ""), "Bouwjaar", { type: "number", waarde: w.bouwjaar || "", extra: 'name="bouwjaar" min="1948" max="2030"' }).replace(`name="bouwjaar${w.id || ""}"`, "")}</div>
       <div class="veld2">${veld("naam" + (w.id || ""), "Bijnaam <small>(optioneel)</small>", { waarde: w.naam, extra: 'name="naam" maxlength="60" placeholder="Otis"' }).replace(`name="naam${w.id || ""}"`, "")}
         ${veld("oms" + (w.id || ""), "Iets over deze wagen <small>(optioneel)</small>", { waarde: w.omschrijving, extra: 'name="omschrijving" maxlength="300"' }).replace(`name="oms${w.id || ""}"`, "")}</div>
-      <button class="btn btn-solid" type="submit">${w.id ? "Bewaren" : "Toevoegen aan garage"}</button>
-      ${w.id ? `<button class="btn" type="submit" name="actie" value="verwijder" data-bevestig="Deze wagen uit je garage halen?">Verwijderen</button>` : ""}
+      <button class="btn btn-solid" type="submit">${w.id ? "Bewaren" : "Land Rover toevoegen"}</button>
+      ${w.id ? `<button class="btn" type="submit" name="actie" value="verwijder" data-bevestig="Deze Land Rover verwijderen?">Verwijderen</button>` : ""}
     </form>`;
-  const m = url.searchParams.has("ok") ? melding("Bewaard.", "ok") : url.searchParams.has("weg") ? melding("Verwijderd uit je garage.", "ok") : url.searchParams.has("fout") ? melding("Vul minstens het type in.") : "";
+  const m = url.searchParams.has("ok") ? melding("Bewaard.", "ok") : url.searchParams.has("weg") ? melding("Land Rover verwijderd.", "ok") : url.searchParams.has("fout") ? melding("Vul minstens het type in.") : "";
   return pagina(env, request, {
-    titel: "Mijn garage", noindex: true,
-    inhoud: banner("Mijn account", "Mijn garage", "Zet hier je Land Rovers. Niets is verplicht. Andere leden zien ze op je profiel en bij je berichten op het forum.", [["Mijn account", "/account"], ["Mijn garage"]]) + `<section class="narrow acc-sectie">${m}
+    titel: "Mijn Landy", noindex: true,
+    inhoud: banner("Mijn account", "Mijn Landy", "Zet hier je Land Rovers. Niets is verplicht. Andere leden zien ze op je profiel en bij je berichten op het forum.", [["Mijn account", "/account"], ["Mijn Landy"]]) + `<section class="narrow acc-sectie">${m}
       ${wagens.map((w) => `<div class="acc-kaart"><h2>${esc(w.type)}${w.bouwjaar ? ` <small>${w.bouwjaar}</small>` : ""}</h2>${formulier(w)}</div>`).join("")}
       <div class="acc-kaart"><h2>${wagens.length ? "Nog een Land Rover toevoegen" : "Je eerste Land Rover"}</h2>${formulier()}</div>
       <p><a href="/account">← Terug naar mijn account</a>${lid.gebruikersnaam ? ` · <a href="/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}#garage">Bekijk je profiel</a>` : ""}</p>
@@ -576,7 +576,7 @@ async function export_(env, lid) {
     cb_berichten_laatste_24u: await alle("SELECT nr AS kanaal, tekst, audio_id, aangemaakt FROM cb_berichten WHERE lid_id = ?", lid.id),
     meldingen: await alle("SELECT tekst, link, gelezen, aangemaakt FROM lid_meldingen WHERE lid_id = ?", lid.id),
     activiteit_laatste_90_dagen: await alle("SELECT soort, tekst, aangemaakt FROM lid_log WHERE lid_id = ? ORDER BY id", lid.id),
-    fotos: "Je foto's staan op /forum/foto/<foto_id> (zie garage en forumberichten).",
+    fotos: "Je foto's staan op /forum/foto/<foto_id> (zie Mijn Landy en forumberichten).",
   };
   await log(env, lid.id, "account", "Gegevens gedownload");
   return new Response(JSON.stringify(data, null, 2), { headers: { "content-type": "application/json; charset=utf-8", "content-disposition": `attachment; filename="rover-en-co-mijn-gegevens.json"`, "cache-control": "no-store" } });
@@ -587,7 +587,7 @@ async function verwijderen(request, env, url, lid) {
     titel: "Account verwijderen", noindex: true,
     inhoud: banner("Mijn account", "Account verwijderen", "Je gegevens worden gewist. Dit kan niet ongedaan gemaakt worden.", [["Mijn account", "/account"], ["Account verwijderen"]]) + kader(`${melding(m)}
       <p>Dit gebeurt er:</p>
-      <ul><li>Je naam, e-mail, telefoon, adres, profielfoto en garage worden gewist.</li>
+      <ul><li>Je naam, e-mail, telefoon, adres, profielfoto en Land Rovers worden gewist.</li>
       <li>Je CB-berichten, bewaarde items, meldingen en activiteitenlog worden gewist.</li>
       <li>Je forumberichten blijven staan, maar onder een anonieme naam. Wil je ze ook weg? Verwijder ze eerst zelf of mail ons.</li>
       <li>Bestellingen en inschrijvingen bewaren we zolang de boekhoudwet dat vraagt.</li></ul>

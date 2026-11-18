@@ -41,7 +41,7 @@ async function item(env, soort, id) {
   }
   if (soort === "wagen") {
     const w = await db.prepare("SELECT w.*, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id WHERE w.id = ? AND w.foto_id IS NOT NULL").bind(id).first();
-    return w && { lidId: w.lid_id, naam: w.gebruikersnaam, wat: "een foto uit de garage", terug: `/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#wagen-${w.id}`, voorbeeld: `<img src="/forum/foto/${w.foto_id}" alt="" style="max-width:280px;border-radius:10px">`, mailTekst: `Foto: /forum/foto/${w.foto_id} (${w.type})`, kolom: "wagen_id" };
+    return w && { lidId: w.lid_id, naam: w.gebruikersnaam, wat: "een foto van een Land Rover", terug: `/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#wagen-${w.id}`, voorbeeld: `<img src="/forum/foto/${w.foto_id}" alt="" style="max-width:280px;border-radius:10px">`, mailTekst: `Foto: /forum/foto/${w.foto_id} (${w.type})`, kolom: "wagen_id" };
   }
   if (soort === "cb") {
     const c = await db.prepare("SELECT c.*, l.gebruikersnaam FROM cb_berichten c JOIN leden l ON l.id = c.lid_id WHERE c.id = ? AND c.verwijderd = 0").bind(id).first();

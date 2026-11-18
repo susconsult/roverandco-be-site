@@ -171,7 +171,7 @@ async function index(request, env, url, lid) {
     <div class="wrap waarom-kaarten">
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg><b>Geen algoritme, geen reclame</b><span>Niemand verdient aan jouw foto's. Gewoon delen en elkaar helpen.</span></div>
       <div>${ico("pin")}<b>Spreek af om samen te rijden</b><span>Zin in een roadbook zaterdag? Post het, wie meewil reageert.</span></div>
-      <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Je berichten blijven van jou</b><span>Zet je Land Rovers in je <a href="/account/garage">garage</a>, volg topics en #hashtags.</span></div>
+      <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Je berichten blijven van jou</b><span>Zet je Land Rovers bij <a href="/account/garage">Mijn Landy</a>, volg topics en #hashtags.</span></div>
     </div>
     <section class="wrap f-sectie forum-layout">
       <div>${balk(lid, "/forum")}${kaarten}</div>
@@ -423,12 +423,12 @@ async function meldWagen(request, env, url, lid, id) {
   const recent = await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE (ip_hash = ? OR lid_id = ?) AND aangemaakt > ?").bind(ip, lid?.id || -1, new Date(Date.now() - 3600_000).toISOString()).first();
   if (recent.n >= 5) return naar(`${terug}?gemeld=1#wagen-${w.id}`);
   await env.SHOP_DB.prepare("INSERT INTO forum_meldingen (bericht_id, wagen_id, lid_id, ip_hash, reden, aangemaakt) VALUES (0, ?, ?, ?, ?, ?)").bind(w.id, lid?.id || null, ip, reden, nu()).run();
-  if (lid) await log(env, lid.id, "forum", `Garagefoto gemeld van ${w.gebruikersnaam}`, `${terug}#wagen-${w.id}`);
-  await log(env, w.lid_id, "garage", `Garagefoto van dit lid werd gemeld${reden ? ` (${reden})` : ""}`, `${terug}#wagen-${w.id}`);
+  if (lid) await log(env, lid.id, "forum", `Land Rover-foto gemeld van ${w.gebruikersnaam}`, `${terug}#wagen-${w.id}`);
+  await log(env, w.lid_id, "garage", `Land Rover-foto van dit lid werd gemeld${reden ? ` (${reden})` : ""}`, `${terug}#wagen-${w.id}`);
   const aan = (env.BEHEER_EMAILS || "pieter@roverandco.be").split(",")[0].trim();
   await mail(env, {
-    aan, onderwerp: `Melding: garagefoto van ${w.gebruikersnaam}`,
-    tekst: `Er werd een foto uit de garage gemeld.\n\nLid: ${w.gebruikersnaam}\nWagen: ${wagenNaam(w)}\nGemeld door: ${lid?.gebruikersnaam || "bezoeker zonder account"}\nReden: ${reden || "(geen reden)"}\n\nFoto: ${url.origin}/forum/foto/${w.foto_id}\n\nBekijk en verwijder hem hier (log in als moderator):\n${url.origin}${terug}#wagen-${w.id}`,
+    aan, onderwerp: `Melding: Land Rover-foto van ${w.gebruikersnaam}`,
+    tekst: `Er werd een foto van een Land Rover gemeld.\n\nLid: ${w.gebruikersnaam}\nWagen: ${wagenNaam(w)}\nGemeld door: ${lid?.gebruikersnaam || "bezoeker zonder account"}\nReden: ${reden || "(geen reden)"}\n\nFoto: ${url.origin}/forum/foto/${w.foto_id}\n\nBekijk en verwijder hem hier (log in als moderator):\n${url.origin}${terug}#wagen-${w.id}`,
   });
   return naar(`${terug}?gemeld=1#wagen-${w.id}`);
 }
@@ -517,9 +517,9 @@ async function profiel(request, env, url, lid, naam) {
     titel: `${p.gebruikersnaam} – Forum`, noindex: true,
     inhoud: sjabloonBanner("Forum", p.gebruikersnaam, "Lid van het Rover & Co-forum.", [["Forum", "/forum"], [p.gebruikersnaam]], wagens.find((w) => w.foto_id) ? `/forum/foto/${wagens.find((w) => w.foto_id).foto_id}` : "leden-vuur-avond") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
-      <h2 class="f-h2" id="garage">Garage</h2>
+      <h2 class="f-h2" id="garage">Land Rovers</h2>
       ${url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : ""}
-      ${wagens.length ? garageKaarten(wagens, { lid, eigen: lid?.id === p.id, mod: !!lid?.beheerder, bewaard: await bewaardSet(env, lid, "wagen", wagens.map((w) => w.id)), profiel: `/forum/lid/${encodeURIComponent(p.gebruikersnaam)}` }) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Zet je Land Rovers in je garage</a>.' : "Nog geen Land Rovers in de garage."}</p>`}
+      ${wagens.length ? garageKaarten(wagens, { lid, eigen: lid?.id === p.id, mod: !!lid?.beheerder, bewaard: await bewaardSet(env, lid, "wagen", wagens.map((w) => w.id)), profiel: `/forum/lid/${encodeURIComponent(p.gebruikersnaam)}` }) : `<p>${lid?.id === p.id ? 'Nog leeg. <a href="/account/garage">Voeg je Land Rovers toe</a>.' : "Nog geen Land Rovers."}</p>`}
     </section>`,
   });
 }
