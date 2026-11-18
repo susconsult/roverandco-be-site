@@ -280,7 +280,7 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 /* ---------- Activiteitpagina met inschrijfkaart (18 nov 2026) ---------- */
 .act-grid{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);grid-template-areas:"intro kaart" "meer kaart";column-gap:48px;align-items:start}
 .act-intro{grid-area:intro}.act-meer{grid-area:meer}
-.act-kaart{grid-area:kaart;position:sticky;top:96px;background:#fff;border-radius:18px;padding:22px 22px 18px;box-shadow:0 10px 34px rgba(20,24,21,.12);border:2px solid var(--green)}
+.act-kaart{grid-area:kaart;position:sticky;top:96px;max-height:calc(100vh - 112px);overflow:auto;overscroll-behavior:contain;background:#fff;border-radius:18px;padding:22px 22px 18px;box-shadow:0 10px 34px rgba(20,24,21,.12);border:2px solid var(--green)}
 .act-kaart-titel{font-size:var(--fs-h3);margin:0 0 4px}
 .act-labels{display:flex;gap:8px;flex-wrap:wrap;margin:0 0 18px}
 .act-labels span{background:#fff;border:1px solid var(--sand-2,#DED5BF);border-radius:999px;padding:6px 14px;font-size:var(--fs-sm);font-weight:600}
