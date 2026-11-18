@@ -2,8 +2,10 @@
 // Login met een code per mail (via Resend): e-mail invullen -> code van 6 cijfers (10 min geldig, max 5 pogingen)
 // -> sessie van 30 dagen in een cookie (HttpOnly, Secure, alleen voor /beheer).
 // Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
+import { verstuur, htmlMail, alinea } from "./mail.js";
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
+import { beheerTestmail } from "./beheer-testmail.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
@@ -35,14 +37,11 @@ async function wie(request, env) {
 }
 
 async function stuurCode(env, email, code) {
-  const r = await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json" },
-    body: JSON.stringify({
-      from: "Rover & Co VZW <noreply@roverandco.be>", to: [email], subject: `Je code voor het beheer: ${code}`,
-      text: `Je code om in te loggen op het beheer van Rover & Co: ${code}\n\nDe code is 10 minuten geldig. Heb je dit niet gevraagd? Dan mag je deze mail negeren.`,
-    }),
-  });
+  const html = htmlMail({ eyebrow: "Beheer", titel: "Je code om in te loggen", inhoud:
+    `<div style="text-align:center;margin:6px 0 18px"><span style="display:inline-block;font-family:Inter,Arial,sans-serif;font-size:34px;letter-spacing:8px;font-weight:700;color:#1F3B2A;background:#F6F3EA;border-radius:10px;padding:14px 22px">${code}</span></div>` +
+    alinea("De code is 10 minuten geldig. Heb je dit niet gevraagd? Dan mag je deze mail negeren.", "color:#5B625C;text-align:center") });
+  const r = await verstuur(env, { aan: email, onderwerp: `Je code voor het beheer: ${code}`, html,
+    tekst: `Je code om in te loggen op het beheer van Rover & Co: ${code}\n\nDe code is 10 minuten geldig. Heb je dit niet gevraagd? Dan mag je deze mail negeren.` });
   return r.ok;
 }
 
@@ -157,7 +156,7 @@ html{touch-action:pan-x pan-y}`;
 
 const MENU = [
   ["", [["home", "Te doen", "/beheer", "home"]]],
-  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"]]],
+  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["kassa", "Kassa (scannen)", "/kassa", "ticket"], ["testmail", "Testmail", "/beheer/testmail", "lijst"]]],
   ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
   ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"]]],
 ];
@@ -211,7 +210,7 @@ async function lijst(url, env, email) {
   const zoek = (url.searchParams.get("q") || "").trim().slice(0, 80);
   const act = (url.searchParams.get("activiteit") || "").slice(0, 80);
 
-  let sql = `SELECT nummer, aangemaakt, status, naam, email, totaal, activiteit, afgehandeld, test, data FROM registraties WHERE soort = ? AND (${FILTERS[filter]})`;
+  let sql = `SELECT nummer, aangemaakt, status, naam, email, totaal, activiteit, afgehandeld, test, gescand_op, data FROM registraties WHERE soort = ? AND (${FILTERS[filter]})`;
   const p = [soort];
   if (zoek) { sql += " AND (naam LIKE ? OR email LIKE ? OR nummer LIKE ? OR telefoon LIKE ?)"; p.push(...Array(4).fill(`%${zoek}%`)); }
   if (act) { sql += " AND activiteit = ?"; p.push(act); }
@@ -229,7 +228,7 @@ async function lijst(url, env, email) {
       : esc((d.lijnen || []).map((l) => `${l.aantal}× ${l.naam}`).join(", ")) + (d.tijdslot ? `<br><small>Tijdslot ${esc(d.tijdslot)}</small>` : "");
     return `<tr><td>${datum(r.aangemaakt)}</td><td><a href="/beheer/r/${esc(r.nummer)}">${esc(r.nummer)}</a></td>
       <td>${esc(r.naam)}<br><small class="mob">${esc(r.email)}</small></td>${soort === "inschrijving" ? `<td class="mob">${esc(d.activiteit_titel || r.activiteit)}</td>` : ""}
-      <td class="mob">${wat}</td><td>${eur(r.totaal)}</td><td>${badge(r.status)}${r.afgehandeld ? ' <span class="badge">afgehandeld</span>' : ""}</td></tr>`;
+      <td class="mob">${wat}</td><td>${eur(r.totaal)}</td><td>${badge(r.status)}${r.afgehandeld ? ' <span class="badge">afgehandeld</span>' : ""}${r.gescand_op ? ` <span class="badge b-betaald">binnen ${new Date(r.gescand_op).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Brussels" })}</span>` : ""}</td></tr>`;
   }).join("");
 
   const tab = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer?soort=${s}">${label}</a>`;
@@ -267,7 +266,7 @@ ${melding ? `<div class="kaart">${esc(melding)}</div>` : ""}
 <dl><dt>Aangemaakt</dt><dd>${datum(r.aangemaakt)}</dd><dt>Klant</dt><dd>${esc(r.naam)}<br><a href="mailto:${esc(r.email)}">${esc(r.email)}</a><br><a href="tel:${esc(r.telefoon)}">${esc(r.telefoon)}</a></dd>
 ${inhoud}<dt>Totaal</dt><dd><b>${eur(r.totaal)}</b></dd>${d.opmerking ? `<dt>Opmerking klant</dt><dd><pre>${esc(d.opmerking)}</pre></dd>` : ""}
 <dt>Viva ordercode</dt><dd>${esc(r.viva_ordercode || "–")}</dd><dt>Transactie</dt><dd>${esc(r.transactie || "–")}</dd><dt>Betaald op</dt><dd>${datum(r.betaald_op) || "–"}</dd>
-<dt>Mail klant</dt><dd>${esc(r.mail_klant || "–")}</dd></dl></div>
+<dt>Mail klant</dt><dd>${esc(r.mail_klant || "–")}</dd>${r.soort === "inschrijving" ? `<dt>Ticket</dt><dd>${r.gescand_op ? `gescand op ${esc(new Date(r.gescand_op).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}` : r.ticket ? "nog niet gescand" : "nog geen ticket"}</dd>` : ""}</dl></div>
 <form class="kaart" method="post" action="/beheer/r/${esc(r.nummer)}"><h2>Afhandelen</h2>
 <p><label><input type="checkbox" name="afgehandeld" value="1" ${r.afgehandeld ? "checked" : ""}> ${r.soort === "bestelling" ? "Afgehaald of verzonden" : "Afgehandeld"}</label></p>
 <p><label>Status<br><select name="status">${[...new Set([r.status, ...STATUSSEN])].map((s) => `<option ${s === r.status ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label></p>
@@ -341,6 +340,8 @@ export async function beheer(request, env, url) {
   if (ld) return ld;
   const ab = await beheerAanbod(request, env, url, w.email);
   if (ab) return ab;
+  const tm = await beheerTestmail(request, env, url, w.email);
+  if (tm) return tm;
   if (p === "/beheer/export.csv") return exporteer(url, env);
   const m = p.match(/^\/beheer\/r\/([A-Z]{2}-\d{6}-[A-Z0-9]{5})$/);
   if (m) return request.method === "POST" ? bewaar(request, m[1], env, w.email) : detail(m[1], env, w.email);

@@ -1,3 +1,4 @@
+import { verstuur } from "./mail.js";
 // Kalender: activiteiten van andere clubs indienen en goedkeuren.
 // - POST /api/kalender            : iemand dient een activiteit in (status "wacht"), mail naar Pieter met goedkeurlinks
 // - GET  /api/kalender            : goedgekeurde, nog niet voorbije activiteiten (de pagina /kalender toont ze)
@@ -60,11 +61,7 @@ async function indienen(request, env) {
       `Goedkeuren (komt meteen op de kalender): ${basis}&actie=ok`, `Weigeren: ${basis}&actie=nee`,
     ].join("\n");
     try {
-      await fetch("https://api.resend.com/emails", {
-        method: "POST",
-        headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `kalender-${id}` },
-        body: JSON.stringify({ from: VAN, to: [AAN], reply_to: a.email, subject: `Kalender: ${a.titel} (${a.club})`, text: tekst }),
-      });
+      await verstuur(env, { van: VAN, aan: AAN, reply_to: a.email, onderwerp: `Kalender: ${a.titel} (${a.club})`, tekst, sleutel: `kalender-${id}` });
     } catch { /* inzending staat in de database; mail is enkel een melding */ }
   }
   return kjson({ ok: true });

@@ -4,7 +4,7 @@
 // en vult de delen in op statische pagina's die erop steunen (HTMLRewriter):
 //   / (eerstvolgende, activiteiten, shop), /kalender (Rover & Co-activiteiten), /afrekenen (ophalen op activiteit), /sitemap.xml
 // Ook de prijscontrole bij afrekenen en inschrijven (laadCatalogus) leest uit de database.
-import { esc as e, pagina, kruimel } from "./sjabloon.js";
+import { esc as e, pagina, kruimel, willekeurigeBanner } from "./sjabloon.js";
 import kalenderAnderen from "../../data/kalender.json";
 
 const DOMEIN = "https://roverandco.be";
@@ -54,7 +54,7 @@ export async function laadCatalogus(env) {
   cat.__activiteiten = acts.filter((a) => komend(a) && a.datum).map((a) => `${a.titel} (${a.datum_label})`);
   cat.__inschrijvingen = {};
   for (const a of acts) if (inschrijvingOpen(a)) cat.__inschrijvingen[a.slug] = {
-    titel: a.titel, datum_label: a.datum_label, sluit: a.inschrijving.sluit || a.datum,
+    titel: a.titel, datum_label: a.datum_label, datum_lang: a.datum_lang || "", locatie: a.locatie || "", uren: a.uren || "", sluit: a.inschrijving.sluit || a.datum,
     onderdelen: a.inschrijving.onderdelen, tijdsloten: a.inschrijving.tijdsloten || null, wagen: !!a.inschrijving.wagen,
   };
   return cat;
@@ -81,7 +81,8 @@ function img(naam, alt, { cls = "", sizes = "100vw", prio = false, pos = null } 
   if (String(naam).startsWith("/")) return `<img ${a}src="${e(naam)}" alt="${e(alt)}"${load}>`;
   return `<img ${a}src="/assets/img/${e(naam)}-s.webp" srcset="/assets/img/${e(naam)}-s.webp 800w, /assets/img/${e(naam)}.webp 1600w" sizes="${sizes}" alt="${e(alt)}"${load}>`;
 }
-function banner(eyebrow, titel, intro = "", foto = null, alt = "", pos = null, groen = false, kruim = null) {
+function banner(eyebrow, titel, intro = "", foto = null, alt = "", pos = null, groen = false, kruim = null, vast = false) {
+  if (!vast) { foto = willekeurigeBanner(); alt = ""; pos = null; }
   return `<section class="banner banner-foto">${foto ? img(foto, alt, { prio: true, pos }) : ""}<div class="wrap">${kruimel(kruim || [[eyebrow]])}<div class="eyebrow">${e(eyebrow)}</div><h1>${e(titel)}</h1>${intro ? `<p>${e(intro)}</p>` : ""}</div></section>`;
 }
 function galerij(items) {
@@ -226,7 +227,7 @@ async function activiteitPagina(env, request, slug) {
     ? `<a class="btn btn-solid" href="#inschrijven" style="width:100%;justify-content:center">Inschrijven</a><p class="note">Het formulier staat onderaan deze pagina. ${gratis(a) ? "Inschrijven is gratis." : "Je betaalt veilig online via Viva."}</p>`
     : a.inschrijven_url ? `<a class="btn btn-solid" href="${e(a.inschrijven_url)}" rel="noopener" style="width:100%;justify-content:center">${e(a.inschrijven_label || "Inschrijven")}</a><p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>`
     : a.inschrijven_label ? `<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">${e(a.inschrijven_label)}</span>` : "";
-  let body = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen, [["Activiteiten", "/activiteiten"], [a.titel]]) + aftellen(a) + `
+  let body = banner(a.datum_lang || "", a.titel, a.kort || "", a.banner_foto || a.foto, a.foto_alt || a.titel, a.banner_pos || a.foto_pos, !!a.banner_groen, [["Activiteiten", "/activiteiten"], [a.titel]], true) + aftellen(a) + `
 <section><div class="wrap detail">
   <div class="prose">${a.omschrijving_html || ""}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">

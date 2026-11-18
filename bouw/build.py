@@ -161,9 +161,16 @@ def kruimel(delen):
     return s + "</nav>"
 
 
-def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False, kruim=None):
+BANNER_POOL = json.load(open(os.path.join(DATA, "banners.json"), encoding="utf-8"))
+# Bannerfoto wisselt bij elke refresh (behalve homepage en activiteitpagina's): klein script direct na de foto.
+ROTEER_JS = ('<script>(function(i){var p=' + json.dumps(BANNER_POOL, separators=(",", ":")) + ',n=p[Math.floor(Math.random()*p.length)];'
+             'i.removeAttribute("style");i.alt="";i.srcset="/assets/img/"+n+"-s.webp 800w, /assets/img/"+n+".webp 1600w";i.src="/assets/img/"+n+"-s.webp"})'
+             '(document.currentScript.previousElementSibling)</script>')
+
+
+def banner(eyebrow, title, intro="", foto=None, alt="", pos=None, groen=False, kruim=None, vast=False):
     foto = foto or {"Contact": "905", "Voorwaarden": "leden-defender-blauwe-lucht", "Privacy": "leden-defender-90-zonsondergang-veld", "404": "730", "Shop": "5577", "Betaling": "leden-defender-110-lichtjes-boven"}.get(eyebrow, "leden-defender-110-lichtjes-boven")
-    pic = img(foto, alt, prio=True, pos=pos)
+    pic = img(foto, alt, prio=True, pos=pos) + ("" if vast else ROTEER_JS)
     if kruim is None:
         kruim = [(title if eyebrow in ("Rover & Co", "404") else eyebrow,)]
     return f'<section class="banner banner-foto{" banner-groen" if groen else ""}">{pic}<div class="wrap">{kruimel(kruim)}<div class="eyebrow">{e(eyebrow)}</div><h1>{e(title)}</h1>{f"<p>{e(intro)}</p>" if intro else ""}</div></section>'
@@ -406,7 +413,7 @@ for a in alle_acts:
       knop = (f'<a class="btn btn-solid" href="{a["inschrijven_url"]}" rel="noopener" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</a>'
             '<p class="note">Inschrijven en betalen gebeurt voorlopig nog via onze huidige webshop.</p>') if a["inschrijven_url"] else \
            f'<span class="btn btn-solid" aria-disabled="true" style="width:100%;justify-content:center">{e(a["inschrijven_label"])}</span>' if a["inschrijven_label"] else ""
-    body = banner(a["datum_lang"], a["titel"], a["kort"], a.get("banner_foto", a["foto"]), a["foto_alt"], a.get("banner_pos", a.get("foto_pos")), a.get("banner_groen", False)) + aftellen(a) + f"""
+    body = banner(a["datum_lang"], a["titel"], a["kort"], a.get("banner_foto", a["foto"]), a["foto_alt"], a.get("banner_pos", a.get("foto_pos")), a.get("banner_groen", False), vast=True) + aftellen(a) + f"""
 <section><div class="wrap detail">
   <div class="prose">{a['omschrijving_html']}</div>
   <div class="ev-side"><aside class="card"><h3>In het kort</h3><ul class="facts">
@@ -768,8 +775,11 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug.</p>
   <h2>Meldingen en moderatie</h2>
   <p>Leden kunnen een bericht, foto of CB-bericht melden. De beheerder krijgt dan een mail met de inhoud en de reden en kan ze verwijderen of een lid blokkeren. Wie het bericht schreef, ziet niet wie het meldde. Andere CB-berichten leest de beheerder niet.</p>
-  <h2>Je microfoon</h2>
+  <h2>Je microfoon en camera</h2>
   <p>Je microfoon wordt alleen gebruikt zolang je de PTT-knop op de CB ingedrukt houdt, en alleen als je dat zelf toelaat in je browser.</p>
+  <p>De camera wordt alleen gebruikt door vrijwilligers aan de kassa, om tickets te scannen. De beelden blijven op hun gsm en worden niet bewaard.</p>
+  <h2>Tickets</h2>
+  <p>Bij een inschrijving krijg je een ticket met een QR-code. Die code is willekeurig en bevat geen persoonsgegevens. Aan de ingang zien de vrijwilligers aan de kassa je naam en waarvoor je inschreef, en we noteren wanneer je ticket gescand werd.</p>
   <h2>Hoe lang</h2>
   <ul>
     <li>CB-berichten, spraakberichten, reacties en eigen CB-kanalen: 24 uur.</li>

@@ -31,7 +31,7 @@ function status(l) {
   if (l.geblokkeerd) return `<span class="badge b-fout">Geblokkeerd</span>`;
   if (!l.wachtwoord) return `<span class="badge b-wacht">Via bestelling</span>`;
   if (!l.bevestigd_op) return `<span class="badge b-wacht">Niet bevestigd</span>`;
-  return `<span class="badge b-betaald">Actief</span>`;
+  return `<span class="badge b-betaald">Actief</span>${l.kassa ? ' <span class="badge">Kassa</span>' : ""}`;
 }
 
 const FILTERS = {
@@ -92,6 +92,7 @@ ${weg ? `<p>Dit account werd op ${dag(l.verwijderd_op)} anoniem gemaakt.</p>` : 
 ${l.wachtwoord ? knop("wachtwoordlink", "Stuur wachtwoordlink") : knop("wachtwoordlink", "Stuur 'kies je wachtwoord'-mail")}
 ${!l.bevestigd_op ? knop("bevestigmail", "Bevestigingsmail opnieuw") : ""}
 ${knop("uitloggen", "Overal uitloggen")}
+${l.kassa ? knop("kassa-uit", "Kassa-rechten intrekken") : knop("kassa-aan", "Kassa-rechten geven", { bevestig: "Dit lid mag dan tickets scannen op /kassa." })}
 ${l.geblokkeerd ? knop("deblokkeer", "Deblokkeren") : knop("blokkeer", "Blokkeren", { rood: true, bevestig: "Dit lid blokkeren? Inloggen lukt dan niet meer." })}
 ${knop("anoniem", "Account verwijderen", { rood: true, bevestig: "Account anoniem maken? Naam, e-mail, telefoon, garage en profielfoto worden gewist. Forumberichten blijven staan als 'verwijderd lid', bestellingen blijven voor de boekhouding. Dit kan niet ongedaan worden." })}
 </div>`}</div>
@@ -129,6 +130,11 @@ async function actie(request, env, url, id, email) {
     await db.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(l.id).run();
     await log(env, l.id, "beheer", "Beheer logde dit lid overal uit");
     return detail(id, env, email, "Overal uitgelogd.");
+  }
+  if (a === "kassa-aan" || a === "kassa-uit") {
+    await db.prepare("UPDATE leden SET kassa = ? WHERE id = ?").bind(a === "kassa-aan" ? 1 : 0, l.id).run();
+    await log(env, l.id, "beheer", a === "kassa-aan" ? "Kassa-rechten gekregen" : "Kassa-rechten ingetrokken");
+    return detail(id, env, email, a === "kassa-aan" ? "Dit lid kan nu tickets scannen op /kassa." : "Kassa-rechten ingetrokken.");
   }
   if (a === "blokkeer" || a === "deblokkeer") {
     await db.prepare("UPDATE leden SET geblokkeerd = ? WHERE id = ?").bind(a === "blokkeer" ? 1 : 0, l.id).run();

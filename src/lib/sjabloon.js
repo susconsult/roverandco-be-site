@@ -1,3 +1,4 @@
+import { verstuur } from "./mail.js";
 // Pagina's die de Worker zelf maakt (account, forum) in dezelfde opmaak als de rest van de site.
 // bouw/build.py schrijft public/_sjabloon.html met plaatshouders; die vullen we hier in.
 export const esc = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
@@ -12,9 +13,12 @@ export const datum = (iso, kort = false) => {
 // Kruimelpad: [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
 export const kruimel = (delen = []) => delen === "slot" ? "<!--kruim-->" : delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
 const BANNERFOTO = { "Mijn account": "leden-defender-110-zonsondergang-achter", Forum: "leden-lightweight-110", "Rover & Co": "leden-vuur-avond" };
+import ROTATIE from "../../data/banners.json";
+export { ROTATIE };
+export const willekeurigeBanner = () => ROTATIE[crypto.getRandomValues(new Uint32Array(1))[0] % ROTATIE.length];
 export const bannerFoto = (naam) => naam.startsWith("/") ? `<img src="${esc(naam)}" alt="" fetchpriority="high">` : `<img src="/assets/img/${naam}-s.webp" srcset="/assets/img/${naam}-s.webp 800w, /assets/img/${naam}.webp 1600w" sizes="100vw" alt="" fetchpriority="high">`;
 export function banner(eyebrow, titel, intro = "", kruim = null, foto = null) {
-  return `<section class="banner banner-foto">${bannerFoto(foto || BANNERFOTO[eyebrow] || "968")}<div class="wrap">${kruimel(kruim || [[eyebrow === "Rover & Co" ? titel : eyebrow]])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
+  return `<section class="banner banner-foto">${bannerFoto(foto && foto.startsWith("/") ? foto : willekeurigeBanner())}<div class="wrap">${kruimel(kruim || [[eyebrow === "Rover & Co" ? titel : eyebrow]])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
 }
 
 let cache = null;
@@ -65,15 +69,7 @@ export async function sha(s) {
 export const willekeurig = (n = 32) => [...crypto.getRandomValues(new Uint8Array(n))].map((b) => b.toString(16).padStart(2, "0")).join("");
 
 export async function mail(env, { aan, onderwerp, tekst, sleutel }) {
-  if (!env.RESEND_API_KEY) return false;
-  try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", ...(sleutel ? { "idempotency-key": sleutel } : {}) },
-      body: JSON.stringify({ from: "Rover & Co VZW <noreply@roverandco.be>", to: [aan], subject: onderwerp, text: tekst }),
-    });
-    return r.ok;
-  } catch { return false; }
+  return (await verstuur(env, { aan, onderwerp, tekst, sleutel })).ok;
 }
 
 // Ingelogd maar de vlag-cookie voor het belletje ontbreekt (bv. ingelogd voor die cookie bestond)? Dan zetten we hem.

@@ -6,6 +6,8 @@
 //  mailstatus : resultaat van de klantmail (Resend) noteren.
 // Meldingen naar Pieter gaan via Resend (vroeger MailApp).
 
+import { verstuur } from "./mail.js";
+
 const MELDING_AAN = "pieter@roverandco.be";
 const VRAGEN_AAN = "info@roverandco.be";
 const AFZENDER = "Rover & Co VZW <noreply@roverandco.be>";
@@ -139,13 +141,8 @@ async function mailstatus(env, b) {
 
 async function resend(env, aan, onderwerp, tekst, sleutel) {
   if (!env.RESEND_API_KEY) { console.log("melding niet verstuurd (geen RESEND_API_KEY):", onderwerp); return; }
-  try {
-    await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", ...(sleutel ? { "idempotency-key": sleutel } : {}) },
-      body: JSON.stringify({ from: AFZENDER, to: [aan], subject: onderwerp, text: tekst }),
-    });
-  } catch (e) { console.log("melding fout", String(e)); }
+  const r = await verstuur(env, { aan, onderwerp, tekst, sleutel });
+  if (!r.ok) console.log("melding fout", r.fout);
 }
 
 async function stuurMelding(env, b, extra) {
@@ -183,7 +180,7 @@ async function controleerGrenzen(env, b, voor) {
 
 function klantMail(b) {
   const m = b.soort === "bestelling" ? mailBestelling(b) : mailInschrijving(b);
-  return { aan: b.klant.email, onderwerp: m.onderwerp, tekst: m.tekst, nummer: b.nummer, soort: b.soort };
+  return { aan: b.klant.email, onderwerp: m.onderwerp, tekst: m.tekst, nummer: b.nummer, soort: b.soort, data: b };
 }
 
 function mailBestelling(b) {
@@ -208,6 +205,7 @@ function mailInschrijving(b) {
   if (b.wagen) regels.push(`Land Rover: ${b.wagen}`);
   if (b.totaal > 0) regels.push(`Totaal: ${eur(b.totaal)}`);
   regels.push("");
+  regels.push("Je ticket met QR-code zit als PDF in bijlage. Toon het aan de ingang.", "");
   if (b.site) regels.push(`Alle info over de activiteit: ${b.site}/activiteiten/${b.activiteit}`, "");
   regels.push("Dit is een automatische mail, je kan er niet op antwoorden.",
     `Vragen? Mail naar ${VRAGEN_AAN} en vermeld je inschrijfnummer.`, "", "Tot dan!", "Rover & Co VZW");

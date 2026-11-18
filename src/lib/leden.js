@@ -15,6 +15,7 @@ import { eur } from "./opslag.js";
 import { log } from "./log.js";
 import { anonimiseer } from "./anoniem.js";
 import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
+import { ticketPdf } from "./ticket.js";
 
 const COOKIE = "rc_lid";
 const SESSIE_DAGEN = 90;
@@ -339,7 +340,7 @@ const STATUS_KLAS = (s) => /niet betaald/i.test(s) ? "nee" : /betaald|bevestigd/
 
 async function registratieLijsten(env, lid) {
   const rijen = (await env.SHOP_DB.prepare(
-    `SELECT nummer, soort, aangemaakt, status, totaal, activiteit, data FROM registraties
+    `SELECT nummer, soort, aangemaakt, status, totaal, activiteit, ticket, gescand_op, data FROM registraties
      WHERE lid_id = ?1 OR (?2 = 1 AND email = ?3 COLLATE NOCASE) ORDER BY aangemaakt DESC LIMIT 100`
   ).bind(lid.id, lid.bevestigd_op ? 1 : 0, lid.email).all()).results || [];
   const lijst = (soort) => {
@@ -355,7 +356,7 @@ async function registratieLijsten(env, lid) {
             const k = Object.values(a.keuzes || {}).filter(Boolean).join(", ");
             return `<li><span>${a.aantal} × ${esc(a.naam)}${k ? ` <small>(${esc(k)})</small>` : ""}</span><span>${eur(a.lijn ?? a.prijs * a.aantal)}</span></li>`;
           }).join("")}</ul>`
-        : `<p class="acc-wat">${esc(d.activiteit_titel || x.activiteit)}</p>`;
+        : `<p class="acc-wat">${esc(d.activiteit_titel || x.activiteit)}</p>${x.ticket && /betaald|bevestigd|test/i.test(status) && !/niet/i.test(status) ? `<p class="acc-wat"><a class="btn btn-solid" href="/account/ticket/${esc(x.nummer)}">Ticket downloaden (PDF)</a>${x.gescand_op ? " <small>Gescand aan de ingang.</small>" : ""}</p>` : ""}`;
       return `<div class="acc-rij"><div class="acc-kop"><b>${esc(x.nummer)}</b><span class="acc-status ${STATUS_KLAS(status)}">${esc(status)}</span></div>
         <small class="acc-meta">${datum(x.aangemaakt, true)}</small>${wat}<div class="acc-tot"><span>Totaal</span><b>${eur(x.totaal)}</b></div></div>`;
     }).join("")}</div>`;
@@ -404,6 +405,20 @@ async function overzicht(request, env, url, lid) {
       </div>
       <p class="acc-uit"><a href="/account/uitloggen">Uitloggen</a></p></section>`,
   });
+}
+
+// Ticket (PDF) van een eigen inschrijving opnieuw downloaden.
+async function ticketDownload(env, lid, nummer) {
+  const r = await env.SHOP_DB.prepare("SELECT * FROM registraties WHERE nummer = ? AND soort = 'inschrijving' AND ticket IS NOT NULL AND (lid_id = ? OR (? = 1 AND email = ? COLLATE NOCASE))")
+    .bind(nummer, lid.id, lid.bevestigd_op ? 1 : 0, lid.email).first();
+  if (!r) return new Response("Niet gevonden.", { status: 404 });
+  const d = JSON.parse(r.data);
+  const pdf = ticketPdf({
+    titel: d.activiteit_naam || String(d.activiteit_titel || "").replace(/\s*\([^)]*\)$/, ""), datum: d.activiteit_datum_lang || d.activiteit_datum_label || "", uren: d.activiteit_uren || "",
+    locatie: d.activiteit_locatie || "", naam: r.naam, nummer: r.nummer, tijdslot: r.tijdslot || "", wagen: d.wagen || "", test: String(r.status).startsWith("Test"),
+    lijnen: (d.lijnen || []).map((l) => ({ tekst: `${l.aantal} × ${l.naam}`, bedrag: l.prijs > 0 ? eur(l.lijn) : "gratis" })), totaal: r.totaal > 0 ? eur(r.totaal) : "", code: r.ticket,
+  });
+  return new Response(pdf, { headers: { "content-type": "application/pdf", "content-disposition": `inline; filename="ticket-${r.nummer}.pdf"`, "cache-control": "private, no-store" } });
 }
 
 async function bestellingen(request, env, url, lid) {
@@ -613,6 +628,7 @@ export async function leden(request, env, url) {
   if (!lid) return naar("/account/inloggen?terug=" + encodeURIComponent(p));
   if (p === "/account") return metVlag(request, await overzicht(request, env, url, lid), lid);
   if (p === "/account/bestellingen") return bestellingen(request, env, url, lid);
+  if (p.startsWith("/account/ticket/")) return ticketDownload(env, lid, decodeURIComponent(p.slice(16)));
   if (p === "/account/mijn-gegevens.json") return export_(env, lid);
   if (p === "/account/verwijderen") return verwijderen(request, env, url, lid);
   if (p === "/account/gegevens") return gegevens(request, env, url, lid);

@@ -11,6 +11,8 @@
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.8",
     "astro": "^7.4.12",
+    "jsqr": "^1.4.0",
+    "qrcode-generator": "^2.0.4",
     "wrangler": "^4.164.0"
   }
 }

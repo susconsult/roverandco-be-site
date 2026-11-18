@@ -19,6 +19,10 @@
   function eur(n) { return "€" + n.toFixed(2).replace(".", ","); }
   function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
 
+  // − aantal + per lijn (mandje en afrekenpagina)
+  function stapper(i, n) {
+    return '<span class="stapper"><button type="button" data-min="' + i + '" aria-label="Eén minder">−</button><b>' + n + '</b><button type="button" data-plus="' + i + '" aria-label="Eén meer">+</button></span>';
+  }
   function render() {
     var count = cart.reduce(function (a, l) { return a + l.aantal; }, 0);
     document.querySelectorAll(".cart-count").forEach(function (el) { el.textContent = count; });
@@ -26,13 +30,22 @@
     if (!lines) return;
     lines.innerHTML = cart.length ? cart.map(function (l, i) {
       return '<div class="line"><span>' + esc(l.naam) + (l.opties ? "<small>" + esc(l.opties) + "</small>" : "") +
-        "<small>" + l.aantal + " × " + eur(l.prijs) + '</small><button type="button" data-remove="' + i + '">Verwijderen</button></span><b>' + eur(l.prijs * l.aantal) + "</b></div>";
-    }).join("") : "<p style='color:#5B625C'>Je mandje is leeg.</p>";
+        "<small>" + eur(l.prijs) + " per stuk</small>" + stapper(i, l.aantal) + '<button type="button" data-remove="' + i + '">Verwijderen</button></span><b>' + eur(l.prijs * l.aantal) + "</b></div>";
+    }).join("") + '<a class="btn btn-solid line-naar" href="/afrekenen">Naar de kassa</a>' : "<p style='color:#5B625C'>Je mandje is leeg.</p>";
     document.getElementById("total").textContent = eur(cart.reduce(function (a, l) { return a + l.prijs * l.aantal; }, 0));
   }
   document.addEventListener("click", function (e) {
     var r = e.target.closest("[data-remove]");
-    if (r) { cart.splice(+r.dataset.remove, 1); save(); render(); }
+    if (r) { cart.splice(+r.dataset.remove, 1); save(); render(); document.dispatchEvent(new Event("mandje")); return; }
+    var m = e.target.closest("[data-min],[data-plus]");
+    if (m) {
+      var i = +(m.dataset.min != null ? m.dataset.min : m.dataset.plus), l = cart[i];
+      if (!l) return;
+      if (m.dataset.plus != null) l.aantal = Math.min(99, l.aantal + 1);
+      else if (l.aantal > 1) l.aantal -= 1;
+      else if (confirm("Dit artikel uit je mandje halen?")) cart.splice(i, 1);
+      save(); render(); document.dispatchEvent(new Event("mandje"));
+    }
   });
 
   function toggleCart(open) { document.body.classList.toggle("open-cart", open); }
@@ -41,10 +54,12 @@
   document.addEventListener("keydown", function (e) { if (e.key === "Escape") { toggleCart(false); closeLightbox(); } });
 
   var tt;
-  function toast(t) {
+  function toast(t, link) {
     var el = document.getElementById("toast"); if (!el) return;
-    el.textContent = t; el.classList.add("show"); clearTimeout(tt);
-    tt = setTimeout(function () { el.classList.remove("show"); }, 2800);
+    el.textContent = t;
+    if (link) { var a = document.createElement("a"); a.href = link[1]; a.textContent = link[0]; a.className = "toast-knop"; el.append(a); }
+    el.classList.add("show"); clearTimeout(tt);
+    tt = setTimeout(function () { el.classList.remove("show"); }, link ? 6000 : 2800);
   }
 
   /* ---------- productpagina ---------- */
@@ -74,7 +89,9 @@
       var opties = keuzes.join(", ");
       var bestaand = cart.find(function (l) { return l.id === form.dataset.id && l.opties === opties; });
       if (bestaand) bestaand.aantal += aantal; else cart.push({ id: form.dataset.id, naam: form.dataset.naam, opties: opties, keuzes: keuzeObj, prijs: huidigePrijs(), aantal: aantal });
-      save(); render(); toast(form.dataset.naam + " zit in je mandje");
+      save(); render(); toast(form.dataset.naam + " zit in je mandje", ["Naar winkelmand", "/afrekenen"]);
+      var naar = document.getElementById("naar-mandje");
+      if (!naar) { naar = document.createElement("a"); naar.id = "naar-mandje"; naar.className = "btn naar-mandje"; naar.href = "/afrekenen"; naar.textContent = "Ga naar winkelmand"; form.querySelector('button[type="submit"]').after(naar); }
     });
   }
   var main = document.getElementById("pdp-main");
@@ -132,6 +149,7 @@
       box.style.top = (r.bottom + h + 8 > window.innerHeight ? r.top + window.scrollY - h - 6 : r.bottom + window.scrollY + 6) + "px";
       box.addEventListener("mousedown", function (e) { var b = e.target.closest("[data-n]"); if (b) { e.preventDefault(); zet(b.dataset.n); } });
     }
+    document.addEventListener("mandje", function () { toon(); });
     document.addEventListener("input", function (e) {
       var el = e.target;
       if (!el.matches || !el.matches('textarea[name="tekst"], #cb-tekst, #mini-tekst')) return;
@@ -219,8 +237,8 @@
         el.hidden = !(gekozen("levering") === k || gekozen("donatie") === k);
       });
       var b = bereken();
-      document.getElementById("co-lijnen").innerHTML = cart.map(function (l) {
-        return '<div class="co-lijn"><span>' + l.aantal + " × " + esc(l.naam) + (l.opties ? "<small>" + esc(l.opties) + "</small>" : "") + "</span><b>" + eur(l.prijs * l.aantal) + "</b></div>";
+      document.getElementById("co-lijnen").innerHTML = cart.map(function (l, i) {
+        return '<div class="co-lijn"><span>' + esc(l.naam) + (l.opties ? "<small>" + esc(l.opties) + "</small>" : "") + "<small>" + eur(l.prijs) + " per stuk</small>" + stapper(i, l.aantal) + '<button type="button" class="co-weg" data-remove="' + i + '">Verwijderen</button></span><b>' + eur(l.prijs * l.aantal) + "</b></div>";
       }).join("");
       document.getElementById("co-subtotaal").textContent = eur(b.sub);
       document.getElementById("co-verzending").textContent = gekozen("levering") === "verzenden" ? (b.verz ? eur(b.verz) : "Gratis") : "Gratis (ophalen)";

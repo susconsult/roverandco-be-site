@@ -102,3 +102,10 @@ ALTER TABLE leden ADD COLUMN straat TEXT;
 ALTER TABLE leden ADD COLUMN postcode TEXT;
 ALTER TABLE leden ADD COLUMN gemeente TEXT;
 ALTER TABLE leden ADD COLUMN land TEXT;
+
+-- Tickets en kassa (18 nov 2026)
+ALTER TABLE registraties ADD COLUMN ticket TEXT;          -- willekeurige code in de QR (RCT-<code>)
+ALTER TABLE registraties ADD COLUMN gescand_op TEXT;      -- moment van scannen aan de ingang
+ALTER TABLE registraties ADD COLUMN gescand_door INTEGER; -- lid (kassa) dat scande
+CREATE UNIQUE INDEX IF NOT EXISTS idx_reg_ticket ON registraties(ticket);
+ALTER TABLE leden ADD COLUMN kassa INTEGER NOT NULL DEFAULT 0; -- mag tickets scannen op /kassa

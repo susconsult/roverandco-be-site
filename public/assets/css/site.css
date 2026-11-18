@@ -656,3 +656,11 @@ button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-
 .lb-onderschrift{position:absolute;left:0;right:0;bottom:24px;text-align:center;color:#fff;font-weight:700;font-size:var(--fs-ui-groot);text-shadow:0 1px 4px rgba(0,0,0,.6)}
 .f-profielkop{display:flex;align-items:center;gap:16px;margin:10px 0 6px}.f-profielkop b{font-family:var(--head);font-size:var(--fs-h2);text-transform:uppercase}
 .sec-knoppen{display:flex;gap:10px;flex-wrap:wrap}
+
+.stapper{display:inline-flex;align-items:center;gap:0;border:1px solid var(--sand-2);border-radius:999px;margin:6px 10px 2px 0;vertical-align:middle;background:#fff}
+.stapper button{width:34px;height:34px;border:0;background:none;font-size:18px;line-height:1;cursor:pointer;color:var(--green);text-decoration:none!important;border-radius:999px}
+.stapper button:hover{background:var(--sand)}.stapper b{min-width:26px;text-align:center;font-size:15px}
+.line-naar{display:block;text-align:center;margin:16px 0 0}
+.co-weg{background:none;border:0;color:var(--muted);cursor:pointer;font-size:13px;text-decoration:underline;padding:0}
+.toast{display:flex;align-items:center;gap:12px;flex-wrap:wrap;justify-content:center}.toast-knop{background:var(--white);color:var(--green);padding:6px 14px;border-radius:999px;text-decoration:none;font-size:var(--fs-sm)}
+.naar-mandje{margin-left:10px;background:#fff;color:var(--green);border-color:var(--green)}.naar-mandje:hover{background:var(--sand)}

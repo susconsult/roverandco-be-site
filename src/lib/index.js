@@ -28,6 +28,9 @@ import { forum } from "./forum.js";
 import { cb } from "./cb.js";
 import { melden } from "./melden.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
+import { verstuur } from "./mail.js";
+import { kassa } from "./kassa.js";
+import { klantMailOpmaak } from "./mails-klant.js";
 
 const VERZENDKOST = 7.5;
 const GRATIS_VERZENDING_VANAF = 100;
@@ -124,25 +127,18 @@ async function vivaTransactie(env, id) {
 async function stuurKlantmail(env, m, origin) {
   if (!m || !env.RESEND_API_KEY) return;
   // Account zonder wachtwoord (automatisch aangemaakt bij deze bestelling)? Dan de link om er een te kiezen erbij.
+  let link = "";
   try {
     const lid = await env.SHOP_DB.prepare("SELECT l.id, l.wachtwoord FROM registraties r JOIN leden l ON l.id = r.lid_id WHERE r.nummer = ?").bind(m.nummer).first();
     if (lid && !lid.wachtwoord && origin) {
-      const link = await wachtwoordLink(env, origin, lid.id);
+      link = await wachtwoordLink(env, origin, lid.id);
       m = { ...m, tekst: m.tekst.replace("Dit is een automatische mail", `Je account bij Rover & Co\nWe maakten een account voor je aan met dit mailadres. Daarin vind je je bestellingen en inschrijvingen terug, en je kan ermee op ons forum. Kies hier je wachtwoord (de link is 30 dagen geldig):\n${link}\n\nDit is een automatische mail`) };
     }
   } catch (e) { console.error("wachtwoordlink", e?.message); }
-  let status;
-  try {
-    const r = await fetch("https://api.resend.com/emails", {
-      method: "POST",
-      headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", "idempotency-key": `bevestiging-${m.nummer}` },
-      body: JSON.stringify({ from: AFZENDER, to: [m.aan], subject: m.onderwerp, text: m.tekst }),
-    });
-    const d = await r.json().catch(() => ({}));
-    status = r.ok && d.id ? `verstuurd ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC (Resend ${d.id})` : `fout bij Resend (${r.status}): ${d.message || ""}`;
-  } catch (e) {
-    status = "fout bij Resend: geen verbinding";
-  }
+  let opmaak = { html: "", bijlagen: [] };
+  try { opmaak = await klantMailOpmaak(env, m, { wachtwoordLink: link }); } catch (e) { console.error("mailopmaak", m.nummer, e?.message); }
+  const r = await verstuur(env, { aan: m.aan, onderwerp: m.onderwerp, tekst: m.tekst, html: opmaak.html || undefined, bijlagen: opmaak.bijlagen, sleutel: `bevestiging-${m.nummer}` });
+  const status = r.ok ? `verstuurd ${new Date().toISOString().slice(0, 16).replace("T", " ")} UTC (Resend ${r.id})` : `fout bij Resend (${r.status || "-"}): ${r.fout}`;
   await opslag(env, "mailstatus", { soort: m.soort, nummer: m.nummer, status });
 }
 
@@ -233,7 +229,7 @@ function controleerInschrijving(b, catalogus) {
   return {
     fouten,
     record: {
-      klant, activiteit: slug, activiteit_titel: `${cfg.titel} (${cfg.datum_label})`, lijnen, tijdslot, slot_personen,
+      klant, activiteit: slug, activiteit_titel: `${cfg.titel} (${cfg.datum_label})`, activiteit_naam: cfg.titel, activiteit_datum_label: cfg.datum_label, activiteit_datum_lang: cfg.datum_lang || "", activiteit_locatie: cfg.locatie || "", activiteit_uren: cfg.uren || "", lijnen, tijdslot, slot_personen,
       max_per_slot: cfg.tijdsloten?.max_per_slot || 0, limieten, wagen, totaal: r2(lijnen.reduce((s, x) => s + x.lijn, 0)), opmerking: tekst(b.opmerking, 1000),
     },
   };
@@ -382,6 +378,8 @@ export default {
     if (md) return md;
     const cbr = await cb(request, env, url);
     if (cbr) return cbr;
+    const ks = await kassa(request, env, url);
+    if (ks) return ks;
     const bh = await beheer(request, env, url);
     if (bh) return bh;
     const pl = await planner(request, env, url);
