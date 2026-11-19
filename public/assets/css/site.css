@@ -668,7 +668,7 @@ button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-
 
 /* hero-slider homepage (nov 2026): 4 foto's, overvloeien + lichte Ken Burns, 7 s per foto */
 .hero-slides{position:absolute;inset:0;overflow:hidden}
-.hero-slide{opacity:0;transform-origin:50% 50%}
+.hero-slide{opacity:0;transform-origin:50% 50%;filter:saturate(.78) contrast(1.06) brightness(.94) sepia(.14) hue-rotate(-6deg)}
 .hero-slide:first-child{opacity:1}
 @media (prefers-reduced-motion:no-preference){
   .hero-slide{animation:heroSlide 28s linear infinite;will-change:opacity,transform}

@@ -185,6 +185,13 @@ function inlogPagina(env, request, { m = "", email = "", terug = "", soort = "fo
   });
 }
 
+// Minimumleeftijd 16 (beslissing nov 2026): laatste geboortedatum die nog mag, als JJJJ-MM-DD.
+function zestienJaarGeleden() {
+  const d = new Date();
+  d.setUTCFullYear(d.getUTCFullYear() - 16);
+  return d.toISOString().slice(0, 10);
+}
+
 function registreerPagina(env, request, { m = "", w = {}, terug = "" } = {}) {
   return pagina(env, request, {
     titel: "Registreren", noindex: true, pad: "/account/registreren",
@@ -196,6 +203,7 @@ function registreerPagina(env, request, { m = "", w = {}, terug = "" } = {}) {
         ${veld("gebruikersnaam", "Gebruikersnaam", { waarde: w.gebruikersnaam, auto: "username", extra: 'required minlength="3" maxlength="20" pattern="[A-Za-z0-9][A-Za-z0-9_.\\-]{2,19}"', hulp: "3 tot 20 tekens: letters, cijfers, punt, streepje of underscore. Dit zien anderen op het forum." })}
         ${veld("email", "E-mailadres", { type: "email", waarde: w.email, auto: "email", extra: "required" })}
         ${veld("wachtwoord", "Wachtwoord", { type: "password", auto: "new-password", extra: 'required minlength="8"', hulp: "Minstens 8 tekens." })}
+        ${veld("geboortedatum", "Geboortedatum", { type: "date", waarde: w.geboortedatum, auto: "bday", extra: `required max="${zestienJaarGeleden()}"`, hulp: "Je moet minstens 16 jaar zijn. Anderen zien dit niet." })}
         ${turnstileVeld(env)}
         <label class="vink"><input type="checkbox" name="akkoord" value="ja" required><span>Ik ga akkoord met de <a href="/voorwaarden" target="_blank">voorwaarden</a> en de <a href="/privacy" target="_blank">privacyverklaring</a>.</span></label>
         <button class="btn btn-solid" type="submit">Account maken</button>
@@ -237,13 +245,15 @@ async function inloggen(request, env, url) {
 async function registreren(request, env, url) {
   if (request.method !== "POST") return registreerPagina(env, request, { terug: veilig(url.searchParams.get("terug")) });
   const f = await request.formData();
-  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), email: tekst(f.get("email"), 160).toLowerCase() };
+  const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), email: tekst(f.get("email"), 160).toLowerCase(), geboortedatum: tekst(f.get("geboortedatum"), 10) };
   const terug = veilig(tekst(f.get("terug"), 300));
   if (f.get("website")) return naar("/account/inloggen"); // spam-val
   const ww = String(f.get("wachtwoord") || "");
   if (!naamOk(w.gebruikersnaam)) return registreerPagina(env, request, { m: "Kies een gebruikersnaam van 3 tot 20 tekens: letters, cijfers, punt, streepje of underscore.", w, terug });
   if (!emailOk(w.email)) return registreerPagina(env, request, { m: "Vul een geldig e-mailadres in.", w, terug });
   if (ww.length < 8) return registreerPagina(env, request, { m: "Je wachtwoord moet minstens 8 tekens hebben.", w, terug });
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(w.geboortedatum) || w.geboortedatum < "1900-01-01") return registreerPagina(env, request, { m: "Vul je geboortedatum in.", w, terug });
+  if (w.geboortedatum > zestienJaarGeleden()) return registreerPagina(env, request, { m: "Je moet minstens 16 jaar zijn om een account te maken.", w, terug });
   if (f.get("akkoord") !== "ja") return registreerPagina(env, request, { m: "Vink aan dat je akkoord gaat met de voorwaarden.", w, terug });
   if (!(await turnstileOk(env, f, request))) return registreerPagina(env, request, { m: "De spamcheck lukte niet. Probeer opnieuw.", w, terug });
 
@@ -258,8 +268,8 @@ async function registreren(request, env, url) {
     }
     return inlogPagina(env, request, { m: "Er bestaat al een account met dit e-mailadres. Log in, of vraag een nieuw wachtwoord.", email: w.email, terug });
   }
-  const r = await env.SHOP_DB.prepare("INSERT INTO leden (email, gebruikersnaam, wachtwoord, aangemaakt, laatst_gezien) VALUES (?, ?, ?, ?, ?)")
-    .bind(w.email, w.gebruikersnaam, await maakHash(ww), nu(), nu()).run();
+  const r = await env.SHOP_DB.prepare("INSERT INTO leden (email, gebruikersnaam, wachtwoord, geboortedatum, aangemaakt, laatst_gezien) VALUES (?, ?, ?, ?, ?, ?)")
+    .bind(w.email, w.gebruikersnaam, await maakHash(ww), w.geboortedatum, nu(), nu()).run();
   const lid = { id: r.meta.last_row_id, email: w.email, gebruikersnaam: w.gebruikersnaam };
   await log(env, lid.id, "account", "Account geregistreerd");
   await stuurBevestiging(env, url.origin, lid);

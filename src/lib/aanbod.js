@@ -200,7 +200,7 @@ function inschrijfKaart(a) {
   <div class="hp" aria-hidden="true"><label>Website <input name="website" tabindex="-1" autocomplete="off"></label></div>
   <div id="co-lijnen" hidden></div>
   <div class="ins-totaal"><span>Totaal</span><b id="co-totaal">€0,00</b></div>
-  <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
+  <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>, en ik ben minstens 16 jaar.</span></label>
   <div class="err" data-voor="akkoord"></div>
   <button class="btn btn-solid ins-knop" type="submit" id="co-knop">${g ? "Inschrijven" : "Verder naar betalen"}</button>
   <div class="err" id="co-fout" role="alert"></div>

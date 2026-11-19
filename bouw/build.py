@@ -744,6 +744,7 @@ write("/voorwaarden", "Algemene voorwaarden", "Algemene voorwaarden van Rover & 
   <h2>Wie zijn we</h2>
   <p>{e(site['naam'])}, {', '.join(site['adres'])} · {site['ondernemingsnummer']} · <a href="mailto:{site['email']}">{site['email']}</a> · <a href="tel:{site['telefoon_link']}">{site['telefoon']}</a></p>
   <h2>Bestellen en betalen</h2>
+  <p>Bestellen, inschrijven en een account maken kan vanaf 16 jaar.</p>
   <p>Je bestelling of inschrijving is definitief zodra de betaling via Viva gelukt is. Je krijgt een bevestiging per mail. Alle prijzen staan in euro.</p>
   <h2>Levering</h2>
   <ul>
@@ -770,11 +771,13 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <h2>Wat we bijhouden en waarom</h2>
   <ul>
     <li><b>Bestellingen en inschrijvingen</b>: naam, e-mailadres, telefoon, wat je kiest, je opmerking, eventueel met welke Land Rover je komt en bij verzending je adres. Nodig om je bestelling of inschrijving uit te voeren (overeenkomst).</li>
-    <li><b>Je account</b>: e-mailadres, gebruikersnaam, wachtwoord (alleen versleuteld bewaard) en wat je zelf invult: naam, telefoon, adres, profielfoto en je Land Rovers. Zo vullen we je gegevens automatisch in bij een volgende bestelling of inschrijving.</li>
+    <li><b>Je account</b>: e-mailadres, gebruikersnaam, wachtwoord (alleen versleuteld bewaard), je geboortedatum (alleen om te controleren dat je minstens 16 bent; niemand anders ziet die) en wat je zelf invult: naam, telefoon, adres, profielfoto en je Land Rovers. Zo vullen we je gegevens automatisch in bij een volgende bestelling of inschrijving.</li>
     <li><b>Forum en CB</b>: je berichten, foto's, spraakberichten, likes en reacties, wat je volgt en bewaart.</li>
     <li><b>Veiligheid</b>: een activiteitenlog per account (inloggen, berichten, wijzigingen) en bij een melding een versleutelde code van je IP-adres. Zo houden we misbruik en spam tegen (gerechtvaardigd belang).</li>
   </ul>
   <p>We verkopen je gegevens niet en gebruiken ze niet voor reclame.</p>
+  <h2>Minimumleeftijd</h2>
+  <p>Een account, bestellen en inschrijven kan vanaf 16 jaar. Ben je jonger, laat dan een ouder of voogd bestellen of inschrijven.</p>
   <h2>Wat anderen zien</h2>
   <p>Iedereen ziet je gebruikersnaam, je profielfoto, je Land Rovers en je forumberichten. Je naam, e-mailadres, telefoon en adres ziet niemand behalve jij en de beheerder. De CB en de spraakberichten zijn alleen zichtbaar voor ingelogde leden. Op het Albertkanaal ziet niemand wie wat zegt, maar de beheerder kan het wel nagaan als een bericht gemeld wordt.</p>
   <p>Wie iets bestelt of zich inschrijft, krijgt automatisch een account met dat e-mailadres. Daarin zie je je bestellingen en inschrijvingen terug.</p>
@@ -895,7 +898,7 @@ for slug, cfg in cat["__inschrijvingen"].items():
         </ul>
         <div id="co-lijnen"></div>
         <ul class="facts"><li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li></ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>, en ik ben minstens 16 jaar.</span></label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">{"Inschrijven" if gratis(a) else "Verder naar betalen"}</button>
         <div class="err" id="co-fout" role="alert"></div>
@@ -959,7 +962,7 @@ afrekenen = banner("Shop", "Afrekenen", "Controleer je mandje, vul je gegevens i
           <li><span>Steun</span><span id="co-donatie">€0,00</span></li>
           <li class="co-totaal"><span>Totaal</span><span id="co-totaal">€0,00</span></li>
         </ul>
-        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>.</span></label>
+        <label class="akkoord"><input type="checkbox" id="akkoord" name="akkoord"> <span>Ik ga akkoord met de <a href="/voorwaarden">algemene voorwaarden</a> en de <a href="/privacy">privacyverklaring</a>, en ik ben minstens 16 jaar.</span></label>
         <div class="err" data-voor="akkoord"></div>
         <button class="btn btn-solid" type="submit" id="co-knop" style="width:100%;justify-content:center">Verder naar betalen</button>
         <div class="err" id="co-fout" role="alert"></div>

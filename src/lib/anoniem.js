@@ -6,7 +6,7 @@ export async function anonimiseer(env, lidId) {
   if (!l) return false;
   const fotos = [l.avatar_id, ...(((await db.prepare("SELECT foto_id FROM lid_wagens WHERE lid_id = ?").bind(lidId).all()).results || []).map((x) => x.foto_id))].filter(Boolean);
   await db.batch([
-    db.prepare("UPDATE leden SET email = ?, gebruikersnaam = ?, wachtwoord = NULL, naam = NULL, telefoon = NULL, woonplaats = NULL, straat = NULL, postcode = NULL, gemeente = NULL, land = NULL, landrover = NULL, avatar_id = NULL, bevestigd_op = NULL, geblokkeerd = 0, laatst_cb = NULL, verwijderd_op = ? WHERE id = ?")
+    db.prepare("UPDATE leden SET email = ?, gebruikersnaam = ?, wachtwoord = NULL, naam = NULL, telefoon = NULL, woonplaats = NULL, straat = NULL, postcode = NULL, gemeente = NULL, land = NULL, landrover = NULL, geboortedatum = NULL, avatar_id = NULL, bevestigd_op = NULL, geblokkeerd = 0, laatst_cb = NULL, verwijderd_op = ? WHERE id = ?")
       .bind(`verwijderd-${lidId}@roverandco.invalid`, `verwijderd-${lidId}`, new Date().toISOString(), lidId),
     db.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(lidId),
     db.prepare("DELETE FROM lid_tokens WHERE lid_id = ?").bind(lidId),
