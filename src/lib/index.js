@@ -357,6 +357,9 @@ export default {
     if (url.hostname === "www.roverandco.be") { url.hostname = "roverandco.be"; return Response.redirect(url.href, 301); }
     if (p === "/_sjabloon" || p === "/_sjabloon.html") return new Response("Niet gevonden", { status: 404 });
     // Oude Ecwid-adressen (roverandco.be tot nov 2026) naar de nieuwe site.
+    const OUDE_PAGINAS = { "/woolandwheels": "/activiteiten/wild-and-wheels", "/demopage02": "/voorwaarden" };
+    const op = OUDE_PAGINAS[p.replace(/\/$/, "")];
+    if (op) return Response.redirect(new URL(op, url.origin).href, 301);
     if (p === "/products" || p.startsWith("/products/")) {
       const OUD = {
         "church-of-rover-22-11-2026": "/activiteiten/church-of-rover",
@@ -366,6 +369,7 @@ export default {
         "rover--co-emaille-mok": "/shop/emaille-mok",
         "wool--wheels-stel-je-eigen-weekend-samen": "/activiteiten/wild-and-wheels",
         "cart": "/afrekenen", "account": "/account",
+        "evenementen": "/activiteiten",
       };
       const deel = p.split("/")[2] || "";
       return Response.redirect(new URL(OUD[deel] || "/shop", url.origin).href, 301);

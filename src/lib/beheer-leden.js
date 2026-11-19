@@ -1,4 +1,5 @@
 // /beheer/leden: leden zoeken, bekijken en beheren, plus de activiteitenlog (90 dagen).
+import { onderhoudAan } from "./onderhoud.js";
 import { esc, pagina } from "./beheer.js";
 import { stuurWachtwoordLink, stuurBevestiging } from "./leden.js";
 import { log, opruimen, LOG_DAGEN } from "./log.js";
@@ -209,7 +210,12 @@ export async function thuis(env, email) {
   ]);
   const tegel = (label, n, link, actie, klas = "") => `<a class="tegel ${n ? klas : "ok"}" href="${link}"><small>${label}</small><b>${n}</b><span>${n ? actie : "Niets te doen"}</span></a>`;
   const a = acts.results || [];
+  const ond = await onderhoudAan(env);
   return pagina("Te doen", `${STIJL}${hoofdTabs("home")}
+<form method="post" action="/beheer/onderhoud" class="kaart" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;${ond ? "border-color:#c0392b" : ""}">
+<div><h2 style="margin:0 0 4px">Onderhoudsmodus: ${ond ? "<b style=\"color:#c0392b\">AAN</b>" : "uit"}</h2>
+<small>${ond ? "Bezoekers van roverandco.be zien de onderhoudspagina. Jij ziet de site omdat je ingelogd bent als beheerder." : "roverandco.be is open voor iedereen."}</small></div>
+<input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form>
 <div class="tegels">
 ${tegel("Bestellingen af te handelen", best.n, "/beheer?soort=bestelling&filter=open", "Afhandelen →", "let")}
 ${tegel("Inschrijvingen af te handelen", insch.n, "/beheer?soort=inschrijving&filter=open", "Afhandelen →", "let")}

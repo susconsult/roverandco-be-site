@@ -22,3 +22,5 @@ CREATE INDEX IF NOT EXISTS idx_reg_aangemaakt ON registraties(soort, aangemaakt)
 CREATE TABLE IF NOT EXISTS beheer_codes (email TEXT NOT NULL, code_hash TEXT NOT NULL, aangemaakt INTEGER NOT NULL, verloopt INTEGER NOT NULL, pogingen INTEGER NOT NULL DEFAULT 0);
 CREATE INDEX IF NOT EXISTS idx_codes_email ON beheer_codes(email, aangemaakt);
 CREATE TABLE IF NOT EXISTS beheer_sessies (token_hash TEXT PRIMARY KEY, email TEXT NOT NULL, verloopt INTEGER NOT NULL);
+-- Instellingen (sleutel/waarde), o.a. onderhoud = aan/uit (src/lib/onderhoud.js)
+CREATE TABLE IF NOT EXISTS instellingen (sleutel TEXT PRIMARY KEY, waarde TEXT NOT NULL);

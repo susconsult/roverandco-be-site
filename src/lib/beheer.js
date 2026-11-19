@@ -6,6 +6,7 @@ import { verstuur, htmlMail, alinea } from "./mail.js";
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
 import { beheerTestmail } from "./beheer-testmail.js";
+import { zetOnderhoud } from "./onderhoud.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
@@ -333,6 +334,14 @@ export async function beheer(request, env, url) {
     // Alleen formulieren van het beheer zelf.
     const origin = request.headers.get("origin");
     if (origin && origin !== url.origin) return html("Geweigerd.", 403);
+  }
+  if (p === "/beheer/onderhoud" && request.method === "POST") {
+    const f = await request.formData();
+    const aan = f.get("aan") === "aan";
+    await zetOnderhoud(env, aan);
+    await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer', ?)")
+      .bind(`Onderhoudsmodus ${aan ? "aangezet" : "uitgezet"} door ${w.email}`, new Date().toISOString()).run().catch(() => {});
+    return new Response(null, { status: 303, headers: { location: "/beheer", "cache-control": "no-store" } });
   }
   if ((p === "/beheer" || p === "/beheer/") && !url.searchParams.get("soort")) return thuis(env, w.email);
   if (p === "/beheer" || p === "/beheer/") return lijst(url, env, w.email);
