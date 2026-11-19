@@ -283,7 +283,12 @@ PARTNERS_HOME = [("partner-the-wolfgarage", "The Wolfgarage"), ("partner-pp-hekw
 
 home = f"""
 <section class="hero hero-nieuw" style="padding:0">
-  {img("964", "Defender met daktent in een stoffige bosweg", "hero-img", prio=True)}
+  <div class="hero-slides">
+    {img("964", "Defender met daktent in een stoffige bosweg", "hero-img hero-slide", prio=True)}
+    {img("hero-1", "Leden rond een Defender op een activiteit in het bos", "hero-img hero-slide", lazy=False).replace(' alt=', ' fetchpriority="low" decoding="async" alt=')}
+    {img("hero-2", "Drie Defenders met daktent in het bos", "hero-img hero-slide", lazy=False).replace(' alt=', ' fetchpriority="low" decoding="async" alt=')}
+    {img("hero-3", "Leden overleggen bij hun Defenders", "hero-img hero-slide", lazy=False).replace(' alt=', ' fetchpriority="low" decoding="async" alt=')}
+  </div>
   <div class="wrap hero-in">
     <div class="eyebrow" style="color:#CFE3D4">Land Rover-club · België</div>
     <h1>For the ones built different</h1>
