@@ -1,12 +1,11 @@
 // Onderhoudsmodus voor roverandco.be (nov 2026).
 // - Aan/uit via een knop in /beheer (tabel instellingen, sleutel "onderhoud" = "aan"/"uit").
-// - Alleen op het echte domein (roverandco.be); het testadres op workers.dev blijft open.
+// - Geldt op elk adres: roverandco.be, www en het testadres op workers.dev (keuze Pieter 20 nov 2026).
 // - Bezoekers krijgen een 503 met noindex. Alleen een ingelogde beheerder (lid met BEHEER_EMAILS, mail bevestigd) komt erdoor.
 // - Altijd open: inloggen/wachtwoord, /beheer, Viva (webhook + terugkeer), oude Ecwid-links (301), assets, robots.txt.
 import { huidigLid } from "./leden.js";
 import { HEADERS } from "./veiligheid.js";
 
-const DOMEINEN = ["roverandco.be"];
 let cache = { waarde: null, tot: 0 };
 
 export async function onderhoudAan(env) {
@@ -37,7 +36,6 @@ const OPEN = [
 // Geeft een Response (onderhoudspagina) of null (gewoon doorlaten).
 export async function onderhoud(request, env) {
   const url = new URL(request.url);
-  if (!DOMEINEN.includes(url.hostname)) return null;
   if (OPEN.some((re) => re.test(url.pathname))) return null;
   if (!(await onderhoudAan(env))) return null;
   const lid = await huidigLid(request, env).catch(() => null);
