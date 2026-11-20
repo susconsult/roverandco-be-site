@@ -584,7 +584,7 @@ span.f-like{cursor:default}
 .garage-kaart{background:var(--white);border-radius:var(--r2);overflow:hidden;color:inherit;text-decoration:none;box-shadow:var(--schaduw);transition:transform .2s,box-shadow .2s}
 .garage-kaart:hover{transform:translateY(-3px);box-shadow:var(--schaduw-hover)}
 .garage-kaart img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}
-.garage-kaart>span{display:block;padding:14px 16px;font-size:var(--fs-ui);color:var(--muted)}.garage-kaart b{display:block;color:var(--ink);font-size:var(--fs-ui-groot)}
+.garage-kaart>span,.gk-open>span{display:block;padding:14px 16px;font-size:var(--fs-ui);color:var(--muted)}.garage-kaart b{display:block;color:var(--ink);font-size:var(--fs-ui-groot)}
 .garage-kaart small{display:block;margin-top:2px;color:var(--muted)}.garage-kaart em{display:block;margin-top:6px;font-style:normal;font-size:var(--fs-sm);color:var(--groen-3,#3E7350);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.garage-kaart b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .garage-leeg{grid-column:1/-1;display:block;border:2px dashed var(--sand-2);border-radius:var(--r2);padding:34px;text-align:center;color:var(--muted);text-decoration:none;font-size:var(--fs-ui-groot)}
 .garage-leeg:hover{border-color:var(--green-3);color:var(--green)}
@@ -694,3 +694,11 @@ button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-
 .blog-likes{white-space:nowrap}.blog-likes .ico{width:1em;height:1em;color:#C0392B;fill:currentColor;stroke:none;margin-right:3px;vertical-align:-.12em}
 @keyframes hartklop{50%{transform:scale(1.15)}}
 @media(prefers-reduced-motion:reduce){.blog-like.aan{animation:none}}
+
+/* Hartjes op Land Rovers van leden */
+.garage-kaart{position:relative}.gk-open{display:block;width:100%;border:0;padding:0;margin:0;background:none;font:inherit;text-align:left;color:inherit;cursor:zoom-in}
+.gk-open>span{display:block;padding:14px 16px;font-size:var(--fs-ui);color:var(--muted)}
+.wagen{position:relative}
+.wagen-like{position:absolute;top:10px;right:10px;z-index:2;background:rgba(255,255,255,.92);border-color:transparent;display:inline-flex;align-items:center;gap:4px;padding:4px 10px}
+.wagen-like.aan{background:#FBEDEB}
+@media(max-width:880px){.gk-open>span{padding:10px 12px;font-size:var(--fs-sm)}}

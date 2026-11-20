@@ -13,6 +13,16 @@ const COOKIE = "rc_bz";
 const json = (d, status = 200, extra = {}) => new Response(JSON.stringify(d), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store", ...extra } });
 const bezoekerVan = (request) => ((request.headers.get("cookie") || "").match(/(?:^|;\s*)rc_bz=([a-f0-9]{32})/) || [])[1] || "";
 
+// Ook Land Rovers van leden kunnen een hartje krijgen (wens Pieter 20 nov 2026): sleutel "wagen-<id>".
+const WAGEN = /^wagen-(\d{1,9})$/;
+async function info(env, sleutel) {
+  if (ARTIKELS[sleutel]) return { soort: "blog", ...ARTIKELS[sleutel] };
+  const m = sleutel.match(WAGEN);
+  if (!m) return null;
+  const w = await env.SHOP_DB.prepare("SELECT w.id, w.naam, w.type, w.lid_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id WHERE w.id = ?").bind(Number(m[1])).first();
+  return w ? { soort: "wagen", titel: w.naam || w.type, eigenaar: w.lid_id, link: `/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#wagen-${w.id}` } : null;
+}
+
 export async function blogLikes(request, env, url) {
   const p = url.pathname;
   if (p !== "/api/blog/likes" && p !== "/api/blog/like") return null;
@@ -20,7 +30,7 @@ export async function blogLikes(request, env, url) {
   const bz = bezoekerVan(request);
 
   if (p === "/api/blog/likes" && request.method === "GET") {
-    const slugs = [...new Set((url.searchParams.get("s") || "").split(",").map((x) => x.trim()))].filter((x) => ARTIKELS[x]).slice(0, 60);
+    const slugs = [...new Set((url.searchParams.get("s") || "").split(",").map((x) => x.trim()))].filter((x) => ARTIKELS[x] || WAGEN.test(x)).slice(0, 60);
     if (!slugs.length) return json({ n: {}, mijn: [] });
     const q = slugs.map(() => "?").join(",");
     const rij = (await db.prepare(`SELECT slug, COUNT(*) n FROM blog_likes WHERE slug IN (${q}) GROUP BY slug`).bind(...slugs).all()).results || [];
@@ -32,8 +42,8 @@ export async function blogLikes(request, env, url) {
     if (!eigenOrigin(request, url)) return json({ ok: false }, 403);
     let b = {}; try { b = await request.json(); } catch {}
     const slug = String(b.slug || "");
-    const art = ARTIKELS[slug];
-    if (!art) return json({ ok: false, fout: "Onbekend artikel." }, 404);
+    const art = await info(env, slug);
+    if (!art) return json({ ok: false, fout: "Onbekend." }, 404);
     const nieuweBz = bz || willekeurig(16);
     const cookie = bz ? {} : { "set-cookie": `${COOKIE}=${nieuweBz}; Path=/; Max-Age=${2 * 365 * 86400}; HttpOnly; Secure; SameSite=Lax` };
     const nu = new Date().toISOString();
@@ -56,13 +66,16 @@ export async function blogLikes(request, env, url) {
 }
 
 async function meldSchrijver(env, slug, art, liker) {
-  const r = await env.SHOP_DB.prepare("SELECT waarde FROM instellingen WHERE sleutel = 'blog_auteurs'").first();
-  let map = {}; try { map = JSON.parse(r?.waarde || "{}"); } catch {}
-  const auteurId = map[art.auteur];
+  let auteurId = art.eigenaar, link = art.link;
+  if (art.soort === "blog") {
+    const r = await env.SHOP_DB.prepare("SELECT waarde FROM instellingen WHERE sleutel = 'blog_auteurs'").first();
+    let map = {}; try { map = JSON.parse(r?.waarde || "{}"); } catch {}
+    auteurId = map[art.auteur]; link = `/blog/${slug}`;
+  }
   if (!auteurId || liker?.id === auteurId) return;
-  const link = `/blog/${slug}`;
   const al = await env.SHOP_DB.prepare("SELECT 1 FROM lid_meldingen WHERE lid_id = ? AND link = ? AND tekst LIKE '%hartje%' AND aangemaakt > ?")
     .bind(auteurId, link, new Date(Date.now() - 86400_000).toISOString()).first();
   if (al) return;
-  await meld(env, [auteurId], `${liker?.gebruikersnaam ? liker.gebruikersnaam : "Iemand"} gaf een hartje aan je artikel "${art.titel}"`, link);
+  const wie = liker?.gebruikersnaam || "Iemand";
+  await meld(env, [auteurId], art.soort === "wagen" ? `${wie} gaf een hartje aan je Land Rover "${art.titel}"` : `${wie} gaf een hartje aan je artikel "${art.titel}"`, link);
 }

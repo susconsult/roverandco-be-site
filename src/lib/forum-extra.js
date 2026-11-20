@@ -92,7 +92,7 @@ export async function garages(env, lidIds) {
 export const wagenNaam = (w) => [w.type, w.bouwjaar].filter(Boolean).join(", ") + (w.naam ? ` "${w.naam}"` : "");
 export function garageKaarten(wagens, o = {}) {
   return `<div class="garage">${wagens.map((w) => `<figure class="wagen" id="wagen-${w.id}">${w.foto_id ? `<button type="button" data-full="/forum/foto/${w.foto_id}" class="wagen-foto" aria-label="Foto groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${esc(wagenNaam(w))}" loading="lazy"></button>` : `<div class="wagen-foto leeg" aria-hidden="true">${ico("auto")}</div>`}
-    <figcaption><b>${esc(w.naam || w.type)}</b>${w.naam ? `<small>${esc(w.type)}</small>` : ""}${o.profiel ? drieMenu([
+    ${w.foto_id ? `<button type="button" class="f-like wagen-like" data-like="wagen-${w.id}" aria-pressed="false" title="Geef een hartje">${ico("hart")} <span></span></button>` : ""}<figcaption><b>${esc(w.naam || w.type)}</b>${w.naam ? `<small>${esc(w.type)}</small>` : ""}${o.profiel ? drieMenu([
       o.eigen ? `<a href="/account/garage">Bewerken</a>` : "",
       deelKnop(`${o.profiel}#wagen-${w.id}`, wagenNaam(w)),
       o.lid && !o.eigen && w.foto_id ? bewaarKnop("wagen", w.id, o.bewaard?.has(w.id)) : "",
