@@ -659,6 +659,8 @@ def blogvolgorde(lijst):
 json.dump({x["slug"]: {"titel": x["titel"], "auteur": x["auteur"]} for x in gepubliceerd}, open(os.path.join(DATA, "blog-index.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 feed = blogvolgorde(gepubliceerd)
+# Laatste nieuws in de zijkolom van /forum (gelezen door src/lib/forum.js).
+json.dump([{"slug": x["slug"], "titel": x["titel"], "foto": x["foto"], "rubriek": x["rubriek"], "datum": nl_datum(x["datum"])} for x in feed[:4]], open(os.path.join(DATA, "blog-nieuws.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 chips = '<button type="button" class="chip actief" data-filter="">Alles</button>' + "".join(
     f'<button type="button" class="chip" data-filter="{e(r)}">{e(r)}</button>' for r, _ in RUBRIEKEN)
 blogbody = banner("Blog", "Verhalen en kennis", "Onderhoud, geschiedenis, verhalen en alles rond Land Rover.", "5739", "Zicht over de motorkap op een bospad")
