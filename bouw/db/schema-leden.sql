@@ -112,3 +112,7 @@ ALTER TABLE leden ADD COLUMN kassa INTEGER NOT NULL DEFAULT 0; -- mag tickets sc
 
 -- nov 2026: minimumleeftijd 16, geboortedatum bij registreren
 ALTER TABLE leden ADD COLUMN geboortedatum TEXT;
+
+-- nov 2026: Ecwid-import (marketing-toestemming uit Ecwid, bron = 'ecwid')
+ALTER TABLE leden ADD COLUMN marketing INTEGER;
+ALTER TABLE leden ADD COLUMN bron TEXT;

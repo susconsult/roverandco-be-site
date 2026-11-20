@@ -361,12 +361,15 @@ async function registratieLijsten(env, lid) {
       // Niet betaald binnen de betaaltijd? Dan is de betaling verlopen.
       let status = x.status;
       if (/wacht/i.test(status) && Date.now() - Date.parse(x.aangemaakt) > ((d.betaaltijd_min || 15) + 5) * 60_000) status = "Niet betaald";
-      const wat = soort === "bestelling"
-        ? `<ul>${(d.artikels || []).map((a) => {
+      const artikels = `<ul>${(d.artikels || []).map((a) => {
             const k = Object.values(a.keuzes || {}).filter(Boolean).join(", ");
             return `<li><span>${a.aantal} × ${esc(a.naam)}${k ? ` <small>(${esc(k)})</small>` : ""}</span><span>${eur(a.lijn ?? a.prijs * a.aantal)}</span></li>`;
-          }).join("")}</ul>`
-        : `<p class="acc-wat">${esc(d.activiteit_titel || x.activiteit)}</p>${x.ticket && /betaald|bevestigd|test/i.test(status) && !/niet/i.test(status) ? `<p class="acc-wat"><a class="btn btn-solid" href="/account/ticket/${esc(x.nummer)}">Ticket downloaden (PDF)</a>${x.gescand_op ? " <small>Gescand aan de ingang.</small>" : ""}</p>` : ""}`;
+          }).join("")}</ul>`;
+      // Bestellingen uit de vorige webshop (Ecwid, tot nov 2026): enkel historiek, met de lijnen erbij.
+      const oud = d.bron === "ecwid" ? `<small class="acc-meta">Uit onze vorige webshop</small>` : "";
+      const wat = soort === "bestelling"
+        ? oud + artikels
+        : `<p class="acc-wat">${esc(d.activiteit_titel || x.activiteit)}</p>${oud}${d.bron === "ecwid" ? artikels : ""}${x.ticket && /betaald|bevestigd|test/i.test(status) && !/niet/i.test(status) ? `<p class="acc-wat"><a class="btn btn-solid" href="/account/ticket/${esc(x.nummer)}">Ticket downloaden (PDF)</a>${x.gescand_op ? " <small>Gescand aan de ingang.</small>" : ""}</p>` : ""}`;
       return `<div class="acc-rij"><div class="acc-kop"><b>${esc(x.nummer)}</b><span class="acc-status ${STATUS_KLAS(status)}">${esc(status)}</span></div>
         <small class="acc-meta">${datum(x.aangemaakt, true)}</small>${wat}<div class="acc-tot"><span>Totaal</span><b>${eur(x.totaal)}</b></div></div>`;
     }).join("")}</div>`;
