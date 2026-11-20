@@ -51,6 +51,16 @@
   "info": "Offroad-rondrit, enkel voor leden van de club."
  },
  {
+  "club": "Range Rover Trust",
+  "soort": "club",
+  "titel": "Technische dag bij roverspecialist Berry Smink",
+  "datum": "2026-11-28",
+  "plaats": "Nederland, zie de agenda van de RRT",
+  "link": "https://rangerovertrust.nl/evenementen/",
+  "org": "Vereniging Range Rover Trust Nederland",
+  "info": "Technische dag van de Range Rover Trust. Info en inschrijving via hun agenda."
+ },
+ {
   "club": "Xrover Belgium",
   "titel": "Roadbook",
   "datum": "2026-11-29",
@@ -141,6 +151,16 @@
   "info": "Vrij rijden. Voorwaarden voor leden en niet-leden bij de ANVT."
  },
  {
+  "club": "DLRR",
+  "soort": "club",
+  "titel": "Kerstrit",
+  "datum": "2026-12-13",
+  "plaats": "Reestdal, Drenthe (NL) · 10u–16u",
+  "link": "https://terrein.nu/events/lijst/",
+  "org": "Dutch Land Rover Register",
+  "info": "Kerstrit voor liefhebbers en eigenaren van Land Rovers die niet meer gemaakt worden of bijzonder zijn."
+ },
+ {
   "club": "Tea on the Tailgate",
   "titel": "Tea on the Tailgate Belgium – Kersteditie",
   "datum": "2026-12-18",
@@ -159,6 +179,26 @@
   "org": "Xrover Belgium",
   "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
   "soort": "club"
+ },
+ {
+  "club": "DLRR",
+  "soort": "club",
+  "titel": "Nieuwjaarsreceptie",
+  "datum": "2027-01-02",
+  "plaats": "Nederland, plaats volgt · 11u–17u",
+  "link": "https://terrein.nu/events/lijst/",
+  "org": "Dutch Land Rover Register",
+  "info": "Nieuwjaarsreceptie van het Dutch Land Rover Register."
+ },
+ {
+  "club": "Greenlane Tracks",
+  "soort": "4x4",
+  "titel": "Nightride",
+  "datum": "2027-01-02",
+  "plaats": "Noord-Brabant (NL) · 18u–23u",
+  "link": "https://terrein.nu/events/lijst/",
+  "org": "Greenlane Tracks",
+  "info": "Avondrit in het donker. Info en inschrijving via de organisator."
  },
  {
   "club": "InterClassics",
@@ -190,6 +230,16 @@
   "org": "LRCH – Land Rover Club Holland",
   "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
   "soort": "club"
+ },
+ {
+  "club": "ANVT",
+  "soort": "4x4",
+  "titel": "Offroaddag",
+  "datum": "2027-01-31",
+  "plaats": "Nederland, plaats volgt · 10u–16u",
+  "link": "https://terrein.nu/events/lijst/",
+  "org": "ANVT",
+  "info": "Vrij rijden. Plaats nog niet bekend, zie de site van de ANVT."
  },
  {
   "club": "H.E.L.M. Kempen",
@@ -233,6 +283,27 @@
   "soort": "club"
  },
  {
+  "club": "ANVT",
+  "soort": "4x4",
+  "titel": "Offroaddag",
+  "datum": "2027-02-28",
+  "plaats": "Nederland, plaats volgt · 10u–16u",
+  "link": "https://terrein.nu/events/lijst/",
+  "org": "ANVT",
+  "info": "Vrij rijden. Plaats nog niet bekend, zie de site van de ANVT."
+ },
+ {
+  "club": "4x4 rhein-waal",
+  "soort": "beurs",
+  "titel": "4x4 rhein-waal",
+  "datum": "2027-03-12",
+  "einde": "2027-03-14",
+  "plaats": "Kalkar (Duitsland, net over de grens bij Nijmegen)",
+  "link": "https://matsch-und-piste.de/en/category/events-expos/",
+  "org": "4x4 rhein-waal",
+  "info": "Offroadbeurs voor Duitsland, Nederland en België: wagens, daktenten, trailers en reisuitrusting, met kampeerzone."
+ },
+ {
   "club": "Xrover Belgium",
   "titel": "Paasbrunch",
   "datum": "2027-03-21",
@@ -253,6 +324,27 @@
   "soort": "club"
  },
  {
+  "club": "ANVT",
+  "soort": "4x4",
+  "titel": "Offroaddag",
+  "datum": "2027-03-28",
+  "plaats": "Nederland, plaats volgt · 10u–16u",
+  "link": "https://terrein.nu/event/off-road-evenement-van-de-anvt-6/",
+  "org": "ANVT",
+  "info": "Vrij rijden. Plaats nog niet bekend, zie de site van de ANVT."
+ },
+ {
+  "club": "Range Rover Trust",
+  "soort": "club",
+  "titel": "Kampeerweek Zuid-Limburg",
+  "datum": "2027-05-22",
+  "einde": "2027-05-29",
+  "plaats": "Zuid-Limburg (NL)",
+  "link": "https://rangerovertrust.nl/evenementen/",
+  "org": "Vereniging Range Rover Trust Nederland",
+  "info": "Kampeerweek van de Range Rover Trust. Info en inschrijving via hun agenda."
+ },
+ {
   "club": "LRCH",
   "titel": "Allroadrit 3 – Midzomer",
   "datum": "2027-06-20",
@@ -261,6 +353,16 @@
   "org": "LRCH – Land Rover Club Holland",
   "info": "Activiteit van de Land Rover Club Holland. Info, voorwaarden en inschrijving via hun agenda.",
   "soort": "club"
+ },
+ {
+  "club": "Autojumble",
+  "soort": "beurs",
+  "titel": "Autojumble Waalwijk",
+  "datum": "2027-06-27",
+  "plaats": "Waalwijk (NL)",
+  "link": "https://rangerovertrust.nl/evenementen/",
+  "org": "Autojumble Waalwijk",
+  "info": "Onderdelenmarkt voor klassieke Britse auto's. De Range Rover Trust is erbij."
  },
  {
   "club": "LRCH",
@@ -313,6 +415,16 @@
   "link": "https://www.4x4vakantiebeurs.nl/",
   "org": "LRCH – Land Rover Club Holland",
   "info": "22e editie van de beurs voor 4x4-reizen, daktenten en uitrusting. Alle merken welkom."
+ },
+ {
+  "club": "British Car Club Day",
+  "soort": "beurs",
+  "titel": "British Car Club Day",
+  "datum": "2027-10-17",
+  "plaats": "Houten (NL)",
+  "link": "https://rangerovertrust.nl/evenementen/",
+  "org": "British Car Club Day",
+  "info": "Dag van de Britse autoclubs, met o.a. een stand van de Range Rover Trust."
  },
  {
   "club": "Xrover Belgium",
