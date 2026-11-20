@@ -257,10 +257,16 @@ async function recenteTopics(env) {
       LEFT JOIN leden l ON l.id = t.lid_id WHERE t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 4`).all()).results || [];
   } catch { return []; }
 }
+// Startpagina, "Wagens van leden" (wens Pieter 20 nov 2026): 2 rijen van 5. Bovenaan de 5 nieuwste,
+// onderaan 5 willekeurige andere (bij elke refresh andere; de pagina wordt niet gecachet).
 async function recenteWagens(env) {
+  const basis = `SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
+      WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 AND l.verwijderd_op IS NULL`;
   try {
-    return (await env.SHOP_DB.prepare(`SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
-      WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 ORDER BY w.aangemaakt DESC LIMIT 6`).all()).results || [];
+    const nieuw = (await env.SHOP_DB.prepare(`${basis} ORDER BY w.aangemaakt DESC LIMIT 5`).all()).results || [];
+    const ids = nieuw.map((w) => w.id);
+    const rest = (await env.SHOP_DB.prepare(`${basis}${ids.length ? ` AND w.id NOT IN (${ids.map(() => "?").join(",")})` : ""} ORDER BY RANDOM() LIMIT 5`).bind(...ids).all()).results || [];
+    return [...nieuw, ...rest];
   } catch { return []; }
 }
 async function home(env, request) {
@@ -280,7 +286,7 @@ async function home(env, request) {
     .on('[data-dyn="events"]', vervang(lijst.length ? `${evKaart(lijst[0], true)}<div class="ev-stack">${lijst.slice(1, 3).map((a) => evKaart(a)).join("")}</div>` : "<p>Binnenkort nieuwe activiteiten.</p>"))
     .on('[data-dyn="producten"]', vervang(prods.map(productKaart).join("")))
     .on('[data-dyn="forum"]', topics.length ? vervang(topics.map((t) => `<a class="forum-rij" href="/forum/t/${t.id}-${slugTitel(t.titel)}"><span>${e(t.titel)}</span><small>${e(t.cnaam)} · ${t.berichten} ${t.berichten === 1 ? "bericht" : "berichten"}${t.naam ? ` · door ${e(t.naam)}` : ""}</small></a>`).join("")) : { element() {} })
-    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => `<button type="button" class="garage-kaart" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="Foto van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="Land Rover van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(w.naam_lid)}</b></span></button>`).join("")) : { element() {} })
+    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => { const titel = w.naam || w.type; const info = [w.naam ? w.type : "", w.bouwjaar || ""].filter(Boolean).join(" · "); return `<button type="button" class="garage-kaart" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(titel)} van ${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="${e(titel)} van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${e(titel)} van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(titel)}</b>${info ? `<small>${e(info)}</small>` : ""}<em>van ${e(w.naam_lid)}</em></span></button>`; }).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
 }
 
