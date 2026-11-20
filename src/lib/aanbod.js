@@ -5,6 +5,7 @@
 //   / (eerstvolgende, activiteiten, shop), /kalender (Rover & Co-activiteiten), /afrekenen (ophalen op activiteit), /sitemap.xml
 // Ook de prijscontrole bij afrekenen en inschrijven (laadCatalogus) leest uit de database.
 import { esc as e, pagina, kruimel, willekeurigeBanner } from "./sjabloon.js";
+import { nieuwsteBerichten, nieuwLijst } from "./forum-nieuw.js";
 import kalenderAnderen from "../../data/kalender.json";
 
 const DOMEIN = "https://roverandco.be";
@@ -251,12 +252,6 @@ async function activiteitPagina(env, request, slug) {
 const vervang = (html) => ({ element(el) { el.setInnerContent(html, { html: true }); } });
 
 const slugTitel = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
-async function recenteTopics(env) {
-  try {
-    return (await env.SHOP_DB.prepare(`SELECT t.id, t.titel, t.berichten, c.naam cnaam, l.gebruikersnaam naam FROM forum_topics t JOIN forum_categorieen c ON c.id = t.categorie_id
-      LEFT JOIN leden l ON l.id = t.lid_id WHERE t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 4`).all()).results || [];
-  } catch { return []; }
-}
 // Startpagina, "Wagens van leden" (wens Pieter 20 nov 2026): 2 rijen van 5. Bovenaan de 5 nieuwste,
 // onderaan 5 willekeurige andere (bij elke refresh andere; de pagina wordt niet gecachet).
 async function recenteWagens(env) {
@@ -270,7 +265,7 @@ async function recenteWagens(env) {
   } catch { return []; }
 }
 async function home(env, request) {
-  const [acts, prods, r, topics, wagens] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request), recenteTopics(env), recenteWagens(env)]);
+  const [acts, prods, r, topics, wagens] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request), nieuwsteBerichten(env, 4), recenteWagens(env)]);
   const lijst = acts.filter(komend);
   const eerst = lijst[0];
   const titels = lijst.map((a) => `<span>${e(a.titel)}</span>·`).join("");
@@ -285,7 +280,7 @@ async function home(env, request) {
     .on('[data-dyn="strip"]', vervang(`${titels.repeat(2)}<span>Series · Defender · Discovery · Range Rover</span>·${titels}<span>Series · Defender · Discovery · Range Rover</span>·`))
     .on('[data-dyn="events"]', vervang(lijst.length ? `${evKaart(lijst[0], true)}<div class="ev-stack">${lijst.slice(1, 3).map((a) => evKaart(a)).join("")}</div>` : "<p>Binnenkort nieuwe activiteiten.</p>"))
     .on('[data-dyn="producten"]', vervang(prods.map(productKaart).join("")))
-    .on('[data-dyn="forum"]', topics.length ? vervang(topics.map((t) => `<a class="forum-rij" href="/forum/t/${t.id}-${slugTitel(t.titel)}"><span>${e(t.titel)}</span><small>${e(t.cnaam)} · ${t.berichten} ${t.berichten === 1 ? "bericht" : "berichten"}${t.naam ? ` · door ${e(t.naam)}` : ""}</small></a>`).join("")) : { element() {} })
+    .on('[data-dyn="forum"]', topics.length ? vervang(nieuwLijst(topics, 4)) : { element() {} })
     .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => { const titel = w.naam || w.type; const info = [w.naam ? w.type : "", w.bouwjaar || ""].filter(Boolean).join(" · "); return `<div class="garage-kaart"><button type="button" class="gk-open" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(titel)} van ${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="${e(titel)} van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${e(titel)} van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(titel)}</b>${info ? `<small>${e(info)}</small>` : ""}<em>van ${e(w.naam_lid)}</em></span></button><button type="button" class="f-like wagen-like" data-like="wagen-${w.id}" aria-pressed="false" title="Geef een hartje"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg> <span></span></button></div>`; }).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
 }

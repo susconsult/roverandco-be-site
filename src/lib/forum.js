@@ -4,6 +4,7 @@
 // Foto's worden in de browser verkleind (public/assets/js/forum.js) en in D1 bewaard (tabel forum_fotos).
 import { esc, ico, bannerFoto, kruimel as hoofdKruimel, datum, banner as sjabloonBanner, pagina, naar, eigenOrigin, sha, mail, metVlag } from "./sjabloon.js";
 import { huidigLid, avatar } from "./leden.js";
+import { nieuwsteBerichten, nieuwStrook, CAT_FOTO } from "./forum-nieuw.js";
 import { log } from "./log.js";
 import { drieMenu, deelKnop, bewaarKnop, meldLink, bewaardSet } from "./melden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
@@ -150,8 +151,8 @@ async function index(request, env, url, lid) {
       (SELECT COUNT(*) FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0) leden,
       (SELECT gebruikersnaam FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 ORDER BY id DESC LIMIT 1) nieuwste`).first();
 
-  const FOTO = { series: "870", defender: "5577", "discovery-range-rover": "959", "elektriciteit-ombouw": "900", "samen-rijden": "977",
-    ritten: "968", vakantiekiekjes: "leden-daktent-rivier", "te-koop": "905", cafe: "leden-vuur-hond" };
+  const FOTO = CAT_FOTO;
+  const nieuwste = await nieuwsteBerichten(env, 8);
   let groep = "", kaarten = "";
   for (const c of cats) {
     if (c.groep !== groep) { if (groep) kaarten += "</div>"; groep = c.groep; kaarten += `<h2 class="fc-groep">${esc(groep)}</h2><div class="fc-grid">`; }
@@ -174,7 +175,7 @@ async function index(request, env, url, lid) {
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Je berichten blijven van jou</b><span>Zet je Land Rovers bij <a href="/account/garage">Mijn Landy</a>, volg topics en #hashtags.</span></div>
     </div>
     <section class="wrap f-sectie forum-layout">
-      <div>${balk(lid, "/forum")}${kaarten}</div>
+      <div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
       <aside class="forum-zij"><div class="zij-kaart"><h3>Nu actief</h3>${recent.length ? recent.map((t) => `<a href="${topicUrl(t)}"><b>${esc(t.titel)}</b><small>${esc(t.cnaam)} · ${datum(t.laatste_op)}</small></a>`).join("") : "<p>Nog stil. Start jij het eerste topic?</p>"}</div>
         ${lid ? "" : `<div class="zij-kaart groen"><h3>Doe mee</h3><p>Met één gratis account post je op het forum, bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-wit" href="/account/registreren?terug=/forum">Account maken</a></div>`}
         ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
