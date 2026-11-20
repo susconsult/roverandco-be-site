@@ -17,6 +17,8 @@
     "TURNSTILE_HOSTNAMES": "roverandco.be,www.roverandco.be,roverandco-be-site.pieter-2d7.workers.dev"
   },
   "keep_vars": true,
+  // Elke 15 minuten: overstapmails druppelsgewijs (aan/uit op /beheer/versturen).
+  "triggers": { "crons": ["*/15 * * * *"] },
   // Previews (branch astro e.a.): zelfde databases; secrets staan apart in het dashboard (Previews Base).
   "previews": {
     "d1_databases": [

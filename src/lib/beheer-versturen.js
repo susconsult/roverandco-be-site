@@ -47,9 +47,24 @@ export async function verstuurRonde(env, campagne, email) {
     }
     await wacht(400); // rustig aan: Resend laat een paar mails per seconde toe
   }
-  await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer/versturen', ?)")
+  if (ok || fout) await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer/versturen', ?)")
     .bind(`${CAMPAGNES[campagne].titel}: ${ok} verstuurd${fout ? `, ${fout} mislukt` : ""} door ${email}`, new Date().toISOString()).run().catch(() => {});
   return { ok, fout };
+}
+
+/* ---------- druppelsgewijs (Cron Trigger, zie wrangler.jsonc) ---------- */
+// Elke 15 minuten: de volgende 10 tickets (altijd) en de volgende 10 aankondigingen (alleen 8–21 u Belgische tijd).
+// Aan/uit met de knop op /beheer/versturen (instellingen.druppel). Nooit tijdens onderhoud.
+const uurBrussel = () => Number(new Intl.DateTimeFormat("nl-BE", { timeZone: "Europe/Brussels", hour: "numeric", hour12: false }).format(new Date()));
+async function druppelAan(env) {
+  const r = await env.SHOP_DB.prepare("SELECT waarde FROM instellingen WHERE sleutel = 'druppel'").first().catch(() => null);
+  return r?.waarde === "aan";
+}
+export async function druppel(env) {
+  if (!(await druppelAan(env)) || (await onderhoudAan(env))) return;
+  await verstuurRonde(env, "cor-ticket", "automatisch");
+  const u = uurBrussel();
+  if (u >= 8 && u < 21) await verstuurRonde(env, "aankondiging", "automatisch");
 }
 
 export async function beheerVersturen(request, env, url, email) {
@@ -61,7 +76,10 @@ export async function beheerVersturen(request, env, url, email) {
     const campagne = String(f.get("campagne") || "");
     const actie = String(f.get("actie") || "");
     if (!CAMPAGNES[campagne]) melding = "!Onbekende mail.";
-    else if (actie === "opnieuw") {
+    else if (actie === "druppel-aan" || actie === "druppel-uit") {
+      await env.SHOP_DB.prepare("INSERT INTO instellingen (sleutel, waarde) VALUES ('druppel', ?) ON CONFLICT(sleutel) DO UPDATE SET waarde = excluded.waarde").bind(actie === "druppel-aan" ? "aan" : "uit").run();
+      melding = actie === "druppel-aan" ? "Automatisch versturen staat aan." : "Automatisch versturen staat uit.";
+    } else if (actie === "opnieuw") {
       await env.SHOP_DB.prepare("UPDATE mail_wachtrij SET status = 'wacht', fout = NULL WHERE campagne = ? AND status = 'fout'").bind(campagne).run();
       melding = "Mislukte mails staan terug klaar.";
     } else if (dicht) melding = "!De site staat nog in onderhoud. Zet die eerst uit, anders werken de links in de mail niet.";
@@ -71,6 +89,7 @@ export async function beheerVersturen(request, env, url, email) {
     }
   }
 
+  const auto = await druppelAan(env);
   const alle = (await env.SHOP_DB.prepare("SELECT * FROM mail_wachtrij ORDER BY id").all()).results || [];
   const kaarten = Object.entries(CAMPAGNES).map(([k, c]) => {
     const rijen = alle.filter((r) => r.campagne === k);
@@ -89,5 +108,7 @@ ${n("fout") ? `<button type="submit" name="actie" value="opnieuw">Mislukte opnie
 
   return pagina("Overstapmails versturen", `<!--aan:versturen-->${melding ? `<div class="${melding.startsWith("!") ? "melding-fout" : "melding-ok"}">${esc(melding.replace(/^!/, ""))}</div>` : ""}
 ${dicht ? `<div class="melding-fout">De site staat nog in onderhoud: versturen kan pas als je die uitzet op <a href="/beheer">Te doen</a>.</div>` : ""}
+<div class="kaart"><h2>Automatisch versturen: ${auto ? "aan" : "uit"}</h2><p>Elke 15 minuten gaan de volgende ${PER_KEER} tickets en de volgende ${PER_KEER} aankondigingen weg. Aankondigingen alleen tussen 8 en 21 uur.</p>
+<form method="post" action="/beheer/versturen"><input type="hidden" name="campagne" value="aankondiging"><button type="submit" name="actie" value="${auto ? "druppel-uit" : "druppel-aan"}">${auto ? "Stop automatisch versturen" : "Start automatisch versturen"}</button></form></div>
 <p>Per klik gaan er ${PER_KEER} mails weg. Iedereen krijgt elke mail hoogstens één keer.</p>${kaarten}`, email);
 }

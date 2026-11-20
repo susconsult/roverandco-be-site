@@ -5,6 +5,7 @@ import { handle } from "@astrojs/cloudflare/handler";
 import { onderhoud } from "./lib/onderhoud.js";
 import { huidigLid, stopBekijkAls } from "./lib/leden.js";
 import { veiligheid } from "./lib/veiligheid.js";
+import { druppel } from "./lib/beheer-versturen.js";
 
 export default {
   async fetch(request: Request, env: any, ctx: any) {
@@ -37,5 +38,9 @@ export default {
       try { res.headers.set("x-robots-tag", "noindex, nofollow"); } catch {}
     }
     return res;
+  },
+  // Cron Trigger (wrangler.jsonc): overstapmails druppelsgewijs versturen.
+  async scheduled(_event: any, env: any, ctx: any) {
+    ctx.waitUntil(druppel(env));
   },
 };
