@@ -7,6 +7,11 @@ import { veiligheid } from "./lib/veiligheid.js";
 
 export default {
   async fetch(request: Request, env: any, ctx: any) {
+    const u = new URL(request.url);
+    if (u.hostname === "www.roverandco.be") {
+      u.hostname = "roverandco.be";
+      return Response.redirect(u.href, 301);
+    }
     const poort = await onderhoud(request, env);
     if (poort) return poort;
     const res = veiligheid(await handle(request, env, ctx));
