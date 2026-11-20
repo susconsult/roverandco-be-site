@@ -119,3 +119,6 @@ ALTER TABLE leden ADD COLUMN bron TEXT;
 
 -- nov 2026: 'Bekijk als' vanuit /beheer (sessie gemarkeerd met het beheer-e-mailadres; alleen lezen)
 ALTER TABLE lid_sessies ADD COLUMN als_door TEXT;
+
+-- Wachtrij voor eenmalige mails (overstap Ecwid): één rij per ontvanger per campagne, nooit twee keer.
+CREATE TABLE IF NOT EXISTS mail_wachtrij (id INTEGER PRIMARY KEY, campagne TEXT NOT NULL, sleutel TEXT NOT NULL, lid_id INTEGER, email TEXT NOT NULL, naam TEXT, status TEXT NOT NULL DEFAULT 'wacht', verzonden_op TEXT, resend_id TEXT, fout TEXT, UNIQUE(campagne, sleutel));

@@ -6,6 +6,7 @@ import { verstuur, htmlMail, alinea } from "./mail.js";
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
 import { beheerTestmail } from "./beheer-testmail.js";
+import { beheerVersturen } from "./beheer-versturen.js";
 import { zetOnderhoud } from "./onderhoud.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
 
@@ -157,7 +158,7 @@ html{touch-action:pan-x pan-y}`;
 
 const MENU = [
   ["", [["home", "Te doen", "/beheer", "home"]]],
-  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["kassa", "Kassa (scannen)", "/kassa", "ticket"], ["testmail", "Testmail", "/beheer/testmail", "lijst"]]],
+  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["kassa", "Kassa (scannen)", "/kassa", "ticket"], ["testmail", "Testmail", "/beheer/testmail", "lijst"], ["versturen", "Overstapmails", "/beheer/versturen", "lijst"]]],
   ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
   ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"]]],
 ];
@@ -351,6 +352,8 @@ export async function beheer(request, env, url) {
   if (ab) return ab;
   const tm = await beheerTestmail(request, env, url, w.email);
   if (tm) return tm;
+  const vs = await beheerVersturen(request, env, url, w.email);
+  if (vs) return vs;
   if (p === "/beheer/export.csv") return exporteer(url, env);
   const m = p.match(/^\/beheer\/r\/([A-Z]{2}-\d{6}-[A-Z0-9]{5})$/);
   if (m) return request.method === "POST" ? bewaar(request, m[1], env, w.email) : detail(m[1], env, w.email);

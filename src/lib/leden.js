@@ -103,9 +103,11 @@ async function nieuweSessie(env, lidId) {
 
 /* ---------------- mails met eenmalige link ---------------- */
 
-async function maakToken(env, lidId, soort, dagen) {
+async function maakToken(env, lidId, soort, dagen, { behoud = false } = {}) {
   const t = willekeurig();
-  await env.SHOP_DB.prepare("DELETE FROM lid_tokens WHERE verloopt < ? OR (lid_id = ? AND soort = ?)").bind(Date.now(), lidId, soort).run();
+  // behoud: oudere, nog geldige links van dezelfde soort blijven werken (bv. twee mails kort na elkaar).
+  if (behoud) await env.SHOP_DB.prepare("DELETE FROM lid_tokens WHERE verloopt < ?").bind(Date.now()).run();
+  else await env.SHOP_DB.prepare("DELETE FROM lid_tokens WHERE verloopt < ? OR (lid_id = ? AND soort = ?)").bind(Date.now(), lidId, soort).run();
   await env.SHOP_DB.prepare("INSERT INTO lid_tokens (token_hash, lid_id, soort, verloopt, aangemaakt) VALUES (?, ?, ?, ?, ?)").bind(await sha(t), lidId, soort, Date.now() + dagen * 86400_000, Date.now()).run();
   return t;
 }
@@ -126,8 +128,8 @@ export async function stuurBevestiging(env, origin, lid) {
 }
 
 // Ook gebruikt na een bestelling of inschrijving (automatisch account): geeft de link terug.
-export async function wachtwoordLink(env, origin, lidId) {
-  return `${origin}/account/wachtwoord?t=${await maakToken(env, lidId, "wachtwoord", 30)}`;
+export async function wachtwoordLink(env, origin, lidId, { behoud = false } = {}) {
+  return `${origin}/account/wachtwoord?t=${await maakToken(env, lidId, "wachtwoord", 30, { behoud })}`;
 }
 
 // Afmeldlink voor nieuwsmails (lang geldig, ook via one-click List-Unsubscribe).
