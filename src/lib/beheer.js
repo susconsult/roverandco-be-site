@@ -148,6 +148,8 @@ tr:hover td{background:#fafaf6}td a{color:var(--g);font-weight:600}
 .badge{display:inline-block;padding:2px 8px;border-radius:99px;font-size:12px;font-weight:600;background:#eee}
 .b-betaald{background:#dcefe2;color:#1F3B2A}.b-wacht{background:#fbefd5;color:#7a5200}.b-test{background:#e6e6f6;color:#3c3489}.b-fout{background:#f7dede;color:#791f1f}
 .kaart{background:#fff;border-radius:10px;padding:18px;margin-bottom:16px}
+.art-fotos{display:flex;flex-wrap:wrap;gap:12px;margin:4px 0 10px}.art-fotos figure{margin:0;width:120px}.art-fotos img{width:120px;height:120px;object-fit:cover;border-radius:8px;display:block;background:#eee}.art-fotos figcaption{font-size:12px;line-height:1.3;margin-top:4px}
+.wat-fotos{display:inline-flex;gap:3px;vertical-align:middle;margin-right:6px}.wat-fotos img{width:30px;height:30px;border-radius:5px;object-fit:cover}
 .kaart h2{margin:0 0 10px;font-size:18px}dl{display:grid;grid-template-columns:160px 1fr;gap:6px 12px;margin:0}dt{color:var(--m)}
 pre{white-space:pre-wrap;font:inherit;margin:0}
 .som{display:flex;gap:16px;flex-wrap:wrap;margin-bottom:16px}.som div{background:#fff;border-radius:10px;padding:12px 16px}.som b{display:block;font-size:20px}
@@ -225,7 +227,7 @@ async function lijst(url, env, email) {
   const lijnen = rijen.map((r) => {
     let d = {}; try { d = JSON.parse(r.data); } catch {}
     const wat = soort === "bestelling"
-      ? esc((d.artikels || []).map((a) => `${a.aantal}× ${a.naam}`).join(", ")) + `<br><small>${esc(leveringTekst(d.levering || {}))}${d.levering?.activiteit ? " – " + esc(d.levering.activiteit) : ""}</small>`
+      ? watFotos(d) + esc((d.artikels || []).map((a) => `${a.aantal}× ${a.naam}`).join(", ")) + `<br><small>${esc(leveringTekst(d.levering || {}))}${d.levering?.activiteit ? " – " + esc(d.levering.activiteit) : ""}</small>`
       : esc((d.lijnen || []).map((l) => `${l.aantal}× ${l.naam}`).join(", ")) + (d.tijdslot ? `<br><small>Tijdslot ${esc(d.tijdslot)}</small>` : "");
     return `<tr><td>${datum(r.aangemaakt)}</td><td><a href="/beheer/r/${esc(r.nummer)}">${esc(r.nummer)}</a></td>
       <td>${esc(r.naam)}<br><small class="mob">${esc(r.email)}</small></td>${soort === "inschrijving" ? `<td class="mob">${esc(d.activiteit_titel || r.activiteit)}</td>` : ""}
@@ -250,6 +252,24 @@ ${rijen.length ? `<table><thead><tr><th>Datum</th><th>Nummer</th><th>Klant</th>$
 
 const STATUSSEN = ["Betaald", "Wacht op betaling", "Bevestigd (gratis)", "Geannuleerd", "Terugbetaald"];
 
+// Productfoto's bij bestellingen (ook de oude Ecwid-orders): foto's uit de Ecwid-backup van 20 nov 2026,
+// opgeslagen in /assets/img/ecwid/<naam-als-slug>.webp. Koppeling op productnaam.
+const EC_FOTOS = new Set(["built-for-the-wild-t-shirt", "church-of-rover-22-11-2026", "driving-sheep-t-shirt", "for-the-ones-built-different-t-shirt", "get-lost-in-nature-t-shirt",
+  "happy-camper-t-shirt", "life-is-better-in-low-range-t-shirt", "overland-adventure-t-shirt", "rover-co-emaille-mok", "rover-co-hoodie", "rover-co-petje", "rover-co-t-shirt",
+  "series-wolves-wool-t-shirt", "wanderer-t-shirt", "wool-wheels-hoodie", "wool-wheels-stel-je-eigen-weekend-samen", "wool-wheels-t-shirt"]);
+const EC_ALIAS = { "rover-co-tshirt": "rover-co-t-shirt", "church-of-rover-22-november-2026": "church-of-rover-22-11-2026" };
+function productFoto(naam) {
+  let k = String(naam || "").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+  k = EC_ALIAS[k] || k;
+  return EC_FOTOS.has(k) ? `/assets/img/ecwid/${k}.webp` : null;
+}
+const regels = (d) => d.artikels || d.lijnen || [];
+function artikelFotos(d) {
+  const met = regels(d).filter((a) => productFoto(a.naam));
+  return met.length ? `<div class="art-fotos">${met.map((a) => `<figure><img src="${productFoto(a.naam)}" alt="" loading="lazy"><figcaption>${a.aantal}× ${esc(a.naam)}</figcaption></figure>`).join("")}</div>` : "";
+}
+const watFotos = (d) => { const f = [...new Set(regels(d).map((a) => productFoto(a.naam)).filter(Boolean))].slice(0, 4); return f.length ? `<span class="wat-fotos">${f.map((u) => `<img src="${u}" alt="" loading="lazy">`).join("")}</span>` : ""; };
+
 async function detail(nummer, env, email, melding = "") {
   const r = await env.SHOP_DB.prepare("SELECT * FROM registraties WHERE nummer = ?").bind(nummer).first();
   if (!r) return pagina("Niet gevonden", '<div class="kaart leeg">Niet gevonden. <a href="/beheer">Terug</a></div>', email);
@@ -257,8 +277,8 @@ async function detail(nummer, env, email, melding = "") {
   const lev = d.levering || {};
   const inhoud = r.soort === "bestelling"
     ? `<dt>Levering</dt><dd>${esc(leveringTekst(lev))}${lev.activiteit ? " – " + esc(lev.activiteit) : ""}${lev.type === "verzenden" ? "<br>" + esc(adres(lev)) : ""}</dd>
-       <dt>Artikels</dt><dd><pre>${esc(artikelTekst(d))}</pre></dd><dt>Subtotaal</dt><dd>${eur(d.subtotaal)}</dd><dt>Verzending</dt><dd>${eur(d.verzending)}</dd><dt>Steun</dt><dd>${eur(d.donatie)}</dd>`
-    : `<dt>Activiteit</dt><dd>${esc(d.activiteit_titel)}</dd><dt>Onderdelen</dt><dd><pre>${esc(lijnTekst(d))}</pre></dd>
+       <dt>Artikels</dt><dd>${artikelFotos(d)}<pre>${esc(artikelTekst(d))}</pre></dd><dt>Subtotaal</dt><dd>${eur(d.subtotaal)}</dd><dt>Verzending</dt><dd>${eur(d.verzending)}</dd><dt>Steun</dt><dd>${eur(d.donatie)}</dd>`
+    : `<dt>Activiteit</dt><dd>${esc(d.activiteit_titel)}</dd><dt>Onderdelen</dt><dd>${artikelFotos(d)}<pre>${esc(lijnTekst(d))}</pre></dd>
        ${d.tijdslot ? `<dt>Tijdslot</dt><dd>${esc(d.tijdslot)}</dd>` : ""}${d.wagen ? `<dt>Land Rover</dt><dd>${esc(d.wagen)}</dd>` : ""}`;
   return pagina(r.nummer, `<!--aan:${r.soort}-->
 <p><a href="/beheer?soort=${r.soort}">← Terug naar ${r.soort === "bestelling" ? "bestellingen" : "inschrijvingen"}</a></p>
