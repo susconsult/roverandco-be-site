@@ -1,4 +1,4 @@
-// /beheer: bestellingen en inschrijvingen bekijken en afhandelen.
+// /beheer: bestellingen en inschrijvingen bekijken (status en interne notitie aanpassen).
 // Login met een code per mail (via Resend): e-mail invullen -> code van 6 cijfers (10 min geldig, max 5 pogingen)
 // -> sessie van 30 dagen in een cookie (HttpOnly, Secure, alleen voor /beheer).
 // Wie mag: BEHEER_EMAILS (komma-lijst in Cloudflare-variabelen; standaard pieter@roverandco.be).
@@ -202,7 +202,6 @@ const FILTERS = {
   echt: "status IN ('Betaald') OR status LIKE 'Bevestigd%'",
   wacht: "status = 'Wacht op betaling'",
   test: "test = 1",
-  open: "(status = 'Betaald' OR status LIKE 'Bevestigd%') AND afgehandeld = 0",
   alle: "1=1",
 };
 
@@ -212,7 +211,7 @@ async function lijst(url, env, email) {
   const zoek = (url.searchParams.get("q") || "").trim().slice(0, 80);
   const act = (url.searchParams.get("activiteit") || "").slice(0, 80);
 
-  let sql = `SELECT nummer, aangemaakt, status, naam, email, totaal, activiteit, afgehandeld, test, gescand_op, data FROM registraties WHERE soort = ? AND (${FILTERS[filter]})`;
+  let sql = `SELECT nummer, aangemaakt, status, naam, email, totaal, activiteit, test, gescand_op, data FROM registraties WHERE soort = ? AND (${FILTERS[filter]})`;
   const p = [soort];
   if (zoek) { sql += " AND (naam LIKE ? OR email LIKE ? OR nummer LIKE ? OR telefoon LIKE ?)"; p.push(...Array(4).fill(`%${zoek}%`)); }
   if (act) { sql += " AND activiteit = ?"; p.push(act); }
@@ -230,14 +229,14 @@ async function lijst(url, env, email) {
       : esc((d.lijnen || []).map((l) => `${l.aantal}× ${l.naam}`).join(", ")) + (d.tijdslot ? `<br><small>Tijdslot ${esc(d.tijdslot)}</small>` : "");
     return `<tr><td>${datum(r.aangemaakt)}</td><td><a href="/beheer/r/${esc(r.nummer)}">${esc(r.nummer)}</a></td>
       <td>${esc(r.naam)}<br><small class="mob">${esc(r.email)}</small></td>${soort === "inschrijving" ? `<td class="mob">${esc(d.activiteit_titel || r.activiteit)}</td>` : ""}
-      <td class="mob">${wat}</td><td>${eur(r.totaal)}</td><td>${badge(r.status)}${r.afgehandeld ? ' <span class="badge">afgehandeld</span>' : ""}${r.gescand_op ? ` <span class="badge b-betaald">binnen ${new Date(r.gescand_op).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Brussels" })}</span>` : ""}</td></tr>`;
+      <td class="mob">${wat}</td><td>${eur(r.totaal)}</td><td>${badge(r.status)}${r.gescand_op ? ` <span class="badge b-betaald">binnen ${new Date(r.gescand_op).toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit", timeZone: "Europe/Brussels" })}</span>` : ""}</td></tr>`;
   }).join("");
 
   const tab = (s, label) => `<a class="${soort === s ? "aan" : ""}" href="/beheer?soort=${s}">${label}</a>`;
   const ftab = (f, label) => `<a class="${filter === f ? "aan" : ""}" href="${esc(q({ filter: f }))}">${label}</a>`;
   return pagina(soort === "inschrijving" ? "Inschrijvingen" : "Bestellingen", `
 ${hoofdTabs(soort)}
-<nav class="tabs">${ftab("echt", "Betaald en bevestigd")}${ftab("open", "Nog af te handelen")}${ftab("wacht", "Wacht op betaling")}${ftab("test", "Test")}${ftab("alle", "Alles")}</nav>
+<nav class="tabs">${ftab("echt", "Betaald en bevestigd")}${ftab("wacht", "Wacht op betaling")}${ftab("test", "Test")}${ftab("alle", "Alles")}</nav>
 <form class="filter" method="get" action="/beheer"><input type="hidden" name="soort" value="${soort}"><input type="hidden" name="filter" value="${filter}">
 <input name="q" placeholder="Zoek naam, e-mail, nummer" value="${esc(zoek)}">
 <select name="activiteit"><option value="">Alle activiteiten</option>${acts.map((a) => `<option ${a.activiteit === act ? "selected" : ""}>${esc(a.activiteit)}</option>`).join("")}</select>
@@ -269,8 +268,7 @@ ${melding ? `<div class="kaart">${esc(melding)}</div>` : ""}
 ${inhoud}<dt>Totaal</dt><dd><b>${eur(r.totaal)}</b></dd>${d.opmerking ? `<dt>Opmerking klant</dt><dd><pre>${esc(d.opmerking)}</pre></dd>` : ""}
 <dt>Viva ordercode</dt><dd>${esc(r.viva_ordercode || "–")}</dd><dt>Transactie</dt><dd>${esc(r.transactie || "–")}</dd><dt>Betaald op</dt><dd>${datum(r.betaald_op) || "–"}</dd>
 <dt>Mail klant</dt><dd>${esc(r.mail_klant || "–")}</dd>${r.soort === "inschrijving" ? `<dt>Ticket</dt><dd>${r.gescand_op ? `gescand op ${esc(new Date(r.gescand_op).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}` : r.ticket ? "nog niet gescand" : "nog geen ticket"}</dd>` : ""}</dl></div>
-<form class="kaart" method="post" action="/beheer/r/${esc(r.nummer)}"><h2>Afhandelen</h2>
-<p><label><input type="checkbox" name="afgehandeld" value="1" ${r.afgehandeld ? "checked" : ""}> ${r.soort === "bestelling" ? "Afgehaald of verzonden" : "Afgehandeld"}</label></p>
+<form class="kaart" method="post" action="/beheer/r/${esc(r.nummer)}"><h2>Status en notitie</h2>
 <p><label>Status<br><select name="status">${[...new Set([r.status, ...STATUSSEN])].map((s) => `<option ${s === r.status ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label></p>
 <p><label>Interne notitie<br><textarea name="notitie" rows="3" style="width:100%">${esc(r.notitie || "")}</textarea></label></p>
 <button>Opslaan</button></form>`, email);
@@ -282,8 +280,8 @@ async function bewaar(request, nummer, env, email) {
   const huidig = await env.SHOP_DB.prepare("SELECT status FROM registraties WHERE nummer = ?").bind(nummer).first();
   if (!huidig) return detail(nummer, env, email);
   const toegestaan = new Set([huidig.status, ...STATUSSEN]);
-  await env.SHOP_DB.prepare("UPDATE registraties SET afgehandeld = ?, status = ?, notitie = ?, bijgewerkt = ? WHERE nummer = ?")
-    .bind(f.get("afgehandeld") ? 1 : 0, toegestaan.has(status) ? status : huidig.status, String(f.get("notitie") || "").slice(0, 2000), new Date().toISOString(), nummer).run();
+  await env.SHOP_DB.prepare("UPDATE registraties SET status = ?, notitie = ?, bijgewerkt = ? WHERE nummer = ?")
+    .bind(toegestaan.has(status) ? status : huidig.status, String(f.get("notitie") || "").slice(0, 2000), new Date().toISOString(), nummer).run();
   return detail(nummer, env, email, "Opgeslagen.");
 }
 
@@ -301,13 +299,13 @@ async function exporteer(url, env) {
   sql += " ORDER BY aangemaakt";
   const { results = [] } = await env.SHOP_DB.prepare(sql).bind(...p).all();
   const kolommen = soort === "bestelling"
-    ? ["Aangemaakt", "Nummer", "Status", "Afgehandeld", "Naam", "E-mail", "Telefoon", "Levering", "Activiteit", "Adres", "Artikels", "Subtotaal", "Verzending", "Steun", "Totaal", "Opmerking", "Notitie"]
-    : ["Aangemaakt", "Nummer", "Status", "Afgehandeld", "Naam", "E-mail", "Telefoon", "Activiteit", "Onderdelen", "Tijdslot", "Land Rover", "Totaal", "Opmerking", "Notitie"];
+    ? ["Aangemaakt", "Nummer", "Status", "Naam", "E-mail", "Telefoon", "Levering", "Activiteit", "Adres", "Artikels", "Subtotaal", "Verzending", "Steun", "Totaal", "Opmerking", "Notitie"]
+    : ["Aangemaakt", "Nummer", "Status", "Naam", "E-mail", "Telefoon", "Activiteit", "Onderdelen", "Tijdslot", "Land Rover", "Totaal", "Opmerking", "Notitie"];
   const cel = (v) => { const s = String(v ?? ""); return /[;"\n]/.test(s) ? `"${s.replace(/"/g, '""')}"` : s; };
   const getal = (n) => Number(n || 0).toFixed(2).replace(".", ",");
   const rijen = results.map((r) => {
     let d = {}; try { d = JSON.parse(r.data); } catch {}
-    const basis = [datum(r.aangemaakt), r.nummer, r.status, r.afgehandeld ? "ja" : "nee", r.naam, r.email, r.telefoon];
+    const basis = [datum(r.aangemaakt), r.nummer, r.status, r.naam, r.email, r.telefoon];
     const rest = soort === "bestelling"
       ? [leveringTekst(d.levering || {}), d.levering?.activiteit || "", d.levering?.type === "verzenden" ? adres(d.levering) : "", artikelTekst(d), getal(d.subtotaal), getal(d.verzending), getal(d.donatie), getal(r.totaal), d.opmerking || "", r.notitie || ""]
       : [d.activiteit_titel || r.activiteit, lijnTekst(d), d.tijdslot || "", d.wagen || "", getal(r.totaal), d.opmerking || "", r.notitie || ""];

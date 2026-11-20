@@ -611,7 +611,7 @@ def kaart(a, groot=False):
     return (f'<a class="blogkaart{" blogkaart-groot" if groot else ""}" href="/blog/{a["slug"]}" data-rubriek="{e(a["rubriek"])}">'
             f'<img src="/assets/img/{a["foto"]}{"" if groot else "-s"}.webp" alt="{e(a["foto_alt"])}" loading="{"eager" if groot else "lazy"}">'
             f'<div class="bk-tekst"><div class="eyebrow">{e(a["rubriek"])}</div><h3>{e(a["titel"])}</h3><p>{e(a["beschrijving"])}</p>'
-            f'<small>{e(AUTEURS[a["auteur"]]["naam"])} · {nl_datum(a["datum"])} · {a["minuten"]} min lezen</small></div></a>')
+            f'<small>{e(AUTEURS[a["auteur"]]["naam"])} · {nl_datum(a["datum"])} · {a["minuten"]} min lezen<span class="blog-likes" data-likes="{a["slug"]}" hidden> · <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg><b></b></span></small></div></a>')
 
 
 def gerelateerd(a, n=3):
@@ -634,6 +634,7 @@ for a in artikels:
   {f'<img class="logobanner" src="/assets/img/{a["foto"]}.webp" alt="{e(a["foto_alt"])}" width="1280" height="900">' if a['foto'].startswith('blog/partner-') or a['foto']=='blog/onze-partners' else ''}
   {a['html']}
   {f'<p class="fotocredit">Foto bovenaan: {a["foto_credit"]}</p>' if a.get('foto_credit') else ''}
+  {'' if concept else '<div class="blog-like-rij"><button type="button" class="f-like blog-like" data-like="' + a['slug'] + '" aria-pressed="false" title="Geef een hartje"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg> <span></span></button><span class="blog-like-tekst">Goed artikel? Geef een hartje.</span></div>'}
   <div class="auteur-onder"><span class="auteur-label">Geschreven door</span>{auteur_blok(a['auteur'])}</div>
   <div class="schrijf-mee"><h3>Zelf een artikel schrijven?</h3><p>Heb je kennis, een verhaal of een tip over Land Rovers? Wil je zelf ook eens een artikel schrijven, laat het ons weten via <a href="mailto:{site['email']}?subject=Artikel%20voor%20de%20blog">{site['email']}</a>.</p></div>
   <p><a class="btn" href="/blog">Alle artikels</a></p>
@@ -653,6 +654,9 @@ def blogvolgorde(lijst):
             uit += [x[i] for x in per if i < len(x)]
     return uit
 
+
+# Voor de hartjes: welke artikels bestaan er en wie schreef ze (gelezen door src/lib/blog-likes.js).
+json.dump({x["slug"]: {"titel": x["titel"], "auteur": x["auteur"]} for x in gepubliceerd}, open(os.path.join(DATA, "blog-index.json"), "w", encoding="utf-8"), ensure_ascii=False, indent=1)
 
 feed = blogvolgorde(gepubliceerd)
 chips = '<button type="button" class="chip actief" data-filter="">Alles</button>' + "".join(

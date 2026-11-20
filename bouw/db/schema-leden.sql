@@ -122,3 +122,7 @@ ALTER TABLE lid_sessies ADD COLUMN als_door TEXT;
 
 -- Wachtrij voor eenmalige mails (overstap Ecwid): één rij per ontvanger per campagne, nooit twee keer.
 CREATE TABLE IF NOT EXISTS mail_wachtrij (id INTEGER PRIMARY KEY, campagne TEXT NOT NULL, sleutel TEXT NOT NULL, lid_id INTEGER, email TEXT NOT NULL, naam TEXT, status TEXT NOT NULL DEFAULT 'wacht', verzonden_op TEXT, resend_id TEXT, fout TEXT, UNIQUE(campagne, sleutel));
+
+-- Hartjes onder blogartikels: één per browser (bezoeker = cookie rc_bz), lid_id als die ingelogd was.
+CREATE TABLE IF NOT EXISTS blog_likes (slug TEXT NOT NULL, bezoeker TEXT NOT NULL, lid_id INTEGER, ip_hash TEXT, aangemaakt TEXT NOT NULL, PRIMARY KEY (slug, bezoeker));
+CREATE INDEX IF NOT EXISTS blog_likes_ip ON blog_likes (ip_hash, aangemaakt);

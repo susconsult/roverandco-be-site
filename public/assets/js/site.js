@@ -478,5 +478,34 @@
     }).catch(function () {});
   }
 
+  /* ---------- hartjes onder blogartikels (zie src/lib/blog-likes.js) ---------- */
+  (function () {
+    var knoppen = [].slice.call(document.querySelectorAll("[data-like]"));
+    var tellers = [].slice.call(document.querySelectorAll("[data-likes]"));
+    if (!knoppen.length && !tellers.length) return;
+    var slugs = knoppen.map(function (b) { return b.dataset.like; }).concat(tellers.map(function (t) { return t.dataset.likes; }));
+    function toon(slug, n, mijn) {
+      knoppen.forEach(function (b) {
+        if (b.dataset.like !== slug) return;
+        b.querySelector("span").textContent = n || "";
+        if (mijn !== undefined) { b.classList.toggle("aan", !!mijn); b.setAttribute("aria-pressed", mijn ? "true" : "false"); b.title = mijn ? "Hartje weghalen" : "Geef een hartje"; }
+      });
+      tellers.forEach(function (t) { if (t.dataset.likes === slug) { t.querySelector("b").textContent = n || ""; t.hidden = !n; } });
+    }
+    fetch("/api/blog/likes?s=" + encodeURIComponent(slugs.filter(function (s, i) { return slugs.indexOf(s) === i; }).join(",")), { credentials: "same-origin" })
+      .then(function (r) { return r.json(); }).then(function (d) {
+        slugs.forEach(function (s) { toon(s, (d.n || {})[s] || 0, (d.mijn || []).indexOf(s) >= 0); });
+      }).catch(function () {});
+    knoppen.forEach(function (b) {
+      b.addEventListener("click", function () {
+        if (b.disabled) return;
+        b.disabled = true;
+        fetch("/api/blog/like", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ slug: b.dataset.like }) })
+          .then(function (r) { return r.json(); }).then(function (d) { if (d.ok) toon(b.dataset.like, d.n, d.mijn); })
+          .catch(function () {}).then(function () { b.disabled = false; });
+      });
+    });
+  })();
+
   render();
 })();

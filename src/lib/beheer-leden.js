@@ -202,13 +202,13 @@ ${r.length ? `<ul class="log">${r.map((x) => logRij(x, true)).join("")}</ul>` : 
 
 /* ---------------- te doen (startpagina) ---------------- */
 
-const OPEN_REG = "(status = 'Betaald' OR status LIKE 'Bevestigd%') AND afgehandeld = 0 AND test = 0";
+const ECHT_REG = "(status = 'Betaald' OR status LIKE 'Bevestigd%') AND test = 0";
 export async function thuis(env, email) {
   const db = env.SHOP_DB;
   const week = new Date(Date.now() - 7 * 86400_000).toISOString();
   const [best, insch, meld, nieuw, acts, logs] = await Promise.all([
-    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'bestelling' AND ${OPEN_REG}`).first(),
-    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'inschrijving' AND ${OPEN_REG}`).first(),
+    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'bestelling' AND ${ECHT_REG} AND aangemaakt > ?`).bind(week).first(),
+    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'inschrijving' AND ${ECHT_REG} AND aangemaakt > ?`).bind(week).first(),
     db.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE afgehandeld = 0").first(),
     db.prepare("SELECT COUNT(*) n FROM leden WHERE aangemaakt > ? AND verwijderd_op IS NULL").bind(week).first(),
     db.prepare("SELECT activiteit, COUNT(*) n FROM registraties WHERE soort = 'inschrijving' AND test = 0 AND (status = 'Betaald' OR status LIKE 'Bevestigd%') GROUP BY activiteit ORDER BY MAX(aangemaakt) DESC LIMIT 6").all(),
@@ -223,8 +223,8 @@ export async function thuis(env, email) {
 <small>${ond ? "Bezoekers van roverandco.be zien de onderhoudspagina. Jij ziet de site omdat je ingelogd bent als beheerder." : "roverandco.be is open voor iedereen."}</small></div>
 <input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form>
 <div class="tegels">
-${tegel("Bestellingen af te handelen", best.n, "/beheer?soort=bestelling&filter=open", "Afhandelen →", "let")}
-${tegel("Inschrijvingen af te handelen", insch.n, "/beheer?soort=inschrijving&filter=open", "Afhandelen →", "let")}
+<a class="tegel" href="/beheer?soort=bestelling"><small>Nieuwe bestellingen (7 dagen)</small><b>${best.n}</b><span>Naar bestellingen →</span></a>
+<a class="tegel" href="/beheer?soort=inschrijving"><small>Nieuwe inschrijvingen (7 dagen)</small><b>${insch.n}</b><span>Naar inschrijvingen →</span></a>
 ${tegel("Open meldingen", meld.n, "/beheer/meldingen", "Bekijken →", "let")}
 <a class="tegel" href="/beheer/leden"><small>Nieuwe leden (7 dagen)</small><b>${nieuw.n}</b><span>Naar leden →</span></a>
 </div>
@@ -300,8 +300,6 @@ async function meldingActie(request, env, email) {
 
 async function tellers(env) {
   const r = await env.SHOP_DB.prepare(`SELECT
-    (SELECT COUNT(*) FROM registraties WHERE soort = 'bestelling' AND ${OPEN_REG}) bestellingen,
-    (SELECT COUNT(*) FROM registraties WHERE soort = 'inschrijving' AND ${OPEN_REG}) inschrijvingen,
     (SELECT COUNT(*) FROM forum_meldingen WHERE afgehandeld = 0) meldingen,
     (SELECT COUNT(*) FROM leden WHERE aangemaakt > ? AND verwijderd_op IS NULL) leden`).bind(new Date(Date.now() - 7 * 86400_000).toISOString()).first();
   return new Response(JSON.stringify(r), { headers: { "content-type": "application/json", "cache-control": "no-store" } });

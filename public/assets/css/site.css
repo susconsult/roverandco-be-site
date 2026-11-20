@@ -684,3 +684,12 @@ button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-
   30%{opacity:0;transform:scale(1.08)}
   100%{opacity:0;transform:scale(1.08)}
 }
+
+/* Hartjes onder blogartikels */
+.blog-like-rij{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:30px 0 8px}
+.blog-like{font-size:1rem;padding:6px 16px;display:inline-flex;align-items:center;gap:6px}
+.blog-like.aan{animation:hartklop .35s ease}
+.blog-like-tekst{color:var(--muted);font-size:var(--fs-sm)}
+.blog-likes{white-space:nowrap}.blog-likes .ico{width:1em;height:1em;color:#C0392B;fill:currentColor;stroke:none;margin-right:3px;vertical-align:-.12em}
+@keyframes hartklop{50%{transform:scale(1.15)}}
+@media(prefers-reduced-motion:reduce){.blog-like.aan{animation:none}}

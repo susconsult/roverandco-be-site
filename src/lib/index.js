@@ -27,6 +27,7 @@ import { leden, lidVoorBestelling, wachtwoordLink } from "./leden.js";
 import { forum } from "./forum.js";
 import { cb } from "./cb.js";
 import { melden } from "./melden.js";
+import { blogLikes } from "./blog-likes.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
 import { verstuur } from "./mail.js";
 import { kassa } from "./kassa.js";
@@ -380,6 +381,8 @@ export default {
     if (fo) return fo;
     const md = await melden(request, env, url);
     if (md) return md;
+    const bl = await blogLikes(request, env, url);
+    if (bl) return bl;
     const cbr = await cb(request, env, url);
     if (cbr) return cbr;
     const ks = await kassa(request, env, url);
