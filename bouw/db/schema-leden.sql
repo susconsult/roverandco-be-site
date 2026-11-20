@@ -116,3 +116,6 @@ ALTER TABLE leden ADD COLUMN geboortedatum TEXT;
 -- nov 2026: Ecwid-import (marketing-toestemming uit Ecwid, bron = 'ecwid')
 ALTER TABLE leden ADD COLUMN marketing INTEGER;
 ALTER TABLE leden ADD COLUMN bron TEXT;
+
+-- nov 2026: 'Bekijk als' vanuit /beheer (sessie gemarkeerd met het beheer-e-mailadres; alleen lezen)
+ALTER TABLE lid_sessies ADD COLUMN als_door TEXT;

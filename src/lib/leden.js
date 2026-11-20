@@ -60,11 +60,37 @@ export async function huidigLid(request, env) {
   const token = cookie(request, COOKIE);
   if (!token || !/^[a-f0-9]{64}$/.test(token)) return null;
   const lid = await env.SHOP_DB.prepare(
-    "SELECT l.* FROM lid_sessies s JOIN leden l ON l.id = s.lid_id WHERE s.token_hash = ? AND s.verloopt > ?"
+    "SELECT l.*, s.als_door AS als_door FROM lid_sessies s JOIN leden l ON l.id = s.lid_id WHERE s.token_hash = ? AND s.verloopt > ?"
   ).bind(await sha(token), Date.now()).first();
-  if (!lid || lid.geblokkeerd) return null;
-  lid.beheerder = !!lid.bevestigd_op && toegelaten(env).includes(String(lid.email).toLowerCase());
+  if (!lid || (lid.geblokkeerd && !lid.als_door)) return null;
+  // "Bekijk als" vanuit /beheer: de beheerder kijkt mee als dit lid, alleen lezen (src/worker.ts blokkeert wijzigingen).
+  lid.bekijkAls = lid.als_door || null;
+  lid.beheerder = !lid.bekijkAls && !!lid.bevestigd_op && toegelaten(env).includes(String(lid.email).toLowerCase());
   return lid;
+}
+
+// Start "Bekijk als": korte sessie (1 uur) voor dit lid, gemarkeerd met wie meekijkt. De eigen login van de beheerder
+// wordt bewaard in rc_lid_terug en teruggezet bij /account/bekijk-stop.
+export async function startBekijkAls(request, env, lidId, doorEmail) {
+  const token = willekeurig();
+  await env.SHOP_DB.prepare("INSERT INTO lid_sessies (token_hash, lid_id, verloopt, als_door) VALUES (?, ?, ?, ?)").bind(await sha(token), lidId, Date.now() + 3600_000, doorEmail).run();
+  const eigen = cookie(request, COOKIE);
+  const c = [`${COOKIE}=${token}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`, "rc_lid_aan=1; Path=/; Max-Age=3600; Secure; SameSite=Lax", "rc_als=1; Path=/; Max-Age=3600; Secure; SameSite=Lax"];
+  if (eigen && /^[a-f0-9]{64}$/.test(eigen) && !cookie(request, "rc_lid_terug")) c.push(`rc_lid_terug=${eigen}; Path=/; Max-Age=3600; HttpOnly; Secure; SameSite=Lax`);
+  return c;
+}
+
+export async function stopBekijkAls(request, env) {
+  const token = cookie(request, COOKIE);
+  let lidId = "";
+  if (token && /^[a-f0-9]{64}$/.test(token)) {
+    const s = await env.SHOP_DB.prepare("SELECT lid_id, als_door FROM lid_sessies WHERE token_hash = ?").bind(await sha(token)).first();
+    if (s?.als_door) { lidId = s.lid_id; await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE token_hash = ?").bind(await sha(token)).run(); }
+  }
+  const terug = cookie(request, "rc_lid_terug");
+  const c = ["rc_als=; Path=/; Max-Age=0; Secure; SameSite=Lax", "rc_lid_terug=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax"];
+  c.push(terug && /^[a-f0-9]{64}$/.test(terug) ? `${COOKIE}=${terug}; Path=/; Max-Age=${SESSIE_DAGEN * 86400}; HttpOnly; Secure; SameSite=Lax` : `${COOKIE}=; Path=/; Max-Age=0; HttpOnly; Secure; SameSite=Lax`);
+  return naar(lidId ? `/beheer/leden/${lidId}` : "/beheer/leden", { "set-cookie": c });
 }
 
 async function nieuweSessie(env, lidId) {

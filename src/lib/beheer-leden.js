@@ -1,7 +1,8 @@
 // /beheer/leden: leden zoeken, bekijken en beheren, plus de activiteitenlog (90 dagen).
 import { onderhoudAan } from "./onderhoud.js";
 import { esc, pagina } from "./beheer.js";
-import { stuurWachtwoordLink, stuurBevestiging } from "./leden.js";
+import { naar as naarMet } from "./sjabloon.js";
+import { stuurWachtwoordLink, stuurBevestiging, startBekijkAls } from "./leden.js";
 import { log, opruimen, LOG_DAGEN } from "./log.js";
 import { anonimiseer } from "./anoniem.js";
 
@@ -90,6 +91,7 @@ async function detail(id, env, email, melding = "") {
 ${l.gebruikersnaam && !weg ? `<br><small><a href="/forum/lid/${encodeURIComponent(l.gebruikersnaam)}" target="_blank" rel="noopener">Publiek profiel bekijken</a></small>` : ""}</div></div>
 <div class="som"><div>Bestellingen en inschrijvingen<b>${regs.length}</b></div><div>Forumberichten<b>${postAantal}</b></div><div>Wagens<b>${ws.length}</b></div></div>
 ${weg ? `<p>Dit account werd op ${dag(l.verwijderd_op)} anoniem gemaakt.</p>` : `<div class="acties">
+${knop("bekijk", "Bekijk als dit lid")}
 ${l.wachtwoord ? knop("wachtwoordlink", "Stuur wachtwoordlink") : knop("wachtwoordlink", "Stuur 'kies je wachtwoord'-mail")}
 ${!l.bevestigd_op ? knop("bevestigmail", "Bevestigingsmail opnieuw") : ""}
 ${knop("uitloggen", "Overal uitloggen")}
@@ -174,6 +176,10 @@ async function actie(request, env, url, id, email) {
       return detail(id, env, email, `Bewaard. Er ging een bevestigingsmail naar ${w.email}; tot dan staat het adres als niet bevestigd.`);
     }
     return detail(id, env, email, "Bewaard.");
+  }
+  if (a === "bekijk") {
+    await log(env, l.id, "beheer", `Beheer (${email}) bekijkt de site als dit lid (alleen lezen, 1 uur)`);
+    return naarMet("/account", { "set-cookie": await startBekijkAls(request, env, l.id, email) });
   }
   if (a === "anoniem") {
     await anonimiseer(env, l.id);
