@@ -42,7 +42,7 @@ Neem telkens het eerste onderwerp dat nog niet afgevinkt is, in de lijst van die
 
 ## Onderwerpen Pieter
 
-- [ ] De Range Rover Classic: hoe het begon
+- [x] De Range Rover Classic: hoe het begon
 - [ ] Santana: de Spaanse Land Rover
 - [ ] De Camel Trophy en de Land Rover
 - [ ] De Land Rover Discovery: van 1989 tot vandaag
