@@ -109,13 +109,14 @@ export async function corTicketMail(env, r, { site, wachtwoordLink = "", test = 
 }
 
 /* ---------- 2. aankondiging nieuwe site ---------- */
+// Opgebouwd zoals goede lanceringsmails: grote foto bovenaan, korte tekst, fototegels per onderdeel,
+// één hoofdknop, foto's als JPG van onze eigen site (/assets/mail, WebP werkt niet in Outlook), overal alt-tekst.
 
 const WAT = [
-  ["Activiteiten", "Schrijf je in en krijg meteen je ticket met QR-code."],
-  ["Kalender", "Alle Land Rover-evenementen op een rij, ook die van andere clubs."],
-  ["Forum en CB-chat", "Praat mee met andere Land Rover-rijders, vraag raad of toon je wagen."],
-  ["Blog", "Verhalen en de geschiedenis van Land Rover."],
-  ["Shop", "Onze kledij en merch, op te halen of thuis geleverd."],
+  ["activiteiten", "Activiteiten", "Schrijf je in en krijg meteen je ticket met QR-code.", "/activiteiten"],
+  ["kalender", "Kalender", "Alle Land Rover-evenementen op een rij, ook van andere clubs.", "/kalender"],
+  ["forum", "Forum en CB-chat", "Praat mee, vraag raad of toon je wagen.", "/forum"],
+  ["blog", "Blog", "Verhalen, tips en de geschiedenis van Land Rover.", "/blog"],
 ];
 const ACCOUNT = [
   "Je vorige bestellingen en inschrijvingen terugvinden (ze staan er al in)",
@@ -129,46 +130,86 @@ function komende(vandaag) {
   return ACTIVITEITEN.filter((a) => a.datum && a.datum >= vandaag && !/test/i.test(a.slug)).sort((x, y) => x.datum.localeCompare(y.datum)).slice(0, 3);
 }
 
+const foto = (src, alt, w, h, stijl = "") => `<img src="${esc(src)}" width="${w}" height="${h}" alt="${esc(alt)}" style="display:block;border:0;width:100%;max-width:${w}px;height:auto;${stijl}">`;
+const kopje = (t, kleur = GROEN3) => `<div style="font-family:${FONT};font-size:12px;letter-spacing:2px;font-weight:700;color:${kleur};text-transform:uppercase;margin:0 0 10px">${esc(t)}</div>`;
+
 // lid = rij uit leden; wachtwoordLink leeg als het lid al een wachtwoord heeft.
-export function aankondigingMail(lid, { site, wachtwoordLink = "", afmeldLink = "", test = false, vandaag = new Date().toISOString().slice(0, 10) }) {
-  const vn = voornaam(lid.naam || lid.voornaam || "");
+export function aankondigingMail(lid, { site, wachtwoordLink = "", afmeldLink = "", test = false, vandaag = new Date().toISOString().slice(0, 10), fotoBasis = "" }) {
+  const vn = voornaam(lid.naam || "");
   const acts = komende(vandaag);
+  const img = (n) => `${fotoBasis || site + "/assets/mail"}/${n}.jpg`;
+  const voorkop = "Je account staat al klaar, met je vorige bestellingen erin. Kies een wachtwoord en kijk rond.";
 
-  const watHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT};font-size:14px;margin:0 0 18px">` +
-    WAT.map(([t, u]) => `<tr><td style="padding:8px 0;border-bottom:1px solid ${ZAND2}"><b style="color:${INKT}">${esc(t)}</b><br><span style="color:${GRIJS}">${esc(u)}</span></td></tr>`).join("") + `</table>`;
+  // Fototegels: twee naast elkaar op een breed scherm, onder elkaar op een gsm (zonder media queries).
+  const tegel = ([f, t, u, pad]) => `<div style="display:inline-block;width:100%;max-width:256px;vertical-align:top;margin:0 0 14px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="padding:0 7px;text-align:left">
+<a href="${esc(site + pad)}" style="text-decoration:none">${foto(img(f), t, 242, 161, "border-radius:10px")}</a>
+<div style="font-family:${FONT};font-size:16px;font-weight:700;color:${INKT};margin:10px 0 2px"><a href="${esc(site + pad)}" style="color:${INKT};text-decoration:none">${esc(t)}</a></div>
+<div style="font-family:${FONT};font-size:14px;line-height:1.45;color:${GRIJS}">${esc(u)}</div></td></tr></table></div>`;
+  const tegels = `<div style="font-size:0;text-align:center">${WAT.map(tegel).join("")}</div>`;
 
-  const accountHtml = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${ZACHT};border-radius:10px;margin:4px 0 18px"><tr><td style="padding:16px 18px;font-family:${FONT}">` +
-    alinea(`We maakten al een account voor je aan met dit mailadres. Daarmee kan je:`, "margin:0 0 8px") +
-    `<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;color:${INKT}">` +
-    ACCOUNT.map((t) => `<tr><td style="padding:3px 10px 3px 0;vertical-align:top;color:${GROEN3};font-weight:700">&#10003;</td><td style="padding:3px 0">${esc(t)}</td></tr>`).join("") + `</table>` +
-    (wachtwoordLink ? `<div style="text-align:center;margin:14px 0 4px">${knop("Kies je wachtwoord", wachtwoordLink)}</div>` +
-      `<div style="text-align:center;font-size:12px;color:${GRIJS}">De link is 30 dagen geldig. Liever geen account? Dan hoef je niets te doen.</div>`
-      : `<div style="text-align:center;margin:14px 0 4px">${knop("Naar mijn account", `${site}/account`)}</div>`) +
-    `</td></tr></table>`;
+  const shop = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${ZACHT};border-radius:12px;margin:4px 0 22px"><tr>
+<td width="44%" style="padding:0;vertical-align:middle"><a href="${site}/shop">${foto(img("shop"), "Emaille mok van Rover & Co", 230, 153, "border-radius:12px 0 0 12px")}</a></td>
+<td style="padding:14px 18px;vertical-align:middle;font-family:${FONT}"><div style="font-size:16px;font-weight:700;color:${INKT};margin-bottom:4px">Shop</div>
+<div style="font-size:14px;line-height:1.45;color:${GRIJS};margin-bottom:8px">T-shirts, hoodies, petjes en onze emaille mok.</div>
+<a href="${site}/shop" style="font-size:14px;font-weight:700;color:${GROEN3};text-decoration:none">Naar de shop &rarr;</a></td></tr></table>`;
 
-  const actsHtml = !acts.length ? "" : kop2("Binnenkort") +
-    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT};font-size:14px;margin:0 0 18px">` +
-    acts.map((a) => `<tr><td style="padding:9px 0;border-bottom:1px solid ${ZAND2}"><a href="${esc(`${site}/activiteiten/${a.slug}`)}" style="color:${INKT};font-weight:700;text-decoration:none">${esc(a.titel)}</a><br><span style="color:${GROEN3};font-size:13px">${esc(a.datum_lang || "")}${a.locatie ? " · " + esc(a.locatie) : ""}</span></td></tr>`).join("") + `</table>`;
+  const account = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${GROEN};border-radius:14px;margin:0 0 24px;overflow:hidden"><tr><td style="padding:0">
+${foto(img("account"), "Land Rovers met daktenten op een kampeerweekend", 524, 349, "max-width:100%")}</td></tr>
+<tr><td style="padding:20px 22px 22px;font-family:${FONT}">
+${kopje("Je account staat klaar", LICHTGROEN)}
+<div style="font-size:20px;line-height:1.3;font-weight:700;color:#ffffff;margin:0 0 10px">We maakten al een account voor je aan</div>
+<div style="font-size:15px;line-height:1.6;color:#ffffff;margin:0 0 12px">Met dit mailadres. Daarmee kan je:</div>
+<table role="presentation" cellpadding="0" cellspacing="0" style="font-size:14px;line-height:1.5;color:#ffffff">` +
+    ACCOUNT.map((t) => `<tr><td style="padding:3px 10px 3px 0;vertical-align:top;color:${LICHTGROEN};font-weight:700">&#10003;</td><td style="padding:3px 0">${esc(t)}</td></tr>`).join("") + `</table>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" style="margin:18px auto 8px"><tr><td style="border-radius:8px;background:#ffffff">
+<a href="${esc(wachtwoordLink || site + "/account")}" style="display:inline-block;padding:14px 26px;font-family:${FONT};font-size:16px;font-weight:700;color:${GROEN};text-decoration:none;border-radius:8px">${wachtwoordLink ? "Kies je wachtwoord" : "Naar mijn account"}</a></td></tr></table>
+${wachtwoordLink ? `<div style="text-align:center;font-size:12px;color:${LICHTGROEN}">De link is 30 dagen geldig. Liever geen account? Dan hoef je niets te doen.</div>` : ""}
+</td></tr></table>`;
 
-  const inhoud =
-    alinea(`Je bestelde ooit iets of schreef je in via onze webshop. Die webshop hebben we vervangen door een eigen website. Alles over Rover &amp; Co staat nu op één plek: <a href="${site}" style="color:${GROEN3};font-weight:600">roverandco.be</a>.`, `color:${GRIJS}`) +
-    kop2("Wat vind je er") + watHtml +
-    kop2("Je account staat klaar") + accountHtml +
-    actsHtml +
-    `<div style="text-align:center;margin:0 0 18px">${knop("Bekijk de nieuwe site", site, !!wachtwoordLink)}</div>` +
-    spamTip();
+  const actsHtml = !acts.length ? "" : kopje("Binnenkort") +
+    `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT};margin:0 0 22px">` +
+    acts.map((a) => `<tr><td width="92" style="padding:8px 14px 8px 0;vertical-align:middle"><a href="${esc(`${site}/activiteiten/${a.slug}`)}">${foto(img("act-" + a.slug), a.titel, 80, 80, "border-radius:10px")}</a></td>
+<td style="padding:8px 0;vertical-align:middle;border-bottom:1px solid ${ZAND2}"><a href="${esc(`${site}/activiteiten/${a.slug}`)}" style="font-size:16px;color:${INKT};font-weight:700;text-decoration:none">${esc(a.titel)}</a>
+<div style="font-size:13px;color:${GROEN3};margin-top:2px">${esc(a.datum_lang || "")}${a.locatie ? " &middot; " + esc(a.locatie) : ""}</div></td></tr>`).join("") + `</table>`;
 
-  const voet = `Vragen? Antwoord op deze mail of mail naar <a href="mailto:info@roverandco.be" style="color:#ffffff">info@roverandco.be</a>.` +
-    (afmeldLink ? `<br>Geen nieuws meer van ons? <a href="${esc(afmeldLink)}" style="color:#ffffff">Afmelden</a>` : "");
-  const html = htmlMail({ eyebrow: "Nieuw bij Rover & Co", titel: `Onze nieuwe website is online${vn ? ", " + vn : ""}`, inhoud, voet });
+  const strip = `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="margin:0"><tr>` +
+    [1, 2, 3].map((i) => `<td width="33%" style="padding:0">${foto(img("strip-" + i), "Land Rover van Rover & Co", 187, 187)}</td>`).join("") + `</tr></table>`;
+  const volg = `<tr><td align="center" style="background:${GROEN};padding:18px 20px 6px;font-family:${FONT}">
+<div style="font-size:15px;font-weight:700;color:#ffffff;margin-bottom:10px">Volg ons voor foto's van elke rit</div>
+<a href="https://www.facebook.com/roverandcobe/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Facebook</a>
+<a href="https://www.instagram.com/roverandco.be/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Instagram</a></td></tr>`;
+
+  const html = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>Rover &amp; Co heeft een nieuwe website</title></head>
+<body style="margin:0;padding:0;background:#ECE6D6">
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ECE6D6">${esc(voorkop)}&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ECE6D6"><tr><td align="center" style="padding:24px 10px">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden">
+<tr><td align="center" style="background:${GROEN};padding:16px 20px 12px"><a href="${site}"><img src="cid:rc-logo" width="76" height="76" alt="Rover &amp; Co" style="display:block;border:0;width:76px;height:76px"></a></td></tr>
+<tr><td style="padding:0;background:${GROEN}"><a href="${site}">${foto(img("hero"), "Colonne Land Rovers op een stoffig bospad", 560, 320, "max-width:100%")}</a></td></tr>
+<tr><td style="background:${GROEN};padding:22px 26px 26px;font-family:${FONT}">
+${kopje("Nieuw bij Rover & Co", LICHTGROEN)}
+<h1 style="margin:0 0 12px;font-size:28px;line-height:1.15;color:#ffffff;font-weight:800">Onze nieuwe website is online${vn ? `, ${esc(vn)}` : ""}</h1>
+<p style="margin:0 0 18px;font-size:16px;line-height:1.6;color:#ffffff">Je bestelde ooit iets of schreef je in via onze webshop. Die vervangen we door een eigen website. Activiteiten, kalender, forum, blog en shop: alles van Rover &amp; Co staat nu op één plek.</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0"><tr><td style="border-radius:8px;background:#ffffff"><a href="${site}" style="display:inline-block;padding:13px 24px;font-family:${FONT};font-size:15px;font-weight:700;color:${GROEN};text-decoration:none;border-radius:8px">Bekijk roverandco.be</a></td></tr></table>
+</td></tr>
+<tr><td style="padding:26px 18px 6px;font-family:${FONT}"><div style="padding:0 7px">${kopje("Wat vind je er")}</div>${tegels}</td></tr>
+<tr><td style="padding:0 18px;font-family:${FONT}"><div style="padding:0 7px">${shop}${account}${actsHtml}
+<p style="margin:0 0 20px;font-size:13px;line-height:1.5;color:${GRIJS}">Tip: zet <b>noreply@roverandco.be</b> bij je contacten, dan komen onze mails niet in je spam terecht.</p></div></td></tr>
+<tr><td style="padding:0">${strip}</td></tr>
+${volg}
+<tr><td align="center" style="background:${GROEN};padding:8px 24px 18px;font-family:${FONT};font-size:12px;line-height:1.7;color:#ffffff">Vragen? Antwoord op deze mail of mail naar <a href="mailto:info@roverandco.be" style="color:#ffffff">info@roverandco.be</a>.<br>
+<span style="color:${LICHTGROEN}">Rover &amp; Co VZW &middot; Oostham${afmeldLink ? ` &middot; Geen nieuws meer? <a href="${esc(afmeldLink)}" style="color:${LICHTGROEN}">Afmelden</a>` : ""}</span></td></tr>
+</table></td></tr></table></body></html>`;
 
   const tekst = [
     `Hallo${vn ? " " + vn : ""},`, "",
-    `Je bestelde ooit iets of schreef je in via onze webshop. Die webshop hebben we vervangen door een eigen website. Alles over Rover & Co staat nu op één plek: ${site}`, "",
-    "Wat vind je er:", ...WAT.map(([t, u]) => `- ${t}: ${u}`), "",
+    `Je bestelde ooit iets of schreef je in via onze webshop. Die vervangen we door een eigen website. Activiteiten, kalender, forum, blog en shop: alles van Rover & Co staat nu op één plek: ${site}`, "",
+    "Wat vind je er:", ...WAT.map(([, t, u, pad]) => `- ${t}: ${u} ${site}${pad}`), `- Shop: T-shirts, hoodies, petjes en onze emaille mok. ${site}/shop`, "",
     "Je account staat klaar. We maakten al een account voor je aan met dit mailadres. Daarmee kan je:", ...ACCOUNT.map((t) => `- ${t}`), "",
     ...(wachtwoordLink ? ["Kies hier je wachtwoord (30 dagen geldig):", wachtwoordLink, "Liever geen account? Dan hoef je niets te doen.", ""] : [`Naar je account: ${site}/account`, ""]),
     ...(acts.length ? ["Binnenkort:", ...acts.map((a) => `- ${a.titel}, ${a.datum_lang || ""}: ${site}/activiteiten/${a.slug}`), ""] : []),
+    "Volg ons voor foto's van elke rit:", "Facebook: https://www.facebook.com/roverandcobe/", "Instagram: https://www.instagram.com/roverandco.be/", "",
     "Tip: zet noreply@roverandco.be bij je contacten, dan komen onze mails niet in je spam terecht.", "",
     "Vragen? Antwoord op deze mail of mail naar info@roverandco.be.", "", "Tot binnenkort!", "Rover & Co VZW",
     ...(afmeldLink ? ["", `Geen nieuws meer van ons? Afmelden: ${afmeldLink}`] : []),
