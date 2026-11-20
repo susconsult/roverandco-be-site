@@ -353,7 +353,7 @@ export async function beheer(request, env, url) {
   const vs = await beheerVersturen(request, env, url, w.email);
   if (vs) return vs;
   if (p === "/beheer/export.csv") return exporteer(url, env);
-  const m = p.match(/^\/beheer\/r\/([A-Z]{2}-\d{6}-[A-Z0-9]{5})$/);
+  const m = p.match(/^\/beheer\/r\/([A-Z]{2}-[A-Z0-9]{4,12}(?:-[A-Z0-9]{1,6})?)$/);
   if (m) return request.method === "POST" ? bewaar(request, m[1], env, w.email) : detail(m[1], env, w.email);
   return html("Niet gevonden.", 404);
 }
