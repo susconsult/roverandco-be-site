@@ -1,3 +1,4 @@
+import { importEcwid } from "./import-ecwid.js";
 // Worker voor roverandco.be
 // - /api/bestelling   : bestelling uit de shop (prijzen opnieuw berekend uit de database, zie laadCatalogus in src/aanbod.js)
 // - /api/inschrijving : inschrijving voor een activiteit (prijzen en tijdsloten uit de database)
@@ -357,6 +358,7 @@ export default {
     if (url.hostname === "www.roverandco.be") { url.hostname = "roverandco.be"; return Response.redirect(url.href, 301); }
     if (p === "/_sjabloon" || p === "/_sjabloon.html") return new Response("Niet gevonden", { status: 404 });
     // Oude Ecwid-adressen (roverandco.be tot nov 2026) naar de nieuwe site.
+    if (p === "/api/import-ecwid") return importEcwid(request, env);
     const OUDE_PAGINAS = { "/woolandwheels": "/activiteiten/wild-and-wheels", "/demopage02": "/voorwaarden" };
     const op = OUDE_PAGINAS[p.replace(/\/$/, "")];
     if (op) return Response.redirect(new URL(op, url.origin).href, 301);
