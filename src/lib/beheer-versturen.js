@@ -7,10 +7,37 @@ import { verstuur } from "./mail.js";
 import { corTicketMail, aankondigingMail } from "./mails-lancering.js";
 import { wachtwoordLink, afmeldLink } from "./leden.js";
 import { onderhoudAan } from "./onderhoud.js";
+import KALENDER from "../../data/kalender.json";
+
+// Kort mailtje aan organisatoren van wie we activiteiten in de kalender zetten (tekst goedgekeurd door Pieter 20 nov 2026).
+// mail_wachtrij: sleutel = waarde van "org" in data/kalender.json, naam = aanspreking.
+const MAANDEN = ["", "januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+function kalDatum(x) {
+  const [j, m, d] = x.datum.split("-").map(Number);
+  if (!x.einde) return `${d} ${MAANDEN[m]} ${j}`;
+  const [j2, m2, d2] = x.einde.split("-").map(Number);
+  return m === m2 ? `${d} tot ${d2} ${MAANDEN[m2]} ${j2}` : `${d} ${MAANDEN[m]} tot ${d2} ${MAANDEN[m2]} ${j2}`;
+}
+function kalenderMail(rij) {
+  const vandaag = new Date().toISOString().slice(0, 10);
+  const acts = KALENDER.filter((x) => (x.org || x.club) === rij.sleutel && (x.einde || x.datum) >= vandaag);
+  if (!acts.length) throw new Error("geen activiteiten voor deze organisator");
+  const meer = acts.length > 1;
+  const lijn = (x) => `${x.titel}, ${kalDatum(x)}`;
+  const tekst = [`Hoi ${rij.naam},`, "", `We hebben jullie ${meer ? "activiteiten" : "activiteit"} toegevoegd aan de Land Rover-kalender op onze site:`,
+    ...acts.map((x) => `- ${lijn(x)}`), "", `${SITE}/kalender`, "", "Klopt er iets niet, of willen jullie nog iets toevoegen? Laat het gerust weten.", "", "Groetjes,", "Rover & Co"].join("\n");
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#141815">` +
+    `<p>Hoi ${esc(rij.naam)},</p><p>We hebben jullie ${meer ? "activiteiten" : "activiteit"} toegevoegd aan de Land Rover-kalender op onze site:</p>` +
+    `<ul>${acts.map((x) => `<li>${esc(lijn(x))}</li>`).join("")}</ul>` +
+    `<p><a href="${SITE}/kalender" style="color:#3E7350">${SITE.replace("https://", "")}/kalender</a></p>` +
+    `<p>Klopt er iets niet, of willen jullie nog iets toevoegen? Laat het gerust weten.</p><p>Groetjes,<br>Rover &amp; Co</p></div>`;
+  return { van: "Rover & Co <info@roverandco.be>", zonderLogo: true, onderwerp: "Jullie activiteit staat in onze kalender", tekst, html, bijlagen: [] };
+}
 
 const CAMPAGNES = {
   "cor-ticket": { titel: "Ticket Church of Rover", uitleg: "Voor iedereen die zich via de vorige webshop inschreef. Met QR-code en PDF-ticket. Vóór zondag versturen." },
   "aankondiging": { titel: "Aankondiging nieuwe site", uitleg: "Voor alle klanten uit de vorige webshop. Liefst in een paar rondes, niet alles tegelijk." },
+  "kalender": { titel: "Organisatoren kalender", uitleg: "Kort mailtje aan clubs van wie we activiteiten in de kalender zetten. Van info@roverandco.be." },
 };
 const PER_KEER = 10;
 const SITE = "https://roverandco.be";
@@ -19,6 +46,7 @@ const wacht = (ms) => new Promise((r) => setTimeout(r, ms));
 async function bouw(env, campagne, rij) {
   const lid = rij.lid_id ? await env.SHOP_DB.prepare("SELECT * FROM leden WHERE id = ?").bind(rij.lid_id).first() : null;
   const ww = lid && !lid.wachtwoord ? await wachtwoordLink(env, SITE, lid.id, { behoud: true }) : "";
+  if (campagne === "kalender") return kalenderMail(rij);
   if (campagne === "cor-ticket") {
     const r = await env.SHOP_DB.prepare("SELECT nummer, naam, email, totaal, data FROM registraties WHERE nummer = ?").bind(rij.sleutel).first();
     if (!r) throw new Error("inschrijving niet gevonden");
@@ -63,6 +91,7 @@ async function druppelAan(env) {
 export async function druppel(env) {
   if (!(await druppelAan(env)) || (await onderhoudAan(env))) return;
   await verstuurRonde(env, "cor-ticket", "automatisch");
+  await verstuurRonde(env, "kalender", "automatisch");
   const u = uurBrussel();
   if (u >= 8 && u < 21) await verstuurRonde(env, "aankondiging", "automatisch");
 }

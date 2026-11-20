@@ -83,7 +83,7 @@ const ANTWOORD = "info@roverandco.be";
 export async function verstuur(env, m) {
   if (!env.RESEND_API_KEY) return { ok: false, fout: "geen RESEND_API_KEY" };
   const html = m.html || tekstNaarHtml(m.tekst, m.onderwerp);
-  const attachments = [{ filename: "rover-en-co.png", content: LOGO_PNG, content_type: "image/png", content_id: "rc-logo" }, ...(m.bijlagen || [])];
+  const attachments = [...(m.zonderLogo ? [] : [{ filename: "rover-en-co.png", content: LOGO_PNG, content_type: "image/png", content_id: "rc-logo" }]), ...(m.bijlagen || [])];
   try {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
