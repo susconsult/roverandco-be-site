@@ -29,7 +29,7 @@ const OPEN = [
   /^\/assets\//, /^\/favicon\.png$/, /^\/apple-touch-icon\.png$/, /^\/robots\.txt$/,
   /^\/account\/(inloggen|uitloggen|wachtwoord|wachtwoord-vergeten|bevestig)$/,
   /^\/beheer(\/|$)/, /^\/kassa(\/|$)/, /^\/planner(\/|$)/,
-  /^\/api\/viva\/webhook$/, /^\/api\/import-ecwid$/, /^\/betaald\/?$/, /^\/betaling-mislukt(\.html)?$/,
+  /^\/api\/viva\/webhook$/, /^\/betaald\/?$/, /^\/betaling-mislukt(\.html)?$/,
   /^\/products(\/|$)/, /^\/woolandwheels\/?$/, /^\/demopage02\/?$/,
 ];
 
