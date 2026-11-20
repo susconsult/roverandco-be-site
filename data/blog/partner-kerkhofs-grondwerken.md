@@ -5,8 +5,8 @@ volgorde: 6
 auteur: pieter
 datum: 2026-11-15
 beschrijving: Jan Kerkhofs zette vorig jaar gratis een graafmachine van 18 ton op ons terrein. Maak kennis met Kerkhofs Grondwerken uit Bocholt, een familiebedrijf sinds 1935.
-foto: 959
-foto_alt: Defenders rijden door het stof
+foto: blog/partner-kerkhofs-grondwerken
+foto_alt: Logo van Kerkhofs Vervoer & Grondwerken op een lichte achtergrond
 ---
 
 Kerkhofs Grondwerken uit Bocholt is een van de partners van Rover & Co, en Jan Kerkhofs is iemand die we graag eens in de bloemetjes zetten. In dit artikel vertellen we waarom, en stellen we het bedrijf voor aan de hand van wat ze zelf op hun website vertellen.

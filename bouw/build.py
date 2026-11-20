@@ -275,10 +275,10 @@ def tegel(href, foto, titel, tekst, label=""):
             f'<div class="tegel-b">{f"<span class=tegel-label>{e(label)}</span>" if label else ""}<b>{e(titel)}</b><span>{e(tekst)}</span></div></a>')
 
 PARTNERS_ALLE = [("partner-the-wolfgarage", "The Wolfgarage", "blog/partner-the-wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk", "blog/partner-pp-hekwerk"),
-                 ("partner-kerkhofs-grondwerken", "Kerkhofs Grondwerken", "959"), ("partner-pakawi", "Pakawi Park", "blog/partner-pakawi"),
+                 ("partner-kerkhofs-grondwerken", "Kerkhofs Grondwerken", "blog/partner-kerkhofs-grondwerken"), ("partner-pakawi", "Pakawi Park", "blog/partner-pakawi"),
                  ("partner-epc-verbeteraars", "EPC Verbeteraars", "blog/partner-epc-verbeteraars"), ("partner-elektrofix", "ElektroFix", "blog/partner-elektrofix"),
                  ("partner-sus-consult", "SUS Consult", "blog/partner-sus-consult")]
-PARTNERS_HOME = [("partner-the-wolfgarage", "The Wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk"), ("partner-pakawi", "Pakawi Park"),
+PARTNERS_HOME = [("partner-the-wolfgarage", "The Wolfgarage"), ("partner-pp-hekwerk", "P&P Hekwerk"), ("partner-kerkhofs-grondwerken", "Kerkhofs Grondwerken"), ("partner-pakawi", "Pakawi Park"),
                  ("partner-epc-verbeteraars", "EPC Verbeteraars"), ("partner-elektrofix", "ElektroFix"), ("partner-sus-consult", "SUS Consult")]
 
 home = f"""

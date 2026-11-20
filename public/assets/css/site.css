@@ -594,7 +594,7 @@ span.f-like{cursor:default}
 .ev:hover,.prod:hover,.blogkaart:hover{transform:translateY(-3px);box-shadow:var(--schaduw-hover)}
 .ev,.prod,.blogkaart{border-radius:var(--r2)}
 .partners-home{margin-top:34px}.partners-home small{display:block;color:var(--muted);font-size:var(--fs-sm);letter-spacing:1px;text-transform:uppercase;margin-bottom:12px}
-.partners-home div{display:grid;grid-template-columns:repeat(6,1fr);gap:10px}
+.partners-home div{display:grid;grid-template-columns:repeat(7,1fr);gap:10px}
 .partners-home a{border-radius:12px;overflow:hidden;box-shadow:var(--schaduw);transition:transform .2s}.partners-home a:hover{transform:translateY(-2px)}
 .partners-home img{width:100%;aspect-ratio:1;object-fit:cover;display:block}
 [data-gast][hidden]{display:none}
@@ -603,7 +603,7 @@ span.f-like{cursor:default}
   .volgende-wrap{margin-top:-46px}.volgende{width:100%;min-width:0}
   .hero-nieuw{min-height:80svh}.hero-nieuw .hero-in{padding-bottom:90px}
   .forum-in{grid-template-columns:1fr}
-  .partners-home div{grid-template-columns:repeat(3,1fr)}
+  .partners-home div{grid-template-columns:repeat(4,1fr)}
   .kal-tip{align-items:flex-start}
 }
 .volgende{padding-right:56px}
