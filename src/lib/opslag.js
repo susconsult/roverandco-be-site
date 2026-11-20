@@ -192,8 +192,8 @@ function mailBestelling(b) {
     `Bedankt voor je bestelling bij Rover & Co VZW. We hebben je betaling van ${eur(b.totaal)} goed ontvangen.`, "",
     `Bestelnummer: ${b.nummer}`, "", artikelTekst(b), "", `Subtotaal: ${eur(b.subtotaal)}`, `Verzending: ${eur(b.verzending)}`];
   if (b.donatie > 0) regels.push(`Steun aan de vzw: ${eur(b.donatie)}`);
-  regels.push(`Totaal: ${eur(b.totaal)}`, "", ophalen, "", "Dit is een automatische mail, je kan er niet op antwoorden.",
-    `Vragen? Mail naar ${VRAGEN_AAN} en vermeld je bestelnummer.`, "", "Bedankt voor je steun!", "Rover & Co VZW");
+  regels.push(`Totaal: ${eur(b.totaal)}`, "", ophalen, "", "Dit is een automatische mail.",
+    `Vragen? Antwoord op deze mail of mail naar ${VRAGEN_AAN} en vermeld je bestelnummer.`, "", "Bedankt voor je steun!", "Rover & Co VZW");
   return { onderwerp: `Je bestelling bij Rover & Co (${b.nummer})`, tekst: regels.join("\n") };
 }
 
@@ -207,8 +207,8 @@ function mailInschrijving(b) {
   regels.push("");
   regels.push("Je ticket met QR-code zit als PDF in bijlage. Toon het aan de ingang.", "");
   if (b.site) regels.push(`Alle info over de activiteit: ${b.site}/activiteiten/${b.activiteit}`, "");
-  regels.push("Dit is een automatische mail, je kan er niet op antwoorden.",
-    `Vragen? Mail naar ${VRAGEN_AAN} en vermeld je inschrijfnummer.`, "", "Tot dan!", "Rover & Co VZW");
+  regels.push("Dit is een automatische mail.",
+    `Vragen? Antwoord op deze mail of mail naar ${VRAGEN_AAN} en vermeld je inschrijfnummer.`, "", "Tot dan!", "Rover & Co VZW");
   return { onderwerp: `Je inschrijving voor ${b.activiteit_titel} (${b.nummer})`, tekst: regels.join("\n") };
 }
 
@@ -225,4 +225,4 @@ export const lijnTekst = (b) => {
   const per = { persoon: "per persoon", wagen: "per wagen", stuk: "per stuk" };
   return (b.lijnen || []).map((l) => l.prijs > 0 ? `${l.aantal} × ${l.naam} (${eur(l.prijs)} ${per[l.per] || ""}) = ${eur(l.lijn)}` : `${l.aantal} × ${l.naam} (gratis)`).join("\n");
 };
-export { adres };
+export { adres, mailBestelling, mailInschrijving };

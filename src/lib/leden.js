@@ -115,7 +115,7 @@ async function leesToken(env, t, soort) {
     .bind(await sha(t), soort, Date.now()).first();
 }
 
-const SLOT = "\n\nDit is een automatische mail, je kan er niet op antwoorden. Vragen? Mail naar info@roverandco.be";
+const SLOT = "\n\nDit is een automatische mail. Vragen? Antwoord op deze mail of mail naar info@roverandco.be.";
 
 export async function stuurBevestiging(env, origin, lid) {
   const t = await maakToken(env, lid.id, "bevestig", 7);
@@ -128,6 +128,27 @@ export async function stuurBevestiging(env, origin, lid) {
 // Ook gebruikt na een bestelling of inschrijving (automatisch account): geeft de link terug.
 export async function wachtwoordLink(env, origin, lidId) {
   return `${origin}/account/wachtwoord?t=${await maakToken(env, lidId, "wachtwoord", 30)}`;
+}
+
+// Afmeldlink voor nieuwsmails (lang geldig, ook via one-click List-Unsubscribe).
+export async function afmeldLink(env, origin, lidId) {
+  return `${origin}/account/afmelden?t=${await maakToken(env, lidId, "afmelden", 400)}`;
+}
+async function afmelden(request, env, url) {
+  const t = url.searchParams.get("t") || "";
+  const lid = await leesToken(env, t, "afmelden");
+  if (!lid) return pagina(env, request, { titel: "Link verlopen", noindex: true, status: 400,
+    inhoud: banner("Nieuwsmails", "Link verlopen") + kader(`<p>Deze afmeldlink werkt niet meer. Log in en zet de nieuwsmails uit bij je gegevens, of mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a>.</p>`) });
+  if (request.method === "POST") {
+    await env.SHOP_DB.prepare("UPDATE leden SET marketing = 0 WHERE id = ?").bind(lid.id).run();
+    await log(env, lid.id, "account", "Afgemeld voor nieuwsmails");
+    if (url.searchParams.has("klik") || !(request.headers.get("content-type") || "").includes("form")) return new Response("Afgemeld.", { status: 200 });
+    return pagina(env, request, { titel: "Afgemeld", noindex: true,
+      inhoud: banner("Nieuwsmails", "Je bent afgemeld") + kader(`<p>Je krijgt van ons geen nieuwsmails meer op <b>${esc(lid.email)}</b>. Mails over je eigen bestellingen en inschrijvingen krijg je wel nog.</p>`) });
+  }
+  return pagina(env, request, { titel: "Afmelden", noindex: true,
+    inhoud: banner("Nieuwsmails", "Afmelden") + kader(`<p>Wil je geen nieuwsmails meer van Rover &amp; Co op <b>${esc(lid.email)}</b>?</p>
+      <form method="post" action="/account/afmelden?t=${esc(t)}"><button class="btn btn-solid" type="submit">Ja, meld me af</button></form>`) });
 }
 
 export async function stuurWachtwoordLink(env, origin, lid) {
@@ -656,6 +677,8 @@ export async function leden(request, env, url) {
   }
   if (p !== "/account" && !p.startsWith("/account/")) return null;
   if (!env.SHOP_DB) return new Response("Nog niet gekoppeld.", { status: 503 });
+  // Afmelden mag ook rechtstreeks vanuit het mailprogramma (one-click), dus vóór de origin-check.
+  if (p === "/account/afmelden") return afmelden(request, env, url);
   if (request.method === "POST" && !eigenOrigin(request, url)) return new Response("Geweigerd.", { status: 403 });
 
   if (p === "/account/inloggen") return inloggen(request, env, url);

@@ -27,7 +27,7 @@ export async function zetOnderhoud(env, aan) {
 
 const OPEN = [
   /^\/assets\//, /^\/favicon\.png$/, /^\/apple-touch-icon\.png$/, /^\/robots\.txt$/,
-  /^\/account\/(inloggen|uitloggen|wachtwoord|wachtwoord-vergeten|bevestig)$/,
+  /^\/account\/(inloggen|uitloggen|wachtwoord|wachtwoord-vergeten|bevestig|afmelden)$/,
   /^\/beheer(\/|$)/, /^\/kassa(\/|$)/, /^\/planner(\/|$)/,
   /^\/api\/viva\/webhook$/, /^\/betaald\/?$/, /^\/betaling-mislukt(\.html)?$/,
   /^\/products(\/|$)/, /^\/woolandwheels\/?$/, /^\/demopage02\/?$/,

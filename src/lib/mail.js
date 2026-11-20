@@ -77,7 +77,9 @@ export function tekstNaarHtml(tekst, onderwerp = "") {
 
 /* ---------- versturen ---------- */
 
-// m: { aan, onderwerp, tekst, html?, sleutel?, reply_to?, bijlagen?: [{ filename, content(base64), content_type, content_id? }] }
+// Standaard antwoorden naar info@: wie op "beantwoorden" klikt, komt bij een mens terecht.
+const ANTWOORD = "info@roverandco.be";
+// m: { aan, onderwerp, tekst, html?, sleutel?, reply_to?, headers?, bijlagen?: [{ filename, content(base64), content_type, content_id? }] }
 export async function verstuur(env, m) {
   if (!env.RESEND_API_KEY) return { ok: false, fout: "geen RESEND_API_KEY" };
   const html = m.html || tekstNaarHtml(m.tekst, m.onderwerp);
@@ -86,7 +88,7 @@ export async function verstuur(env, m) {
     const r = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: { authorization: `Bearer ${env.RESEND_API_KEY}`, "content-type": "application/json", ...(m.sleutel ? { "idempotency-key": m.sleutel } : {}) },
-      body: JSON.stringify({ from: m.van || VAN, to: Array.isArray(m.aan) ? m.aan : [m.aan], subject: m.onderwerp, text: m.tekst, html, attachments, ...(m.reply_to ? { reply_to: m.reply_to } : {}) }),
+      body: JSON.stringify({ from: m.van || VAN, to: Array.isArray(m.aan) ? m.aan : [m.aan], subject: m.onderwerp, text: m.tekst, html, attachments, reply_to: m.reply_to || ANTWOORD, ...(m.headers ? { headers: m.headers } : {}) }),
     });
     const d = await r.json().catch(() => ({}));
     return { ok: r.ok && !!d.id, id: d.id, status: r.status, fout: d.message || "" };
