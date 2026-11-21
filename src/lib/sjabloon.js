@@ -12,7 +12,7 @@ export const datum = (iso, kort = false) => {
 
 // Kruimelpad: [["Shop", "/shop"], ["Product"]] → Home › Shop › Product
 export const kruimel = (delen = []) => delen === "slot" ? "<!--kruim-->" : delen.length ? `<nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a>${delen.map(([t, h]) => `<span aria-hidden="true">›</span>${h ? `<a href="${esc(h)}">${esc(t)}</a>` : `<span aria-current="page">${esc(t)}</span>`}`).join("")}</nav>` : "";
-const BANNERFOTO = { "Mijn account": "leden-defender-110-zonsondergang-achter", Forum: "leden-lightweight-110", "Rover & Co": "leden-vuur-avond" };
+const BANNERFOTO = { "Mijn account": "leden-defender-110-zonsondergang-achter", Forum: "leden-lightweight-110", Kampvuur: "leden-lightweight-110", "Rover & Co": "leden-vuur-avond" };
 import ROTATIE from "../../data/banners.json";
 export { ROTATIE };
 export const willekeurigeBanner = () => ROTATIE[crypto.getRandomValues(new Uint32Array(1))[0] % ROTATIE.length];

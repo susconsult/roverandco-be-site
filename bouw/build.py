@@ -299,7 +299,7 @@ home = f"""
 <div class="wrap volgende-wrap"><a href="/activiteiten/{eerst['slug']}" class="volgende" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span>{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a></div>
 <section class="tegels-sec"><div class="wrap tegels">
   {tegel("/activiteiten", "977", "Activiteiten", "Ritten, roadbooks en weekends")}
-  {tegel("/forum", "leden-vuur-avond", "Forum", "Vragen, verhalen en samen rijden", "Nieuw")}
+  {tegel("/forum", "leden-vuur-avond", "Kampvuur", "Vragen, verhalen en samen rijden", "Nieuw")}
   {tegel("/shop", "5577", "Shop", "T-shirts, hoodies en mokken")}
   {tegel("/blog", "5739", "Blog", "Onderhoud, geschiedenis en verhalen")}
 </div></section>
@@ -313,7 +313,7 @@ home = f"""
 <section class="forum-band topo">
   <div class="wrap forum-in">
     <div>
-      <div class="eyebrow">Forum</div>
+      <div class="eyebrow">Kampvuur</div>
       <h2>Wat leeft er</h2>
       <p>Geen algoritme, geen reclame. Vragen stellen, kennis delen en afspreken om samen te rijden. Jouw berichten blijven van jou.</p>
       <div class="ctas"><a href="/account/registreren" class="btn btn-wit" data-gast>Maak je gratis account</a><a href="/forum" class="btn">Naar het forum</a></div>
