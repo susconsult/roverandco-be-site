@@ -573,10 +573,10 @@ span.f-like{cursor:default}
 .kal-tip b{display:block;font-size:var(--fs-ui-groot)}.kal-tip .pijl{margin-left:auto;font-size:22px;color:var(--green)}
 .topo{background-color:var(--green);background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='400' viewBox='0 0 600 400'%3E%3Cg fill='none' stroke='%23ffffff' stroke-opacity='.06' stroke-width='1.2'%3E%3Cpath d='M-20 80c80-40 150 30 240 0s160-70 260-20 120 40 140 20'/%3E%3Cpath d='M-20 120c90-40 160 40 250 5s150-60 250-15 120 45 140 25'/%3E%3Cpath d='M-20 170c100-30 170 45 260 10s140-50 240-5 110 40 140 20'/%3E%3Cpath d='M-20 230c90-50 180 30 270 0s150-40 230 5 120 35 140 15'/%3E%3Cpath d='M-20 290c110-30 170 40 260 10s160-60 250-10 100 40 130 20'/%3E%3Cpath d='M-20 350c100-40 170 30 260 5s150-50 240-10 110 40 140 20'/%3E%3Cellipse cx='420' cy='190' rx='60' ry='26'/%3E%3Cellipse cx='420' cy='190' rx='30' ry='12'/%3E%3C/g%3E%3C/svg%3E")}
 .forum-band{color:var(--white)}
-.forum-in{display:grid;grid-template-columns:1fr 1fr;gap:40px 60px;align-items:center}
+.forum-in{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:40px 60px;align-items:center}.forum-in>*{min-width:0}
 .forum-band h2{font-size:var(--fs-h2);margin:6px 0 14px}.forum-band p{font-size:var(--fs-tekst);opacity:.9;max-width:42ch;margin-bottom:24px}
 .forum-band .eyebrow{color:#CFE3D4}
-.forum-lijst{display:grid;gap:10px}
+.forum-lijst{display:grid;grid-template-columns:minmax(0,1fr);gap:10px}.forum-rij{min-width:0}
 .forum-rij{display:block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:14px;padding:16px 18px;color:var(--white);text-decoration:none;transition:background .2s,transform .2s}
 .forum-rij:hover{background:rgba(255,255,255,.14);transform:translateX(4px)}
 .forum-rij span{display:block;font-weight:700;font-size:var(--fs-ui-groot)}.forum-rij small{display:block;opacity:.75;font-size:var(--fs-sm);margin-top:3px}
@@ -604,7 +604,7 @@ span.f-like{cursor:default}
   .tegels{grid-template-columns:1fr 1fr;gap:12px}.tegel{aspect-ratio:1}.tegel-b{padding:14px}.tegel-b>span:last-child{font-size:var(--fs-sm)}
   .volgende-wrap{margin-top:-46px}.volgende{width:100%;min-width:0}
   .hero-nieuw{min-height:80svh}.hero-nieuw .hero-in{padding-bottom:90px}
-  .forum-in{grid-template-columns:1fr}
+  .forum-in{grid-template-columns:minmax(0,1fr)}
   .partners-home div{grid-template-columns:repeat(4,1fr)}
   .kal-tip{align-items:flex-start}
 }
