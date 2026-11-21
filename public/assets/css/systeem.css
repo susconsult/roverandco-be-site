@@ -314,11 +314,9 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
   .ins-balk .btn{background:#fff;color:var(--green);padding:10px 20px}
 }
 
-/* app-uitnodiging op gsm */
-.app-uitnodiging{position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));z-index:90;background:#1F3B2A;color:#fff;border-radius:16px;padding:14px;box-shadow:0 10px 30px rgba(0,0,0,.3);transform:translateY(140%);transition:transform .3s ease}
-.app-uitnodiging.toon{transform:none}
-.au-kop{display:flex;gap:12px;align-items:center}.au-kop img{width:46px;height:46px;border-radius:11px;flex:none}.au-kop div{flex:1;min-width:0}.au-kop b{display:block;font-size:16px}.au-kop span{display:block;font-size:14px;opacity:.85}
-.au-x{background:none;border:0;color:#fff;font-size:26px;line-height:1;padding:4px 8px;opacity:.8;cursor:pointer}
-.au-knoppen{display:flex;gap:10px;margin-top:12px}.au-knoppen button{flex:1;border-radius:99px;padding:11px;font:700 15px var(--body,Inter,sans-serif);cursor:pointer;border:2px solid #fff}
-.au-ja{background:#fff;color:#1F3B2A}.au-later{background:none;color:#fff;flex:0 0 auto!important;padding:11px 18px!important;border-color:rgba(255,255,255,.4)!important}
-.au-stappen{margin:12px 0 0;padding-left:22px;font-size:15px;line-height:1.7}.au-stappen .ico{width:18px;height:18px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2}
+/* app op je gsm: blok op /account */
+.app-blok{display:flex;gap:14px;align-items:center;background:#1F3B2A;color:#fff;border-radius:16px;padding:16px;margin:0 0 18px;flex-wrap:wrap}
+.app-blok[hidden]{display:none}.app-blok img{width:52px;height:52px;border-radius:12px;flex:none}.app-blok>div{flex:1;min-width:180px}
+.app-blok b{font-size:16px}.app-blok span{display:block;font-size:14px;opacity:.9;margin-top:2px}.app-blok span b{font-size:inherit}
+.app-blok .ico{width:17px;height:17px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2}
+.app-blok .app-ja{background:#fff;color:#1F3B2A;border-color:#fff;width:100%;justify-content:center}

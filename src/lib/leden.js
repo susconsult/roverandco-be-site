@@ -457,6 +457,7 @@ async function overzicht(request, env, url, lid) {
   return pagina(env, request, {
     titel: "Mijn account", noindex: true, pad: "/account",
     inhoud: banner("Mijn account", lid.gebruikersnaam ? `Hallo ${lid.gebruikersnaam}` : "Mijn account", "Alles van jou op één plek. Kies hieronder waar je naartoe wil.", [["Mijn account"]]) + `<section class="wrap acc-sectie">${m}${onbevestigd}
+      <div class="app-blok" data-app-blok hidden></div>
       <div class="acc-tegels">
         ${accTegel("/account/bestellingen", "bon", "Bestellingen en inschrijvingen", reg.n ? meer(reg.n, "bestelling of inschrijving", "bestellingen en inschrijvingen") : "Nog niets besteld")}
         ${accTegel("/account/garage", "auto", "Mijn Landy", wagens.n ? meer(wagens.n, "Land Rover", "Land Rovers") : "Zet je Land Rover erin")}
