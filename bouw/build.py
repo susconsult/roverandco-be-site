@@ -791,9 +791,9 @@ write("/privacy", "Privacy", "Privacyverklaring van Rover & Co VZW.",
   <p>Leden kunnen een bericht, foto of CB-bericht melden. De beheerder krijgt dan een mail met de inhoud en de reden en kan ze verwijderen of een lid blokkeren. Wie het bericht schreef, ziet niet wie het meldde. Andere CB-berichten leest de beheerder niet.</p>
   <h2>Je microfoon en camera</h2>
   <p>Je microfoon wordt alleen gebruikt zolang je de PTT-knop op de CB ingedrukt houdt, en alleen als je dat zelf toelaat in je browser.</p>
-  <p>De camera wordt alleen gebruikt door vrijwilligers aan de kassa, om tickets te scannen. De beelden blijven op hun gsm en worden niet bewaard.</p>
+  <p>De camera wordt alleen gebruikt door vrijwilligers aan de ingang, om tickets te scannen. De beelden blijven op hun gsm en worden niet bewaard.</p>
   <h2>Tickets</h2>
-  <p>Bij een inschrijving krijg je een ticket met een QR-code. Die code is willekeurig en bevat geen persoonsgegevens. Aan de ingang zien de vrijwilligers aan de kassa je naam en waarvoor je inschreef, en we noteren wanneer je ticket gescand werd.</p>
+  <p>Bij een inschrijving krijg je een ticket met een QR-code. Die code is willekeurig en bevat geen persoonsgegevens. Aan de ingang zien de vrijwilligers je naam en waarvoor je inschreef, en we noteren wanneer je ticket gescand werd.</p>
   <h2>Hoe lang</h2>
   <ul>
     <li>CB-berichten, spraakberichten, reacties en eigen CB-kanalen: 24 uur.</li>

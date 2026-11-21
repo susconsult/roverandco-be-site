@@ -1,5 +1,5 @@
 // Tickets voor inschrijvingen: één willekeurige code per inschrijving (registraties.ticket),
-// als QR in de mail (PNG via cid) en als PDF-bijlage. De kassa scant de QR (zie kassa.js).
+// als QR in de mail (PNG via cid) en als PDF-bijlage. De scanpagina (/scan) scant de QR (zie scan.js).
 import qrcode from "qrcode-generator";
 import { LOGO_JPG } from "./mail-logo.js";
 

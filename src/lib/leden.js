@@ -465,7 +465,7 @@ async function overzicht(request, env, url, lid) {
         ${lid.gebruikersnaam ? accTegel(`/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}`, "profiel", "Mijn profiel", "Zo zien anderen je op het forum") : ""}
         ${accTegel("/account/gegevens", "instel", "Gegevens en wachtwoord", esc(lid.email))}
         ${accTegel("/cb", "cb", "Op de CB", "Live praten met andere leden")}
-        ${lid.kassa || lid.beheerder ? accTegel("/kassa", "kassa", "Kassa", "Tickets scannen aan de ingang") : ""}
+        ${lid.kassa || lid.beheerder ? accTegel("/scan", "kassa", "Scan", "Tickets scannen aan de ingang") : ""}
       </div>
       <p class="acc-uit"><a href="/account/uitloggen">Uitloggen</a></p></section>`,
   });

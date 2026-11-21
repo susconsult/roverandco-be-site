@@ -47,7 +47,7 @@
     lines.innerHTML = cart.length ? cart.map(function (l, i) {
       return '<div class="line"><span>' + esc(l.naam) + (l.opties ? "<small>" + esc(l.opties) + "</small>" : "") +
         "<small>" + eur(l.prijs) + " per stuk</small>" + stapper(i, l.aantal) + '<button type="button" data-remove="' + i + '">Verwijderen</button></span><b>' + eur(l.prijs * l.aantal) + "</b></div>";
-    }).join("") + '<a class="btn btn-solid line-naar" href="/afrekenen">Naar de kassa</a>' : "<p style='color:#5B625C'>Je mandje is leeg.</p>";
+    }).join("") + '<a class="btn btn-solid line-naar" href="/afrekenen">Afrekenen</a>' : "<p style='color:#5B625C'>Je mandje is leeg.</p>";
     document.getElementById("total").textContent = eur(cart.reduce(function (a, l) { return a + l.prijs * l.aantal; }, 0));
   }
   document.addEventListener("click", function (e) {
@@ -462,7 +462,7 @@
       item("/account/meldingen", "bel", "Meldingen", ik.meldingen ? '<em>' + (ik.meldingen > 99 ? "99+" : ik.meldingen) + "</em>" : "") +
       (ik.gebruikersnaam ? item("/forum/lid/" + encodeURIComponent(ik.gebruikersnaam), "profiel", "Mijn profiel op het forum") : "") +
       item("/account/gegevens", "instel", "Gegevens en wachtwoord") + "<hr>" +
-      (ik.kassa ? item("/kassa", "kassa", "Kassa (tickets scannen)") : "") + (ik.beheerder ? item("/beheer", "beheer", "Beheer") : "") + item("/account/uitloggen", "uit", "Uitloggen");
+      (ik.kassa ? item("/scan", "kassa", "Scan (tickets)") : "") + (ik.beheerder ? item("/beheer", "beheer", "Beheer") : "") + item("/account/uitloggen", "uit", "Uitloggen");
     acc.parentNode.appendChild(m);
     acc.setAttribute("aria-haspopup", "true"); acc.setAttribute("aria-expanded", "false"); acc.setAttribute("aria-controls", "acc-menu");
     acc.addEventListener("click", function (e) { e.preventDefault(); var open = m.hidden; m.hidden = !open; acc.setAttribute("aria-expanded", open ? "true" : "false"); });

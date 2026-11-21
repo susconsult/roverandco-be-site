@@ -33,7 +33,7 @@ function status(l) {
   if (l.geblokkeerd) return `<span class="badge b-fout">Geblokkeerd</span>`;
   if (!l.wachtwoord) return `<span class="badge b-wacht">Via bestelling</span>`;
   if (!l.bevestigd_op) return `<span class="badge b-wacht">Niet bevestigd</span>`;
-  return `<span class="badge b-betaald">Actief</span>${l.kassa ? ' <span class="badge">Kassa</span>' : ""}`;
+  return `<span class="badge b-betaald">Actief</span>${l.kassa ? ' <span class="badge">Scan</span>' : ""}`;
 }
 
 const FILTERS = {
@@ -95,7 +95,7 @@ ${knop("bekijk", "Bekijk als dit lid")}
 ${l.wachtwoord ? knop("wachtwoordlink", "Stuur wachtwoordlink") : knop("wachtwoordlink", "Stuur 'kies je wachtwoord'-mail")}
 ${!l.bevestigd_op ? knop("bevestigmail", "Bevestigingsmail opnieuw") : ""}
 ${knop("uitloggen", "Overal uitloggen")}
-${l.kassa ? knop("kassa-uit", "Kassa-rechten intrekken") : knop("kassa-aan", "Kassa-rechten geven", { bevestig: "Dit lid mag dan tickets scannen op /kassa." })}
+${l.kassa ? knop("kassa-uit", "Scanrechten intrekken") : knop("kassa-aan", "Scanrechten geven", { bevestig: "Dit lid mag dan tickets scannen op /scan." })}
 ${l.geblokkeerd ? knop("deblokkeer", "Deblokkeren") : knop("blokkeer", "Blokkeren", { rood: true, bevestig: "Dit lid blokkeren? Inloggen lukt dan niet meer." })}
 ${knop("anoniem", "Account verwijderen", { rood: true, bevestig: "Account anoniem maken? Naam, e-mail, telefoon, Land Rovers en profielfoto worden gewist. Forumberichten blijven staan als 'verwijderd lid', bestellingen blijven voor de boekhouding. Dit kan niet ongedaan worden." })}
 </div>`}</div>
@@ -136,8 +136,8 @@ async function actie(request, env, url, id, email) {
   }
   if (a === "kassa-aan" || a === "kassa-uit") {
     await db.prepare("UPDATE leden SET kassa = ? WHERE id = ?").bind(a === "kassa-aan" ? 1 : 0, l.id).run();
-    await log(env, l.id, "beheer", a === "kassa-aan" ? "Kassa-rechten gekregen" : "Kassa-rechten ingetrokken");
-    return detail(id, env, email, a === "kassa-aan" ? "Dit lid kan nu tickets scannen op /kassa." : "Kassa-rechten ingetrokken.");
+    await log(env, l.id, "beheer", a === "kassa-aan" ? "Scanrechten gekregen" : "Scanrechten ingetrokken");
+    return detail(id, env, email, a === "kassa-aan" ? "Dit lid kan nu tickets scannen op /scan." : "Scanrechten ingetrokken.");
   }
   if (a === "blokkeer" || a === "deblokkeer") {
     await db.prepare("UPDATE leden SET geblokkeerd = ? WHERE id = ?").bind(a === "blokkeer" ? 1 : 0, l.id).run();

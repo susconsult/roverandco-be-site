@@ -1,5 +1,5 @@
 // /beheer/testmail: voorbeeldmails versturen naar een adres naar keuze, om de opmaak te bekijken.
-// De QR in de testmail is een willekeurige code die niet in de database staat (werkt dus niet aan de kassa).
+// De QR in de testmail is een willekeurige code die niet in de database staat (werkt dus niet bij het scannen).
 import { esc, pagina } from "./beheer.js";
 import { verstuur } from "./mail.js";
 import { klantMailOpmaak } from "./mails-bevestiging.js";
@@ -51,7 +51,7 @@ export async function beheerTestmail(request, env, url, email) {
   }
   const knop = (s, t) => `<button type="submit" name="soort" value="${s}">${t}</button>`;
   return pagina("Testmail", `<!--aan:testmail-->${melding ? `<div class="${melding.startsWith("!") ? "melding-fout" : "melding-ok"}">${esc(melding.replace(/^!/, ""))}</div>` : ""}
-<div class="kaart"><h2>Testmail versturen</h2><p>Stuur een voorbeeld van een mail om de opmaak te bekijken. De QR-code in de testmail werkt niet aan de kassa.</p>
+<div class="kaart"><h2>Testmail versturen</h2><p>Stuur een voorbeeld van een mail om de opmaak te bekijken. De QR-code in de testmail werkt niet bij het scannen.</p>
 <form method="post" action="/beheer/testmail"><label>Naar<input name="aan" type="email" value="pieter@susconsult.be" required></label>
 <p style="display:flex;gap:8px;flex-wrap:wrap">${knop("inschrijving", "Inschrijving met ticket")}${knop("bestelling", "Bestelling webshop")}${knop("gewoon", "Gewone melding")}${knop("cor", "Ticket Church of Rover (Ecwid)")}${knop("aankondiging", "Aankondiging nieuwe site")}</p></form></div>`, email);
 }

@@ -108,7 +108,7 @@ ALTER TABLE registraties ADD COLUMN ticket TEXT;          -- willekeurige code i
 ALTER TABLE registraties ADD COLUMN gescand_op TEXT;      -- moment van scannen aan de ingang
 ALTER TABLE registraties ADD COLUMN gescand_door INTEGER; -- lid (kassa) dat scande
 CREATE UNIQUE INDEX IF NOT EXISTS idx_reg_ticket ON registraties(ticket);
-ALTER TABLE leden ADD COLUMN kassa INTEGER NOT NULL DEFAULT 0; -- mag tickets scannen op /kassa
+ALTER TABLE leden ADD COLUMN kassa INTEGER NOT NULL DEFAULT 0; -- mag tickets scannen op /scan (naam kolom bleef kassa)
 
 -- nov 2026: minimumleeftijd 16, geboortedatum bij registreren
 ALTER TABLE leden ADD COLUMN geboortedatum TEXT;

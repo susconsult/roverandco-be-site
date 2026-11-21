@@ -30,7 +30,7 @@ import { melden } from "./melden.js";
 import { blogLikes } from "./blog-likes.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
 import { verstuur } from "./mail.js";
-import { kassa } from "./kassa.js";
+import { scanPagina } from "./scan.js";
 import { klantMailOpmaak } from "./mails-bevestiging.js";
 
 const VERZENDKOST = 7.5;
@@ -385,7 +385,7 @@ export default {
     if (bl) return bl;
     const cbr = await cb(request, env, url);
     if (cbr) return cbr;
-    const ks = await kassa(request, env, url);
+    const ks = await scanPagina(request, env, url);
     if (ks) return ks;
     const bh = await beheer(request, env, url);
     if (bh) return bh;
