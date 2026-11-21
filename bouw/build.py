@@ -1012,7 +1012,7 @@ home = home.replace("__BLOGHOME__", '<section class="blog-home"><div class="wrap
 write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen: ritten, roadbooks, een forum, een shop en verhalen over Land Rover.", home, hero=True)
 
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
-     "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VERSIE}</lastmod></url>\n" for p in pages) + "</urlset>\n"
+     "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VERSIE}</lastmod></url>\n" for p in pages + ["/landys"]) + "</urlset>\n"  # /landys = live Worker-pagina
 open(os.path.join(PUB, "sitemap.xml"), "w").write(sm)
 open(os.path.join(PUB, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nDisallow: /planner\nDisallow: /account\nDisallow: /forum/nieuw\nDisallow: /forum/lid/\nSitemap: {site['domein']}/sitemap.xml\n")
 print(f"{len(pages)} pagina's gebouwd + 404, sitemap en robots.txt")
