@@ -46,6 +46,15 @@ async function andere(env, b, eigenNummer) {
   return (results || []).filter((r) => teltMee(r, grens));
 }
 
+// Bezetting per tijdslot (personen), voor het formulier: volle sloten worden niet meer aanklikbaar.
+export async function slotBezetting(env, slug) {
+  const som = {};
+  for (const r of await andere(env, { activiteit: slug, betaaltijd_min: 15 }, "")) {
+    if (r.tijdslot) som[r.tijdslot] = (som[r.tijdslot] || 0) + (Number(r.slot_personen) || 0);
+  }
+  return som;
+}
+
 function telOnderdelen(rijen) {
   const som = {};
   for (const r of rijen) {

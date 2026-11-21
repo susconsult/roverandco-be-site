@@ -7,6 +7,7 @@
 import { esc as e, pagina, kruimel, willekeurigeBanner } from "./sjabloon.js";
 import { nieuwsteBerichten, nieuwLijst } from "./forum-nieuw.js";
 import kalenderAnderen from "../../data/kalender.json";
+import { slotBezetting } from "./opslag.js";
 
 const DOMEIN = "https://roverandco.be";
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
@@ -169,7 +170,7 @@ async function activiteitenPagina(env, request) {
 }
 
 // Compacte inschrijfkaart: kiezen, (gegevens), totaal en betalen in één kaart naast de tekst.
-function inschrijfKaart(a) {
+function inschrijfKaart(a, bezet = {}) {
   const i = a.inschrijving, ts = i.tijdsloten, g = gratis(a);
   const rijen = i.onderdelen.map((o) => `
       <div class="ins-rij" data-onderdeel="${e(o.id)}" data-prijs="${Number(o.prijs) || 0}">
@@ -180,7 +181,11 @@ function inschrijfKaart(a) {
       </div>`).join("");
   const slot = ts?.onderdeel && ts.slots?.length ? `
       <fieldset class="ins-slots" data-slot-voor="${e(ts.onderdeel)}" hidden><legend>Kies je tijdslot</legend>
-        <div class="chips">${ts.slots.map((x) => `<label><input type="radio" name="tijdslot" value="${e(x)}"><span>${e(x)}</span></label>`).join("")}</div>
+        <div class="chips">${ts.slots.map((x) => {
+          const vrij = ts.max_per_slot > 0 ? Math.max(0, ts.max_per_slot - (bezet[x] || 0)) : null;
+          if (vrij === 0) return `<label class="vol"><input type="radio" name="tijdslot" value="${e(x)}" disabled><span>${e(x)} <small>volzet</small></span></label>`;
+          return `<label><input type="radio" name="tijdslot" value="${e(x)}"${vrij !== null ? ` data-vrij="${vrij}"` : ""}><span>${e(x)}${vrij !== null && vrij < ts.max_per_slot ? ` <small>nog ${vrij}</small>` : ""}</span></label>`;
+        }).join("")}</div>
         <div class="err" data-voor="tijdslot"></div></fieldset>` : "";
   const wagen = i.wagen ? `<div class="veld ins-wagen"><label for="wagen">Met welke Land Rover kom je? <small>(optioneel)</small></label><input id="wagen" name="wagen" placeholder="Bv. Defender 110, 1998"></div>` : "";
   return `
@@ -228,7 +233,7 @@ async function activiteitPagina(env, request, slug) {
     let body = kop + `
 <section class="act-sec"><div class="wrap act-grid">
   <div class="act-intro">${labels ? `<div class="act-labels">${labels}</div>` : ""}<div class="prose">${intro}</div></div>
-  ${inschrijfKaart(a)}
+  ${inschrijfKaart(a, a.inschrijving?.tijdsloten?.max_per_slot ? await slotBezetting(env, a.slug) : {})}
   <div class="act-meer"><div class="prose">${rest}</div>${a.affiche ? `<div class="act-affiche">${affiche(a)}<span>Affiche, klik om te vergroten</span></div>` : ""}</div>
 </div></section>` + fotoblok(a);
     if (a.foto_credit) body += `<section style="padding-top:0"><div class="wrap"><p class="fotocredit">Foto bovenaan: ${e(a.foto_credit)}</p></div></section>`;

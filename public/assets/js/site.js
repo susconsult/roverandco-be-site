@@ -384,6 +384,11 @@
       if (!iets) { ifout("aantal", "Kies minstens één onderdeel"); ok = false; }
       var slotVak = ins.querySelector("[data-slot-voor]");
       if (slotVak && !slotVak.hidden && !iw("tijdslot")) { ifout("tijdslot", "Kies een tijdslot"); ok = false; }
+      if (slotVak && !slotVak.hidden && iw("tijdslot")) {
+        var gk = slotVak.querySelector("input:checked"), vrij = gk && gk.dataset.vrij ? parseInt(gk.dataset.vrij, 10) : null;
+        var pers = aantallen[slotVak.dataset.slotVoor] || 0;
+        if (vrij !== null && pers > vrij) { ifout("tijdslot", "In dit tijdslot zijn nog maar " + vrij + " plaatsen. Kies een ander tijdslot of minder personen."); ok = false; }
+      }
       if (!document.getElementById("akkoord").checked) { ifout("akkoord", "Vink dit aan om in te schrijven"); ok = false; }
       if (!ok && geg && geg.classList.contains("kort") && (ins.querySelector('.err[data-voor="naam"]').textContent || ins.querySelector('.err[data-voor="email"]').textContent || ins.querySelector('.err[data-voor="telefoon"]').textContent)) gegevensKort(false);
       if (!ok) { ins.classList.add("gekozen"); var eerste = ins.querySelector(".err:not(:empty)"); if (eerste) eerste.scrollIntoView({ block: "center", behavior: "smooth" }); return; }

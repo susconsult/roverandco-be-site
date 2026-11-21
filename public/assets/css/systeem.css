@@ -290,6 +290,7 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .act-kaart .teller button{width:34px;height:34px;font-size:18px}.act-kaart .teller input{width:44px;padding:6px 2px}
 .ins-slots{border:0;margin:10px 0 4px;padding:0;min-width:0}.ins-slots legend{font-weight:700;font-size:var(--fs-sm);margin-bottom:8px}
 .ins-slots .chips{gap:6px}.ins-slots .chips span{padding:6px 12px;font-size:var(--fs-sm)}
+.ins-slots .chips small{font-weight:500;opacity:.75}.ins-slots .chips .vol span{cursor:not-allowed;background:#eee9dd;color:#8a8576;border-color:#e0dacb;text-decoration:line-through}.ins-slots .chips .vol small{text-decoration:none;display:inline-block}
 .ins-gegevens{margin:12px 0 0}
 .act-kaart form:not(.gekozen) .ins-gegevens:not(.kort){display:none}
 .ins-gegevens.kort .ins-velden{display:none}
