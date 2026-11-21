@@ -4,6 +4,7 @@
 import { hoofdTabs } from "./beheer-leden.js";
 import { pagina, esc } from "./beheer.js";
 import { producten, activiteiten, product, activiteit, eur } from "./aanbod.js";
+import { activiteitOverzicht } from "./beheer-overzicht.js";
 
 const nu = () => new Date().toISOString();
 const slugify = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/&/g, " en ").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 80);
@@ -154,7 +155,7 @@ async function activiteitLijst(env, email, url) {
     const voorbij = a.datum && (a.einde || a.datum) < v;
     const ins = a.inschrijving?.open ? `Open${a.inschrijving.sluit ? " tot " + esc(a.inschrijving.sluit) : ""}` : a.inschrijven_url ? "Externe link" : "–";
     return `<tr class="${a.verborgen || voorbij ? "uit" : ""}"><td>${esc(a.datum_label || a.datum || "–")}</td><td><a href="/beheer/activiteiten/${esc(a.slug)}">${esc(a.titel)}</a><br><small>${esc(a.locatie || "")}</small></td>
-      <td><small>${ins}</small></td><td>${a.verborgen ? "Verborgen" : voorbij ? "Voorbij" : "Ja"}</td></tr>`;
+      <td><small>${ins}</small>${a.inschrijving?.onderdelen?.length ? `<br><a class="knop licht" style="padding:4px 10px;font-size:13px;margin-top:4px" href="/beheer/activiteiten/${esc(a.slug)}/overzicht">Overzicht</a>` : ""}</td><td>${a.verborgen ? "Verborgen" : voorbij ? "Voorbij" : "Ja"}</td></tr>`;
   }).join("") || '<tr><td colspan="4">Nog geen activiteiten.</td></tr>'}</tbody></table>`, email);
 }
 
@@ -339,6 +340,7 @@ export async function beheerAanbod(request, env, url, email) {
   }
   if (p === "/beheer/activiteiten") return activiteitLijst(env, email, url);
   if (p === "/beheer/activiteiten/nieuw") return post ? activiteitBewaren(request, env, null, email) : activiteitFormulier({ inschrijving: { open: false, onderdelen: [] } }, email);
+  if ((m = p.match(/^\/beheer\/activiteiten\/([a-z0-9-]{1,80})\/overzicht$/))) return (await activiteitOverzicht(env, email, m[1], url)) || naar("/beheer/activiteiten");
   if ((m = p.match(/^\/beheer\/activiteiten\/([a-z0-9-]{1,80})$/))) {
     const x = await activiteit(env, m[1]);
     if (!x) return naar("/beheer/activiteiten");
