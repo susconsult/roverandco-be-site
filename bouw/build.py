@@ -69,6 +69,10 @@ def layout(path, title, desc, body, hero=False, noindex=False):
 <meta property="og:image" content="{site['domein']}/assets/img/964.webp">
 <meta property="og:locale" content="nl_BE">
 <link rel="icon" href="/favicon.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#1F3B2A">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-title" content="Rover &amp; Co">
 <link rel="preload" href="/assets/fonts/big-shoulders-display-latin-900-normal.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="/assets/css/site.css?v={VERSIE}">
 <link rel="stylesheet" href="/assets/css/systeem.css?v={VERSIE}">

@@ -529,4 +529,42 @@
   })();
 
   render();
+
+  /* ---------- app op je gsm: service worker + uitnodiging (2de bezoek, na 10 s, 30 dagen rust na sluiten) ---------- */
+  (function () {
+    if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("/sw.js"); } catch (x) {} }
+    var ls = function (k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (x) { return null; } };
+    var app = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
+    if (app) return;
+    try { if (!sessionStorage.getItem("rc-sessie")) { sessionStorage.setItem("rc-sessie", "1"); ls("rc-bezoeken", String((parseInt(ls("rc-bezoeken"), 10) || 0) + 1)); } } catch (x) {}
+    var gsm = window.matchMedia("(max-width: 880px) and (pointer: coarse)").matches;
+    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var weg = parseInt(ls("rc-app-weg"), 10) || 0;
+    var rust = ls("rc-app-nooit") || Date.now() - weg < 30 * 86400000;
+    var stil = /^\/(afrekenen|bedankt|betaald|scan|beheer|account\/(inloggen|registreren|wachtwoord))/.test(location.pathname);
+    var prompt = null;
+    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); prompt = e; });
+    window.addEventListener("appinstalled", function () { ls("rc-app-nooit", "1"); sluit(); });
+    if (!gsm || rust || stil || (parseInt(ls("rc-bezoeken"), 10) || 0) < 2) return;
+    var el;
+    function sluit(nooit) { if (el) { el.classList.remove("toon"); setTimeout(function () { el && el.remove(); }, 300); } }
+    function later() { ls("rc-app-weg", String(Date.now())); sluit(); }
+    setTimeout(function () {
+      if (!ios && !prompt) return; // Android zonder installeerbare app (bv. al geïnstalleerd of andere browser): niets tonen
+      el = document.createElement("div");
+      el.className = "app-uitnodiging"; el.setAttribute("role", "dialog"); el.setAttribute("aria-label", "Rover & Co op je gsm");
+      el.innerHTML = '<div class="au-kop"><img src="/apple-touch-icon.png" alt=""><div><b>Rover &amp; Co</b><span>Zet de app op je gsm</span></div><button type="button" class="au-x" aria-label="Sluiten">×</button></div>' +
+        (ios ? '<ol class="au-stappen"><li>Tik op <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> <b>Delen</b></li><li>Kies <b>Zet op beginscherm</b></li></ol>'
+             : '<div class="au-knoppen"><button type="button" class="au-ja">Installeren</button><button type="button" class="au-later">Later</button></div>');
+      document.body.appendChild(el);
+      requestAnimationFrame(function () { el.classList.add("toon"); });
+      el.querySelector(".au-x").addEventListener("click", later);
+      var l = el.querySelector(".au-later"); if (l) l.addEventListener("click", later);
+      var j = el.querySelector(".au-ja");
+      if (j) j.addEventListener("click", function () {
+        prompt.prompt();
+        prompt.userChoice.then(function (r) { if (r.outcome === "accepted") ls("rc-app-nooit", "1"); else ls("rc-app-weg", String(Date.now())); prompt = null; sluit(); });
+      });
+    }, 10000);
+  })();
 })();
