@@ -205,7 +205,7 @@ function inschrijfKaart(a) {
   <div class="err" data-voor="akkoord"></div>
   <button class="btn btn-solid ins-knop" type="submit" id="co-knop">${g ? "Inschrijven" : "Verder naar betalen"}</button>
   <div class="err" id="co-fout" role="alert"></div>
-  <p class="note">${g ? "Gratis. Je krijgt een bevestiging met ticket per mail." : "Je betaalt veilig via Viva en krijgt een bevestiging met ticket per mail."}</p>${g ? "" : '<p class="betaal-met">Betalen via <img class="viva-logo" src="/assets/img/viva-logo.svg" alt="viva.com" width="73" height="13"></p>'}
+  <p class="note">${g ? "Gratis. Je krijgt een bevestiging met ticket per mail." : "Je betaalt veilig via Viva en krijgt een bevestiging met ticket per mail."}</p>
 </form></aside>
 <div class="ins-balk" id="ins-balk" hidden><span><small>Totaal</small><b id="ins-balk-tot">€0,00</b></span><a class="btn" href="#inschrijven">Inschrijven</a></div>`;
 }
