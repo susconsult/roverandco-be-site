@@ -6,10 +6,26 @@
 
   var burger = document.querySelector(".burger");
   var menu = document.getElementById("menu");
-  if (burger && menu) burger.addEventListener("click", function () {
-    var open = menu.classList.toggle("open");
-    burger.setAttribute("aria-expanded", open ? "true" : "false");
-  });
+  if (burger && menu) {
+    var BURGER = burger.innerHTML;
+    var KRUIS = '<svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18"/></svg>';
+    if (!menu.querySelector(".menu-extra")) {
+      var li = document.createElement("li");
+      li.className = "menu-extra";
+      li.innerHTML = '<a class="btn" href="/account">Mijn account</a><span><a href="https://www.instagram.com/roverandco.be/" target="_blank" rel="noopener">Instagram</a><a href="https://www.facebook.com/roverandcobe/" target="_blank" rel="noopener">Facebook</a></span>';
+      menu.appendChild(li);
+    }
+    var zet = function (open) {
+      menu.classList.toggle("open", open);
+      document.body.classList.toggle("menu-open", open);
+      burger.setAttribute("aria-expanded", open ? "true" : "false");
+      burger.setAttribute("aria-label", open ? "Menu sluiten" : "Menu");
+      burger.innerHTML = open ? KRUIS : BURGER;
+    };
+    burger.addEventListener("click", function () { zet(!menu.classList.contains("open")); });
+    menu.addEventListener("click", function (ev) { if (ev.target.closest("a")) zet(false); });
+    window.addEventListener("keydown", function (ev) { if (ev.key === "Escape" && menu.classList.contains("open")) zet(false); });
+  }
 
   /* ---------- mandje ---------- */
   var KEY = "rc-mandje";
