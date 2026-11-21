@@ -748,3 +748,4 @@ button.garage-kaart{border:0;padding:0;font:inherit;text-align:left;cursor:zoom-
   .menu .menu-extra .btn{justify-content:center;padding:14px;background:var(--white);color:var(--green);border-radius:99px;font-weight:700}
   .menu .menu-extra span{display:flex;gap:18px;justify-content:center;opacity:.8}
 }
+@media(min-width:881px){.menu a{font-family:var(--head);font-weight:800;font-size:21px;text-transform:uppercase;letter-spacing:.4px;line-height:1}.menu a::before{width:19px;height:19px}}
