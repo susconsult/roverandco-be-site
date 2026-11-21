@@ -581,6 +581,8 @@ span.f-like{cursor:default}
 .forum-rij:hover{background:rgba(255,255,255,.14);transform:translateX(4px)}
 .forum-rij span{display:block;font-weight:700;font-size:var(--fs-ui-groot)}.forum-rij small{display:block;opacity:.75;font-size:var(--fs-sm);margin-top:3px}
 .garage-rij{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:16px}
+.landys-raster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+@media(max-width:880px){.landys-raster{grid-template-columns:1fr 1fr;gap:12px}}
 .garage-kaart{background:var(--white);border-radius:var(--r2);overflow:hidden;color:inherit;text-decoration:none;box-shadow:var(--schaduw);transition:transform .2s,box-shadow .2s}
 .garage-kaart:hover{transform:translateY(-3px);box-shadow:var(--schaduw-hover)}
 .garage-kaart img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block}

@@ -257,11 +257,31 @@ async function activiteitPagina(env, request, slug) {
 const vervang = (html) => ({ element(el) { el.setInnerContent(html, { html: true }); } });
 
 const slugTitel = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
+// Land Rovers van leden met foto (home en /landys).
+const WAGEN_BASIS = `SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
+      WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 AND l.verwijderd_op IS NULL`;
+// Eén kaart: foto groot openen (lightbox) + hartje.
+function wagenKaart(w) {
+  const titel = w.naam || w.type;
+  const info = [w.naam ? w.type : "", w.bouwjaar || ""].filter(Boolean).join(" · ");
+  return `<div class="garage-kaart"><button type="button" class="gk-open" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(titel)} van ${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="${e(titel)} van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${e(titel)} van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(titel)}</b>${info ? `<small>${e(info)}</small>` : ""}<em>van ${e(w.naam_lid)}</em></span></button><button type="button" class="f-like wagen-like" data-like="wagen-${w.id}" aria-pressed="false" title="Geef een hartje"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg> <span></span></button></div>`;
+}
+// /landys: alle Land Rovers van leden met foto, nieuwste eerst (geen filters, niet in het menu).
+async function landysPagina(env, request) {
+  let wagens = [];
+  try { wagens = (await env.SHOP_DB.prepare(`${WAGEN_BASIS} ORDER BY w.aangemaakt DESC`).all()).results || []; } catch {}
+  return pagina(env, request, {
+    titel: "Landy's van leden", pad: "/landys", desc: "Alle Land Rovers van de leden van Rover & Co.",
+    inhoud: banner("Land Rovers van leden", "Landy's van leden", "De Land Rovers van onze leden. Geef een hartje aan je favoriet.", "977", "Colonne Defenders in het bos")
+      + `<section class="garage-sec"><div class="wrap"><div class="landys-raster">${wagens.length ? wagens.map(wagenKaart).join("") : '<a class="garage-leeg" href="/account/garage">Nog niemand. Zet als eerste je Land Rover erbij.</a>'}</div>
+<p style="text-align:center;margin-top:28px"><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></p></div></section>`,
+  });
+}
+
 // Startpagina, "Wagens van leden" (wens Pieter 20 nov 2026): 2 rijen van 5. Bovenaan de 5 nieuwste,
 // onderaan 5 willekeurige andere (bij elke refresh andere; de pagina wordt niet gecachet).
 async function recenteWagens(env) {
-  const basis = `SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
-      WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 AND l.verwijderd_op IS NULL`;
+  const basis = WAGEN_BASIS;
   try {
     const nieuw = (await env.SHOP_DB.prepare(`${basis} ORDER BY w.aangemaakt DESC LIMIT 5`).all()).results || [];
     const ids = nieuw.map((w) => w.id);
@@ -286,7 +306,7 @@ async function home(env, request) {
     .on('[data-dyn="events"]', vervang(lijst.length ? `${evKaart(lijst[0], true)}<div class="ev-stack">${lijst.slice(1, 3).map((a) => evKaart(a)).join("")}</div>` : "<p>Binnenkort nieuwe activiteiten.</p>"))
     .on('[data-dyn="producten"]', vervang(prods.map(productKaart).join("")))
     .on('[data-dyn="forum"]', topics.length ? vervang(nieuwLijst(topics, 4)) : { element() {} })
-    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map((w) => { const titel = w.naam || w.type; const info = [w.naam ? w.type : "", w.bouwjaar || ""].filter(Boolean).join(" · "); return `<div class="garage-kaart"><button type="button" class="gk-open" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(titel)} van ${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="${e(titel)} van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${e(titel)} van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(titel)}</b>${info ? `<small>${e(info)}</small>` : ""}<em>van ${e(w.naam_lid)}</em></span></button><button type="button" class="f-like wagen-like" data-like="wagen-${w.id}" aria-pressed="false" title="Geef een hartje"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg> <span></span></button></div>`; }).join("")) : { element() {} })
+    .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map(wagenKaart).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
 }
 
@@ -311,7 +331,7 @@ async function afrekenen(env, request) {
 async function sitemap(env, request) {
   const [acts, prods, r] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request)]);
   let xml = (await r.text()).replace(/<url><loc>[^<]*\/(shop|activiteiten)\/[^<]*<\/loc><\/url>\s*/g, "");
-  const extra = [...prods.map((p) => `/shop/${p.slug}`), ...acts.filter((a) => !a.verborgen && !a.extern_url).map((a) => `/activiteiten/${a.slug}`)]
+  const extra = ["/landys", ...prods.map((p) => `/shop/${p.slug}`), ...acts.filter((a) => !a.verborgen && !a.extern_url).map((a) => `/activiteiten/${a.slug}`)]
     .map((p) => `<url><loc>${DOMEIN}${p}</loc></url>`).join("\n");
   xml = xml.replace("</urlset>", extra + "\n</urlset>");
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });
@@ -330,6 +350,7 @@ export async function aanbod(request, env, url) {
   if (p === "/afrekenen") return afrekenen(env, request);
   if (p === "/sitemap.xml") return sitemap(env, request);
   if (p === "/shop") return shopPagina(env, request);
+  if (p === "/landys") return landysPagina(env, request);
   if ((m = p.match(/^\/shop\/([a-z0-9-]{1,80})$/))) return productPagina(env, request, m[1]);
   if (p === "/activiteiten") return activiteitenPagina(env, request);
   if ((m = p.match(/^\/activiteiten\/([a-z0-9-]{1,80})\/inschrijven$/))) return Response.redirect(new URL(`/activiteiten/${m[1]}#inschrijven`, url), 301);

@@ -323,7 +323,7 @@ home = f"""
 </section>
 <section class="garage-sec">
   <div class="wrap">
-    <div class="sec-head"><div><div class="eyebrow">Land Rovers van leden</div><h2>Landy's van leden</h2></div><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></div>
+    <div class="sec-head"><div><div class="eyebrow">Land Rovers van leden</div><h2>Landy's van leden</h2></div><div class="sec-knoppen"><a href="/landys" class="btn">Bekijk alle Landy's</a><a href="/account/garage" class="btn btn-solid">Zet je Land Rover erbij</a></div></div>
     <div class="garage-rij" data-dyn="garage"><a class="garage-leeg" href="/account/garage">Nog niemand. Zet als eerste je Land Rover erbij.</a></div>
   </div>
 </section>
