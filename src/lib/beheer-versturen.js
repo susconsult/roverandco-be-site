@@ -38,7 +38,28 @@ const CAMPAGNES = {
   "cor-ticket": { titel: "Ticket Church of Rover", uitleg: "Voor iedereen die zich via de vorige webshop inschreef. Met QR-code en PDF-ticket. Vóór zondag versturen." },
   "aankondiging": { titel: "Aankondiging nieuwe site", uitleg: "Voor alle klanten uit de vorige webshop. Liefst in een paar rondes, niet alles tegelijk." },
   "kalender": { titel: "Organisatoren kalender", uitleg: "Kort mailtje aan clubs van wie we activiteiten in de kalender zetten. Van info@roverandco.be." },
+  "los": { titel: "Losse mails", uitleg: "Losse mails van info@roverandco.be, tekst vooraf goedgekeurd door Pieter." },
 };
+
+// Losse mails (campagne "los"): sleutel in mail_wachtrij = sleutel hieronder. Tekst goedgekeurd door Pieter.
+const LOS = {
+  "roadtripme-2026-11": {
+    aan: ["pieter@roadtripme.be", "sanne@roadtripme.be"],
+    onderwerp: "Jullie events in onze kalender",
+    alineas: [
+      "Hey Pieter en Sanne",
+      "Op de nieuwe site van Rover & Co (roverandco.be) hebben we nu een kalender met Land Rover- en 4x4-events, en daar zet ik jullie events graag bij.",
+      "Laten jullie het weten als er iets nieuws online komt? Dan zet ik het er meteen op, met een link naar jullie.",
+      "Pieter – Rover & Co VZW",
+    ],
+  },
+};
+function losMail(rij) {
+  const l = LOS[rij.sleutel];
+  if (!l) throw new Error("onbekende losse mail");
+  return { aan: l.aan, van: "Rover & Co <info@roverandco.be>", zonderLogo: true, onderwerp: l.onderwerp,
+    tekst: l.alineas.join("\n\n"), html: `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.6;color:#141815">${l.alineas.map((a) => `<p>${esc(a)}</p>`).join("")}</div>`, bijlagen: [] };
+}
 const PER_KEER = 10;
 const SITE = "https://roverandco.be";
 const wacht = (ms) => new Promise((r) => setTimeout(r, ms));
@@ -47,6 +68,7 @@ async function bouw(env, campagne, rij) {
   const lid = rij.lid_id ? await env.SHOP_DB.prepare("SELECT * FROM leden WHERE id = ?").bind(rij.lid_id).first() : null;
   const ww = lid && !lid.wachtwoord ? await wachtwoordLink(env, SITE, lid.id, { behoud: true }) : "";
   if (campagne === "kalender") return kalenderMail(rij);
+  if (campagne === "los") return losMail(rij);
   if (campagne === "cor-ticket") {
     const r = await env.SHOP_DB.prepare("SELECT nummer, naam, email, totaal, data FROM registraties WHERE nummer = ?").bind(rij.sleutel).first();
     if (!r) throw new Error("inschrijving niet gevonden");
@@ -92,6 +114,7 @@ export async function druppel(env) {
   if (!(await druppelAan(env)) || (await onderhoudAan(env))) return;
   await verstuurRonde(env, "cor-ticket", "automatisch");
   await verstuurRonde(env, "kalender", "automatisch");
+  await verstuurRonde(env, "los", "automatisch");
   const u = uurBrussel();
   if (u >= 8 && u < 21) await verstuurRonde(env, "aankondiging", "automatisch");
 }
