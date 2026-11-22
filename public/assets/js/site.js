@@ -530,25 +530,128 @@
 
   render();
 
-  /* ---------- app op je gsm: service worker + blok op /account (alleen gsm, niet als de app al open is) ---------- */
+  /* ---------- app op je gsm: service worker + blok op /account met uitleg per toestel ---------- */
   (function () {
     if ("serviceWorker" in navigator) { try { navigator.serviceWorker.register("/sw.js"); } catch (x) {} }
     var blok = document.querySelector("[data-app-blok]");
     var app = window.matchMedia("(display-mode: standalone)").matches || navigator.standalone === true;
     var gsm = window.matchMedia("(max-width: 880px) and (pointer: coarse)").matches;
-    var ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var ua = navigator.userAgent;
+    var ios = /iPhone|iPad|iPod/.test(ua) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+    var android = /Android/.test(ua);
+    var nooit = false; try { nooit = localStorage.getItem("rc-app-nooit") === "1"; } catch (x) {}
     var prompt = null;
-    function toon() {
-      if (!blok || app || !gsm || (!ios && !prompt)) return;
-      blok.innerHTML = '<img src="/apple-touch-icon.png" alt=""><div><b>Installeer als app</b>' +
-        (ios ? '<span>Tik op <svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/></svg> <b>Delen</b> en kies <b>Zet op beginscherm</b>.</span></div>'
-             : '</div><button type="button" class="btn btn-solid app-ja">Installeren</button>');
-      blok.hidden = false;
-      var j = blok.querySelector(".app-ja");
-      if (j) j.addEventListener("click", function () { prompt.prompt(); prompt.userChoice.then(function (r) { if (r.outcome === "accepted") blok.hidden = true; prompt = null; }); });
+    if (!blok || app || !gsm || nooit || (!ios && !android)) return;
+
+    /* welk toestel / welke browser? */
+    function soort() {
+      if (/FBAN|FBAV|FB_IAB|Instagram|Messenger|Snapchat|TikTok|musical_ly|LinkedInApp|Line\/|Twitter/i.test(ua) || (android && /; wv\)/.test(ua))) return "inapp";
+      if (ios) {
+        if (/CriOS|EdgiOS/.test(ua)) return "ios-chrome";
+        if (/FxiOS|OPiOS|GSA\//.test(ua)) return "inapp";
+        var v = (ua.match(/Version\/(\d+)/) || [])[1];
+        return v && +v >= 26 ? "ios-26" : "ios-oud";
+      }
+      if (/SamsungBrowser/.test(ua)) return "samsung";
+      if (/Firefox/.test(ua)) return "firefox";
+      if (/Chrome/.test(ua)) return "android-chrome";
+      return "android-ander";
     }
-    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); prompt = e; toon(); });
-    window.addEventListener("appinstalled", function () { if (blok) blok.hidden = true; });
-    toon();
+
+    var I = {
+      deel: '<path d="M12 3v12M8 7l4-4 4 4M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-7"/>',
+      drie: '<circle cx="5" cy="12" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="19" cy="12" r="1.4"/>',
+      menu: '<circle cx="12" cy="5" r="1.4"/><circle cx="12" cy="12" r="1.4"/><circle cx="12" cy="19" r="1.4"/>',
+      plus: '<rect x="3" y="3" width="18" height="18" rx="4"/><path d="M12 8v8M8 12h8"/>',
+      lijn: '<path d="M4 7h16M4 12h16M4 17h16"/>',
+      neer: '<path d="M12 4v11M7 10l5 5 5-5M5 20h14"/>'
+    };
+    function ico(n) { return '<svg class="ico" viewBox="0 0 24 24" aria-hidden="true">' + I[n] + '</svg>'; }
+
+    var UITLEG = {
+      "ios-26": { titel: "Zet Rover & Co op je iPhone", stappen: [
+        "Tik onderaan naast de adresbalk op " + ico("drie") + "<small>Zie je dat niet? Tik dan meteen op " + ico("deel") + " <b>Delen</b>.</small>",
+        "Tik op " + ico("deel") + " <b>Delen</b>",
+        "Scroll naar beneden en tik op " + ico("plus") + " <b>Zet op beginscherm</b>",
+        "Tik rechtsboven op <b>Voeg toe</b>. Klaar!"] },
+      "ios-oud": { titel: "Zet Rover & Co op je iPhone", stappen: [
+        "Tik onderaan op " + ico("deel") + " <b>Delen</b>",
+        "Scroll naar beneden en tik op " + ico("plus") + " <b>Zet op beginscherm</b>",
+        "Tik rechtsboven op <b>Voeg toe</b>. Klaar!"] },
+      "ios-chrome": { titel: "Zet Rover & Co op je iPhone", stappen: [
+        "Tik in de adresbalk op " + ico("deel") + " <b>Delen</b><small>Staat de adresbalk onderaan? Dan zit Delen daar.</small>",
+        "Scroll naar beneden en tik op " + ico("plus") + " <b>Zet op beginscherm</b>",
+        "Tik op <b>Voeg toe</b>. Klaar!"] },
+      "android-chrome": { titel: "Zet Rover & Co op je gsm", stappen: [
+        "Tik rechtsboven op " + ico("menu"),
+        "Kies " + ico("neer") + " <b>App installeren</b> of <b>Toevoegen aan startscherm</b>",
+        "Bevestig met <b>Installeren</b>. Klaar!"] },
+      "samsung": { titel: "Zet Rover & Co op je gsm", stappen: [
+        "Zie je in de adresbalk " + ico("neer") + " het <b>installeer-icoon</b>? Tik erop en bevestig. Klaar!<small>Geen icoon? Ga verder met stap 2.</small>",
+        "Tik onderaan op " + ico("lijn") + " <b>menu</b>",
+        "Kies <b>Pagina toevoegen aan</b> en dan <b>Startscherm</b>"] },
+      "firefox": { titel: "Zet Rover & Co op je gsm", stappen: [
+        "Tik op " + ico("menu") + " (boven of onder in je scherm)",
+        "Kies <b>Installeren</b> of <b>Toevoegen aan startscherm</b>",
+        "Bevestig. Klaar!"] },
+      "android-ander": { titel: "Zet Rover & Co op je gsm", stappen: [
+        "Open het menu van je browser " + ico("menu"),
+        "Kies <b>App installeren</b> of <b>Toevoegen aan startscherm</b>",
+        "Bevestig. Klaar!"] },
+      "inapp": { titel: "Open eerst je gewone browser", uitleg: "Je bekijkt de site nu vanuit een andere app (zoals Facebook, Instagram of WhatsApp). Daar kan je niet installeren.", stappen: [
+        "Tik op " + ico("drie") + " of " + ico("menu") + " en kies <b>Openen in " + (ios ? "Safari" : "browser") + "</b><small>Lukt dat niet? Kopieer de link hieronder en plak hem in " + (ios ? "Safari" : "Chrome") + ".</small>",
+        "Ga daar naar <b>Mijn account</b> en tik opnieuw op <b>Installeer als app</b>"], link: true }
+    };
+    var s = soort();
+
+    function lade() {
+      var u = UITLEG[s];
+      var knop = (s === "android-chrome" || s === "samsung") && prompt;
+      var laag = document.createElement("div");
+      laag.className = "app-laag";
+      laag.innerHTML = '<div class="app-lade" role="dialog" aria-modal="true" aria-labelledby="app-lade-t">' +
+        '<div class="app-greep"></div><button type="button" class="app-x" aria-label="Sluiten">×</button>' +
+        '<h3 id="app-lade-t">' + u.titel + '</h3>' +
+        '<p class="app-sub">' + (u.uitleg || "Dan open je de site met één tik, zonder adresbalk.") + '</p>' +
+        (knop ? '<button type="button" class="btn btn-solid app-ja">Installeren</button><p class="app-of">Werkt de knop niet? Zo doe je het zelf:</p>' : '') +
+        '<ol class="app-stappen">' + u.stappen.map(function (t) { return "<li>" + t + "</li>"; }).join("") + '</ol>' +
+        (u.link ? '<button type="button" class="btn app-kopie">Kopieer link</button>' : '') +
+        '<button type="button" class="btn btn-solid app-ok">Begrepen</button>' +
+        '<button type="button" class="app-nooit">Toon dit niet meer</button></div>';
+      document.body.appendChild(laag);
+      document.documentElement.classList.add("app-open");
+      requestAnimationFrame(function () { laag.classList.add("aan"); });
+      function weg() { laag.classList.remove("aan"); document.documentElement.classList.remove("app-open"); setTimeout(function () { laag.remove(); }, 250); }
+      laag.addEventListener("click", function (e) { if (e.target === laag) weg(); });
+      laag.querySelector(".app-x").addEventListener("click", weg);
+      laag.querySelector(".app-ok").addEventListener("click", weg);
+      laag.querySelector(".app-nooit").addEventListener("click", function () {
+        try { localStorage.setItem("rc-app-nooit", "1"); } catch (x) {}
+        blok.hidden = true; weg();
+      });
+      var j = laag.querySelector(".app-ja");
+      if (j) j.addEventListener("click", function () {
+        prompt.prompt();
+        prompt.userChoice.then(function (r) { if (r.outcome === "accepted") { blok.hidden = true; weg(); } prompt = null; });
+      });
+      var k = laag.querySelector(".app-kopie");
+      if (k) k.addEventListener("click", function () {
+        var url = location.origin + "/account";
+        function ok() { k.textContent = "Link gekopieerd"; }
+        if (navigator.clipboard) navigator.clipboard.writeText(url).then(ok, function () { window.prompt("Kopieer deze link:", url); });
+        else window.prompt("Kopieer deze link:", url);
+      });
+      document.addEventListener("keydown", function esc(e) { if (e.key === "Escape") { weg(); document.removeEventListener("keydown", esc); } });
+    }
+
+    blok.innerHTML = '<img src="/apple-touch-icon.png" alt=""><div><b>Installeer als app</b><span>Tik hier, we tonen je hoe het moet op jouw gsm.</span></div>' +
+      '<svg class="ico app-pijl" viewBox="0 0 24 24" aria-hidden="true"><path d="M9 6l6 6-6 6"/></svg>';
+    blok.setAttribute("role", "button");
+    blok.setAttribute("tabindex", "0");
+    blok.hidden = false;
+    blok.addEventListener("click", lade);
+    blok.addEventListener("keydown", function (e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); lade(); } });
+    window.addEventListener("beforeinstallprompt", function (e) { e.preventDefault(); prompt = e; });
+    window.addEventListener("appinstalled", function () { blok.hidden = true; });
   })();
 })();

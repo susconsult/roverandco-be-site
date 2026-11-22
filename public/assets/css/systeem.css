@@ -319,4 +319,23 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .app-blok[hidden]{display:none}.app-blok img{width:52px;height:52px;border-radius:12px;flex:none}.app-blok>div{flex:1;min-width:180px}
 .app-blok b{font-size:16px}.app-blok span{display:block;font-size:14px;opacity:.9;margin-top:2px}.app-blok span b{font-size:inherit}
 .app-blok .ico{width:17px;height:17px;vertical-align:-3px;fill:none;stroke:currentColor;stroke-width:2}
-.app-blok .app-ja{background:#fff;color:#1F3B2A;border-color:#fff;width:100%;justify-content:center}
+.app-blok{cursor:pointer;flex-wrap:nowrap}.app-blok .app-pijl{width:22px;height:22px;flex:none}
+.app-laag{position:fixed;inset:0;z-index:200;background:rgba(20,24,21,.5);display:flex;align-items:flex-end;opacity:0;transition:opacity .25s}
+.app-laag.aan{opacity:1}html.app-open{overflow:hidden}
+.app-lade{position:relative;background:#fff;color:var(--ink);width:100%;max-height:88vh;overflow:auto;border-radius:20px 20px 0 0;padding:12px 20px calc(20px + env(safe-area-inset-bottom));transform:translateY(100%);transition:transform .25s}
+.app-laag.aan .app-lade{transform:none}
+.app-greep{width:40px;height:4px;border-radius:2px;background:#d6d0c0;margin:0 auto 10px}
+.app-x{position:absolute;top:10px;right:12px;width:36px;height:36px;border:0;background:none;font-size:28px;line-height:1;color:var(--muted);cursor:pointer}
+.app-lade h3{font-family:var(--head);font-weight:800;text-transform:uppercase;letter-spacing:1px;font-size:22px;margin:4px 40px 4px 0;color:var(--green)}
+.app-sub{font-size:14px;color:var(--muted);margin:0 0 16px}
+.app-stappen{list-style:none;counter-reset:st;padding:0;margin:0 0 18px}
+.app-stappen li{counter-increment:st;position:relative;padding:3px 0 0 42px;min-height:30px;margin-bottom:14px;font-size:15px;line-height:1.45}
+.app-stappen li::before{content:counter(st);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--green);color:#fff;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center}
+.app-stappen small{display:block;font-size:13px;color:var(--muted);margin-top:3px}
+.app-lade .ico{width:18px;height:18px;vertical-align:-3px;fill:none;stroke:var(--green);stroke-width:2}
+.app-lade .ico circle{fill:var(--green);stroke:none}
+.app-lade .btn{width:100%;justify-content:center;margin-bottom:10px}
+.app-lade .btn-solid{background:var(--green);color:#fff;border-color:var(--green)}
+.app-lade .app-kopie{color:var(--green)}
+.app-of{font-size:13px;color:var(--muted);margin:4px 0 12px}
+.app-nooit{display:block;margin:4px auto 0;border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer;padding:8px}
