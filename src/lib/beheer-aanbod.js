@@ -250,6 +250,7 @@ function activiteitFormulier(a, email, fout = "") {
     </div>
   </div>
   <div class="knoppen"><button type="submit">Bewaren</button><a class="knop grijs" href="/beheer/activiteiten">Annuleren</a>
+    ${nieuw ? "" : `<a class="knop licht" href="/activiteiten/${esc(a.slug)}/qr" target="_blank">QR-code</a>`}
     ${nieuw ? "" : `<button type="submit" name="actie" value="verwijder" class="knop rood" data-bevestig="${esc(a.titel)} definitief verwijderen? Verbergen kan ook. Inschrijvingen blijven bewaard.">Verwijderen</button>`}</div>
   </form>${script}`, email);
 }

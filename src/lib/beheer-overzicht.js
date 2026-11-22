@@ -116,6 +116,7 @@ export async function activiteitOverzicht(env, email, slug, url) {
   <button type="button" id="ov-wa">📋 Kopieer WhatsApp-update</button>
   <a class="knop licht" href="?csv=1">CSV downloaden</a>
   <button type="button" class="knop licht" onclick="print()">Afdrukken</button>
+  <a class="knop licht" href="/activiteiten/${esc(slug)}/qr" target="_blank">QR-code</a>
 </div>
 <textarea id="ov-wa-tekst" hidden>${esc(waTekst)}</textarea>
 <div class="tegels">${tegel("Inschrijvingen", ok.length)}${personen ? tegel("Personen", personen) : ""}${wagens ? tegel("Wagens", wagens) : ""}${tegel("Omzet", eur(omzet))}${tegel("Binnen (scan)", `${binnen} / ${ok.length}`)}</div>
