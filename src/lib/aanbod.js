@@ -8,6 +8,7 @@ import { esc as e, pagina, kruimel, willekeurigeBanner } from "./sjabloon.js";
 import { nieuwsteBerichten, nieuwLijst } from "./forum-nieuw.js";
 import kalenderAnderen from "../../data/kalender.json";
 import { slotBezetting } from "./opslag.js";
+import { qrActiviteit } from "./qr-activiteit.js";
 
 const DOMEIN = "https://roverandco.be";
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
@@ -354,6 +355,10 @@ export async function aanbod(request, env, url) {
   if ((m = p.match(/^\/shop\/([a-z0-9-]{1,80})$/))) return productPagina(env, request, m[1]);
   if (p === "/activiteiten") return activiteitenPagina(env, request);
   if ((m = p.match(/^\/activiteiten\/([a-z0-9-]{1,80})\/inschrijven$/))) return Response.redirect(new URL(`/activiteiten/${m[1]}#inschrijven`, url), 301);
+  if ((m = p.match(/^\/activiteiten\/([a-z0-9-]{1,80})\/qr(?:\.(svg|eps))?$/))) {
+    const a = await activiteit(env, m[1]);
+    return a ? qrActiviteit(a, m[2] || "pagina") : null;
+  }
   if ((m = p.match(/^\/activiteiten\/([a-z0-9-]{1,80})$/))) return activiteitPagina(env, request, m[1]);
   return null;
 }

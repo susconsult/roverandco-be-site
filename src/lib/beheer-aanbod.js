@@ -155,7 +155,7 @@ async function activiteitLijst(env, email, url) {
     const voorbij = a.datum && (a.einde || a.datum) < v;
     const ins = a.inschrijving?.open ? `Open${a.inschrijving.sluit ? " tot " + esc(a.inschrijving.sluit) : ""}` : a.inschrijven_url ? "Externe link" : "–";
     return `<tr class="${a.verborgen || voorbij ? "uit" : ""}"><td>${esc(a.datum_label || a.datum || "–")}</td><td><a href="/beheer/activiteiten/${esc(a.slug)}">${esc(a.titel)}</a><br><small>${esc(a.locatie || "")}</small></td>
-      <td><small>${ins}</small>${a.inschrijving?.onderdelen?.length ? `<br><a class="knop licht" style="padding:4px 10px;font-size:13px;margin-top:4px" href="/beheer/activiteiten/${esc(a.slug)}/overzicht">Overzicht</a>` : ""}</td><td>${a.verborgen ? "Verborgen" : voorbij ? "Voorbij" : "Ja"}</td></tr>`;
+      <td><small>${ins}</small>${a.inschrijving?.onderdelen?.length ? `<br><a class="knop licht" style="padding:4px 10px;font-size:13px;margin-top:4px" href="/beheer/activiteiten/${esc(a.slug)}/overzicht">Overzicht</a>` : ""}<br><a class="knop licht" style="padding:4px 10px;font-size:13px;margin-top:4px" href="/activiteiten/${esc(a.slug)}/qr" target="_blank">QR</a></td><td>${a.verborgen ? "Verborgen" : voorbij ? "Voorbij" : "Ja"}</td></tr>`;
   }).join("") || '<tr><td colspan="4">Nog geen activiteiten.</td></tr>'}</tbody></table>`, email);
 }
 
