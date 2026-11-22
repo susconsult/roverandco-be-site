@@ -6,6 +6,7 @@ import { onderhoud } from "./lib/onderhoud.js";
 import { huidigLid, stopBekijkAls } from "./lib/leden.js";
 import { veiligheid } from "./lib/veiligheid.js";
 import { druppel } from "./lib/beheer-versturen.js";
+import { wolfOpvolging } from "./lib/wolf.js";
 
 export default {
   async fetch(request: Request, env: any, ctx: any) {
@@ -39,8 +40,9 @@ export default {
     }
     return res;
   },
-  // Cron Trigger (wrangler.jsonc): overstapmails druppelsgewijs versturen.
+  // Cron Trigger (wrangler.jsonc, elk kwartier): overstapmails druppelsgewijs versturen + Wolf-bestellingen opvolgen.
   async scheduled(_event: any, env: any, ctx: any) {
     ctx.waitUntil(druppel(env));
+    ctx.waitUntil(wolfOpvolging(env).catch((e: any) => console.log("wolfOpvolging", String(e))));
   },
 };

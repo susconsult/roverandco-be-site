@@ -7,6 +7,7 @@
 // Meldingen naar Pieter gaan via Resend (vroeger MailApp).
 
 import { verstuur } from "./mail.js";
+import { naarWolf } from "./wolf.js";
 
 const MELDING_AAN = "pieter@roverandco.be";
 const VRAGEN_AAN = "info@roverandco.be";
@@ -135,6 +136,8 @@ async function betaald(env, b) {
   await stuurMelding(env, data, (juist ? "Betaald" : `LET OP: betaald bedrag (${eur(b.bedrag)}) klopt niet met het totaal`) +
     ` – Viva-transactie ${b.transactie}\nMail naar klant: ${mailKlant}`);
   if (rij.soort === "inschrijving") await controleerGrenzen(env, data, voor);
+  // Webshop: bestelling meteen door naar Wolf Workwear (zie wolf.js).
+  if (juist && rij.soort === "bestelling" && !rij.test) await naarWolf(env, rij.nummer);
   const res = { ok: true, nummer: rij.nummer, soort: rij.soort, site: data.site };
   if (juist && b.resend) res.mail = klantMail(data);
   return res;

@@ -1,7 +1,8 @@
 // /beheer/leden: leden zoeken, bekijken en beheren, plus de activiteitenlog (90 dagen).
 import { onderhoudAan } from "./onderhoud.js";
-import { producten, activiteiten, eur } from "./aanbod.js";
-import { activiteitCijfers, meer } from "./beheer-overzicht.js";
+import { activiteiten } from "./aanbod.js";
+import { wolfStand } from "./wolf.js";
+import { activiteitCijfers } from "./beheer-overzicht.js";
 import { esc, pagina } from "./beheer.js";
 import { naar as naarMet } from "./sjabloon.js";
 import { stuurWachtwoordLink, stuurBevestiging, startBekijkAls } from "./leden.js";
@@ -204,79 +205,136 @@ ${r.length ? `<ul class="log">${r.map((x) => logRij(x, true)).join("")}</ul>` : 
 
 /* ---------------- overzicht (startpagina) ---------------- */
 
-// Dashboard: per menu-onderdeel wat er nu speelt, plus de cijfers van komende en net voorbije activiteiten.
+// Dashboard, community eerst (keuze Pieter 22 nov 2026):
+// alarmbalk (alleen als er iets is) → community deze week → nieuwe leden → Kampvuur → nieuwste Landy's → CB
+// → activiteiten (1 regel elk) → verkoop + Wolf → log → instellingen (onderhoudsmodus onderaan).
 const ECHT_REG = "(status = 'Betaald' OR status LIKE 'Bevestigd%') AND test = 0";
 const VOORBIJ_DAGEN = 7; // een activiteit blijft nog zo lang op het overzicht na de datum
+const geleden = (iso) => {
+  if (!iso) return "";
+  const m = Math.round((Date.now() - new Date(iso).getTime()) / 60000);
+  if (m < 60) return `${Math.max(m, 1)} min`;
+  if (m < 1440) return `${Math.round(m / 60)} u`;
+  const d = Math.round(m / 1440);
+  return d === 1 ? "gisteren" : `${d} d`;
+};
 export async function thuis(env, email) {
   const db = env.SHOP_DB;
   const week = new Date(Date.now() - 7 * 86400_000).toISOString();
+  const etmaal = new Date(Date.now() - 86400_000).toISOString();
   const vandaag = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
-  const [best, insch, meld, leden, scans, logs, prods, acts] = await Promise.all([
+  const leeg = { results: [] };
+  const [best, insch, meld, leden, posts, wagensWeek, actief, scans, nieuweLeden, topics, landys, cb, logs, acts, wolf] = await Promise.all([
     db.prepare(`SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM registraties WHERE soort = 'bestelling' AND ${ECHT_REG}`).bind(week).first(),
     db.prepare(`SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM registraties WHERE soort = 'inschrijving' AND ${ECHT_REG}`).bind(week).first(),
     db.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE afgehandeld = 0").first(),
     db.prepare("SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM leden WHERE verwijderd_op IS NULL").bind(week).first(),
-    db.prepare("SELECT COUNT(*) n FROM registraties WHERE gescand_op >= ?").bind(new Date(Date.now() - 86400_000).toISOString()).first(),
-    db.prepare("SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id WHERE g.soort <> 'account' OR g.tekst LIKE 'Account%' ORDER BY g.id DESC LIMIT 6").all(),
-    producten(env).catch(() => []),
+    db.prepare("SELECT COUNT(*) n FROM forum_berichten WHERE verwijderd = 0 AND aangemaakt > ?").bind(week).first(),
+    db.prepare("SELECT COUNT(*) n FROM lid_wagens WHERE aangemaakt > ?").bind(week).first(),
+    db.prepare("SELECT COUNT(*) n FROM leden WHERE verwijderd_op IS NULL AND laatst_gezien > ?").bind(etmaal).first(),
+    db.prepare("SELECT COUNT(*) n FROM registraties WHERE gescand_op >= ?").bind(etmaal).first(),
+    db.prepare(`SELECT l.id, l.gebruikersnaam, l.aangemaakt, l.avatar_id, (SELECT coalesce(w.naam, w.type) FROM lid_wagens w WHERE w.lid_id = l.id ORDER BY w.volgorde, w.id LIMIT 1) wagen
+      FROM leden l WHERE l.verwijderd_op IS NULL AND l.wachtwoord IS NOT NULL ORDER BY l.id DESC LIMIT 5`).all().catch(() => leeg),
+    db.prepare(`SELECT t.id, t.titel, t.berichten, t.laatste_op, l.gebruikersnaam laatste FROM forum_topics t LEFT JOIN leden l ON l.id = t.laatste_lid_id
+      WHERE t.verwijderd = 0 ORDER BY t.laatste_op DESC LIMIT 5`).all().catch(() => leeg),
+    db.prepare(`SELECT w.id, w.type, w.naam, w.foto_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
+      WHERE w.foto_id IS NOT NULL AND l.verwijderd_op IS NULL ORDER BY w.id DESC LIMIT 4`).all().catch(() => leeg),
+    db.prepare("SELECT COUNT(*) n, COUNT(DISTINCT nr) kanalen, COUNT(DISTINCT lid_id) mensen, MAX(aangemaakt) laatst FROM cb_berichten WHERE verwijderd = 0 AND aangemaakt > ?").bind(etmaal).first().catch(() => null),
+    db.prepare("SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id WHERE g.soort <> 'account' OR g.tekst LIKE 'Account%' ORDER BY g.id DESC LIMIT 5").all(),
     activiteiten(env).catch(() => []),
+    wolfStand(env).catch(() => ({ open: 0, laat: 0, oudsteDagen: 0 })),
   ]);
   const grens = new Date(Date.now() - VOORBIJ_DAGEN * 86400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
   const relevant = acts.filter((a) => !a.verborgen && a.datum && (a.einde || a.datum) >= grens).sort((x, y) => String(x.datum).localeCompare(String(y.datum)));
-  const komend = relevant.filter((a) => (a.einde || a.datum) >= vandaag);
-  const kandidaten = relevant.filter((a) => a.inschrijving?.onderdelen?.length).slice(0, 8);
-  const alleCijfers = await Promise.all(kandidaten.map((a) => activiteitCijfers(env, a).catch(() => null)));
-  // alleen activiteiten met inschrijvingen, of waar inschrijven open staat
-  const metInschr = [], cijfers = [];
-  kandidaten.forEach((a, i) => { const c = alleCijfers[i]; if (c && (c.rijen.length || a.inschrijving.open)) { metInschr.push(a); cijfers.push(c); } });
-
-  const n = (v) => Number(v || 0);
-  const tegel = (ic, label, groot, sub, link, klas = "") => `<a class="tegel ${klas}" href="${link}"><small>${label}</small><b>${groot}</b><span>${sub}</span></a>`;
-  const actKaart = (a, c) => {
-    if (!c) return "";
-    const voorbij = (a.einde || a.datum) < vandaag;
-    const onderdelen = [...c.som.values()].filter((x) => x.aantal && !String(x.naam).startsWith("Ecwid-inschrijving"));
-    return `<div class="kaart dash-act"><div class="dash-act-kop"><h2>${esc(a.titel)}</h2><small>${esc(a.datum_label || a.datum)}${voorbij ? " · voorbij" : ""}</small></div>
-<div class="dash-cijfers"><div><small>Inschrijvingen</small><b>${c.ok.length}</b></div>
-${onderdelen.map((x) => `<div><small>${esc(x.naam)}</small><b>${meer(x.aantal, x.per)}</b></div>`).join("")}
-<div><small>Binnen (scan)</small><b>${c.binnen} / ${c.ok.length}</b></div><div><small>Omzet</small><b>${eur(c.omzet)}</b></div></div>
-${c.niet.length ? `<p class="dash-noot">${c.niet.length} niet betaald (tellen niet mee)</p>` : ""}
-<p class="dash-links"><a href="/beheer/activiteiten/${esc(a.slug)}/overzicht">Overzicht →</a> <a href="/activiteiten/${esc(a.slug)}/qr" target="_blank">QR-code</a></p></div>`;
-  };
+  const kandidaten = relevant.slice(0, 4);
+  const cijfers = await Promise.all(kandidaten.map((a) => a.inschrijving?.onderdelen?.length ? activiteitCijfers(env, a).catch(() => null) : null));
   const ond = await onderhoudAan(env);
-  const volgende = komend[0];
+  const n = (v) => Number(v || 0);
+
+  // Alarmbalk: alleen wat aandacht vraagt.
+  const alarm = [];
+  if (ond) alarm.push(`<a href="#instellingen"><b>Onderhoudsmodus staat AAN</b>: bezoekers zien de onderhoudspagina.</a>`);
+  if (n(meld.n)) alarm.push(`<a href="/beheer/meldingen"><b>${n(meld.n)} ${n(meld.n) === 1 ? "melding" : "meldingen"}</b> van leden wachten op jou →</a>`);
+  if (wolf.laat) alarm.push(`<a href="/beheer?soort=bestelling"><b>${wolf.laat} ${wolf.laat === 1 ? "bestelling" : "bestellingen"}</b> al meer dan 14 dagen open bij Wolf →</a>`);
+
+  const stat = (groot, label, link) => `<a class="ds" href="${link}"><b>${groot}</b><small>${label}</small></a>`;
+  const av = (l) => l.avatar_id ? `<img class="dav" src="/forum/foto/${l.avatar_id}" alt="">` : `<span class="dav">${esc(String(l.gebruikersnaam || "?").slice(0, 1).toUpperCase())}</span>`;
+  const rij = (links, rechts, href) => `<a class="drij" href="${href}"><span>${links}</span><small>${rechts}</small></a>`;
+  const leegRij = (t) => `<p class="dleeg">${t}</p>`;
+
+  const ledenLijst = (nieuweLeden.results || []).map((l) => rij(`${av(l)}<b>${esc(l.gebruikersnaam || "(nog geen naam)")}</b>${l.wagen ? ` · ${esc(l.wagen)}` : ' <span class="dzw">· nog geen Land Rover</span>'}`, geleden(l.aangemaakt), `/beheer/leden/${l.id}`)).join("");
+  const topicLijst = (topics.results || []).map((t) => {
+    const antw = Math.max(n(t.berichten) - 1, 0);
+    return `<a class="drij dtopic" href="/forum/t/${t.id}" target="_blank"><span class="dtitel">${esc(t.titel)}</span><small>${antw ? `${antw} ${antw === 1 ? "antwoord" : "antwoorden"}` : '<span class="dlabel">nog geen antwoord</span>'} · ${t.laatste ? esc(t.laatste) + " · " : ""}${geleden(t.laatste_op)}</small></a>`;
+  }).join("");
+  const landyLijst = (landys.results || []).map((w) => `<a class="dlandy" href="/landys"><img src="/forum/foto/${w.foto_id}" alt="" loading="lazy"><span>${esc(w.naam || w.type)}<small>${esc(w.gebruikersnaam || "")}</small></span></a>`).join("");
+  const cbTekst = cb && n(cb.n)
+    ? `<b>${n(cb.n)}</b> ${n(cb.n) === 1 ? "bericht" : "berichten"} in <b>${n(cb.kanalen)}</b> ${n(cb.kanalen) === 1 ? "kanaal" : "kanalen"} · ${n(cb.mensen)} ${n(cb.mensen) === 1 ? "lid" : "leden"} · laatst ${geleden(cb.laatst)} geleden`
+    : "Stil op de CB de laatste 24 uur.";
+
+  const actRij = (a, c) => {
+    const isVandaag = a.datum <= vandaag && (a.einde || a.datum) >= vandaag;
+    const voorbij = (a.einde || a.datum) < vandaag;
+    const deel = [esc(a.datum_label || a.datum)];
+    if (c) deel.push(`${c.ok.length} inschr.`);
+    if (c && (isVandaag || voorbij) && c.ok.length) deel.push(`${c.binnen}/${c.ok.length} binnen`);
+    if (voorbij) deel.push("voorbij");
+    return rij(`${isVandaag ? '<span class="dlabel groen">vandaag</span> ' : ""}<b>${esc(a.titel)}</b>`, deel.join(" · "), c ? `/beheer/activiteiten/${esc(a.slug)}/overzicht` : "/beheer/activiteiten");
+  };
+
   return pagina("Overzicht", `${STIJL}${hoofdTabs("home")}<style>
-.dash-groep{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--m);margin:22px 0 8px}
-.dash-act-kop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.dash-act-kop h2{margin:0}.dash-act-kop small{color:var(--m)}
-.dash-cijfers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 6px}.dash-cijfers div{background:#f6f4ee;border-radius:10px;padding:10px 12px}.dash-cijfers small{display:block;color:var(--m);font-size:13px}.dash-cijfers b{font-size:22px}
-.dash-noot{color:var(--m);font-size:13px;margin:6px 0 0}.dash-links{margin:10px 0 0;display:flex;gap:18px}.dash-links a{color:var(--g);font-weight:600;text-decoration:none}
-.dash-ond{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px}.dash-ond h2{font-size:15px;margin:0}
-@media(max-width:700px){.dash-cijfers{grid-template-columns:1fr 1fr}}
+.dalarm{background:#f7dede;border-radius:10px;padding:4px 14px;margin-bottom:14px}.dalarm a{display:block;color:#791f1f;text-decoration:none;padding:9px 0}.dalarm a+a{border-top:1px solid #ecc}
+.dgroep{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--m);margin:22px 0 8px;display:flex;justify-content:space-between;align-items:baseline}.dgroep a{letter-spacing:0;text-transform:none;font-size:13px;color:var(--g);font-weight:600;text-decoration:none}
+.dstats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.ds{background:#fff;border-radius:10px;padding:12px 14px;text-decoration:none;color:inherit}.ds b{display:block;font-size:24px;line-height:1.1}.ds small{color:var(--m);font-size:13px}
+.dlijst{background:#fff;border-radius:10px;padding:2px 14px}.drij{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;color:inherit;text-decoration:none;min-width:0}.drij+.drij{border-top:1px solid #eee}
+.drij>span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;display:flex;align-items:center;gap:8px}.drij>small{color:var(--m);white-space:nowrap;flex-shrink:0}
+.dav{width:28px;height:28px;border-radius:50%;object-fit:cover;background:#e8e4d8;display:inline-flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.dzw{color:var(--m)}.dlabel{background:#fbefd5;color:#7a5200;font-size:11px;font-weight:700;padding:2px 7px;border-radius:99px;flex-shrink:0}.dlabel.groen{background:#dcefe2;color:#1F3B2A}
+.dleeg{color:var(--m);margin:0;padding:12px 0}
+.dtopic{flex-direction:column;align-items:flex-start;gap:3px}.dtopic .dtitel{display:block;white-space:normal;font-weight:600}.dtopic small{white-space:normal;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.dlandys{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.dlandy{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:4/3;color:#fff;text-decoration:none;background:#e8e4d8}.dlandy img{width:100%;height:100%;object-fit:cover;display:block}
+.dlandy span{position:absolute;left:0;right:0;bottom:0;padding:18px 10px 8px;background:linear-gradient(to top,rgba(0,0,0,.7),transparent);font-size:13px;font-weight:600;line-height:1.2}.dlandy small{display:block;font-weight:400;opacity:.85}
+.dcb{background:#fff;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;gap:10px;align-items:center;color:inherit;text-decoration:none}
+.dond{background:#fff;border-radius:10px;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.dond form{margin:0}
+@media(max-width:700px){.dstats,.dlandys{grid-template-columns:repeat(2,minmax(0,1fr))}}
 </style>
-<form method="post" action="/beheer/onderhoud" class="kaart dash-ond" style="${ond ? "border:2px solid #c0392b" : ""}">
-<h2>Onderhoudsmodus: ${ond ? '<b style="color:#c0392b">AAN</b>' : "uit"} <small style="font-weight:400;color:var(--m)">${ond ? "bezoekers zien de onderhoudspagina" : "site is open"}</small></h2>
-<input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form>
+${alarm.length ? `<div class="dalarm">${alarm.join("")}</div>` : ""}
 
-<div class="dash-groep">Verkoop</div>
-<div class="tegels">
-${tegel("zak", "Bestellingen", n(best.nieuw), `nieuw deze week · ${n(best.n)} in totaal →`, "/beheer?soort=bestelling")}
-${tegel("ticket", "Inschrijvingen", n(insch.nieuw), `nieuw deze week · ${n(insch.n)} in totaal →`, "/beheer?soort=inschrijving")}
-${tegel("ticket", "Scan (tickets)", n(scans.n), "gescand laatste 24 uur · naar scan →", "/scan")}
+<div class="dgroep" style="margin-top:0">Community deze week</div>
+<div class="dstats">
+${stat(`+${n(leden.nieuw)}`, `nieuwe leden · ${n(leden.n)} totaal`, "/beheer/leden")}
+${stat(n(posts.n), n(posts.n) === 1 ? "bericht op Kampvuur" : "berichten op Kampvuur", "/forum")}
+${stat(`+${n(wagensWeek.n)}`, "Landy's toegevoegd", "/landys")}
+${stat(n(actief.n), "leden actief (24 u)", "/beheer/leden?filter=actief")}
 </div>
 
-<div class="dash-groep">Community</div>
-<div class="tegels">
-${tegel("leden", "Leden", n(leden.n), `+${n(leden.nieuw)} deze week →`, "/beheer/leden")}
-${tegel("vlag", "Meldingen", n(meld.n), n(meld.n) ? "open · bekijken →" : "niets te doen", "/beheer/meldingen", n(meld.n) ? "let" : "ok")}
-</div>
-<div class="kaart"><h2>Log</h2>${(logs.results || []).length ? `<ul class="log">${logs.results.map((x) => logRij(x, true)).join("")}</ul><p style="margin:10px 0 0"><a href="/beheer/log">Hele log →</a></p>` : `<p class="leeg" style="padding:0">Nog niets gebeurd.</p>`}</div>
+<div class="dgroep">Nieuwe leden <a href="/beheer/leden">Alle leden →</a></div>
+<div class="dlijst">${ledenLijst || leegRij("Nog geen nieuwe leden.")}</div>
 
-<div class="dash-groep">Aanbod</div>
-<div class="tegels">
-${tegel("shirt", "Producten", prods.length, "op de site · beheren →", "/beheer/producten")}
-${tegel("kalender", "Activiteiten", komend.length, volgende ? `komend · volgende: ${esc(volgende.titel)} (${esc(volgende.datum_label || volgende.datum)}) →` : "komend →", "/beheer/activiteiten")}
+<div class="dgroep">Recent op Kampvuur <a href="/forum" target="_blank">Naar Kampvuur →</a></div>
+<div class="dlijst">${topicLijst || leegRij("Nog niets gepost.")}</div>
+
+${landyLijst ? `<div class="dgroep">Nieuwste Landy's <a href="/landys" target="_blank">Alle Landy's →</a></div><div class="dlandys">${landyLijst}</div>` : ""}
+
+<div class="dgroep">CB-chat</div>
+<a class="dcb" href="/cb" target="_blank"><span>${cbTekst}</span><small>→</small></a>
+
+${kandidaten.length ? `<div class="dgroep">Activiteiten <a href="/beheer/activiteiten">Alle →</a></div><div class="dlijst">${kandidaten.map((a, i) => actRij(a, cijfers[i])).join("")}</div>` : ""}
+
+<div class="dgroep">Verkoop deze week</div>
+<div class="dlijst">
+${rij(`<b>+${n(best.nieuw)}</b> ${n(best.nieuw) === 1 ? "bestelling" : "bestellingen"}`, `${n(best.n)} totaal`, "/beheer?soort=bestelling")}
+${rij(`<b>+${n(insch.nieuw)}</b> ${n(insch.nieuw) === 1 ? "inschrijving" : "inschrijvingen"}`, `${n(insch.n)} totaal`, "/beheer?soort=inschrijving")}
+${rij(wolf.open ? `<b>${wolf.open}</b> open bij Wolf` : "Niets open bij Wolf", wolf.open ? `oudste ${wolf.oudsteDagen} ${wolf.oudsteDagen === 1 ? "dag" : "dagen"}` : "", "/beheer?soort=bestelling")}
+${n(scans.n) ? rij(`<b>${n(scans.n)}</b> tickets gescand`, "laatste 24 u", "/scan") : ""}
 </div>
-${metInschr.map((a, i) => actKaart(a, cijfers[i])).join("")}`, email);
+
+<div class="dgroep">Log <a href="/beheer/log">Hele log →</a></div>
+<div class="kaart" style="padding:6px 14px">${(logs.results || []).length ? `<ul class="log">${logs.results.map((x) => logRij(x, true)).join("")}</ul>` : leegRij("Nog niets gebeurd.")}</div>
+
+<div class="dgroep" id="instellingen">Instellingen</div>
+<div class="dond"><span>Onderhoudsmodus: ${ond ? '<b style="color:#c0392b">AAN</b> <small class="dzw">bezoekers zien de onderhoudspagina</small>' : "<b>uit</b> <small class=\"dzw\">site is open</small>"}</span>
+<form method="post" action="/beheer/onderhoud"${ond ? "" : ` onsubmit="return confirm('Onderhoud aanzetten? Bezoekers zien dan alleen de onderhoudspagina.')"`}><input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit" class="${ond ? "" : "knop licht"}">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form></div>`, email);
 }
 
 /* ---------------- meldingen ---------------- */

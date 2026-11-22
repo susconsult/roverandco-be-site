@@ -9,6 +9,7 @@ import { beheerTestmail } from "./beheer-testmail.js";
 import { beheerVersturen } from "./beheer-versturen.js";
 import { zetOnderhoud } from "./onderhoud.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
+import { naarWolf, wolfInfo } from "./wolf.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
   status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
@@ -288,14 +289,32 @@ ${melding ? `<div class="kaart">${esc(melding)}</div>` : ""}
 ${inhoud}<dt>Totaal</dt><dd><b>${eur(r.totaal)}</b></dd>${d.opmerking ? `<dt>Opmerking klant</dt><dd><pre>${esc(d.opmerking)}</pre></dd>` : ""}
 <dt>Viva ordercode</dt><dd>${esc(r.viva_ordercode || "–")}</dd><dt>Transactie</dt><dd>${esc(r.transactie || "–")}</dd><dt>Betaald op</dt><dd>${datum(r.betaald_op) || "–"}</dd>
 <dt>Mail klant</dt><dd>${esc(r.mail_klant || "–")}</dd>${r.soort === "inschrijving" ? `<dt>Ticket</dt><dd>${r.gescand_op ? `gescand op ${esc(new Date(r.gescand_op).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}` : r.ticket ? "nog niet gescand" : "nog geen ticket"}</dd>` : ""}</dl></div>
+${r.soort === "bestelling" ? await wolfBlok(env, r) : ""}
 <form class="kaart" method="post" action="/beheer/r/${esc(r.nummer)}"><h2>Status en notitie</h2>
 <p><label>Status<br><select name="status">${[...new Set([r.status, ...STATUSSEN])].map((s) => `<option ${s === r.status ? "selected" : ""}>${esc(s)}</option>`).join("")}</select></label></p>
 <p><label>Interne notitie<br><textarea name="notitie" rows="3" style="width:100%">${esc(r.notitie || "")}</textarea></label></p>
 <button>Opslaan</button></form>`, email);
 }
 
+// Stand bij Wolf Workwear (zie wolf.js) + knop om een bestelling (nog eens) door te sturen.
+async function wolfBlok(env, r) {
+  const o = await wolfInfo(env, r.nummer).catch(() => null);
+  const dagen = o ? Math.floor((Date.now() - new Date(o.gestuurd_op).getTime()) / 86400_000) : 0;
+  const stand = !o ? (r.afgehandeld ? "Niet via Wolf (afgehandeld)." : "Nog niet naar Wolf gestuurd.")
+    : o.status === "verzonden" ? `Verzonden met ${esc(o.vervoerder)} · track &amp; trace <b>${esc(o.tt)}</b> · ${datum(o.klaar_op)}`
+    : o.status === "klaar" ? `Ligt klaar in Ham · ${datum(o.klaar_op)}`
+    : `<b style="color:${dagen >= 14 ? "#a32d2d" : "inherit"}">Open bij Wolf sinds ${dagen} ${dagen === 1 ? "dag" : "dagen"}</b> · ${o.herinneringen} herinnering(en)`;
+  const knop = !o && r.status === "Betaald" && !r.test && !r.afgehandeld
+    ? `<form method="post" action="/beheer/r/${esc(r.nummer)}" style="margin-top:10px"><input type="hidden" name="actie" value="wolf"><button>Naar Wolf sturen</button></form>` : "";
+  return `<div class="kaart"><h2>Wolf Workwear</h2><p style="margin:0">${stand}</p>${knop}</div>`;
+}
+
 async function bewaar(request, nummer, env, email) {
   const f = await request.formData();
+  if (f.get("actie") === "wolf") {
+    const res = await naarWolf(env, nummer);
+    return detail(nummer, env, email, res.ok ? (res.al ? "Stond al bij Wolf." : "Naar Wolf gestuurd.") : `Niet gelukt: ${res.fout}`);
+  }
   const status = String(f.get("status") || "").slice(0, 60);
   const huidig = await env.SHOP_DB.prepare("SELECT status FROM registraties WHERE nummer = ?").bind(nummer).first();
   if (!huidig) return detail(nummer, env, email);

@@ -126,3 +126,8 @@ CREATE TABLE IF NOT EXISTS mail_wachtrij (id INTEGER PRIMARY KEY, campagne TEXT 
 -- Hartjes onder blogartikels: één per browser (bezoeker = cookie rc_bz), lid_id als die ingelogd was.
 CREATE TABLE IF NOT EXISTS blog_likes (slug TEXT NOT NULL, bezoeker TEXT NOT NULL, lid_id INTEGER, ip_hash TEXT, aangemaakt TEXT NOT NULL, PRIMARY KEY (slug, bezoeker));
 CREATE INDEX IF NOT EXISTS blog_likes_ip ON blog_likes (ip_hash, aangemaakt);
+
+-- Wolf Workwear: opvolging van webshopbestellingen (22 nov 2026). Wordt ook automatisch aangemaakt door wolf.js.
+CREATE TABLE IF NOT EXISTS wolf_opvolging (nummer TEXT PRIMARY KEY, token TEXT NOT NULL UNIQUE, gestuurd_op TEXT NOT NULL,
+  herinnerd_op TEXT, herinneringen INTEGER NOT NULL DEFAULT 0, geescaleerd_op TEXT, status TEXT NOT NULL DEFAULT 'open',
+  vervoerder TEXT, tt TEXT, klaar_op TEXT);
