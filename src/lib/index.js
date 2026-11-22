@@ -32,6 +32,7 @@ import { aanbod, laadCatalogus } from "./aanbod.js";
 import { verstuur } from "./mail.js";
 import { scanPagina } from "./scan.js";
 import { wolfPagina } from "./wolf.js";
+import { wolfTestApi } from "./beheer-testmail.js";
 import { klantMailOpmaak } from "./mails-bevestiging.js";
 
 const VERZENDKOST = 7.5;
@@ -386,6 +387,8 @@ export default {
     if (bl) return bl;
     const cbr = await cb(request, env, url);
     if (cbr) return cbr;
+    const wt = await wolfTestApi(request, env, url);
+    if (wt) return wt;
     const wf = await wolfPagina(request, env, url);
     if (wf) return wf;
     const ks = await scanPagina(request, env, url);

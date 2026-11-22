@@ -22,6 +22,39 @@ const VOORBEELD_BESTELLING = {
   artikels: [{ aantal: 2, naam: "T-shirt Rover & Co", keuzes: { Maat: "L" }, lijn: 50 }], subtotaal: 50, verzending: 0, donatie: 5, totaal: 55,
 };
 
+// Tijdelijk (22 nov 2026): de 6 Wolf-testmails via Resend naar pieter@susconsult.be sturen zonder /beheer-login.
+// Eenmalige token (hash in instellingen 'wolf_testtoken'), vaste ontvanger. Wordt na gebruik weer verwijderd.
+const WOLF_TEST = ["wolf-nieuw", "wolf-herinnering", "wolf-onderweg", "wolf-klaar", "wolf-klaar-act", "wolf-escalatie"];
+export async function wolfTestApi(request, env, url) {
+  if (url.pathname !== "/api/wolf-testmail" || request.method !== "POST") return null;
+  const t = url.searchParams.get("t") || "";
+  const d = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
+  const h = [...new Uint8Array(d)].map((b) => b.toString(16).padStart(2, "0")).join("");
+  const del = await env.SHOP_DB.prepare("DELETE FROM instellingen WHERE sleutel = 'wolf_testtoken' AND waarde = ?").bind(h).run();
+  if (!t || !del.meta.changes) return new Response("nee", { status: 403 });
+  const aan = "pieter@susconsult.be", uit = [];
+  for (const soort of WOLF_TEST) {
+    const m = wolfVoorbeeld(soort, aan);
+    const r = await verstuur(env, { aan, ...m });
+    uit.push({ soort, ok: r.ok, id: r.id, fout: r.fout });
+  }
+  return new Response(JSON.stringify(uit), { headers: { "content-type": "application/json" } });
+}
+
+function wolfVoorbeeld(soort, aan) {
+  // Voorbeeldbestelling; de knop in de Wolf-mail wijst naar een link die niet bestaat (geeft "klopt niet").
+  const d = { soort: "bestelling", nummer: "RC-000000-TEST1", klant: { naam: "Pieter Van Baekel", email: aan, telefoon: "0477 00 00 00" },
+    levering: { type: "verzenden", straat: "Stokerijstraat 75", postcode: "3945", gemeente: "Ham", land: "België" },
+    artikels: [{ aantal: 2, naam: "Rover & Co T-shirt", keuzes: { Maat: "L" } }, { aantal: 1, naam: "Emaille mok" }], opmerking: "Dit is een testbestelling" };
+  const r = { nummer: d.nummer, naam: d.klant.naam, email: aan, telefoon: d.klant.telefoon, betaald_op: new Date(Date.now() - (soort === "wolf-herinnering" ? 6 : 0) * 86400_000).toISOString(), data: JSON.stringify(d) };
+  const x = soort === "wolf-nieuw" ? wolfMailInhoud(r, "0".repeat(40), 0)
+    : soort === "wolf-herinnering" ? wolfMailInhoud(r, "0".repeat(40), 1)
+    : soort === "wolf-escalatie" ? escalatieMail({ ...r, gestuurd_op: new Date(Date.now() - 14 * 86400_000).toISOString(), herinneringen: 2 }, d, 14)
+    : soort === "wolf-klaar-act" ? klantWolfMail(r, { ...d, levering: { type: "activiteit", activiteit: "Tea on the Tailgate (18 dec)" } }, { status: "klaar" })
+    : klantWolfMail(r, d, soort === "wolf-onderweg" ? { status: "verzonden", vervoerder: "bpost", tt: "323212345678901234" } : { status: "klaar" });
+  return { ...x, onderwerp: `[TEST] ${x.onderwerp}` };
+}
+
 export async function beheerTestmail(request, env, url, email) {
   if (url.pathname !== "/beheer/testmail") return null;
   let melding = "";
@@ -42,17 +75,7 @@ export async function beheerTestmail(request, env, url, email) {
         const fakeEnv = { ...env, SHOP_DB: { prepare: () => ({ bind: () => ({ first: async () => ({ ticket: nieuweTicketCode() }), run: async () => ({ meta: { changes: 0 } }) }) }) } };
         m = await corTicketMail(fakeEnv, VOORBEELD_COR, { site, wachtwoordLink: `${site}/account/wachtwoord-vergeten`, test: true });
       } else if (soort.startsWith("wolf-")) {
-        // Voorbeeldbestelling; de knop in de Wolf-mail wijst naar een link die niet bestaat (geeft "klopt niet").
-        const d = { soort: "bestelling", nummer: "RC-000000-TEST1", klant: { naam: "Pieter Van Baekel", email: aan, telefoon: "0477 00 00 00" },
-          levering: { type: "verzenden", straat: "Stokerijstraat 75", postcode: "3945", gemeente: "Ham", land: "België" },
-          artikels: [{ aantal: 2, naam: "Rover & Co T-shirt", keuzes: { Maat: "L" } }, { aantal: 1, naam: "Emaille mok" }], opmerking: "Dit is een testbestelling" };
-        const r = { nummer: d.nummer, naam: d.klant.naam, email: aan, telefoon: d.klant.telefoon, betaald_op: new Date(Date.now() - (soort === "wolf-herinnering" ? 6 : 0) * 86400_000).toISOString(), data: JSON.stringify(d) };
-        const x = soort === "wolf-nieuw" ? wolfMailInhoud(r, "0".repeat(40), 0)
-          : soort === "wolf-herinnering" ? wolfMailInhoud(r, "0".repeat(40), 1)
-          : soort === "wolf-escalatie" ? escalatieMail({ ...r, gestuurd_op: new Date(Date.now() - 14 * 86400_000).toISOString(), herinneringen: 2 }, d, 14)
-          : soort === "wolf-klaar-act" ? klantWolfMail(r, { ...d, levering: { type: "activiteit", activiteit: "Tea on the Tailgate (18 dec)" } }, { status: "klaar" })
-          : klantWolfMail(r, d, soort === "wolf-onderweg" ? { status: "verzonden", vervoerder: "bpost", tt: "323212345678901234" } : { status: "klaar" });
-        m = { ...x, onderwerp: `[TEST] ${x.onderwerp}` };
+        m = wolfVoorbeeld(soort, aan);
       } else if (soort === "aankondiging") {
         m = aankondigingMail({ naam: "Pieter Van Baekel" }, { site, wachtwoordLink: `${site}/account/wachtwoord-vergeten`, afmeldLink: `${site}/account/afmelden?t=test`, test: true });
       } else {
