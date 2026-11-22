@@ -19,7 +19,7 @@ const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&l
 
 function pagina(titel, tekst) {
   return new Response(`<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="robots" content="noindex">
-<title>${esc(titel)}</title><style>body{font-family:system-ui,sans-serif;background:#ECE6D6;color:#141815;display:grid;place-items:center;min-height:100vh;margin:0;padding:20px}
+<title>${esc(titel)}</title><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png"><style>body{font-family:system-ui,sans-serif;background:#ECE6D6;color:#141815;display:grid;place-items:center;min-height:100vh;margin:0;padding:20px}
 div{background:#fff;border-radius:14px;padding:28px;max-width:440px}h1{margin:0 0 10px;font-size:1.5rem}a{color:#1F3B2A;font-weight:700}</style></head>
 <body><div><h1>${esc(titel)}</h1><p>${tekst}</p><p><a href="/kalender">Naar de kalender</a></p></div></body></html>`,
     { headers: { "content-type": "text/html; charset=utf-8", "x-robots-tag": "noindex", "cache-control": "no-store" } });

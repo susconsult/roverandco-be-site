@@ -41,7 +41,7 @@ showpage
 function printPagina(a, url) {
   const t = e(a.titel), qr = svg(url);
   return `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="robots" content="noindex, nofollow"><title>QR – ${t}</title>
+<meta name="robots" content="noindex, nofollow"><title>QR – ${t}</title><link rel="icon" href="/favicon.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <link rel="stylesheet" href="/assets/css/site.css">
 <style>
 body{margin:0;background:#f3efe6;font-family:Inter,system-ui,sans-serif;color:#1a1a1a}
