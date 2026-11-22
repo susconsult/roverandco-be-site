@@ -9,7 +9,7 @@ import { beheerTestmail } from "./beheer-testmail.js";
 import { beheerVersturen } from "./beheer-versturen.js";
 import { zetOnderhoud } from "./onderhoud.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
-import { naarWolf, wolfInfo } from "./wolf.js";
+import { naarWolf, wolfInfo, zetWolf } from "./wolf.js";
 
 const html = (body, status = 200, extra = {}) => new Response(body, {
   status, headers: { "content-type": "text/html; charset=utf-8", "cache-control": "no-store", "x-robots-tag": "noindex, nofollow", ...extra },
@@ -312,7 +312,7 @@ async function wolfBlok(env, r) {
 async function bewaar(request, nummer, env, email) {
   const f = await request.formData();
   if (f.get("actie") === "wolf") {
-    const res = await naarWolf(env, nummer);
+    const res = await naarWolf(env, nummer, { handmatig: true });
     return detail(nummer, env, email, res.ok ? (res.al ? "Stond al bij Wolf." : "Naar Wolf gestuurd.") : `Niet gelukt: ${res.fout}`);
   }
   const status = String(f.get("status") || "").slice(0, 60);
@@ -380,6 +380,14 @@ export async function beheer(request, env, url) {
     await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer', ?)")
       .bind(`Onderhoudsmodus ${aan ? "aangezet" : "uitgezet"} door ${w.email}`, new Date().toISOString()).run().catch(() => {});
     return new Response(null, { status: 303, headers: { location: "/beheer", "cache-control": "no-store" } });
+  }
+  if (p === "/beheer/wolf" && request.method === "POST") {
+    const f = await request.formData();
+    const aan = f.get("aan") === "aan";
+    await zetWolf(env, aan);
+    await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer', ?)")
+      .bind(`Bestellingen naar Wolf ${aan ? "aangezet" : "uitgezet"} door ${w.email}`, new Date().toISOString()).run().catch(() => {});
+    return new Response(null, { status: 303, headers: { location: "/beheer#instellingen", "cache-control": "no-store" } });
   }
   if ((p === "/beheer" || p === "/beheer/") && !url.searchParams.get("soort")) return thuis(env, w.email);
   if (p === "/beheer" || p === "/beheer/") return lijst(url, env, w.email);

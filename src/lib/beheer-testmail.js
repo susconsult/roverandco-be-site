@@ -6,7 +6,7 @@ import { klantMailOpmaak } from "./mails-bevestiging.js";
 import { nieuweTicketCode } from "./ticket.js";
 import { mailBestelling, mailInschrijving } from "./opslag.js";
 import { corTicketMail, aankondigingMail } from "./mails-lancering.js";
-import { wolfMailInhoud, klantWolfMail } from "./wolf.js";
+import { wolfMailInhoud, klantWolfMail, escalatieMail } from "./wolf.js";
 
 const VOORBEELD_COR = { nummer: "EC-TEST0001", naam: "Pieter Van Baekel", totaal: 20,
   data: { bron: "ecwid", soort: "inschrijving", klant: { naam: "Pieter Van Baekel" }, lijnen: [{ naam: "CHURCH OF ROVER -- 22 november 2026", aantal: 1, prijs: 20, lijn: 20, opties: ["Roadbook: Ik rijd mee ! (per wagen)", "Kerkbezoek (met rondleiding): 10:30"] }], totaal: 20 } };
@@ -49,6 +49,8 @@ export async function beheerTestmail(request, env, url, email) {
         const r = { nummer: d.nummer, naam: d.klant.naam, email: aan, telefoon: d.klant.telefoon, betaald_op: new Date(Date.now() - (soort === "wolf-herinnering" ? 6 : 0) * 86400_000).toISOString(), data: JSON.stringify(d) };
         const x = soort === "wolf-nieuw" ? wolfMailInhoud(r, "0".repeat(40), 0)
           : soort === "wolf-herinnering" ? wolfMailInhoud(r, "0".repeat(40), 1)
+          : soort === "wolf-escalatie" ? escalatieMail({ ...r, gestuurd_op: new Date(Date.now() - 14 * 86400_000).toISOString(), herinneringen: 2 }, d, 14)
+          : soort === "wolf-klaar-act" ? klantWolfMail(r, { ...d, levering: { type: "activiteit", activiteit: "Tea on the Tailgate (18 dec)" } }, { status: "klaar" })
           : klantWolfMail(r, d, soort === "wolf-onderweg" ? { status: "verzonden", vervoerder: "bpost", tt: "323212345678901234" } : { status: "klaar" });
         m = { ...x, onderwerp: `[TEST] ${x.onderwerp}` };
       } else if (soort === "aankondiging") {
@@ -65,5 +67,5 @@ export async function beheerTestmail(request, env, url, email) {
 <div class="kaart"><h2>Testmail versturen</h2><p>Stuur een voorbeeld van een mail om de opmaak te bekijken. De QR-code in de testmail werkt niet bij het scannen.</p>
 <form method="post" action="/beheer/testmail"><label>Naar<input name="aan" type="email" value="pieter@susconsult.be" required></label>
 <p style="display:flex;gap:8px;flex-wrap:wrap">${knop("inschrijving", "Inschrijving met ticket")}${knop("bestelling", "Bestelling webshop")}${knop("gewoon", "Gewone melding")}${knop("cor", "Ticket Church of Rover (Ecwid)")}${knop("aankondiging", "Aankondiging nieuwe site")}</p>
-<h2 style="margin-top:18px">Wolf Workwear</h2><p style="display:flex;gap:8px;flex-wrap:wrap">${knop("wolf-nieuw", "Wolf: nieuwe bestelling")}${knop("wolf-herinnering", "Wolf: herinnering")}${knop("wolf-onderweg", "Klant: onderweg")}${knop("wolf-klaar", "Klant: ligt klaar in Ham")}</p></form></div>`, email);
+<h2 style="margin-top:18px">Wolf Workwear</h2><p style="display:flex;gap:8px;flex-wrap:wrap">${knop("wolf-nieuw", "Wolf: nieuwe bestelling")}${knop("wolf-herinnering", "Wolf: herinnering")}${knop("wolf-onderweg", "Klant: onderweg")}${knop("wolf-klaar", "Klant: ligt klaar in Ham")}${knop("wolf-klaar-act", "Klant: klaar (ophalen op activiteit)")}${knop("wolf-escalatie", "Jij: 14 dagen open")}</p></form></div>`, email);
 }

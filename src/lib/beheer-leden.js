@@ -1,7 +1,7 @@
 // /beheer/leden: leden zoeken, bekijken en beheren, plus de activiteitenlog (90 dagen).
 import { onderhoudAan } from "./onderhoud.js";
 import { activiteiten } from "./aanbod.js";
-import { wolfStand } from "./wolf.js";
+import { wolfStand, wolfAan } from "./wolf.js";
 import { activiteitCijfers } from "./beheer-overzicht.js";
 import { esc, pagina } from "./beheer.js";
 import { naar as naarMet } from "./sjabloon.js";
@@ -249,6 +249,7 @@ export async function thuis(env, email) {
   const kandidaten = relevant.slice(0, 4);
   const cijfers = await Promise.all(kandidaten.map((a) => a.inschrijving?.onderdelen?.length ? activiteitCijfers(env, a).catch(() => null) : null));
   const ond = await onderhoudAan(env);
+  const wolfOp = await wolfAan(env);
   const n = (v) => Number(v || 0);
 
   // Alarmbalk: alleen wat aandacht vraagt.
@@ -334,7 +335,10 @@ ${n(scans.n) ? rij(`<b>${n(scans.n)}</b> tickets gescand`, "laatste 24 u", "/sca
 
 <div class="dgroep" id="instellingen">Instellingen</div>
 <div class="dond"><span>Onderhoudsmodus: ${ond ? '<b style="color:#c0392b">AAN</b> <small class="dzw">bezoekers zien de onderhoudspagina</small>' : "<b>uit</b> <small class=\"dzw\">site is open</small>"}</span>
-<form method="post" action="/beheer/onderhoud"${ond ? "" : ` onsubmit="return confirm('Onderhoud aanzetten? Bezoekers zien dan alleen de onderhoudspagina.')"`}><input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit" class="${ond ? "" : "knop licht"}">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form></div>`, email);
+<form method="post" action="/beheer/onderhoud"${ond ? "" : ` onsubmit="return confirm('Onderhoud aanzetten? Bezoekers zien dan alleen de onderhoudspagina.')"`}><input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit" class="${ond ? "" : "knop licht"}">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form></div>
+<div class="dond" style="margin-top:10px"><span>Bestellingen naar Wolf: ${wolfOp ? "<b>aan</b> <small class=\"dzw\">nieuwe betaalde bestellingen gaan naar Wolf, met herinneringen</small>" : '<b style="color:#c0392b">uit</b> <small class="dzw">er gaat niets naar Wolf</small>'}</span>
+<form method="post" action="/beheer/wolf"><input type="hidden" name="aan" value="${wolfOp ? "uit" : "aan"}"><button type="submit" class="${wolfOp ? "knop licht" : ""}">${wolfOp ? "Uitzetten" : "Aanzetten"}</button></form></div>
+<p class="dzw" style="font-size:13px;margin:8px 0 0"><a href="/beheer/testmail">Testmails versturen →</a></p>`, email);
 }
 
 /* ---------------- meldingen ---------------- */

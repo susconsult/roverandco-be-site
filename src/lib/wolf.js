@@ -45,8 +45,18 @@ function bestelKader(r, d) {
 /* ---------- 1. bestelling naar Wolf ---------- */
 
 // Na een betaalde webshopbestelling. Stuurt nooit twee keer (zelfde nummer = niets doen).
-export async function naarWolf(env, nummer) {
+// Schakelaar in /beheer (Overzicht › Instellingen). Standaard UIT tot Pieter de testmails heeft goedgekeurd.
+export async function wolfAan(env) {
+  const r = await env.SHOP_DB.prepare("SELECT waarde FROM instellingen WHERE sleutel = 'wolf'").first().catch(() => null);
+  return r?.waarde === "aan";
+}
+export async function zetWolf(env, aan) {
+  await env.SHOP_DB.prepare("INSERT INTO instellingen (sleutel, waarde) VALUES ('wolf', ?) ON CONFLICT(sleutel) DO UPDATE SET waarde = excluded.waarde").bind(aan ? "aan" : "uit").run();
+}
+
+export async function naarWolf(env, nummer, { handmatig = false } = {}) {
   try {
+    if (!handmatig && !(await wolfAan(env))) return { ok: false, fout: "doorsturen naar Wolf staat uit" };
     await wolfTabel(env);
     const r = await env.SHOP_DB.prepare("SELECT * FROM registraties WHERE nummer = ? AND soort = 'bestelling'").bind(nummer).first();
     if (!r || r.test) return { ok: false, fout: "geen echte bestelling" };
@@ -81,7 +91,7 @@ export function wolfMailInhoud(r, t, herinnering) {
     alinea(esc(intro)) + kop2("Wat") + `<table role="presentation" width="100%" style="font-family:Inter,Arial,sans-serif;font-size:15px;margin:0 0 16px">${lijnen.map((l) => `<tr><td style="padding:7px 0;border-bottom:1px solid #DED5BF">${esc(l)}</td></tr>`).join("")}</table>` +
     kop2("Voor wie") + kader(bestelKader(r, d)) + (d.opmerking ? alinea(`<b>Opmerking van de klant:</b> ${esc(d.opmerking)}`) : "") +
     `<div style="text-align:center;margin:10px 0 18px">${knop("Verzonden of klaar? Duid het hier aan", link)}</div>` +
-    alinea("Track & trace bij de hand houden als je verstuurt: die is nodig om te bevestigen.", "color:#5B625C;font-size:13px;text-align:center") });
+    alinea("Track &amp; trace bij de hand houden als je verstuurt: die is nodig om te bevestigen.", "color:#5B625C;font-size:13px;text-align:center") });
   const tekst = [intro, "", "Wat:", ...lijnen, "", ...bestelKader(r, d).map(([l, w]) => `${l}: ${w}`), d.opmerking ? `\nOpmerking: ${d.opmerking}` : "", "", `Verzonden of klaar? Duid het hier aan: ${link}`].join("\n");
   return { onderwerp, tekst, html };
 }
@@ -196,6 +206,7 @@ async function klantMail(env, r, d, o) {
 /* ---------- 4. opvolging (cron) ---------- */
 
 export async function wolfOpvolging(env, { altijd = false } = {}) {
+  if (!altijd && !(await wolfAan(env))) return;
   const uur = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Brussels", hour: "2-digit", hour12: false }));
   if (!altijd && (uur < 8 || uur >= 21)) return; // geen herinneringen 's nachts
   await wolfTabel(env);
@@ -213,12 +224,14 @@ export async function wolfOpvolging(env, { altijd = false } = {}) {
       const c = await env.SHOP_DB.prepare("UPDATE wolf_opvolging SET geescaleerd_op = ? WHERE nummer = ? AND geescaleerd_op IS NULL").bind(new Date().toISOString(), o.nummer).run();
       if (c.meta.changes) {
         const d = JSON.parse(o.data || "{}");
-        await verstuur(env, { aan: BEHEER(env), onderwerp: `Wolf: bestelling ${o.nummer} staat al ${Math.floor(oud)} dagen open`, sleutel: `wolf-escalatie-${o.nummer}`,
-          tekst: [`Bestelling ${o.nummer} (${o.naam}) is nog niet als verzonden of klaar aangeduid door Wolf.`, `Doorgestuurd: ${datum(o.gestuurd_op)}`, `Herinneringen: ${o.herinneringen}`, "", ...artikelLijnen(d), "", `In het beheer: ${SITE}/beheer/r/${o.nummer}`].join("\n") });
+        await verstuur(env, { aan: BEHEER(env), ...escalatieMail(o, d, oud), sleutel: `wolf-escalatie-${o.nummer}` });
       }
     }
   }
 }
+
+export const escalatieMail = (o, d, oud) => ({ onderwerp: `Wolf: bestelling ${o.nummer} staat al ${Math.floor(oud)} dagen open`,
+  tekst: [`Bestelling ${o.nummer} (${o.naam}) is nog niet als verzonden of klaar aangeduid door Wolf.`, `Doorgestuurd: ${datum(o.gestuurd_op)}`, `Herinneringen: ${o.herinneringen}`, "", ...artikelLijnen(d), "", `In het beheer: ${SITE}/beheer/r/${o.nummer}`].join("\n") });
 
 /* ---------- 5. voor het beheer ---------- */
 
