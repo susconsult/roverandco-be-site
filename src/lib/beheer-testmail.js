@@ -33,7 +33,8 @@ export async function wolfTestApi(request, env, url) {
   const del = await env.SHOP_DB.prepare("DELETE FROM instellingen WHERE sleutel = 'wolf_testtoken' AND waarde = ?").bind(h).run();
   if (!t || !del.meta.changes) return new Response("nee", { status: 403 });
   const aan = "pieter@susconsult.be", uit = [];
-  for (const soort of WOLF_TEST) {
+  const welke = url.searchParams.get("alleen") === "wolf" ? WOLF_TEST.slice(0, 2) : WOLF_TEST;
+  for (const soort of welke) {
     const m = wolfVoorbeeld(soort, aan);
     const r = await verstuur(env, { aan, ...m });
     uit.push({ soort, ok: r.ok, id: r.id, fout: r.fout });

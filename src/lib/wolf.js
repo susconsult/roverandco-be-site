@@ -77,23 +77,37 @@ async function stuurWolfMail(env, r, t, herinnering) {
   return res;
 }
 
-// Ook gebruikt door /beheer/testmail.
+// Ook gebruikt door /beheer/testmail. Bewust kaal en functioneel (geen logo/kader): wat, naar wie, knop.
+const kort = (naam) => String(naam).replace(/^Rover & Co\s+/i, "").replace(/^Emaille\s+/i, "");
 export function wolfMailInhoud(r, t, herinnering) {
   const d = JSON.parse(r.data || "{}");
-  const lijnen = artikelLijnen(d);
+  const lev = d.levering || {};
   const link = `${SITE}/wolf/${t}`;
   const dagen = Math.floor((Date.now() - new Date(r.betaald_op || r.aangemaakt).getTime()) / DAG);
-  const onderwerp = herinnering ? `Herinnering: bestelling ${r.nummer} nog niet verstuurd (${dagen} dagen)` : `Nieuwe bestelling Rover & Co: ${r.nummer}`;
-  const intro = herinnering
-    ? `Deze bestelling staat al ${dagen} dagen open. Zou je ze willen versturen of klaarleggen, en het daarna even aanduiden met de knop hieronder? Dan krijgt de klant meteen een bericht.`
-    : "Er is een nieuwe bestelling betaald in de webshop van Rover & Co. Zou je ze willen maken en versturen of klaarleggen? Duid het daarna aan met de knop hieronder, dan krijgt de klant automatisch een bericht.";
-  const html = htmlMail({ eyebrow: herinnering ? "Herinnering" : "Nieuwe bestelling", titel: `Bestelling ${r.nummer}`, inhoud:
-    alinea(esc(intro)) + kop2("Wat") + `<table role="presentation" width="100%" style="font-family:Inter,Arial,sans-serif;font-size:15px;margin:0 0 16px">${lijnen.map((l) => `<tr><td style="padding:7px 0;border-bottom:1px solid #DED5BF">${esc(l)}</td></tr>`).join("")}</table>` +
-    kop2("Voor wie") + kader(bestelKader(r, d)) + (d.opmerking ? alinea(`<b>Opmerking van de klant:</b> ${esc(d.opmerking)}`) : "") +
-    `<div style="text-align:center;margin:10px 0 18px">${knop("Verzonden of klaar? Duid het hier aan", link)}</div>` +
-    alinea("Track &amp; trace bij de hand houden als je verstuurt: die is nodig om te bevestigen.", "color:#5B625C;font-size:13px;text-align:center") });
-  const tekst = [intro, "", "Wat:", ...lijnen, "", ...bestelKader(r, d).map(([l, w]) => `${l}: ${w}`), d.opmerking ? `\nOpmerking: ${d.opmerking}` : "", "", `Verzonden of klaar? Duid het hier aan: ${link}`].join("\n");
-  return { onderwerp, tekst, html };
+  const items = (d.artikels || d.lijnen || []).map((a) => {
+    const k = Object.values(a.keuzes || {}).join(", ");
+    return { lang: `${a.aantal} × ${a.naam}${k ? ` (${k})` : ""}`, kort: `${a.aantal}× ${kort(a.naam)}` };
+  });
+  const naam = r.naam || d.klant?.naam || "", tel = r.telefoon || d.klant?.telefoon || "";
+  const [waarKop, waar] = lev.type === "verzenden" ? ["Verzenden naar", adresTekst(lev)]
+    : lev.type === "activiteit" ? ["Meegeven naar", lev.activiteit || "activiteit"] : ["Afhalen", "in Ham"];
+  const onderwerp = herinnering ? `Nog open (${dagen} dagen): ${r.nummer}` : `Bestelling ${r.nummer}: ${items.map((i) => i.kort).join(", ")}`.slice(0, 140);
+  const F = "font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#141815";
+  const kop = (t) => `<p style="${F};margin:18px 0 4px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5B625C">${esc(t)}</p>`;
+  const html = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:16px;background:#ffffff">
+<div style="max-width:520px">
+${herinnering ? `<p style="${F};margin:0 0 6px;font-size:15px;font-weight:700;color:#a32d2d">Staat al ${dagen} dagen open.</p>` : ""}
+<p style="${F};margin:0;font-size:13px;color:#5B625C">Rover &amp; Co · ${esc(r.nummer)}</p>
+${kop("Te maken")}
+<p style="${F};margin:0;font-size:17px;line-height:1.5;font-weight:600">${items.map((i) => esc(i.lang)).join("<br>")}</p>
+${kop(waarKop)}
+<p style="${F};margin:0;font-size:15px;line-height:1.5">${esc(naam)}${tel ? ` · <a href="tel:${esc(tel.replace(/\s/g, ""))}" style="color:#141815">${esc(tel)}</a>` : ""}<br>${esc(waar)}</p>
+${d.opmerking ? `<p style="${F};margin:12px 0 0;font-size:15px"><b>Opmerking:</b> ${esc(d.opmerking)}</p>` : ""}
+<p style="margin:22px 0 0"><a href="${link}" style="${F};display:inline-block;background:#1F3B2A;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:13px 22px;border-radius:8px">Verzonden / klaar →</a></p>
+</div></body></html>`;
+  const tekst = [herinnering ? `Staat al ${dagen} dagen open.\n` : "", `Rover & Co · ${r.nummer}`, "", "TE MAKEN", ...items.map((i) => i.lang), "", waarKop.toUpperCase(), `${naam}${tel ? " · " + tel : ""}`, waar,
+    d.opmerking ? `\nOpmerking: ${d.opmerking}` : "", "", `Verzonden / klaar: ${link}`].join("\n");
+  return { onderwerp, tekst, html, zonderLogo: true };
 }
 
 /* ---------- 2. de pagina voor Wolf ---------- */
