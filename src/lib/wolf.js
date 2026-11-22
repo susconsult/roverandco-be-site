@@ -61,6 +61,14 @@ export async function naarWolf(env, nummer) {
 }
 
 async function stuurWolfMail(env, r, t, herinnering) {
+  const m = wolfMailInhoud(r, t, herinnering);
+  const res = await verstuur(env, { aan: WOLF(env), ...m, sleutel: `wolf-${r.nummer}-${herinnering}` });
+  if (!res.ok) console.log("wolfmail fout", r.nummer, res.fout);
+  return res;
+}
+
+// Ook gebruikt door /beheer/testmail.
+export function wolfMailInhoud(r, t, herinnering) {
   const d = JSON.parse(r.data || "{}");
   const lijnen = artikelLijnen(d);
   const link = `${SITE}/wolf/${t}`;
@@ -75,9 +83,7 @@ async function stuurWolfMail(env, r, t, herinnering) {
     `<div style="text-align:center;margin:10px 0 18px">${knop("Verzonden of klaar? Duid het hier aan", link)}</div>` +
     alinea("Track & trace bij de hand houden als je verstuurt: die is nodig om te bevestigen.", "color:#5B625C;font-size:13px;text-align:center") });
   const tekst = [intro, "", "Wat:", ...lijnen, "", ...bestelKader(r, d).map(([l, w]) => `${l}: ${w}`), d.opmerking ? `\nOpmerking: ${d.opmerking}` : "", "", `Verzonden of klaar? Duid het hier aan: ${link}`].join("\n");
-  const res = await verstuur(env, { aan: WOLF(env), onderwerp, tekst, html, sleutel: `wolf-${r.nummer}-${herinnering}` });
-  if (!res.ok) console.log("wolfmail fout", r.nummer, res.fout);
-  return res;
+  return { onderwerp, tekst, html };
 }
 
 /* ---------- 2. de pagina voor Wolf ---------- */

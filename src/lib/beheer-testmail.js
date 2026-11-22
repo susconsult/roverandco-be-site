@@ -6,6 +6,7 @@ import { klantMailOpmaak } from "./mails-bevestiging.js";
 import { nieuweTicketCode } from "./ticket.js";
 import { mailBestelling, mailInschrijving } from "./opslag.js";
 import { corTicketMail, aankondigingMail } from "./mails-lancering.js";
+import { wolfMailInhoud, klantWolfMail } from "./wolf.js";
 
 const VOORBEELD_COR = { nummer: "EC-TEST0001", naam: "Pieter Van Baekel", totaal: 20,
   data: { bron: "ecwid", soort: "inschrijving", klant: { naam: "Pieter Van Baekel" }, lijnen: [{ naam: "CHURCH OF ROVER -- 22 november 2026", aantal: 1, prijs: 20, lijn: 20, opties: ["Roadbook: Ik rijd mee ! (per wagen)", "Kerkbezoek (met rondleiding): 10:30"] }], totaal: 20 } };
@@ -40,6 +41,16 @@ export async function beheerTestmail(request, env, url, email) {
       } else if (soort === "cor") {
         const fakeEnv = { ...env, SHOP_DB: { prepare: () => ({ bind: () => ({ first: async () => ({ ticket: nieuweTicketCode() }), run: async () => ({ meta: { changes: 0 } }) }) }) } };
         m = await corTicketMail(fakeEnv, VOORBEELD_COR, { site, wachtwoordLink: `${site}/account/wachtwoord-vergeten`, test: true });
+      } else if (soort.startsWith("wolf-")) {
+        // Voorbeeldbestelling; de knop in de Wolf-mail wijst naar een link die niet bestaat (geeft "klopt niet").
+        const d = { soort: "bestelling", nummer: "RC-000000-TEST1", klant: { naam: "Pieter Van Baekel", email: aan, telefoon: "0477 00 00 00" },
+          levering: { type: "verzenden", straat: "Stokerijstraat 75", postcode: "3945", gemeente: "Ham", land: "België" },
+          artikels: [{ aantal: 2, naam: "Rover & Co T-shirt", keuzes: { Maat: "L" } }, { aantal: 1, naam: "Emaille mok" }], opmerking: "Dit is een testbestelling" };
+        const r = { nummer: d.nummer, naam: d.klant.naam, email: aan, telefoon: d.klant.telefoon, betaald_op: new Date(Date.now() - (soort === "wolf-herinnering" ? 6 : 0) * 86400_000).toISOString(), data: JSON.stringify(d) };
+        const x = soort === "wolf-nieuw" ? wolfMailInhoud(r, "0".repeat(40), 0)
+          : soort === "wolf-herinnering" ? wolfMailInhoud(r, "0".repeat(40), 1)
+          : klantWolfMail(r, d, soort === "wolf-onderweg" ? { status: "verzonden", vervoerder: "bpost", tt: "323212345678901234" } : { status: "klaar" });
+        m = { ...x, onderwerp: `[TEST] ${x.onderwerp}` };
       } else if (soort === "aankondiging") {
         m = aankondigingMail({ naam: "Pieter Van Baekel" }, { site, wachtwoordLink: `${site}/account/wachtwoord-vergeten`, afmeldLink: `${site}/account/afmelden?t=test`, test: true });
       } else {
@@ -53,5 +64,6 @@ export async function beheerTestmail(request, env, url, email) {
   return pagina("Testmail", `<!--aan:testmail-->${melding ? `<div class="${melding.startsWith("!") ? "melding-fout" : "melding-ok"}">${esc(melding.replace(/^!/, ""))}</div>` : ""}
 <div class="kaart"><h2>Testmail versturen</h2><p>Stuur een voorbeeld van een mail om de opmaak te bekijken. De QR-code in de testmail werkt niet bij het scannen.</p>
 <form method="post" action="/beheer/testmail"><label>Naar<input name="aan" type="email" value="pieter@susconsult.be" required></label>
-<p style="display:flex;gap:8px;flex-wrap:wrap">${knop("inschrijving", "Inschrijving met ticket")}${knop("bestelling", "Bestelling webshop")}${knop("gewoon", "Gewone melding")}${knop("cor", "Ticket Church of Rover (Ecwid)")}${knop("aankondiging", "Aankondiging nieuwe site")}</p></form></div>`, email);
+<p style="display:flex;gap:8px;flex-wrap:wrap">${knop("inschrijving", "Inschrijving met ticket")}${knop("bestelling", "Bestelling webshop")}${knop("gewoon", "Gewone melding")}${knop("cor", "Ticket Church of Rover (Ecwid)")}${knop("aankondiging", "Aankondiging nieuwe site")}</p>
+<h2 style="margin-top:18px">Wolf Workwear</h2><p style="display:flex;gap:8px;flex-wrap:wrap">${knop("wolf-nieuw", "Wolf: nieuwe bestelling")}${knop("wolf-herinnering", "Wolf: herinnering")}${knop("wolf-onderweg", "Klant: onderweg")}${knop("wolf-klaar", "Klant: ligt klaar in Ham")}</p></form></div>`, email);
 }
