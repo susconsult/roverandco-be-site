@@ -1,5 +1,7 @@
 // /beheer/leden: leden zoeken, bekijken en beheren, plus de activiteitenlog (90 dagen).
 import { onderhoudAan } from "./onderhoud.js";
+import { producten, activiteiten, eur } from "./aanbod.js";
+import { activiteitCijfers, meer } from "./beheer-overzicht.js";
 import { esc, pagina } from "./beheer.js";
 import { naar as naarMet } from "./sjabloon.js";
 import { stuurWachtwoordLink, stuurBevestiging, startBekijkAls } from "./leden.js";
@@ -200,39 +202,81 @@ async function activiteit(url, env, email) {
 ${r.length ? `<ul class="log">${r.map((x) => logRij(x, true)).join("")}</ul>` : `<p class="leeg">Nog geen activiteit.</p>`}</div>`, email);
 }
 
-/* ---------------- te doen (startpagina) ---------------- */
+/* ---------------- overzicht (startpagina) ---------------- */
 
+// Dashboard: per menu-onderdeel wat er nu speelt, plus de cijfers van komende en net voorbije activiteiten.
 const ECHT_REG = "(status = 'Betaald' OR status LIKE 'Bevestigd%') AND test = 0";
+const VOORBIJ_DAGEN = 7; // een activiteit blijft nog zo lang op het overzicht na de datum
 export async function thuis(env, email) {
   const db = env.SHOP_DB;
   const week = new Date(Date.now() - 7 * 86400_000).toISOString();
-  const [best, insch, meld, nieuw, acts, logs] = await Promise.all([
-    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'bestelling' AND ${ECHT_REG} AND aangemaakt > ?`).bind(week).first(),
-    db.prepare(`SELECT COUNT(*) n FROM registraties WHERE soort = 'inschrijving' AND ${ECHT_REG} AND aangemaakt > ?`).bind(week).first(),
+  const vandaag = new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
+  const [best, insch, meld, leden, scans, logs, prods, acts] = await Promise.all([
+    db.prepare(`SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM registraties WHERE soort = 'bestelling' AND ${ECHT_REG}`).bind(week).first(),
+    db.prepare(`SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM registraties WHERE soort = 'inschrijving' AND ${ECHT_REG}`).bind(week).first(),
     db.prepare("SELECT COUNT(*) n FROM forum_meldingen WHERE afgehandeld = 0").first(),
-    db.prepare("SELECT COUNT(*) n FROM leden WHERE aangemaakt > ? AND verwijderd_op IS NULL").bind(week).first(),
-    db.prepare("SELECT activiteit, COUNT(*) n FROM registraties WHERE soort = 'inschrijving' AND test = 0 AND (status = 'Betaald' OR status LIKE 'Bevestigd%') GROUP BY activiteit ORDER BY MAX(aangemaakt) DESC LIMIT 6").all(),
-    db.prepare("SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id WHERE g.soort <> 'account' OR g.tekst LIKE 'Account%' ORDER BY g.id DESC LIMIT 15").all(),
+    db.prepare("SELECT COUNT(*) n, SUM(aangemaakt > ?) nieuw FROM leden WHERE verwijderd_op IS NULL").bind(week).first(),
+    db.prepare("SELECT COUNT(*) n FROM registraties WHERE gescand_op >= ?").bind(new Date(Date.now() - 86400_000).toISOString()).first(),
+    db.prepare("SELECT g.*, l.gebruikersnaam FROM lid_log g LEFT JOIN leden l ON l.id = g.lid_id WHERE g.soort <> 'account' OR g.tekst LIKE 'Account%' ORDER BY g.id DESC LIMIT 6").all(),
+    producten(env).catch(() => []),
+    activiteiten(env).catch(() => []),
   ]);
-  const tegel = (label, n, link, actie, klas = "") => `<a class="tegel ${n ? klas : "ok"}" href="${link}"><small>${label}</small><b>${n}</b><span>${n ? actie : "Niets te doen"}</span></a>`;
-  const a = acts.results || [];
+  const grens = new Date(Date.now() - VOORBIJ_DAGEN * 86400_000).toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
+  const relevant = acts.filter((a) => !a.verborgen && a.datum && (a.einde || a.datum) >= grens).sort((x, y) => String(x.datum).localeCompare(String(y.datum)));
+  const komend = relevant.filter((a) => (a.einde || a.datum) >= vandaag);
+  const kandidaten = relevant.filter((a) => a.inschrijving?.onderdelen?.length).slice(0, 8);
+  const alleCijfers = await Promise.all(kandidaten.map((a) => activiteitCijfers(env, a).catch(() => null)));
+  // alleen activiteiten met inschrijvingen, of waar inschrijven open staat
+  const metInschr = [], cijfers = [];
+  kandidaten.forEach((a, i) => { const c = alleCijfers[i]; if (c && (c.rijen.length || a.inschrijving.open)) { metInschr.push(a); cijfers.push(c); } });
+
+  const n = (v) => Number(v || 0);
+  const tegel = (ic, label, groot, sub, link, klas = "") => `<a class="tegel ${klas}" href="${link}"><small>${label}</small><b>${groot}</b><span>${sub}</span></a>`;
+  const actKaart = (a, c) => {
+    if (!c) return "";
+    const voorbij = (a.einde || a.datum) < vandaag;
+    const onderdelen = [...c.som.values()].filter((x) => x.aantal && !String(x.naam).startsWith("Ecwid-inschrijving"));
+    return `<div class="kaart dash-act"><div class="dash-act-kop"><h2>${esc(a.titel)}</h2><small>${esc(a.datum_label || a.datum)}${voorbij ? " · voorbij" : ""}</small></div>
+<div class="dash-cijfers"><div><small>Inschrijvingen</small><b>${c.ok.length}</b></div>
+${onderdelen.map((x) => `<div><small>${esc(x.naam)}</small><b>${meer(x.aantal, x.per)}</b></div>`).join("")}
+<div><small>Binnen (scan)</small><b>${c.binnen} / ${c.ok.length}</b></div><div><small>Omzet</small><b>${eur(c.omzet)}</b></div></div>
+${c.niet.length ? `<p class="dash-noot">${c.niet.length} niet betaald (tellen niet mee)</p>` : ""}
+<p class="dash-links"><a href="/beheer/activiteiten/${esc(a.slug)}/overzicht">Overzicht →</a> <a href="/activiteiten/${esc(a.slug)}/qr" target="_blank">QR-code</a></p></div>`;
+  };
   const ond = await onderhoudAan(env);
-  return pagina("Te doen", `${STIJL}${hoofdTabs("home")}
-<form method="post" action="/beheer/onderhoud" class="kaart" style="display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px;${ond ? "border-color:#c0392b" : ""}">
-<div><h2 style="margin:0 0 4px">Onderhoudsmodus: ${ond ? "<b style=\"color:#c0392b\">AAN</b>" : "uit"}</h2>
-<small>${ond ? "Bezoekers van roverandco.be zien de onderhoudspagina. Jij ziet de site omdat je ingelogd bent als beheerder." : "roverandco.be is open voor iedereen."}</small></div>
+  const volgende = komend[0];
+  return pagina("Overzicht", `${STIJL}${hoofdTabs("home")}<style>
+.dash-groep{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--m);margin:22px 0 8px}
+.dash-act-kop{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.dash-act-kop h2{margin:0}.dash-act-kop small{color:var(--m)}
+.dash-cijfers{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin:12px 0 6px}.dash-cijfers div{background:#f6f4ee;border-radius:10px;padding:10px 12px}.dash-cijfers small{display:block;color:var(--m);font-size:13px}.dash-cijfers b{font-size:22px}
+.dash-noot{color:var(--m);font-size:13px;margin:6px 0 0}.dash-links{margin:10px 0 0;display:flex;gap:18px}.dash-links a{color:var(--g);font-weight:600;text-decoration:none}
+.dash-ond{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px}.dash-ond h2{font-size:15px;margin:0}
+@media(max-width:700px){.dash-cijfers{grid-template-columns:1fr 1fr}}
+</style>
+<form method="post" action="/beheer/onderhoud" class="kaart dash-ond" style="${ond ? "border:2px solid #c0392b" : ""}">
+<h2>Onderhoudsmodus: ${ond ? '<b style="color:#c0392b">AAN</b>' : "uit"} <small style="font-weight:400;color:var(--m)">${ond ? "bezoekers zien de onderhoudspagina" : "site is open"}</small></h2>
 <input type="hidden" name="aan" value="${ond ? "uit" : "aan"}"><button type="submit">${ond ? "Site openzetten" : "Onderhoud aanzetten"}</button></form>
+
+<div class="dash-groep">Verkoop</div>
 <div class="tegels">
-<a class="tegel" href="/beheer?soort=bestelling"><small>Nieuwe bestellingen (7 dagen)</small><b>${best.n}</b><span>Naar bestellingen →</span></a>
-<a class="tegel" href="/beheer?soort=inschrijving"><small>Nieuwe inschrijvingen (7 dagen)</small><b>${insch.n}</b><span>Naar inschrijvingen →</span></a>
-${tegel("Open meldingen", meld.n, "/beheer/meldingen", "Bekijken →", "let")}
-<a class="tegel" href="/beheer/leden"><small>Nieuwe leden (7 dagen)</small><b>${nieuw.n}</b><span>Naar leden →</span></a>
+${tegel("zak", "Bestellingen", n(best.nieuw), `nieuw deze week · ${n(best.n)} in totaal →`, "/beheer?soort=bestelling")}
+${tegel("ticket", "Inschrijvingen", n(insch.nieuw), `nieuw deze week · ${n(insch.n)} in totaal →`, "/beheer?soort=inschrijving")}
+${tegel("ticket", "Scan (tickets)", n(scans.n), "gescand laatste 24 uur · naar scan →", "/scan")}
 </div>
-<div class="twee">
-<div class="kaart"><h2>Laatste activiteit</h2>${(logs.results || []).length ? `<ul class="log">${logs.results.map((x) => logRij(x, true)).join("")}</ul><p style="margin:10px 0 0"><a href="/beheer/log">Hele log →</a></p>` : `<p class="leeg" style="padding:0">Nog niets gebeurd.</p>`}</div>
-<div class="kaart"><h2>Inschrijvingen per activiteit</h2>${a.length ? `<table><tbody>${a.map((x) => `<tr><td><a href="/beheer?soort=inschrijving&activiteit=${encodeURIComponent(x.activiteit || "")}">${esc(x.activiteit || "–")}</a></td><td style="text-align:right"><b>${x.n}</b></td></tr>`).join("")}</tbody></table>` : `<p class="leeg" style="padding:0">Nog geen inschrijvingen.</p>`}
-<p style="margin:14px 0 0"><a href="/beheer/activiteiten">Activiteiten beheren →</a> · <a href="/beheer/producten">Producten →</a></p></div>
-</div>`, email);
+
+<div class="dash-groep">Community</div>
+<div class="tegels">
+${tegel("leden", "Leden", n(leden.n), `+${n(leden.nieuw)} deze week →`, "/beheer/leden")}
+${tegel("vlag", "Meldingen", n(meld.n), n(meld.n) ? "open · bekijken →" : "niets te doen", "/beheer/meldingen", n(meld.n) ? "let" : "ok")}
+</div>
+<div class="kaart"><h2>Log</h2>${(logs.results || []).length ? `<ul class="log">${logs.results.map((x) => logRij(x, true)).join("")}</ul><p style="margin:10px 0 0"><a href="/beheer/log">Hele log →</a></p>` : `<p class="leeg" style="padding:0">Nog niets gebeurd.</p>`}</div>
+
+<div class="dash-groep">Aanbod</div>
+<div class="tegels">
+${tegel("shirt", "Producten", prods.length, "op de site · beheren →", "/beheer/producten")}
+${tegel("kalender", "Activiteiten", komend.length, volgende ? `komend · volgende: ${esc(volgende.titel)} (${esc(volgende.datum_label || volgende.datum)}) →` : "komend →", "/beheer/activiteiten")}
+</div>
+${metInschr.map((a, i) => actKaart(a, cijfers[i])).join("")}`, email);
 }
 
 /* ---------------- meldingen ---------------- */

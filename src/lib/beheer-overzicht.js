@@ -7,7 +7,7 @@ import { activiteit, eur } from "./aanbod.js";
 
 const BETAALD = (st) => st === "Betaald" || String(st).startsWith("Bevestigd");
 const PER = { persoon: ["persoon", "personen"], wagen: ["wagen", "wagens"], stuk: ["stuk", "stuks"] };
-const meer = (n, per) => `${n} ${(PER[per] || ["", ""])[n === 1 ? 0 : 1]}`.trim();
+export const meer = (n, per) => `${n} ${(PER[per] || ["", ""])[n === 1 ? 0 : 1]}`.trim();
 
 // Zet één inschrijving om naar [{ id, naam, per, aantal }] volgens de onderdelen van de activiteit.
 function lijnenVan(d, onderdelen, ts) {
@@ -30,9 +30,9 @@ function lijnenVan(d, onderdelen, ts) {
 
 const csvCel = (v) => `"${String(v ?? "").replace(/"/g, '""')}"`;
 
-export async function activiteitOverzicht(env, email, slug, url) {
-  const a = await activiteit(env, slug);
-  if (!a) return null;
+// Kerncijfers van één activiteit (ook gebruikt op /beheer Overzicht).
+export async function activiteitCijfers(env, a) {
+  const slug = a.slug;
   const ins = a.inschrijving || {}, onderdelen = ins.onderdelen || [], ts = ins.tijdsloten;
   const { results } = await env.SHOP_DB.prepare(
     "SELECT nummer, aangemaakt, status, naam, email, telefoon, tijdslot, slot_personen, totaal, test, gescand_op, data FROM registraties WHERE soort = 'inschrijving' AND activiteit = ? AND (test IS NULL OR test = 0) ORDER BY naam COLLATE NOCASE"
@@ -55,6 +55,14 @@ export async function activiteitOverzicht(env, email, slug, url) {
   const wagens = [...som.values()].filter((x) => x.per === "wagen").reduce((s, x) => s + x.aantal, 0);
   const omzet = ok.reduce((s, r) => s + (Number(r.totaal) || 0), 0);
   const binnen = ok.filter((r) => r.gescand_op).length;
+  return { rijen, ok, niet, som, personen, wagens, omzet, binnen };
+}
+
+export async function activiteitOverzicht(env, email, slug, url) {
+  const a = await activiteit(env, slug);
+  if (!a) return null;
+  const ins = a.inschrijving || {}, ts = ins.tijdsloten;
+  const { rijen, ok, niet, som, personen, wagens, omzet, binnen } = await activiteitCijfers(env, a);
 
   // CSV
   if (url.searchParams.get("csv")) {

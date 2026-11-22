@@ -159,8 +159,8 @@ pre{white-space:pre-wrap;font:inherit;margin:0}
 html{touch-action:pan-x pan-y}`;
 
 const MENU = [
-  ["", [["home", "Te doen", "/beheer", "home"]]],
-  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["scan", "Scan (tickets)", "/scan", "ticket"], ["testmail", "Testmail", "/beheer/testmail", "lijst"], ["versturen", "Overstapmails", "/beheer/versturen", "lijst"]]],
+  ["", [["home", "Overzicht", "/beheer", "home"]]],
+  ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["scan", "Scan (tickets)", "/scan", "ticket"]]],
   ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
   ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"]]],
 ];

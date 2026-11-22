@@ -136,7 +136,7 @@ ${n("fout") ? `<button type="submit" name="actie" value="opnieuw">Mislukte opnie
   }).join("");
 
   return pagina("Overstapmails versturen", `<!--aan:versturen-->${melding ? `<div class="${melding.startsWith("!") ? "melding-fout" : "melding-ok"}">${esc(melding.replace(/^!/, ""))}</div>` : ""}
-${dicht ? `<div class="melding-fout">De site staat nog in onderhoud: versturen kan pas als je die uitzet op <a href="/beheer">Te doen</a>.</div>` : ""}
+${dicht ? `<div class="melding-fout">De site staat nog in onderhoud: versturen kan pas als je die uitzet op <a href="/beheer">Overzicht</a>.</div>` : ""}
 <div class="kaart"><h2>Automatisch versturen: ${auto ? "aan" : "uit"}</h2><p>Elke 15 minuten gaan de volgende ${PER_KEER} tickets en de volgende ${PER_KEER} aankondigingen weg. Aankondigingen alleen tussen 8 en 21 uur.</p>
 <form method="post" action="/beheer/versturen"><input type="hidden" name="campagne" value="aankondiging"><button type="submit" name="actie" value="${auto ? "druppel-uit" : "druppel-aan"}">${auto ? "Stop automatisch versturen" : "Start automatisch versturen"}</button></form></div>
 <p>Per klik gaan er ${PER_KEER} mails weg. Iedereen krijgt elke mail hoogstens één keer.</p>${kaarten}`, email);
