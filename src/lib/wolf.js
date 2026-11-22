@@ -90,23 +90,35 @@ export function wolfMailInhoud(r, t, herinnering) {
   });
   const naam = r.naam || d.klant?.naam || "", tel = r.telefoon || d.klant?.telefoon || "";
   const [waarKop, waar] = lev.type === "verzenden" ? ["Verzenden naar", adresTekst(lev)]
-    : lev.type === "activiteit" ? ["Meegeven naar", lev.activiteit || "activiteit"] : ["Afhalen", "in Ham"];
+    : lev.type === "activiteit" ? ["Meegeven naar", lev.activiteit || "activiteit"] : ["Klant haalt af", "bij The Wolf Garage (Ham)"];
+  // De stappen hangen af van de levering.
+  const stap2 = lev.type === "verzenden" ? "Verstuur het naar het adres hierboven en hou de track &amp; trace bij."
+    : lev.type === "activiteit" ? `Geef het mee naar <b>${esc(lev.activiteit || "de activiteit")}</b>.`
+    : "Leg het klaar in de garage, met de naam van de klant erop.";
+  const stap3 = lev.type === "verzenden" ? "Klik op de knop, kies de vervoerder en vul de track &amp; trace in." : "Klik op de knop en kies <b>Ligt klaar</b>.";
+  const stappen = ["Maak de bestelling klaar.", stap2, stap3];
+  const knopTekst = lev.type === "verzenden" ? "Ik heb het verzonden →" : "Het ligt klaar →";
   const onderwerp = herinnering ? `Nog open (${dagen} dagen): ${r.nummer}` : `Bestelling ${r.nummer}: ${items.map((i) => i.kort).join(", ")}`.slice(0, 140);
   const F = "font-family:-apple-system,Segoe UI,Arial,sans-serif;color:#141815";
-  const kop = (t) => `<p style="${F};margin:18px 0 4px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5B625C">${esc(t)}</p>`;
+  const kop = (t) => `<p style="${F};margin:20px 0 4px;font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#5B625C">${esc(t)}</p>`;
   const html = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0;padding:16px;background:#ffffff">
 <div style="max-width:520px">
-${herinnering ? `<p style="${F};margin:0 0 6px;font-size:15px;font-weight:700;color:#a32d2d">Staat al ${dagen} dagen open.</p>` : ""}
-<p style="${F};margin:0;font-size:13px;color:#5B625C">Rover &amp; Co · ${esc(r.nummer)}</p>
+${herinnering ? `<p style="${F};margin:0 0 6px;font-size:15px;font-weight:700;color:#a32d2d">Deze bestelling staat al ${dagen} dagen open.</p>` : ""}
+<p style="${F};margin:0;font-size:13px;color:#5B625C">Rover &amp; Co · webshopbestelling ${esc(r.nummer)}</p>
 ${kop("Te maken")}
 <p style="${F};margin:0;font-size:17px;line-height:1.5;font-weight:600">${items.map((i) => esc(i.lang)).join("<br>")}</p>
 ${kop(waarKop)}
-<p style="${F};margin:0;font-size:15px;line-height:1.5">${esc(naam)}${tel ? ` · <a href="tel:${esc(tel.replace(/\s/g, ""))}" style="color:#141815">${esc(tel)}</a>` : ""}<br>${esc(waar)}</p>
-${d.opmerking ? `<p style="${F};margin:12px 0 0;font-size:15px"><b>Opmerking:</b> ${esc(d.opmerking)}</p>` : ""}
-<p style="margin:22px 0 0"><a href="${link}" style="${F};display:inline-block;background:#1F3B2A;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:13px 22px;border-radius:8px">Verzonden / klaar →</a></p>
+<p style="${F};margin:0;font-size:15px;line-height:1.5">${esc(naam)}${tel ? ` · <a href="tel:${esc(tel.replace(/\s/g, ""))}" style="color:#141815">${esc(tel)}</a>` : ""}<br>${lev.type === "activiteit" ? esc(waar) : esc(waar)}</p>
+${d.opmerking ? `<p style="${F};margin:12px 0 0;font-size:15px"><b>Opmerking klant:</b> ${esc(d.opmerking)}</p>` : ""}
+${kop("Zo ga je te werk")}
+<ol style="${F};margin:4px 0 0;padding-left:20px;font-size:15px;line-height:1.6">${stappen.map((x) => `<li>${x}</li>`).join("")}</ol>
+<p style="margin:20px 0 0"><a href="${link}" style="${F};display:inline-block;background:#1F3B2A;color:#ffffff;text-decoration:none;font-size:16px;font-weight:700;padding:13px 22px;border-radius:8px">${knopTekst}</a></p>
+<p style="${F};margin:12px 0 0;font-size:14px;line-height:1.5;color:#5B625C">Na je klik krijgt de klant automatisch een mail (${lev.type === "verzenden" ? "met de track &amp; trace" : "dat het klaarligt"}). Je hoeft de klant zelf niets te laten weten.<br>Zolang je niet klikt, krijg je elke week een herinnering.</p>
 </div></body></html>`;
-  const tekst = [herinnering ? `Staat al ${dagen} dagen open.\n` : "", `Rover & Co · ${r.nummer}`, "", "TE MAKEN", ...items.map((i) => i.lang), "", waarKop.toUpperCase(), `${naam}${tel ? " · " + tel : ""}`, waar,
-    d.opmerking ? `\nOpmerking: ${d.opmerking}` : "", "", `Verzonden / klaar: ${link}`].join("\n");
+  const tekstStappen = stappen.map((x, i) => `${i + 1}. ${x.replace(/<[^>]+>/g, "").replace(/&amp;/g, "&")}`);
+  const tekst = [herinnering ? `Deze bestelling staat al ${dagen} dagen open.\n` : "", `Rover & Co · webshopbestelling ${r.nummer}`, "", "TE MAKEN", ...items.map((i) => i.lang), "", waarKop.toUpperCase(), `${naam}${tel ? " · " + tel : ""}`, waar,
+    d.opmerking ? `\nOpmerking klant: ${d.opmerking}` : "", "", "ZO GA JE TE WERK", ...tekstStappen, "", `${knopTekst.replace(" →", "")}: ${link}`, "",
+    "Na je klik krijgt de klant automatisch een mail. Je hoeft de klant zelf niets te laten weten. Zolang je niet klikt, krijg je elke week een herinnering."].join("\n");
   return { onderwerp, tekst, html, zonderLogo: true };
 }
 
