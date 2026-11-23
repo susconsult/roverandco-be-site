@@ -122,7 +122,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
       </div>
       <div>
         <h4>Ontdek</h4>
-        <ul><li><a href="/forum">Community</a></li><li><a href="/blog">Blog</a></li><li><a href="/landys">Landy's van leden</a></li><li><a href="/zoekertjes">Te koop / gezocht</a></li><li><a href="/gids">Garages en zaken</a></li></ul>
+        <ul><li><a href="/community">Community</a></li><li><a href="/blog">Blog</a></li><li><a href="/landys">Landy's van leden</a></li><li><a href="/zoekertjes">Te koop / gezocht</a></li><li><a href="/gids">Garages en zaken</a></li></ul>
       </div>
       <div>
         <h4>Volg ons</h4>
@@ -307,7 +307,7 @@ home = f"""
 <div class="wrap volgende-wrap"><a href="/activiteiten/{eerst['slug']}" class="volgende" data-dyn="volgende"><small>Eerstvolgende</small><strong>{e(eerst['titel'])}</strong><span>{e(eerst['datum_label'])} · {e(eerst['locatie'])}</span></a></div>
 <section class="tegels-sec"><div class="wrap tegels">
   {tegel("/activiteiten", "977", "Activiteiten", "Ritten, roadbooks en weekends")}
-  {tegel("/forum", "leden-vuur-avond", "Kampvuur", "Vragen, verhalen en samen rijden", "Nieuw")}
+  {tegel("/community", "leden-vuur-avond", "Kampvuur", "Vragen, verhalen en samen rijden", "Nieuw")}
   {tegel("/shop", "5577", "Shop", "T-shirts, hoodies en mokken")}
   {tegel("/blog", "5739", "Blog", "Onderhoud, geschiedenis en verhalen")}
 </div></section>
@@ -324,9 +324,9 @@ home = f"""
       <div class="eyebrow">Kampvuur</div>
       <h2>Wat leeft er</h2>
       <p>Geen algoritme, geen reclame. Vragen stellen, kennis delen en afspreken om samen te rijden. Jouw berichten blijven van jou.</p>
-      <div class="ctas"><a href="/account/registreren" class="btn btn-wit" data-gast>Maak je gratis account</a><a href="/forum" class="btn">Naar het forum</a></div>
+      <div class="ctas"><a href="/account/registreren" class="btn btn-wit" data-gast>Maak je gratis account</a><a href="/community" class="btn">Naar het forum</a></div>
     </div>
-    <div class="forum-lijst" data-dyn="forum"><a class="forum-rij" href="/forum"><span>Het forum is open</span><small>Start jij het eerste topic?</small></a></div>
+    <div class="forum-lijst" data-dyn="forum"><a class="forum-rij" href="/community"><span>Het forum is open</span><small>Start jij het eerste topic?</small></a></div>
   </div>
 </section>
 <section class="garage-sec">
@@ -1012,7 +1012,7 @@ write("/betaling-mislukt", "Betaling niet gelukt", "De betaling bij Rover & Co i
 
 # ---------- sjabloon voor pagina's die de Worker maakt (account, forum: zie src/sjabloon.js) ----------
 open(os.path.join(PUB, "_sjabloon.html"), "w", encoding="utf-8").write(layout("/__PAD__", "__TITEL__", "__DESC__", "__INHOUD__"))
-pages.append("/forum")
+pages.append("/community")
 
 # ---------- sitemap + robots ----------
 

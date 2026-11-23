@@ -619,7 +619,7 @@ async function meldingen(request, env, lid) {
     inhoud: banner("Mijn account", "Meldingen", "Nieuwe reacties en likes op wat je volgt.", [["Mijn account", "/account"], ["Meldingen"]]) + `<section class="narrow acc-sectie"><div class="acc-kaart">
       ${r.length ? `<ul class="meldingen">${r.map((x) => `<li class="${x.gelezen ? "" : "nieuw"}"><a href="${esc(x.link)}">${esc(x.tekst)}</a><small>${datum(x.aangemaakt)}</small></li>`).join("")}</ul>`
         : "<p>Nog geen meldingen. Volg een categorie, topic of #hashtag op het forum, dan krijg je hier een melding bij nieuwe berichten.</p>"}
-      </div><p><a href="/account">← Terug naar mijn account</a> · <a href="/forum">Naar het forum</a></p></section>`,
+      </div><p><a href="/account">← Terug naar mijn account</a> · <a href="/community">Naar het forum</a></p></section>`,
   });
 }
 

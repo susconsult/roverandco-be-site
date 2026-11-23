@@ -56,7 +56,7 @@ async function meldPagina(request, env, url, lid) {
   const it = await item(env, soort, id);
   const kader = (inhoud) => pagina(env, request, { titel: "Melden", noindex: true, pad: "/melden",
     inhoud: banner("Melden", "Iets melden", "Zie je iets wat hier niet hoort? Laat het ons weten. We bekijken elke melding.", [["Melden"]], "leden-defender-spiegel-detail") + `<section class="narrow acc-sectie"><div class="acc-kaart">${inhoud}</div></section>` });
-  if (!it) return kader(`<p>Dit bericht of deze foto bestaat niet meer. Misschien werd het al verwijderd.</p><p><a class="btn" href="/forum">Naar het forum</a></p>`);
+  if (!it) return kader(`<p>Dit bericht of deze foto bestaat niet meer. Misschien werd het al verwijderd.</p><p><a class="btn" href="/community">Naar het forum</a></p>`);
   if (it.alleenLeden && !lid) return naar(`/account/inloggen?terug=${encodeURIComponent(url.pathname + url.search)}`);
   if (url.searchParams.has("ok")) return kader(`<h2>Bedankt</h2><p>Je melding is doorgestuurd. We bekijken ze zo snel mogelijk.</p><p><a class="btn btn-solid" href="${esc(it.terug)}">Terug</a></p>`);
   return kader(`<h2>Je meldt ${esc(it.wat)}${it.naam ? ` van ${esc(it.naam)}` : ""}</h2>
@@ -73,7 +73,7 @@ async function meldVersturen(request, env, url, lid) {
   const f = await request.formData();
   const soort = String(f.get("soort") || ""), id = parseInt(f.get("id"), 10) || 0;
   const it = await item(env, soort, id);
-  if (!it) return naar("/forum");
+  if (!it) return naar("/community");
   if (it.alleenLeden && !lid) return naar("/account/inloggen");
   const r = REDENEN.find(([k]) => k === f.get("reden"));
   const toel = String(f.get("toelichting") || "").replace(/\s+/g, " ").trim().slice(0, 300);
@@ -117,7 +117,7 @@ async function bewaardPagina(request, env, lid) {
   return pagina(env, request, {
     titel: "Bewaard", noindex: true, pad: "/account/bewaard",
     inhoud: banner("Mijn account", "Bewaard", "Alles wat je via ⋯ › Bewaren opzij legde: berichten en foto's om later terug te vinden.", [["Mijn account", "/account"], ["Bewaard"]]) + `<section class="narrow acc-sectie">
-      ${!berichten.length && !wagens.length ? `<div class="acc-kaart"><p>Nog niets bewaard. Tik bij een bericht of foto op ⋯ en kies <b>Bewaren</b>.</p><p><a class="btn btn-solid" href="/forum">Naar het forum</a></p></div>` : ""}
+      ${!berichten.length && !wagens.length ? `<div class="acc-kaart"><p>Nog niets bewaard. Tik bij een bericht of foto op ⋯ en kies <b>Bewaren</b>.</p><p><a class="btn btn-solid" href="/community">Naar het forum</a></p></div>` : ""}
       ${wagens.length ? `<div class="acc-kaart"><h2>Foto's</h2><div class="garage">${wagens.map((w) => `<figure class="wagen"><a class="wagen-foto" href="/forum/lid/${encodeURIComponent(w.gebruikersnaam)}#wagen-${w.id}"><img src="/forum/foto/${w.foto_id}" alt="" loading="lazy"></a><figcaption><b>${esc(w.naam || w.type)}</b><small>van ${esc(w.gebruikersnaam)}</small></figcaption></figure>`).join("")}</div></div>` : ""}
       ${berichten.length ? `<div class="acc-kaart"><h2>Berichten</h2><ul class="bewaard-lijst">${berichten.map((b) => `<li><a href="${topicLink(b.tid, b.titel, b.id)}"><b>${esc(b.titel)}</b></a><small>${esc(b.gebruikersnaam || "")} · ${datum(b.aangemaakt)}</small><p>${esc(String(b.tekst).replace(/\[[^\]]*\]/g, "").slice(0, 180))}</p></li>`).join("")}</ul></div>` : ""}
       <p><a href="/account">← Terug naar mijn account</a></p></section>`,

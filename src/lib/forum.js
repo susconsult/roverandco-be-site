@@ -105,7 +105,7 @@ const isNieuw = (lid, t, gelezen) => !!lid && t.laatste_op > (gelezen[t.id] || l
 /* ---------------- stukjes opmaak ---------------- */
 
 const banner = (a, b, c = "") => sjabloonBanner(a, b, c, "slot"); // forum heeft zijn eigen kruimelpad onder de banner
-const kruimel = (...delen) => `<nav class="f-kruimel" aria-label="Kruimelpad"><a href="/">Home</a> <span>›</span> <a href="/forum">Kampvuur</a>${delen.map((d) => ` <span>›</span> ${d}`).join("")}</nav>`;
+const kruimel = (...delen) => `<nav class="f-kruimel" aria-label="Kruimelpad"><a href="/">Home</a> <span>›</span> <a href="/community">Community</a>${delen.map((d) => ` <span>›</span> ${d}`).join("")}</nav>`;
 
 function balk(lid, pad) {
   const rechts = lid
@@ -187,7 +187,7 @@ async function index(request, env, url, lid) {
 
   const getal = (n, een, veel) => `<div><b>${n}</b><span>${n === 1 ? een : veel}</span></div>`;
   const kop = `<div class="wrap com-kop"><div class="com-cijfers">${getal(stats.leden || 0, "lid", "leden")}${getal(stats.topics || 0, "topic", "topics")}${getal(wagens.tot, "Landy", "Landy's")}${getal(cbLive.length, "kanaal live op de CB", "kanalen live op de CB")}</div>
-    <div class="com-acties"><a class="btn btn-solid" href="${lid ? "#kampvuur" : "/account/registreren?terug=/forum"}">${ico("plus")}${lid ? "Nieuw topic" : "Doe mee"}</a><a class="btn" href="/account/garage">${ico("auto")}Zet je Landy erbij</a><a class="btn" href="/cb">${ico("cb")}Op de CB</a></div></div>`;
+    <div class="com-acties"><a class="btn btn-solid" href="${lid ? "#kampvuur" : "/account/registreren?terug=/community"}">${ico("plus")}${lid ? "Nieuw topic" : "Doe mee"}</a><a class="btn" href="/account/garage">${ico("auto")}Zet je Landy erbij</a><a class="btn" href="/cb">${ico("cb")}Op de CB</a></div></div>`;
 
   const landys = wagens.lijst.length ? `<section class="wrap com-landys"><div class="com-sec-kop"><h2>Landy's van leden</h2><a href="/landys">Bekijk alle ${wagens.tot} →</a></div>
     <div class="com-landys-rij">${wagens.lijst.map(wagenKaart).join("")}</div></section>` : "";
@@ -221,11 +221,11 @@ async function index(request, env, url, lid) {
     </div>`;
 
   return pagina(env, request, {
-    titel: "Community: Kampvuur, Landy's en CB van Rover & Co", pad: "/forum", desc: "De community van Rover & Co: het Kampvuur (forum), Land Rovers van leden, de CB, de kalender en de gids met Land Rover-garages. Lezen kan iedereen, meedoen met een gratis account.",
+    titel: "Community: Kampvuur, Landy's en CB van Rover & Co", pad: "/community", desc: "De community van Rover & Co: het Kampvuur (forum), Land Rovers van leden, de CB, de kalender en de gids met Land Rover-garages. Lezen kan iedereen, meedoen met een gratis account.",
     inhoud: sjabloonBanner("Rover & Co", "Community", "Het Kampvuur, de Landy's van leden, de CB en wat er de komende maanden te doen is. Lezen kan iedereen, meedoen met een gratis account.", [["Community"]], "leden-lightweight-110")
       + kop + landys + `
     <section class="wrap f-sectie forum-layout com-midden">
-      <div><div class="com-sec-kop" id="kampvuur"><h2>Het Kampvuur</h2><a href="/forum/nieuw">Alles wat nieuw is →</a></div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
+      <div><div class="com-sec-kop" id="kampvuur"><h2>Het Kampvuur</h2><a href="/forum/nieuw">Alles wat nieuw is →</a></div>${balk(lid, "/community")}${nieuwStrook(nieuwste)}${kaarten}</div>
       <aside class="forum-zij">${zkKaart}${cbKaart}${kalKaart}${gidsKaart}
         ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
     </section>` + blog + waarom,
@@ -490,14 +490,14 @@ async function moderatie(request, env, url, lid) {
   const id = parseInt(f.get("id"), 10) || 0;
   if (actie === "verwijder-wagenfoto") {
     const w = await env.SHOP_DB.prepare("SELECT w.foto_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id WHERE w.id = ?").bind(id).first();
-    if (!w) return naar("/forum");
+    if (!w) return naar("/community");
     await env.SHOP_DB.prepare("UPDATE lid_wagens SET foto_id = NULL WHERE id = ?").bind(id).run();
     await env.SHOP_DB.prepare("UPDATE forum_meldingen SET afgehandeld = 1 WHERE wagen_id = ?").bind(id).run();
     return naar(`/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#garage`);
   }
   if (actie === "verwijder-bericht") {
     const b = await env.SHOP_DB.prepare("SELECT b.topic_id, t.titel FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id WHERE b.id = ?").bind(id).first();
-    if (!b) return naar("/forum");
+    if (!b) return naar("/community");
     await env.SHOP_DB.prepare("UPDATE forum_berichten SET verwijderd = 1 WHERE id = ?").bind(id).run();
     await env.SHOP_DB.prepare("UPDATE forum_meldingen SET afgehandeld = 1 WHERE bericht_id = ?").bind(id).run();
     await herbereken(env, b.topic_id);
@@ -513,9 +513,9 @@ async function moderatie(request, env, url, lid) {
   if (actie === "blokkeer" && id && id !== lid.id) {
     await env.SHOP_DB.prepare("UPDATE leden SET geblokkeerd = 1 WHERE id = ?").bind(id).run();
     await env.SHOP_DB.prepare("DELETE FROM lid_sessies WHERE lid_id = ?").bind(id).run();
-    return naar(request.headers.get("referer")?.startsWith(url.origin) ? request.headers.get("referer") : "/forum");
+    return naar(request.headers.get("referer")?.startsWith(url.origin) ? request.headers.get("referer") : "/community");
   }
-  return naar("/forum");
+  return naar("/community");
 }
 
 /* ---------------- foto's ---------------- */
@@ -565,7 +565,7 @@ async function profiel(request, env, url, lid, naam) {
   const wagens = (await garages(env, [p.id]))[p.id] || [];
   return pagina(env, request, {
     titel: `${p.gebruikersnaam} – Kampvuur`, noindex: true,
-    inhoud: sjabloonBanner("Kampvuur", p.gebruikersnaam, "Lid van het Rover & Co-forum.", [["Kampvuur", "/forum"], [p.gebruikersnaam]], wagens.find((w) => w.foto_id) ? `/forum/foto/${wagens.find((w) => w.foto_id).foto_id}` : "leden-vuur-avond") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}
+    inhoud: sjabloonBanner("Kampvuur", p.gebruikersnaam, "Lid van het Rover & Co-forum.", [["Kampvuur", "/community"], [p.gebruikersnaam]], wagens.find((w) => w.foto_id) ? `/forum/foto/${wagens.find((w) => w.foto_id).foto_id}` : "leden-vuur-avond") + `<section class="wrap f-sectie">${balk(lid, url.pathname)}
       <div class="f-profielkop">${avatar(p, 72)}<b>${esc(p.gebruikersnaam)}</b></div>
       <h2 class="f-h2" id="garage">Land Rovers</h2>
       ${url.searchParams.has("gemeld") ? `<div class="melding melding-ok">Bedankt, je melding is doorgestuurd.</div>` : ""}
@@ -580,8 +580,8 @@ async function volgActie(request, env, lid) {
   const f = await request.formData();
   const soort = String(f.get("soort") || "");
   let sleutel = String(f.get("sleutel") || "").toLowerCase().slice(0, 80);
-  const terug = String(f.get("terug") || "/forum");
-  const veilig = terug.startsWith("/forum") ? terug : "/forum";
+  const terug = String(f.get("terug") || "/community");
+  const veilig = terug.startsWith("/forum") || terug === "/community" ? terug : "/community";
   if (!["cat", "topic", "tag"].includes(soort) || !sleutel) return naar(veilig);
   if (soort === "topic" && !/^\d+$/.test(sleutel)) return naar(veilig);
   if (soort === "cat" && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_categorieen WHERE slug = ?").bind(sleutel).first())) return naar(veilig);
@@ -607,7 +607,7 @@ async function likeActie(request, env, url, lid, id) {
   }
   const n = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM forum_likes WHERE bericht_id = ?").bind(b.id).first()).n;
   if ((request.headers.get("accept") || "").includes("application/json")) return json({ ok: true, aantal: n, mijn: !had });
-  return naar((request.headers.get("referer") || "").startsWith(url.origin) ? request.headers.get("referer").replace(/#.*$/, "") + `#b${b.id}` : "/forum");
+  return naar((request.headers.get("referer") || "").startsWith(url.origin) ? request.headers.get("referer").replace(/#.*$/, "") + `#b${b.id}` : "/community");
 }
 
 async function tagPagina(request, env, url, lid, tag) {
@@ -632,7 +632,8 @@ async function tagPagina(request, env, url, lid, tag) {
 
 export async function forum(request, env, url) {
   const p = url.pathname.replace(/\/$/, "") || "/";
-  if (p !== "/forum" && !p.startsWith("/forum/")) return null;
+  if (p === "/forum") return new Response(null, { status: 301, headers: { location: "/community" + url.search } });
+  if (p !== "/community" && !p.startsWith("/forum/")) return null;
   if (!env.SHOP_DB) return new Response("Nog niet gekoppeld.", { status: 503 });
   let m;
   if ((m = p.match(/^\/forum\/foto\/(\d{1,10})$/))) return fotoTonen(env, m[1]);
@@ -648,7 +649,7 @@ export async function forum(request, env, url) {
   const moetNaam = () => naar("/account/gegevens");
   let res = null;
 
-  if (p === "/forum") res = await index(request, env, url, lid);
+  if (p === "/community") res = await index(request, env, url, lid);
   else if (p === "/forum/nieuw") res = await recent(request, env, url, lid);
   else if (p === "/forum/foto" && post) res = lid ? await fotoOpladen(request, env, lid) : json({ ok: false, fout: "Log eerst in." }, 401);
   else if ((m = p.match(/^\/forum\/wagen\/(\d{1,10})\/meld$/)) && post) res = await meldWagen(request, env, url, lid, m[1]);
@@ -667,5 +668,5 @@ export async function forum(request, env, url) {
 
   if (res) return metVlag(request, res, lid);
   return pagina(env, request, { titel: "Niet gevonden", noindex: true, status: 404,
-    inhoud: banner("Kampvuur", "Niet gevonden", "Deze pagina bestaat niet (meer).") + `<section class="narrow acc-sectie"><div class="acc-kaart"><p>Deze pagina bestaat niet (meer).</p><a class="btn btn-solid" href="/forum">Naar het forum</a></div></section>` });
+    inhoud: banner("Kampvuur", "Niet gevonden", "Deze pagina bestaat niet (meer).") + `<section class="narrow acc-sectie"><div class="acc-kaart"><p>Deze pagina bestaat niet (meer).</p><a class="btn btn-solid" href="/community">Naar het forum</a></div></section>` });
 }

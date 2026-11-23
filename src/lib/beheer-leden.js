@@ -304,7 +304,7 @@ ${alarm.length ? `<div class="dalarm">${alarm.join("")}</div>` : ""}
 <div class="dgroep" style="margin-top:0">Community deze week</div>
 <div class="dstats">
 ${stat(`+${n(leden.nieuw)}`, `nieuwe leden · ${n(leden.n)} totaal`, "/beheer/leden")}
-${stat(n(posts.n), n(posts.n) === 1 ? "bericht op Kampvuur" : "berichten op Kampvuur", "/forum")}
+${stat(n(posts.n), n(posts.n) === 1 ? "bericht op Kampvuur" : "berichten op Kampvuur", "/community")}
 ${stat(`+${n(wagensWeek.n)}`, "Landy's toegevoegd", "/landys")}
 ${stat(n(actief.n), "leden actief (24 u)", "/beheer/leden?filter=actief")}
 </div>
@@ -312,7 +312,7 @@ ${stat(n(actief.n), "leden actief (24 u)", "/beheer/leden?filter=actief")}
 <div class="dgroep">Nieuwe leden <a href="/beheer/leden">Alle leden →</a></div>
 <div class="dlijst">${ledenLijst || leegRij("Nog geen nieuwe leden.")}</div>
 
-<div class="dgroep">Recent op Kampvuur <a href="/forum" target="_blank">Naar Kampvuur →</a></div>
+<div class="dgroep">Recent op Kampvuur <a href="/community" target="_blank">Naar Kampvuur →</a></div>
 <div class="dlijst">${topicLijst || leegRij("Nog niets gepost.")}</div>
 
 ${landyLijst ? `<div class="dgroep">Nieuwste Landy's <a href="/landys" target="_blank">Alle Landy's →</a></div><div class="dlandys">${landyLijst}</div>` : ""}

@@ -75,7 +75,7 @@ async function overzicht(env, request, url, lid) {
   return pagina(env, request, {
     titel: "Te koop / gezocht: Land Rover-onderdelen, wagens en uitrusting", pad: "/zoekertjes",
     desc: "Zoekertjes van Land Rover-rijders: onderdelen, wagens en uitrusting te koop of gezocht, in België en Nederland.",
-    inhoud: CSS + banner("Community", "Te koop / gezocht", "Onderdelen, wagens en uitrusting tussen Land Rover-rijders. Plaatsen is gratis voor leden.", [["Community", "/forum"], ["Te koop / gezocht"]])
+    inhoud: CSS + banner("Community", "Te koop / gezocht", "Onderdelen, wagens en uitrusting tussen Land Rover-rijders. Plaatsen is gratis voor leden.", [["Community", "/community"], ["Te koop / gezocht"]])
       + `<section class="wrap zk-sec">
   <label class="zk-zoekbalk" for="zk-q">${ico("zoek")}<span class="sr-only">Zoeken</span><input id="zk-q" type="search" placeholder="Zoek in de zoekertjes, bv. 'grille' of 'Td5'" autocomplete="off"></label>
   <div class="zk-balk">
@@ -121,7 +121,7 @@ async function detail(env, request, url, lid, id) {
     desc: `${SOORT[z.soort]}: ${z.titel}. ${prijsTekst(z)}${z.plaats ? ", " + z.plaats : ""}. ${String(z.tekst || "").slice(0, 160)}`,
     noindex: z.status !== "actief",
     inhoud: CSS + `<section class="wrap zk-detail">${melding}
-  <nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a><span aria-hidden="true">›</span><a href="/forum">Community</a><span aria-hidden="true">›</span><a href="/zoekertjes">Te koop / gezocht</a></nav>
+  <nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a><span aria-hidden="true">›</span><a href="/community">Community</a><span aria-hidden="true">›</span><a href="/zoekertjes">Te koop / gezocht</a></nav>
   <div class="zk-detail-grid"><div class="zk-fotos">${fotos.length ? fotos.map((f, i) => `<button type="button" class="zk-dfoto${i === 0 ? " groot" : ""}" data-full="${e(f)}" data-groep="zk" data-onderschrift="${e(z.titel)}"><img src="${e(f)}" alt="${e(z.titel)}"${i ? ' loading="lazy"' : ""}></button>`).join("") : `<div class="zk-geenfoto groot">${ico("tag")}</div>`}</div>
   <div class="zk-info"><span class="zk-label ${lk}">${lt}</span><h1>${e(z.titel)}</h1><p class="zk-dprijs">${e(prijsTekst(z))}</p>
     <ul class="zk-feiten"><li><small>Soort</small>${e(CAT[z.categorie] || z.categorie)}</li>${z.model ? `<li><small>Model</small>${e(z.model)}</li>` : ""}${z.plaats ? `<li><small>Plaats</small>${e(z.plaats)}${z.land === "NL" ? " (NL)" : ""}</li>` : ""}<li><small>Geplaatst</small>${e(new Date(z.aangemaakt).toLocaleDateString("nl-BE", { timeZone: "Europe/Brussels", day: "numeric", month: "long" }))} door <a href="/forum/lid/${encodeURIComponent(z.gebruikersnaam || "")}">${e(z.gebruikersnaam || "lid")}</a></li></ul>
@@ -141,7 +141,7 @@ function formulier(env, request, lid, z, fout = "") {
   const fotos = fotosVan(z);
   return pagina(env, request, {
     titel: nieuw ? "Zoekertje plaatsen" : "Zoekertje aanpassen", pad: "/zoekertjes", noindex: true,
-    inhoud: CSS + banner("Te koop / gezocht", nieuw ? "Plaats een zoekertje" : "Zoekertje aanpassen", "Gratis voor leden. Je zoekertje blijft staan tot je het zelf afsluit.", [["Community", "/forum"], ["Te koop / gezocht", "/zoekertjes"], [nieuw ? "Plaatsen" : "Aanpassen"]])
+    inhoud: CSS + banner("Te koop / gezocht", nieuw ? "Plaats een zoekertje" : "Zoekertje aanpassen", "Gratis voor leden. Je zoekertje blijft staan tot je het zelf afsluit.", [["Community", "/community"], ["Te koop / gezocht", "/zoekertjes"], [nieuw ? "Plaatsen" : "Aanpassen"]])
       + `<section class="wrap zk-sec zk-smal">${fout ? `<div class="melding melding-fout">${e(fout)}</div>` : ""}
   <form method="post" class="zk-form" data-zkform>
     <fieldset><legend>Wat wil je?</legend><div class="zk-keuzes">${opt("soort", Object.entries(SOORT), z.soort || "koop")}</div></fieldset>

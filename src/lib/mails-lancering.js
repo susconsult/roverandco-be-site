@@ -115,7 +115,7 @@ export async function corTicketMail(env, r, { site, wachtwoordLink = "", test = 
 const WAT = [
   ["activiteiten", "Activiteiten", "Schrijf je in en krijg meteen je ticket met QR-code.", "/activiteiten"],
   ["kalender", "Kalender", "Alle Land Rover-evenementen op een rij, ook van andere clubs.", "/kalender"],
-  ["forum", "Forum en CB-chat", "Praat mee, vraag raad of toon je wagen.", "/forum"],
+  ["forum", "Forum en CB-chat", "Praat mee, vraag raad of toon je wagen.", "/community"],
   ["blog", "Blog", "Verhalen, tips en de geschiedenis van Land Rover.", "/blog"],
 ];
 const ACCOUNT = [
