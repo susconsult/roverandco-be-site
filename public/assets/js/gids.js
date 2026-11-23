@@ -80,18 +80,40 @@
         var sp = zichtbaar.filter(function (li) { return li.classList.contains("gd-sponsor"); }).sort(function (a, b) { return a._km - b._km; });
         var rest = zichtbaar.filter(function (li) { return !li.classList.contains("gd-sponsor"); }).sort(function (a, b) { return a._km - b._km; });
         sp.concat(rest).forEach(function (li) {
-          var s = li.querySelector(".gd-afstand"); s.hidden = false; s.textContent = Math.round(li._km) + " km";
+          var s = li.querySelector(".gd-afstand"); s.hidden = false; s.textContent = (li._km < 1 ? "< 1" : Math.round(li._km)) + " km";
           lijstEl.appendChild(li);
         });
       }
       $("#gd-leeg").hidden = zichtbaar.length > 0;
+      var n = zichtbaar.length;
+      $("#gd-telling").textContent = n + (n === 1 ? " adres" : " adressen") + (eigen ? ", dichtstbij " + (stand.van || "jou") + " eerst" : "");
     }
     $$(".gd-chip").forEach(function (b) {
       b.addEventListener("click", function () {
-        var soort = b.hasAttribute("data-cat") ? "cat" : "regio";
-        stand[soort] = b.getAttribute("data-" + soort);
-        $$(".gd-chip[data-" + soort + "]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        stand.cat = b.getAttribute("data-cat");
+        $$(".gd-chip").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
         toepassen();
+      });
+    });
+    var regio = $("#gd-regio");
+    if (regio) regio.addEventListener("change", function () { stand.regio = regio.value; toepassen(); if (kaart) passend(); });
+    function passend() {
+      var l = items.filter(function (li) { return !li.hidden && li.dataset.lat; }).map(function (li) { return [+li.dataset.lat, +li.dataset.lon]; });
+      if (l.length) kaart.fitBounds(window.L.latLngBounds(l), { padding: [24, 24], maxZoom: 11 });
+    }
+    /* lijst of kaart (op gsm) */
+    var indeling = $(".gd-indeling");
+    $$("[data-weergave]", $(".gd-wissel") || document.createElement("div")).forEach(function (b) {
+      b.addEventListener("click", function () {
+        indeling.setAttribute("data-weergave", b.dataset.weergave);
+        $$(".gd-wissel [data-weergave]").forEach(function (x) { x.setAttribute("aria-pressed", x === b ? "true" : "false"); });
+        if (kaart && b.dataset.weergave === "kaart") setTimeout(function () {
+          kaart.invalidateSize(false);
+          if (eigen) {
+            var d = $$(".gd-item", lijstEl).filter(function (li) { return !li.hidden && li.dataset.lat; }).slice(0, 5).map(function (li) { return [+li.dataset.lat, +li.dataset.lon]; });
+            kaart.fitBounds(window.L.latLngBounds(d.concat([eigen])), { padding: [30, 30], maxZoom: 11 });
+          } else passend();
+        }, 120);
       });
     });
 
@@ -112,24 +134,42 @@
       laadPostcodes().then(function (d) {
         var hit = (d[land.value] || {})[pc] || (d[land.value === "BE" ? "NL" : "BE"] || {})[pc];
         if (!hit) { fout.textContent = "Deze postcode kennen we niet. Kies het juiste land en probeer opnieuw."; fout.hidden = false; return; }
-        eigen = [hit[0], hit[1]];
-        tel("_gids", "zoek");
+        stand.van = invoer.value.trim().toUpperCase();
         try { localStorage.setItem("rc-gids-pc", JSON.stringify({ pc: invoer.value.trim(), land: land.value })); } catch (e) {}
+        vanaf([hit[0], hit[1]], "Jouw postcode");
+      }).catch(function () { fout.textContent = "De postcodes konden niet geladen worden. Probeer het later opnieuw."; fout.hidden = false; });
+    });
+    function vanaf(punt, label) {
+        eigen = punt;
+        tel("_gids", "zoek");
         toepassen();
         if (kaart) {
           if (start) start.remove();
-          start = window.L.circleMarker(eigen, { radius: 8, color: "#B3261E", weight: 3, fillOpacity: 0.9 }).addTo(kaart).bindTooltip("Jouw postcode");
-          var dichtste = items.filter(function (li) { return !li.hidden && li.dataset.lat; }).slice(0, 5).map(function (li) { return [+li.dataset.lat, +li.dataset.lon]; });
+          start = window.L.circleMarker(eigen, { radius: 8, color: "#B3261E", weight: 3, fillOpacity: 0.9 }).addTo(kaart).bindTooltip(label);
+          var dichtste = $$(".gd-item", lijstEl).filter(function (li) { return !li.hidden && li.dataset.lat; }).slice(0, 5).map(function (li) { return [+li.dataset.lat, +li.dataset.lon]; });
           kaart.fitBounds(window.L.latLngBounds(dichtste.concat([eigen])), { padding: [30, 30], maxZoom: 11 });
         }
-        lijstEl.scrollIntoView({ behavior: "smooth", block: "start" });
-      }).catch(function () { fout.textContent = "De postcodes konden niet geladen worden. Probeer het later opnieuw."; fout.hidden = false; });
-    });
+        var balk = $(".gd-balk"); if (balk) balk.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+    var hier = $("#gd-hier");
+    if (hier) {
+      if (!navigator.geolocation) hier.hidden = true;
+      hier.addEventListener("click", function () {
+        fout.hidden = true; hier.classList.add("bezig");
+        navigator.geolocation.getCurrentPosition(function (pos) {
+          hier.classList.remove("bezig"); stand.van = "jou";
+          vanaf([pos.coords.latitude, pos.coords.longitude], "Jij bent hier");
+        }, function () {
+          hier.classList.remove("bezig");
+          fout.textContent = "Je locatie kon niet bepaald worden. Vul je postcode in."; fout.hidden = false;
+        }, { enableHighAccuracy: false, timeout: 10000, maximumAge: 600000 });
+      });
+    }
     try {
       var bewaard = JSON.parse(localStorage.getItem("rc-gids-pc") || "null");
       if (bewaard && bewaard.pc) { invoer.value = bewaard.pc; land.value = bewaard.land === "NL" ? "NL" : "BE"; }
     } catch (e) {}
-    lijstEl.addEventListener("mouseover", function (ev) {
+    if (window.matchMedia && window.matchMedia("(hover: hover)").matches) lijstEl.addEventListener("mouseover", function (ev) {
       var li = ev.target.closest && ev.target.closest(".gd-item");
       if (li && markers[li.dataset.slug] && li !== lijstEl._aan) { lijstEl._aan = li; markers[li.dataset.slug].openPopup(); }
     });

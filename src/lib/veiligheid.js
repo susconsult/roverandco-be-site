@@ -20,7 +20,7 @@ export const HEADERS = {
   "x-content-type-options": "nosniff",
   "x-frame-options": "DENY",
   "referrer-policy": "strict-origin-when-cross-origin",
-  "permissions-policy": "camera=(self), geolocation=(), payment=(), usb=(), microphone=(self)",
+  "permissions-policy": "camera=(self), geolocation=(self), payment=(), usb=(), microphone=(self)",
   "cross-origin-opener-policy": "same-origin",
 };
 export function veiligheid(res) {

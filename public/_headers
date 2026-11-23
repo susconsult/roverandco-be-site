@@ -5,7 +5,7 @@
   X-Content-Type-Options: nosniff
   X-Frame-Options: DENY
   Referrer-Policy: strict-origin-when-cross-origin
-  Permissions-Policy: camera=(self), geolocation=(), payment=(), usb=(), microphone=(self)
+  Permissions-Policy: camera=(self), geolocation=(self), payment=(), usb=(), microphone=(self)
   Cross-Origin-Opener-Policy: same-origin
 
 # Testadres (workers.dev) nooit indexeren; roverandco.be zelf wel.

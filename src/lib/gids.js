@@ -13,8 +13,8 @@ import { verstuur } from "./mail.js";
 
 export const CATEGORIEEN = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 export const SOORTEN = ["bekeken", "bel", "route", "website", "mail", "meerinfo", "zoek"];
-const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=2">';
-const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=2" defer></script>';
+const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=3">';
+const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=3" defer></script>';
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
 const maand = () => vandaag().slice(0, 7);
 const nu = () => new Date().toISOString();
@@ -70,11 +70,23 @@ const logoHtml = (z, klas) => mediaOk(z.logo) ? `<img class="${klas}" src="${e(z
 
 function kaartItem(z) {
   const sp = isSponsor(z);
-  return `<li class="gd-item${sp ? " gd-sponsor" : ""} met-logo" data-slug="${e(z.slug)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}" data-cat="${e((z.categorieen || []).join(" "))}" data-regio="${e(z.provincie || "")}" data-land="${e(z.land || "")}">
-  ${logoHtml(z, "gd-logo-klein")}<a class="gd-titel" href="/gids/${e(z.slug)}" data-klik="meerinfo">${e(z.naam)}</a>${sp ? '<span class="gd-label">Gesponsord</span>' : ""}<span class="gd-afstand" hidden></span>
-  <div class="gd-plaats">${plaats(z)}</div><div class="gd-cats">${catLabels(z)}</div>
-  <div class="gd-acties">${z.telefoon ? `<a href="${e(telLink(z.telefoon))}" data-klik="bel">${ico("telefoon")}Bel</a>` : ""}${z.website ? `<a href="${e(z.website)}" target="_blank" rel="noopener" data-klik="website">${ico("wereld")}Website</a>` : ""}<a href="${e(googleRoute(z))}" target="_blank" rel="noopener" data-klik="route">${ico("route")}Route</a><a href="/gids/${e(z.slug)}" data-klik="meerinfo">Meer info</a></div></li>`;
+  const omslag = sp && mediaOk(z.omslag);
+  const knop = (href, klik, ic, tekst, extern) => `<a href="${e(href)}"${extern ? ' target="_blank" rel="noopener"' : ""} data-klik="${klik}">${ico(ic)}<span>${tekst}</span></a>`;
+  const knoppen = [
+    z.telefoon ? knop(telLink(z.telefoon), "bel", "telefoon", "Bel") : z.email ? knop("mailto:" + z.email, "mail", "mail", "Mail") : "",
+    knop(googleRoute(z), "route", "route", "Route", true),
+    z.website ? knop(z.website, "website", "wereld", "Site", true) : "",
+    `<a href="/gids/${e(z.slug)}" data-klik="meerinfo"><span>Meer</span>${ico("pijl")}</a>`,
+  ].filter(Boolean);
+  return `<li class="gd-item${sp ? " gd-sponsor" : ""}${omslag ? " met-omslag" : ""}" data-slug="${e(z.slug)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}" data-cat="${e((z.categorieen || []).join(" "))}" data-regio="${e(z.provincie || "")}" data-land="${e(z.land || "")}">
+  ${omslag ? `<div class="gd-strook"><img src="${e(omslag)}" alt="" loading="lazy"></div>` : ""}
+  <div class="gd-item-kop">${logoHtml(z, "gd-logo-klein")}<div class="gd-item-tekst">
+    <div class="gd-item-rij"><a class="gd-titel" href="/gids/${e(z.slug)}" data-klik="meerinfo">${e(z.naam)}</a><span class="gd-afstand" hidden></span></div>
+    <div class="gd-plaats">${e(z.gemeente)}${z.land === "NL" ? " (NL)" : ""} · ${(z.categorieen || []).map((c) => e(KORT[c] || c)).join(", ")}</div>
+    ${sp ? '<span class="gd-label">Gesponsord</span>' : ""}</div></div>
+  <div class="gd-acties" style="--n:${knoppen.length}">${knoppen.join("")}</div></li>`;
 }
+const KORT = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 
 /* ---------------- /gids ---------------- */
 
@@ -83,22 +95,28 @@ async function overzicht(env, request) {
   if (!isBot(request)) await tel(env, "_gids", "bekeken");
   const regios = [...new Set(lijst.filter((z) => z.land === "BE").map((z) => z.provincie).filter(Boolean))].sort((a, b) => a.localeCompare(b, "nl"));
   const punten = lijst.filter((z) => z.lat != null).map((z) => ({ s: z.slug, n: z.naam, la: z.lat, lo: z.lon, g: z.gemeente, sp: isSponsor(z) ? 1 : 0 }));
-  const chips = (naam, opties) => `<div class="gd-chips" role="group" aria-label="${e(naam)}">${opties.map(([w, t], i) => `<button type="button" class="gd-chip" data-${naam}="${e(w)}" aria-pressed="${i === 0}">${e(t)}</button>`).join("")}</div>`;
+  const chip = (w, t, i) => `<button type="button" class="gd-chip" data-cat="${e(w)}" aria-pressed="${i === 0}">${e(t)}</button>`;
   return pagina(env, request, {
     titel: "Gids: Land Rover-garages, accessoires en onderdelen", pad: "/gids",
     desc: "Onafhankelijke Land Rover-garages, accessoirezaken en onderdelenhandels in België en Nederland. Vul je postcode in en zie wie het dichtst bij is.",
-    inhoud: CSS + banner("Gids", "Land Rover-adressen", "Onafhankelijke garages, accessoires en onderdelen in België en Nederland. Vul je postcode in en zie wie het dichtst bij is.", [["Gids"]])
-      + `<section class="wrap gd-sec">
-  <form class="gd-zoek" id="gd-zoek" autocomplete="off"><label for="gd-pc">Jouw postcode</label>
-    <div class="gd-zoekrij"><input id="gd-pc" name="pc" inputmode="numeric" placeholder="3945 of 5071 EA" maxlength="7"><select id="gd-land" aria-label="Land"><option value="BE">België</option><option value="NL">Nederland</option></select><button class="btn btn-solid" type="submit">Zoek dichtstbij</button></div>
-    <p class="gd-fout" id="gd-fout" hidden></p></form>
-  ${chips("cat", [["", "Alles"], ["garage", "Garages"], ["accessoires", "Accessoires en ombouw"], ["onderdelen", "Onderdelen"]])}
-  ${chips("regio", [["", "Alle regio's"], ...regios.map((r) => [r, r]), ["NL", "Nederland"]])}
-  <div class="gd-indeling"><div class="gd-kaart" id="gd-kaart" aria-label="Kaart met alle adressen"></div>
+    inhoud: CSS + `<section class="gd-kop"><div class="wrap"><nav class="kruimel" aria-label="Kruimelpad"><a href="/">Home</a><span aria-hidden="true">›</span><span aria-current="page">Gids</span></nav>
+    <div class="eyebrow">Gids</div><h1>Land Rover-adressen</h1><p>${lijst.length} onafhankelijke garages, onderdelen en ombouw in België en Nederland</p></div></section>
+  <section class="wrap gd-sec gd-overzicht">
+  <form class="gd-zoek" id="gd-zoek" autocomplete="off" role="search">
+    <label class="gd-zoekveld" for="gd-pc">${ico("pin")}<span class="sr-only">Jouw postcode</span><input id="gd-pc" name="pc" inputmode="text" placeholder="Jouw postcode" maxlength="7" autocomplete="postal-code"></label>
+    <select id="gd-land" aria-label="Land"><option value="BE">BE</option><option value="NL">NL</option></select>
+    <button type="button" class="gd-hier" id="gd-hier" title="Gebruik mijn locatie">${ico("locatie")}<span>Mijn locatie</span></button>
+    <button class="gd-zoekknop" type="submit">Zoek</button></form>
+  <p class="gd-fout" id="gd-fout" hidden></p>
+  <div class="gd-filters"><div class="gd-chips" role="group" aria-label="Soort">${[["", "Alles"], ["garage", "Garage"], ["onderdelen", "Onderdelen"], ["accessoires", "Accessoires en ombouw"]].map(([w, t], i) => chip(w, t, i)).join("")}</div>
+    <label class="gd-regio"><span class="sr-only">Regio</span><select id="gd-regio"><option value="">Alle regio's</option>${regios.map((r) => `<option value="${e(r)}">${e(r)}</option>`).join("")}<option value="NL">Nederland</option></select></label></div>
+  <div class="gd-balk"><span id="gd-telling" aria-live="polite">${lijst.length} adressen</span>
+    <div class="gd-wissel" role="group" aria-label="Weergave"><button type="button" data-weergave="lijst" aria-pressed="true">${ico("lijst")}Lijst</button><button type="button" data-weergave="kaart" aria-pressed="false">${ico("kaart")}Kaart</button></div></div>
+  <div class="gd-indeling" data-weergave="lijst"><div class="gd-kaart" id="gd-kaart" aria-label="Kaart met alle adressen"></div>
   <ol class="gd-lijst" id="gd-lijst">${lijst.map(kaartItem).join("")}</ol></div>
   <p class="gd-leeg" id="gd-leeg" hidden>Geen adressen voor deze keuze.</p>
   <div class="gd-voet"><p><b>Mist er een adres?</b> Stel het voor, dan zetten we het erbij na een korte controle.</p><a class="btn" href="/gids/voorstellen">Stel een zaak voor</a></div>
-  <p class="gd-klein">Afstanden zijn hemelsbreed vanaf het midden van je postcode. Gesponsorde adressen staan bovenaan. Kaart © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-bijdragers.</p>
+  <p class="gd-klein">Afstanden zijn hemelsbreed. Gesponsorde adressen staan bovenaan. Kaart © <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-bijdragers.</p>
 </section><script type="application/json" id="gd-punten">${JSON.stringify(punten).replace(/</g, "\\u003c")}</script>` + JS,
   });
 }

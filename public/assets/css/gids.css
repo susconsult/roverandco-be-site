@@ -92,3 +92,61 @@ span.gd-logo{font-size:36px}
 @media(max-width:600px){.gd-logo{width:84px;height:84px;margin-top:-60px}span.gd-logo{font-size:28px}}
 .gd-twee-foto{display:flex;gap:28px;flex-wrap:wrap}.gd-twee-foto .gd-enkel{flex:1;min-width:240px;margin:0}
 .gd-logo.gd-logo-dummy,.gd-logo-klein.gd-logo-dummy{display:flex;align-items:center;justify-content:center;font-weight:800;background:var(--green,#1F3B2A);color:#fff;border-color:transparent;font-family:inherit}
+/* overzicht v3: compacte kop, zoekbalk, filters op één rij, lijst/kaart, kaarten met logo */
+.gd-kop{background:var(--green);color:#fff;padding:118px 0 58px}
+.gd-kop .eyebrow{color:#CFE3D4}
+.gd-kop h1{font-size:clamp(34px,5vw,56px);margin-top:4px}
+.gd-kop p{opacity:.92;margin-top:6px;font-size:var(--fs-lead)}
+.gd-kop .kruimel{margin-bottom:14px}
+.gd-overzicht{padding-top:0}
+.gd-zoek{display:flex;gap:8px;align-items:center;margin:-32px 0 14px;position:relative;z-index:2;padding:8px;border-radius:16px;box-shadow:0 6px 24px rgba(15,26,19,.14);background:var(--white)}
+.gd-zoekveld{flex:1;display:flex;align-items:center;gap:8px;padding-left:8px;min-width:0;margin:0}
+.gd-zoekveld .ico{width:20px;height:20px;flex:none;fill:none;stroke:var(--muted);stroke-width:2}
+.gd-zoekveld input{flex:1;min-width:0;border:0;outline:0;font:inherit;font-size:17px;padding:10px 0;background:transparent}
+.gd-zoek select{font:inherit;font-size:14px;border:0;background:var(--sand);border-radius:8px;padding:8px 6px;color:var(--ink)}
+.gd-hier{font:inherit;font-size:14px;font-weight:600;display:flex;align-items:center;gap:6px;background:none;border:0;color:var(--green-3);cursor:pointer;padding:8px;white-space:nowrap}
+.gd-hier .ico,.gd-wissel .ico,.gd-acties .ico{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.gd-hier.bezig{opacity:.5}
+.gd-zoekknop{font:inherit;font-weight:700;background:var(--green);color:#fff;border:0;border-radius:11px;padding:11px 20px;cursor:pointer}
+.gd-filters{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+.gd-chips{flex:1;flex-wrap:nowrap;overflow-x:auto;margin:0;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.gd-chips::-webkit-scrollbar{display:none}
+.gd-chip{white-space:nowrap;flex:none}
+.gd-regio select{font:inherit;font-size:var(--fs-sm);font-weight:600;border:1px solid var(--sand-2);background:var(--white);border-radius:999px;padding:7px 12px;color:var(--ink);max-width:170px}
+.gd-balk{display:flex;justify-content:space-between;align-items:center;gap:10px;margin:14px 0 10px;color:var(--muted);font-size:var(--fs-sm)}
+.gd-wissel{display:none;border:1px solid var(--sand-2);border-radius:999px;overflow:hidden;background:var(--white)}
+.gd-wissel button{font:inherit;font-size:13px;font-weight:600;display:flex;gap:5px;align-items:center;border:0;background:none;padding:6px 12px;color:var(--ink);cursor:pointer}
+.gd-wissel button[aria-pressed="true"]{background:var(--green);color:#fff}
+.gd-indeling{margin-top:0}
+.gd-item{padding:0;overflow:hidden;border:1px solid transparent}
+.gd-item.met-logo{padding-left:0;min-height:0}
+.gd-sponsor{outline:0;border:2px solid #C28A1E}
+.gd-strook{height:74px;background:var(--sand)}.gd-strook img{width:100%;height:100%;object-fit:cover;display:block}
+.gd-item-kop{display:flex;gap:12px;padding:14px 16px 12px}
+.met-omslag .gd-item-kop{padding-top:0}
+.gd-logo-klein{position:static;flex:none;width:52px;height:52px;border-radius:12px}
+.met-omslag .gd-logo-klein{margin-top:-24px;box-shadow:0 2px 8px rgba(0,0,0,.12)}
+span.gd-logo-klein{font-size:18px}
+.gd-item-tekst{flex:1;min-width:0}
+.gd-item-rij{display:flex;justify-content:space-between;gap:10px;align-items:baseline}
+.gd-titel{font-size:17px;line-height:1.25}
+.gd-afstand{position:static;flex:none;font-size:15px}
+.gd-plaats{margin:3px 0 0}
+.gd-item .gd-label{margin:7px 0 0;background:#FAEEDA;color:#633806;letter-spacing:.5px}
+.gd-acties{display:grid;grid-template-columns:repeat(var(--n),1fr);gap:0;border-top:1px solid var(--sand);font-size:14px}
+.gd-acties a{justify-content:center;padding:11px 4px;gap:6px;border-left:1px solid var(--sand)}
+.gd-acties a:first-child{border-left:0}
+.gd-acties a:hover{background:var(--sand);text-decoration:none}
+@media(max-width:900px){
+  .gd-kop{padding:100px 0 54px}
+  .gd-hier span{display:none}
+  .gd-zoekknop{padding:11px 16px}
+  .gd-wissel{display:flex}
+  .gd-indeling{display:block}
+  .gd-indeling[data-weergave="lijst"] .gd-kaart{display:none}
+  .gd-indeling[data-weergave="kaart"] .gd-lijst{display:none}
+  .gd-indeling[data-weergave="kaart"] .gd-kaart{display:block;position:static;height:70vh}
+}
+@media(max-width:420px){.gd-zoek select{padding:8px 4px}.gd-regio select{max-width:120px}}
+.gd-zoek .gd-zoekveld{display:flex;font-weight:400;margin:0}
+@media(max-width:900px){.gd-kop{padding:92px 0 50px}}
