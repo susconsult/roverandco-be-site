@@ -7,7 +7,7 @@
   /* ---- overzicht ---- */
   var raster = $("#zk-raster");
   if (raster) {
-    var kaarten = $$(".zk-kaart", raster), stand = { soort: "", cat: "" }, eigen = null;
+    var kaarten = $$(".zk-kaart", raster), stand = { soort: "", cat: "", q: "" }, eigen = null;
     function km(a, b, c, d) {
       var r = Math.PI / 180, x = Math.sin((c - a) * r / 2), y = Math.sin((d - b) * r / 2);
       return 12742 * Math.asin(Math.sqrt(x * x + Math.cos(a * r) * Math.cos(c * r) * y * y));
@@ -15,7 +15,7 @@
     function toepassen() {
       var n = 0;
       kaarten.forEach(function (k) {
-        var ok = (!stand.soort || k.dataset.soort === stand.soort) && (!stand.cat || k.dataset.cat === stand.cat);
+        var ok = (!stand.soort || k.dataset.soort === stand.soort) && (!stand.cat || k.dataset.cat === stand.cat) && (!stand.q || stand.q.split(/\s+/).every(function (w) { return k.dataset.zoek.indexOf(w) >= 0; }));
         k.hidden = !ok; if (ok) n++;
       });
       if (eigen) {
@@ -32,6 +32,8 @@
         toepassen();
       });
     });
+    var q = $("#zk-q");
+    if (q) q.addEventListener("input", function () { stand.q = q.value.trim().toLowerCase(); toepassen(); });
     var hier = $("#zk-hier"), fout = $("#zk-fout");
     if (hier) {
       if (!navigator.geolocation) hier.hidden = true;

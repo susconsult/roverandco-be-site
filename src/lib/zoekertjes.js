@@ -12,8 +12,8 @@ export const SOORT = { koop: "Te koop", zoek: "Gezocht" };
 export const CAT = { onderdelen: "Onderdelen", wagens: "Wagens", uitrusting: "Uitrusting" };
 const MODELLEN = ["Series", "Defender", "Discovery", "Range Rover", "Freelander", "Andere", "Alle modellen"];
 const PRIJS = { vast: "Prijs", bod: "Bod", gratis: "Gratis" };
-const CSS = '<link rel="stylesheet" href="/assets/css/gids.css?v=5"><link rel="stylesheet" href="/assets/css/zoekertjes.css?v=3">';
-const JS = '<script src="/assets/js/zoekertjes.js?v=1" defer></script>';
+const CSS = '<link rel="stylesheet" href="/assets/css/gids.css?v=5"><link rel="stylesheet" href="/assets/css/zoekertjes.css?v=4">';
+const JS = '<script src="/assets/js/zoekertjes.js?v=2" defer></script>';
 const nu = () => new Date().toISOString();
 const tekst = (v, max = 300) => String(v ?? "").trim().slice(0, max);
 const slug = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60) || "zoekertje";
@@ -42,7 +42,8 @@ const label = (z) => z.status === "verkocht" ? ["Verkocht", "zk-dicht"] : z.stat
 export function zkKaart(z) {
   const f = fotosVan(z)[0];
   const [lt, lk] = label(z);
-  return `<a class="zk-kaart${z.status !== "actief" ? " zk-af" : ""}" href="${link(z)}" data-cat="${e(z.categorie)}" data-soort="${e(z.soort)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}">
+  const zoek = [z.titel, z.model, z.plaats, CAT[z.categorie], String(z.tekst || "").slice(0, 400)].join(" ").toLowerCase();
+  return `<a class="zk-kaart${z.status !== "actief" ? " zk-af" : ""}" href="${link(z)}" data-zoek="${e(zoek)}" data-cat="${e(z.categorie)}" data-soort="${e(z.soort)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}">
     <div class="zk-foto">${f ? `<img src="${e(f)}" alt="" loading="lazy">` : `<span class="zk-geenfoto">${ico(z.categorie === "wagens" ? "auto" : "tag")}</span>`}<span class="zk-label ${lk}">${lt}</span></div>
     <div class="zk-b"><b class="zk-prijs">${e(prijsTekst(z))}</b><span class="zk-titel">${e(z.titel)}</span><small>${e([z.model, z.plaats].filter(Boolean).join(" · "))} · ${leeftijd(z.aangemaakt)}<span class="zk-afstand" hidden></span></small></div></a>`;
 }
@@ -75,7 +76,9 @@ async function overzicht(env, request, url, lid) {
     titel: "Te koop / gezocht: Land Rover-onderdelen, wagens en uitrusting", pad: "/zoekertjes",
     desc: "Zoekertjes van Land Rover-rijders: onderdelen, wagens en uitrusting te koop of gezocht, in België en Nederland.",
     inhoud: CSS + banner("Community", "Te koop / gezocht", "Onderdelen, wagens en uitrusting tussen Land Rover-rijders. Plaatsen is gratis voor leden.", [["Community", "/forum"], ["Te koop / gezocht"]])
-      + `<section class="wrap zk-sec"><div class="zk-balk">
+      + `<section class="wrap zk-sec">
+  <label class="zk-zoekbalk" for="zk-q">${ico("zoek")}<span class="sr-only">Zoeken</span><input id="zk-q" type="search" placeholder="Zoek in de zoekertjes, bv. 'grille' of 'Td5'" autocomplete="off"></label>
+  <div class="zk-balk">
     <div class="gd-chips" role="group" aria-label="Te koop of gezocht">${[["", "Alles"], ["koop", "Te koop"], ["zoek", "Gezocht"]].map(([w, t], i) => chip("soort", w, t, i)).join("")}</div>
     <div class="gd-chips" role="group" aria-label="Soort">${[["", "Alle soorten"], ...Object.entries(CAT)].map(([w, t], i) => chip("cat", w, t, i)).join("")}</div>
     <button type="button" class="zk-hier" id="zk-hier">${ico("locatie")}Dichtst bij mij</button>

@@ -81,6 +81,7 @@ export function metVlag(request, res, lid) {
 
 // Eenvoudige lijn-icoontjes (geen emoji), kleur via currentColor.
 const ICONEN = {
+  zoek: '<circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/>',
   tag: '<path d="M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9-9-9Z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   cb: '<rect x="7" y="7" width="10" height="15" rx="2"/><path d="M10 7V2M10 12h4M10 15h4M10 18h4"/>',

@@ -205,8 +205,8 @@ async function index(request, env, url, lid) {
   const zkFoto = (z) => { try { return JSON.parse(z.fotos || "[]")[0] || ""; } catch { return ""; } };
   const zkKaart = `<div class="zij-kaart"><h3>${ico("tag")} Te koop / gezocht</h3>${zks.length
     ? `<ul class="zk-zij">${zks.map((z) => `<li><a href="/zoekertjes/${z.id}">${zkFoto(z) ? `<img src="${esc(zkFoto(z))}" alt="" loading="lazy">` : '<span class="zk-zijleeg"></span>'}<span><b>${esc(z.titel)}</b><small>${z.soort === "zoek" ? "Gezocht" : "Te koop"}${z.plaats ? " · " + esc(z.plaats) : ""}</small> <em>${esc(zkPrijs(z))}</em></span></a></li>`).join("")}</ul>`
-    : "<p>Zoek je een onderdeel of wil je iets verkopen? Plaats gratis een zoekertje.</p>"}
-    <a class="btn btn-solid zk-zijknop" href="${lid ? "/zoekertjes/nieuw" : "/account/inloggen?terug=/zoekertjes/nieuw"}">Plaats een zoekertje</a><a class="zij-meer" href="/zoekertjes">Alle zoekertjes →</a></div>`;
+    : "<p>Zoek je een onderdeel of wil je iets verkopen? Op de zoekertjespagina plaats je gratis een zoekertje.</p>"}
+    <a class="btn btn-solid zk-zijknop" href="/zoekertjes">Bekijk zoekertjes</a></div>`;
 
   const gidsKaart = `<div class="zij-kaart com-gids"><h3>${ico("pin")} Garage nodig?</h3><p>${gidsN} onafhankelijke Land Rover-garages, onderdelen en ombouw in België en Nederland.</p>
     <a class="btn btn-solid" href="/gids?hier=1">${ico("locatie")}Dichtst bij mij</a><a class="zij-meer" href="/gids">Naar de gids →</a></div>`;

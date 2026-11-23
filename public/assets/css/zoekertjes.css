@@ -72,3 +72,6 @@
 .zk-dfoto.groot{aspect-ratio:auto;height:min(70vh,620px);background:var(--white);cursor:zoom-in}
 .zk-dfoto.groot img{object-fit:contain}
 .zk-foto{overflow:hidden}.zk-foto img{position:absolute;inset:0}
+.zk-zoekbalk{display:flex;align-items:center;gap:10px;background:var(--white);border:1px solid var(--sand-2);border-radius:14px;padding:4px 14px;margin:0 0 16px}
+.zk-zoekbalk .ico{width:20px;height:20px;fill:none;stroke:var(--muted);stroke-width:2;stroke-linecap:round;flex:none}
+.zk-zoekbalk input{flex:1;min-width:0;border:0;outline:0;background:transparent;font:inherit;font-size:17px;padding:10px 0}
