@@ -12,7 +12,7 @@ export const SOORT = { koop: "Te koop", zoek: "Gezocht" };
 export const CAT = { onderdelen: "Onderdelen", wagens: "Wagens", uitrusting: "Uitrusting" };
 const MODELLEN = ["Series", "Defender", "Discovery", "Range Rover", "Freelander", "Andere", "Alle modellen"];
 const PRIJS = { vast: "Prijs", bod: "Bod", gratis: "Gratis" };
-const CSS = '<link rel="stylesheet" href="/assets/css/gids.css?v=5"><link rel="stylesheet" href="/assets/css/zoekertjes.css?v=2">';
+const CSS = '<link rel="stylesheet" href="/assets/css/gids.css?v=5"><link rel="stylesheet" href="/assets/css/zoekertjes.css?v=3">';
 const JS = '<script src="/assets/js/zoekertjes.js?v=1" defer></script>';
 const nu = () => new Date().toISOString();
 const tekst = (v, max = 300) => String(v ?? "").trim().slice(0, max);

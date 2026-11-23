@@ -71,3 +71,4 @@
 @media(max-width:700px){.zk-raster{grid-template-columns:1fr 1fr;gap:10px}.zk-plaats{margin-left:0;width:100%;justify-content:center}.zk-detail{padding-top:96px}.zk-b{padding:10px 12px}.zk-prijs{font-size:16px}}
 .zk-dfoto.groot{aspect-ratio:auto;height:min(70vh,620px);background:var(--white);cursor:zoom-in}
 .zk-dfoto.groot img{object-fit:contain}
+.zk-foto{overflow:hidden}.zk-foto img{position:absolute;inset:0}
