@@ -41,11 +41,9 @@ export async function zaak(env, slug) {
   return x ? vanRij(x) : null;
 }
 // Sponsors eerst (onderling willekeurig), daarna de rest op naam.
-const volgorde = (lijst) => {
-  const sp = lijst.filter((z) => isSponsor(z)).sort(() => Math.random() - 0.5);
-  const rest = lijst.filter((z) => !isSponsor(z)).sort((a, b) => a.naam.localeCompare(b.naam, "nl"));
-  return [...sp, ...rest];
-};
+// Geen voorkeur: sponsors bovenaan, daarna alles in willekeurige volgorde (elke keer anders). Fisher-Yates.
+const schud = (l) => { const a = [...l]; for (let i = a.length - 1; i > 0; i--) { const j = crypto.getRandomValues(new Uint32Array(1))[0] % (i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; };
+const volgorde = (lijst) => [...schud(lijst.filter((z) => isSponsor(z))), ...schud(lijst.filter((z) => !isSponsor(z)))];
 
 export async function tel(env, slug, soort) {
   if (!SOORTEN.includes(soort)) return;
