@@ -154,7 +154,7 @@ async function index(request, env, url, lid) {
     gelezenMap(env, lid, ids),
     db.prepare(`SELECT
       (SELECT COUNT(*) FROM forum_topics WHERE verwijderd = 0) topics,
-      (SELECT COUNT(*) FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 AND verwijderd_op IS NULL) leden,
+      (SELECT COUNT(*) FROM leden WHERE COALESCE(geblokkeerd, 0) = 0 AND verwijderd_op IS NULL) leden,
       (SELECT gebruikersnaam FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 ORDER BY id DESC LIMIT 1) nieuwste`).first(),
     nieuwsteBerichten(env, 8),
     (async () => {
