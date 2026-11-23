@@ -150,3 +150,16 @@ span.gd-logo-klein{font-size:18px}
 @media(max-width:420px){.gd-zoek select{padding:8px 4px}.gd-regio select{max-width:120px}}
 .gd-zoek .gd-zoekveld{display:flex;font-weight:400;margin:0}
 @media(max-width:900px){.gd-kop{padding:92px 0 50px}}
+/* v5: Mijn locatie eerst */
+.gd-zoek{display:block;padding:12px}
+.gd-hier{width:100%;justify-content:center;background:var(--green);color:#fff;border-radius:12px;padding:14px 16px;font-size:16px;font-weight:700}
+.gd-hier .ico{width:20px;height:20px}
+.gd-hier:hover{background:var(--green-2)}
+.gd-of{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:13px;margin:10px 4px 6px}
+.gd-of::before,.gd-of::after{content:"";flex:1;height:1px;background:var(--sand-2)}
+.gd-pcrij{display:flex;gap:8px;align-items:center;border:1px solid var(--sand-2);border-radius:12px;padding:4px 4px 4px 0}
+.gd-zoekknop{background:var(--white);color:var(--green);border:1px solid var(--green);padding:9px 16px}
+.gd-zoekknop:hover{background:var(--sand)}
+@media(min-width:901px){.gd-zoek{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1.1fr);gap:14px;align-items:center}.gd-of{margin:0;flex-direction:column;gap:4px}.gd-of::before,.gd-of::after{width:1px;height:10px;flex:none}}
+@media(max-width:900px){.gd-hier span{display:inline}.gd-zoekknop{padding:9px 14px}}
+@media(min-width:901px){.gd-of::before,.gd-of::after{display:none}}

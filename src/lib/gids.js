@@ -13,8 +13,8 @@ import { verstuur } from "./mail.js";
 
 export const CATEGORIEEN = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 export const SOORTEN = ["bekeken", "bel", "route", "website", "mail", "meerinfo", "zoek"];
-const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=4">';
-const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=4" defer></script>';
+const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=5">';
+const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=5" defer></script>';
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
 const maand = () => vandaag().slice(0, 7);
 const nu = () => new Date().toISOString();
@@ -100,10 +100,11 @@ async function overzicht(env, request) {
     <div class="eyebrow">Gids</div><h1>Land Rover-adressen</h1><p>${lijst.length} onafhankelijke garages, onderdelen en ombouw in België en Nederland</p></div></section>
   <section class="wrap gd-sec gd-overzicht">
   <form class="gd-zoek" id="gd-zoek" autocomplete="off" role="search">
-    <label class="gd-zoekveld" for="gd-pc">${ico("pin")}<span class="sr-only">Jouw postcode</span><input id="gd-pc" name="pc" inputmode="text" placeholder="Jouw postcode" maxlength="7" autocomplete="postal-code"></label>
+    <button type="button" class="gd-hier" id="gd-hier">${ico("locatie")}<span>Toon wat het dichtst bij mij is</span></button>
+    <div class="gd-of"><span>of vul je postcode in</span></div>
+    <div class="gd-pcrij"><label class="gd-zoekveld" for="gd-pc">${ico("pin")}<span class="sr-only">Jouw postcode</span><input id="gd-pc" name="pc" inputmode="text" placeholder="Postcode" maxlength="7" autocomplete="postal-code"></label>
     <select id="gd-land" aria-label="Land"><option value="BE">BE</option><option value="NL">NL</option></select>
-    <button type="button" class="gd-hier" id="gd-hier" title="Gebruik mijn locatie">${ico("locatie")}<span>Mijn locatie</span></button>
-    <button class="gd-zoekknop" type="submit">Zoek</button></form>
+    <button class="gd-zoekknop" type="submit">Zoek</button></div></form>
   <p class="gd-fout" id="gd-fout" hidden></p>
   <div class="gd-filters"><div class="gd-chips" role="group" aria-label="Soort">${[["", "Alles"], ["garage", "Garage"], ["onderdelen", "Onderdelen"], ["accessoires", "Accessoires en ombouw"]].map(([w, t], i) => chip(w, t, i)).join("")}</div></div>
   <div class="gd-balk"><span id="gd-telling" aria-live="polite">${lijst.length} adressen</span>
