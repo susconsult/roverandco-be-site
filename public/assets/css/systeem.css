@@ -386,3 +386,11 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .com-midden .fn-kop{display:none}
 .com-midden .fn-strook{margin-top:14px}
 @media(max-width:700px){.com-acties{flex-direction:column}.com-acties .btn{width:100%;white-space:nowrap;padding:12px 14px;border-radius:12px}}
+/* zijbalk op /forum */
+.zk-zij{list-style:none;padding:0;margin:0 0 6px;display:grid;gap:4px}
+.zij-kaart .zk-zij a:not(.btn){display:flex;gap:10px;align-items:center;padding:6px 0;border-top:0}
+.zk-zij img,.zk-zij .zk-zijleeg{width:52px;height:52px;border-radius:10px;object-fit:cover;flex:none;background:var(--sand)}
+.zk-zij span{min-width:0}
+.zij-kaart .zk-zij b{display:block;font-size:var(--fs-sm);line-height:1.25}
+.zk-zij em{font-style:normal;font-weight:700;color:var(--green);font-size:13px}
+.zk-zijknop{display:block;text-align:center;margin:10px 0 4px}

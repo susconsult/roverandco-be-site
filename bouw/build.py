@@ -122,7 +122,7 @@ def layout(path, title, desc, body, hero=False, noindex=False):
       </div>
       <div>
         <h4>Ontdek</h4>
-        <ul><li><a href="/forum">Community</a></li><li><a href="/blog">Blog</a></li><li><a href="/landys">Landy's van leden</a></li><li><a href="/gids">Garages en zaken</a></li></ul>
+        <ul><li><a href="/forum">Community</a></li><li><a href="/blog">Blog</a></li><li><a href="/landys">Landy's van leden</a></li><li><a href="/zoekertjes">Te koop / gezocht</a></li><li><a href="/gids">Garages en zaken</a></li></ul>
       </div>
       <div>
         <h4>Volg ons</h4>
@@ -1023,7 +1023,7 @@ write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen: ritten, 
 # Gids: de zaken uit data/gids-zaken.json (zaken die later in /beheer/gids bijkomen, staan erin na de volgende build)
 import datetime as _dt
 VANDAAG = _dt.date.today().isoformat()
-GIDS = ["/gids"] + [f"/gids/{z['slug']}" for z in json.load(open(os.path.join(DATA, "gids-zaken.json"), encoding="utf-8"))]
+GIDS = ["/gids", "/zoekertjes"] + [f"/gids/{z['slug']}" for z in json.load(open(os.path.join(DATA, "gids-zaken.json"), encoding="utf-8"))]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
      "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VANDAAG}</lastmod></url>\n" for p in pages + ["/landys"] + GIDS) + "</urlset>\n"  # /landys en /gids = live Worker-pagina's
 open(os.path.join(PUB, "sitemap.xml"), "w").write(sm)

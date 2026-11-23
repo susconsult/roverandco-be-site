@@ -7,6 +7,7 @@ import { huidigLid, avatar } from "./leden.js";
 import { nieuwsteBerichten, nieuwStrook, CAT_FOTO } from "./forum-nieuw.js";
 import BLOG_NIEUWS from "../../data/blog-nieuws.json";
 import { wagenKaart, WAGEN_BASIS, komendeKalender } from "./aanbod.js";
+import { laatsteZoekertjes } from "./zoekertjes.js";
 import { log } from "./log.js";
 import { drieMenu, deelKnop, bewaarKnop, meldLink, bewaardSet } from "./melden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
@@ -148,7 +149,7 @@ async function index(request, env, url, lid) {
   const etmaal = new Date(Date.now() - 86400000).toISOString();
   const cats = await categorieen(env);
   const ids = cats.map((c) => c.laatste_topic).filter(Boolean);
-  const [laatste, gelezen, stats, nieuwste, wagens, cbLive, kal, gidsN] = await Promise.all([
+  const [laatste, gelezen, stats, nieuwste, wagens, cbLive, kal, gidsN, zks] = await Promise.all([
     ids.length ? db.prepare(`SELECT t.id, t.titel, t.laatste_op, t.berichten, l.gebruikersnaam FROM forum_topics t LEFT JOIN leden l ON l.id = t.laatste_lid_id WHERE t.id IN (${ids.map(() => "?").join(",")})`)
       .bind(...ids).all().then((r) => Object.fromEntries((r.results || []).map((t) => [t.id, t]))) : {},
     gelezenMap(env, lid, ids),
@@ -170,6 +171,7 @@ async function index(request, env, url, lid) {
       WHERE b.verwijderd = 0 AND b.aangemaakt > ? GROUP BY b.nr ORDER BY laatst DESC LIMIT 3`).bind(etmaal).all().then((r) => r.results || []).catch(() => []),
     komendeKalender(env, 92).catch(() => []),
     db.prepare("SELECT COUNT(*) n FROM gids_zaken WHERE zichtbaar = 1").first().then((r) => r?.n || 0).catch(() => 0),
+    laatsteZoekertjes(env, 4),
   ]);
 
   let groep = "", kaarten = "";
@@ -177,7 +179,7 @@ async function index(request, env, url, lid) {
     if (c.groep !== groep) { if (groep) kaarten += "</div>"; groep = c.groep; kaarten += `<h2 class="fc-groep">${esc(groep)}</h2><div class="fc-grid">`; }
     const t = laatste[c.laatste_topic];
     const nieuw = t && isNieuw(lid, t, gelezen);
-    kaarten += `<a class="fc" href="/forum/c/${c.slug}"><img src="/assets/img/${CAT_FOTO[c.slug] || "968"}-s.webp" alt="" loading="lazy">
+    kaarten += `<a class="fc" href="${c.slug === "te-koop" ? "/zoekertjes" : `/forum/c/${c.slug}`}"><img src="/assets/img/${CAT_FOTO[c.slug] || "968"}-s.webp" alt="" loading="lazy">
       <div class="fc-b">${nieuw ? '<span class="tegel-label" style="position:static;display:inline-block;margin-bottom:8px">Nieuw</span>' : ""}<b>${esc(c.naam)}</b><span>${esc(c.omschrijving || "")}</span>
       <small>${c.topics} ${c.topics === 1 ? "topic" : "topics"} · ${c.berichten} ${c.berichten === 1 ? "bericht" : "berichten"}${t ? ` · laatst: ${esc(t.titel)}` : ""}</small></div></a>`;
   }
@@ -199,6 +201,13 @@ async function index(request, env, url, lid) {
     ? `<ul class="com-kal">${kal.slice(0, 6).map((k, i) => `<li class="${k.ons ? "ons" : ""}${i === 0 ? " eerst" : ""}"><a href="${esc(k.link || "/kalender")}"${k.ons ? "" : ' target="_blank" rel="noopener"'}>${dag(k.datum)}<span><b>${esc(k.titel)}</b><small>${k.ons ? "Rover &amp; Co" : esc(k.club || "")}${k.plaats ? " · " + esc(String(k.plaats).split(" · ")[0]) : ""}</small></span></a></li>`).join("")}</ul>`
     : "<p>Nog niets gepland.</p>"}<a class="zij-meer" href="/kalender">Hele kalender →</a></div>`;
 
+  const zkPrijs = (z) => z.prijs_soort === "gratis" ? "Gratis" : z.prijs_soort === "bod" ? "Bod" : z.prijs != null ? `€ ${Number(z.prijs).toLocaleString("nl-BE")}` : "";
+  const zkFoto = (z) => { try { return JSON.parse(z.fotos || "[]")[0] || ""; } catch { return ""; } };
+  const zkKaart = `<div class="zij-kaart"><h3>${ico("tag")} Te koop / gezocht</h3>${zks.length
+    ? `<ul class="zk-zij">${zks.map((z) => `<li><a href="/zoekertjes/${z.id}">${zkFoto(z) ? `<img src="${esc(zkFoto(z))}" alt="" loading="lazy">` : '<span class="zk-zijleeg"></span>'}<span><b>${esc(z.titel)}</b><small>${z.soort === "zoek" ? "Gezocht" : "Te koop"}${z.plaats ? " · " + esc(z.plaats) : ""}</small> <em>${esc(zkPrijs(z))}</em></span></a></li>`).join("")}</ul>`
+    : "<p>Zoek je een onderdeel of wil je iets verkopen? Plaats gratis een zoekertje.</p>"}
+    <a class="btn btn-solid zk-zijknop" href="${lid ? "/zoekertjes/nieuw" : "/account/inloggen?terug=/zoekertjes/nieuw"}">Plaats een zoekertje</a><a class="zij-meer" href="/zoekertjes">Alle zoekertjes →</a></div>`;
+
   const gidsKaart = `<div class="zij-kaart com-gids"><h3>${ico("pin")} Garage nodig?</h3><p>${gidsN} onafhankelijke Land Rover-garages, onderdelen en ombouw in België en Nederland.</p>
     <a class="btn btn-solid" href="/gids?hier=1">${ico("locatie")}Dichtst bij mij</a><a class="zij-meer" href="/gids">Naar de gids →</a></div>`;
 
@@ -217,7 +226,7 @@ async function index(request, env, url, lid) {
       + kop + landys + `
     <section class="wrap f-sectie forum-layout com-midden">
       <div><div class="com-sec-kop" id="kampvuur"><h2>Het Kampvuur</h2><a href="/forum/nieuw">Alles wat nieuw is →</a></div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
-      <aside class="forum-zij">${cbKaart}${kalKaart}${gidsKaart}
+      <aside class="forum-zij">${zkKaart}${cbKaart}${kalKaart}${gidsKaart}
         ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
     </section>` + blog + waarom,
   });
@@ -644,6 +653,7 @@ export async function forum(request, env, url) {
   else if (p === "/forum/foto" && post) res = lid ? await fotoOpladen(request, env, lid) : json({ ok: false, fout: "Log eerst in." }, 401);
   else if ((m = p.match(/^\/forum\/wagen\/(\d{1,10})\/meld$/)) && post) res = await meldWagen(request, env, url, lid, m[1]);
   else if (p === "/forum/mod" && post) res = await moderatie(request, env, url, lid);
+  else if (p === "/forum/c/te-koop" || p === "/forum/c/te-koop/nieuw") res = new Response(null, { status: 301, headers: { location: p.endsWith("nieuw") ? "/zoekertjes/nieuw" : "/zoekertjes" } });
   else if ((m = p.match(/^\/forum\/c\/([a-z0-9-]+)$/))) res = await categorie(request, env, url, lid, m[1]);
   else if ((m = p.match(/^\/forum\/c\/([a-z0-9-]+)\/nieuw$/))) res = !lid ? moetLid() : !lid.gebruikersnaam ? moetNaam() : await nieuwTopic(request, env, url, lid, m[1]);
   else if ((m = p.match(/^\/forum\/t\/(\d{1,10})(?:-[a-z0-9-]*)?$/))) res = await topic(request, env, url, lid, m[1]);

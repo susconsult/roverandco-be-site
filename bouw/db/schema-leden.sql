@@ -131,3 +131,10 @@ CREATE INDEX IF NOT EXISTS blog_likes_ip ON blog_likes (ip_hash, aangemaakt);
 CREATE TABLE IF NOT EXISTS wolf_opvolging (nummer TEXT PRIMARY KEY, token TEXT NOT NULL UNIQUE, gestuurd_op TEXT NOT NULL,
   herinnerd_op TEXT, herinneringen INTEGER NOT NULL DEFAULT 0, geescaleerd_op TEXT, status TEXT NOT NULL DEFAULT 'open',
   vervoerder TEXT, tt TEXT, klaar_op TEXT);
+
+-- Zoekertjes (te koop / gezocht, src/lib/zoekertjes.js; wordt ook automatisch aangemaakt). status: actief, verkocht, gevonden, weg.
+CREATE TABLE IF NOT EXISTS zoekertjes (id INTEGER PRIMARY KEY AUTOINCREMENT, lid_id INTEGER NOT NULL, soort TEXT NOT NULL, titel TEXT NOT NULL,
+  prijs INTEGER, prijs_soort TEXT NOT NULL DEFAULT 'vast', categorie TEXT NOT NULL, model TEXT, postcode TEXT, land TEXT, plaats TEXT, lat REAL, lon REAL, tekst TEXT,
+  fotos TEXT NOT NULL DEFAULT '[]', telefoon TEXT, toon_tel INTEGER NOT NULL DEFAULT 0, toon_mail INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'actief',
+  bekeken INTEGER NOT NULL DEFAULT 0, aangemaakt TEXT NOT NULL, bijgewerkt TEXT, afgesloten_op TEXT);
+CREATE INDEX IF NOT EXISTS idx_zoekertjes_status ON zoekertjes(status, aangemaakt);

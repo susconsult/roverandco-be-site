@@ -30,6 +30,7 @@ import { melden } from "./melden.js";
 import { blogLikes } from "./blog-likes.js";
 import { aanbod, laadCatalogus } from "./aanbod.js";
 import { gids } from "./gids.js";
+import { zoekertjes } from "./zoekertjes.js";
 import { verstuur } from "./mail.js";
 import { scanPagina } from "./scan.js";
 import { wolfPagina } from "./wolf.js";
@@ -380,6 +381,8 @@ export default {
     }
     const gd = await gids(request, env, url); // vóór leden: /account/zaak hoort bij de gids
     if (gd) return gd;
+    const zk = await zoekertjes(request, env, url);
+    if (zk) return zk;
     const ld = await leden(request, env, url);
     if (ld) return ld;
     const fo = await forum(request, env, url);

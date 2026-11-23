@@ -1,0 +1,71 @@
+/* Zoekertjes (/zoekertjes) */
+.zk-sec{padding:36px 0 72px}
+.zk-smal{max-width:760px}
+.zk-balk{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.zk-balk .gd-chips{flex:none;margin:0;flex-wrap:nowrap;overflow-x:auto}
+.zk-hier{font:inherit;font-size:var(--fs-sm);font-weight:600;display:inline-flex;align-items:center;gap:6px;background:var(--white);border:1px solid var(--sand-2);border-radius:999px;padding:7px 14px;color:var(--green-3);cursor:pointer}
+.zk-hier[aria-pressed="true"]{background:var(--green);border-color:var(--green);color:#fff}
+.zk-hier.bezig{opacity:.5}
+.zk-plaats{margin-left:auto;display:inline-flex;align-items:center;gap:7px}
+.zk-balk .ico,.zk-detail .ico,.zk-plaats .ico{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.zk-raster{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.zk-kaart{background:var(--white);border-radius:var(--r2);overflow:hidden;box-shadow:var(--schaduw);color:var(--ink);text-decoration:none;display:flex;flex-direction:column;transition:transform .2s}
+.zk-kaart:hover{transform:translateY(-2px)}
+.zk-kaart[hidden]{display:none}
+.zk-af{opacity:.55}
+.zk-foto{position:relative;aspect-ratio:4/3;background:var(--sand)}
+.zk-foto img{width:100%;height:100%;object-fit:cover;display:block}
+.zk-geenfoto{display:flex;align-items:center;justify-content:center;width:100%;height:100%;color:var(--muted)}
+.zk-geenfoto .ico{width:40px;height:40px;fill:none;stroke:currentColor;stroke-width:1.5}
+.zk-label{position:absolute;left:10px;top:10px;font-size:12px;font-weight:700;border-radius:7px;padding:3px 9px}
+.zk-koop{background:var(--green);color:#fff}.zk-zoek{background:#FAEEDA;color:#633806}.zk-dicht{background:#5F5E5A;color:#fff}
+.zk-b{padding:12px 14px 14px;display:flex;flex-direction:column;gap:2px}
+.zk-prijs{font-size:18px}
+.zk-titel{font-weight:600;line-height:1.3}
+.zk-b small{color:var(--muted);font-size:12px;margin-top:2px}
+.zk-leeg{text-align:center;color:var(--muted);padding:30px}
+.zk-leeg-groot{background:var(--white);border-radius:var(--r2);padding:40px 24px;text-align:center}
+.zk-leeg-groot h2{font-size:clamp(26px,3vw,36px)}
+.zk-leeg-groot p{margin:8px 0 18px;color:var(--muted)}
+/* detail */
+.zk-detail{padding:110px 0 72px}
+.zk-detail .kruimel a,.zk-detail .kruimel span{color:var(--muted)}
+.zk-detail-grid{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:32px;margin-top:18px;align-items:start}
+.zk-fotos{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.zk-dfoto{border:0;padding:0;background:var(--sand);border-radius:12px;overflow:hidden;cursor:zoom-in;aspect-ratio:1}
+.zk-dfoto.groot{grid-column:1/-1;aspect-ratio:4/3}
+.zk-dfoto img{width:100%;height:100%;object-fit:cover;display:block}
+.zk-geenfoto.groot{grid-column:1/-1;aspect-ratio:4/3;border-radius:12px;background:var(--sand)}
+.zk-info{position:relative}
+.zk-info .zk-label{position:static;display:inline-block}
+.zk-info h1{font-size:clamp(32px,4vw,52px);line-height:1;margin:10px 0 6px}
+.zk-dprijs{font-size:28px;font-weight:700;color:var(--green)}
+.zk-feiten{list-style:none;padding:0;margin:16px 0;display:grid;grid-template-columns:1fr 1fr;gap:10px 16px}
+.zk-feiten small{display:block;color:var(--muted);font-size:12px}
+.zk-tekst{background:var(--white);border-radius:14px;padding:16px 18px;line-height:1.6}
+.zk-contact{background:var(--white);border-radius:14px;padding:16px 18px;margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.zk-contact h2{width:100%;font-size:22px}
+.zk-contact .btn{display:inline-flex;align-items:center;gap:7px}
+.zk-gesloten{font-weight:700;color:var(--muted);margin-top:14px}
+.zk-eigen{margin-top:14px;border:1px dashed var(--sand-2);border-radius:14px;padding:14px 16px;font-size:var(--fs-sm)}
+.zk-eigen-knoppen{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;align-items:center}
+.zk-eigen-knoppen form{display:flex;gap:10px;align-items:center}
+/* formulier */
+.zk-form{display:grid;gap:16px;background:var(--white);border-radius:18px;padding:22px}
+.zk-form label{display:grid;gap:6px;font-weight:600}
+.zk-form input:not([type=radio]):not([type=checkbox]),.zk-form select,.zk-form textarea{font:inherit;font-weight:400;padding:11px 12px;border:1px solid var(--sand-2);border-radius:10px;background:#fff}
+.zk-form fieldset{border:0;padding:0;margin:0;display:grid;gap:8px}
+.zk-form legend{font-weight:600;margin-bottom:6px}
+.zk-keuzes{display:flex;gap:8px;flex-wrap:wrap}
+.zk-keuze{display:block!important}
+.zk-keuze input{position:absolute;opacity:0}
+.zk-keuze span{display:inline-block;border:1px solid var(--sand-2);border-radius:999px;padding:8px 16px;cursor:pointer;font-weight:600}
+.zk-keuze input:checked+span{background:var(--green);border-color:var(--green);color:#fff}
+.zk-keuze input:focus-visible+span{outline:2px solid var(--green-3);outline-offset:2px}
+.zk-vink{display:flex!important;gap:8px;align-items:center;font-weight:400!important}
+.zk-uitleg{color:var(--muted);font-size:var(--fs-sm);margin:-4px 0 4px}
+.zk-twee{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.zk-prijsveld[hidden]{display:none}
+.gd-foto button+button{margin-left:8px}
+@media(max-width:1000px){.zk-raster{grid-template-columns:repeat(3,minmax(0,1fr))}.zk-detail-grid{grid-template-columns:1fr}}
+@media(max-width:700px){.zk-raster{grid-template-columns:1fr 1fr;gap:10px}.zk-plaats{margin-left:0;width:100%;justify-content:center}.zk-detail{padding-top:96px}.zk-b{padding:10px 12px}.zk-prijs{font-size:16px}}
