@@ -339,3 +339,50 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .app-lade .app-kopie{color:var(--green)}
 .app-of{font-size:13px;color:var(--muted);margin:4px 0 12px}
 .app-nooit{display:block;margin:4px auto 0;border:0;background:none;color:var(--muted);font-size:13px;text-decoration:underline;cursor:pointer;padding:8px}
+/* Community (/forum), 23 nov 2026 */
+.com-kop{display:flex;justify-content:space-between;align-items:center;gap:20px;flex-wrap:wrap;background:var(--white);border-radius:var(--r2);box-shadow:var(--schaduw);padding:18px 22px;margin-top:-36px;position:relative;z-index:2}
+.com-cijfers{display:flex;gap:28px;flex-wrap:wrap}
+.com-cijfers div{display:flex;flex-direction:column;line-height:1.15}
+.com-cijfers b{font-family:var(--head);font-size:30px;color:var(--green)}
+.com-cijfers span{font-size:var(--fs-sm);color:var(--muted)}
+.com-acties{display:flex;gap:8px;flex-wrap:wrap}
+.com-acties .btn{display:inline-flex;align-items:center;gap:7px}
+.com-acties .ico,.zij-kaart h3 .ico,.com-gids .btn .ico{width:17px;height:17px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;vertical-align:-3px}
+.com-sec-kop{display:flex;justify-content:space-between;align-items:baseline;gap:12px;margin-bottom:14px}
+.com-sec-kop h2{font-size:clamp(28px,3vw,40px)}
+.com-sec-kop a{font-weight:600;color:var(--green-3);text-decoration:none;white-space:nowrap}
+.com-landys{padding-top:44px}
+.com-landys-rij{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:14px}
+.com-midden{padding-top:44px}
+.com-midden .f-balk{margin-top:0}
+.com-lijst{list-style:none;padding:0;margin:0 0 10px;display:grid;gap:8px}
+.com-lijst li{display:flex;flex-direction:column}
+.com-lijst a{color:var(--ink);text-decoration:none}
+.com-lijst small{color:var(--muted)}
+.com-kal{list-style:none;padding:0;margin:0 0 10px;display:grid;gap:6px}
+.com-kal a{display:flex;gap:12px;align-items:center;color:var(--ink);text-decoration:none;padding:6px;border-radius:10px}
+.com-kal a:hover{background:var(--sand)}
+.com-kal li.eerst a{background:var(--sand)}
+.com-dag{flex:none;width:44px;text-align:center;border-radius:8px;background:var(--white);border:1px solid var(--sand-2);font-size:11px;text-transform:uppercase;line-height:1.1;padding:4px 0;color:var(--muted)}
+.com-dag b{display:block;font-size:18px;color:var(--ink)}
+.com-kal li.ons .com-dag{background:var(--green);border-color:var(--green);color:#CFE3D4}.com-kal li.ons .com-dag b{color:#fff}
+.com-kal span>b{display:block;font-size:var(--fs-sm);line-height:1.25}
+.com-kal small{color:var(--muted);font-size:12px}
+.com-gids{border:2px solid #C28A1E}
+.com-gids .btn{display:flex;justify-content:center;align-items:center;gap:7px;margin:10px 0 6px}
+.com-blog{padding:10px 0 60px}
+.com-blog-rij{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px}
+.com-blog-rij a{background:var(--white);border-radius:var(--r2);overflow:hidden;box-shadow:var(--schaduw);color:var(--ink);text-decoration:none;display:flex;flex-direction:column}
+.com-blog-rij img{width:100%;aspect-ratio:16/10;object-fit:cover}
+.com-blog-rij small{color:var(--muted);padding:12px 14px 0;font-size:12px}
+.com-blog-rij b{padding:4px 14px 16px;line-height:1.3}
+@media(max-width:1100px){.com-landys-rij{grid-template-columns:repeat(3,minmax(0,1fr))}.com-blog-rij{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.com-kop{margin-top:-24px;padding:16px}.com-cijfers{gap:18px}.com-cijfers b{font-size:24px}.com-acties{width:100%}.com-acties .btn{flex:1;justify-content:center;padding-left:10px;padding-right:10px}.com-landys-rij{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.com-blog-rij{grid-template-columns:1fr 1fr;gap:10px}}
+.zij-kaart .com-kal a:not(.btn){display:flex;gap:12px;align-items:center;padding:8px 6px;border-top:0}
+.zij-kaart .com-kal .com-dag b{display:block;font-size:18px}
+.zij-kaart .com-kal span>b{font-size:var(--fs-sm)}
+.zij-kaart .com-lijst a:not(.btn){padding:0;border-top:0}
+.zij-kaart .com-lijst a b{display:inline}
+.com-midden .fn-kop{display:none}
+.com-midden .fn-strook{margin-top:14px}
+@media(max-width:700px){.com-acties{flex-direction:column}.com-acties .btn{width:100%;white-space:nowrap;padding:12px 14px;border-radius:12px}}

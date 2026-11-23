@@ -14,7 +14,7 @@ import { verstuur } from "./mail.js";
 export const CATEGORIEEN = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 export const SOORTEN = ["bekeken", "bel", "route", "website", "mail", "meerinfo", "zoek"];
 const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=5">';
-const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=5" defer></script>';
+const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=6" defer></script>';
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
 const maand = () => vandaag().slice(0, 7);
 const nu = () => new Date().toISOString();

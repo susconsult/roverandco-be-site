@@ -38,7 +38,7 @@ export async function activiteit(env, slug) {
   return x ? { ...lees(x), slug: x.slug, verborgen: !x.zichtbaar } : null;
 }
 // Zichtbaar en nog niet voorbij (einde of datum >= vandaag; zonder datum = altijd).
-const komend = (a) => !a.verborgen && (!a.datum || (a.einde || a.datum) >= vandaag());
+export const komend = (a) => !a.verborgen && (!a.datum || (a.einde || a.datum) >= vandaag());
 
 export const gratis = (a) => (a.inschrijving?.onderdelen || [{ prijs: 1 }]).every((o) => !o.prijs);
 export const inschrijvingOpen = (a) => {
@@ -260,10 +260,10 @@ const vervang = (html) => ({ element(el) { el.setInnerContent(html, { html: true
 
 const slugTitel = (s) => String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 // Land Rovers van leden met foto (home en /landys).
-const WAGEN_BASIS = `SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
+export const WAGEN_BASIS = `SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam naam_lid FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
       WHERE w.foto_id IS NOT NULL AND l.gebruikersnaam IS NOT NULL AND COALESCE(l.geblokkeerd, 0) = 0 AND l.verwijderd_op IS NULL`;
 // Eén kaart: foto groot openen (lightbox) + hartje.
-function wagenKaart(w) {
+export function wagenKaart(w) {
   const titel = w.naam || w.type;
   const info = [w.naam ? w.type : "", w.bouwjaar || ""].filter(Boolean).join(" · ");
   return `<div class="garage-kaart"><button type="button" class="gk-open" data-full="/forum/foto/${w.foto_id}" data-onderschrift="${e(titel)} van ${e(w.naam_lid)}" data-link="/forum/lid/${encodeURIComponent(w.naam_lid)}#wagen-${w.id}" aria-label="${e(titel)} van ${e(w.naam_lid)} groot bekijken"><img src="/forum/foto/${w.foto_id}" alt="${e(titel)} van ${e(w.naam_lid)}" loading="lazy"><span><b>${e(titel)}</b>${info ? `<small>${e(info)}</small>` : ""}<em>van ${e(w.naam_lid)}</em></span></button><button type="button" class="f-like wagen-like" data-like="wagen-${w.id}" aria-pressed="false" title="Geef een hartje"><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 5.6-7 10-7 10Z"/></svg> <span></span></button></div>`;
@@ -310,6 +310,15 @@ async function home(env, request) {
     .on('[data-dyn="forum"]', topics.length ? vervang(nieuwLijst(topics, 4)) : { element() {} })
     .on('[data-dyn="garage"]', wagens.length ? vervang(wagens.map(wagenKaart).join("")) : { element() {} })
     .transform(new Response(r.body, { status: r.status, headers: { ...Object.fromEntries(r.headers), "cache-control": "no-store" } }));
+}
+
+// Komende items van de kalender (Rover & Co + andere clubs), voor de Community-pagina.
+export async function komendeKalender(env, dagen = 92) {
+  const acts = await activiteiten(env);
+  const tot = new Date(Date.now() + dagen * 86400000).toISOString().slice(0, 10), nu = vandaag();
+  const ons = acts.filter((a) => komend(a) && a.datum).map((a) => ({ ons: true, titel: a.titel, datum: a.datum, einde: a.einde || "", plaats: a.locatie || "", link: a.extern_url || `/activiteiten/${a.slug}`, slug: a.slug }));
+  const rest = kalenderAnderen.filter((k) => (k.einde || k.datum) >= nu).map((k) => ({ ...k, ons: false }));
+  return [...ons, ...rest].filter((k) => k.datum <= tot).sort((x, y) => (x.datum < y.datum ? -1 : 1));
 }
 
 async function kalender(env, request) {

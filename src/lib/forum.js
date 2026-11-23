@@ -6,6 +6,7 @@ import { esc, ico, bannerFoto, kruimel as hoofdKruimel, datum, banner as sjabloo
 import { huidigLid, avatar } from "./leden.js";
 import { nieuwsteBerichten, nieuwStrook, CAT_FOTO } from "./forum-nieuw.js";
 import BLOG_NIEUWS from "../../data/blog-nieuws.json";
+import { wagenKaart, WAGEN_BASIS, komendeKalender } from "./aanbod.js";
 import { log } from "./log.js";
 import { drieMenu, deelKnop, bewaarKnop, meldLink, bewaardSet } from "./melden.js";
 import { tagLinks, bewaarTags, volgt, zetVolgen, volgKnop, meld as stuurMelding, meldNieuwBericht, likes, likeKnop, garages, wagenNaam, garageKaarten } from "./forum-extra.js";
@@ -139,47 +140,86 @@ const editor = (naam, waarde = "", extra = "") => `
 
 /* ---------------- pagina's ---------------- */
 
+// /forum = Community (wens Pieter 23 nov 2026): kop met cijfers en acties, Landy's van leden bovenaan,
+// dan het Kampvuur (nieuwe berichten + categorieën) met ernaast CB, kalender en gids, onderaan de blog.
+const MAANDEN_KORT = ["jan", "feb", "mrt", "apr", "mei", "jun", "jul", "aug", "sep", "okt", "nov", "dec"];
 async function index(request, env, url, lid) {
+  const db = env.SHOP_DB;
+  const etmaal = new Date(Date.now() - 86400000).toISOString();
   const cats = await categorieen(env);
   const ids = cats.map((c) => c.laatste_topic).filter(Boolean);
-  const laatste = ids.length ? Object.fromEntries(((await env.SHOP_DB.prepare(
-    `SELECT t.id, t.titel, t.laatste_op, t.berichten, l.gebruikersnaam FROM forum_topics t LEFT JOIN leden l ON l.id = t.laatste_lid_id WHERE t.id IN (${ids.map(() => "?").join(",")})`
-  ).bind(...ids).all()).results || []).map((t) => [t.id, t])) : {};
-  const gelezen = await gelezenMap(env, lid, ids);
-  const stats = await env.SHOP_DB.prepare(`SELECT
+  const [laatste, gelezen, stats, nieuwste, wagens, cbLive, kal, gidsN] = await Promise.all([
+    ids.length ? db.prepare(`SELECT t.id, t.titel, t.laatste_op, t.berichten, l.gebruikersnaam FROM forum_topics t LEFT JOIN leden l ON l.id = t.laatste_lid_id WHERE t.id IN (${ids.map(() => "?").join(",")})`)
+      .bind(...ids).all().then((r) => Object.fromEntries((r.results || []).map((t) => [t.id, t]))) : {},
+    gelezenMap(env, lid, ids),
+    db.prepare(`SELECT
       (SELECT COUNT(*) FROM forum_topics WHERE verwijderd = 0) topics,
-      (SELECT COUNT(*) FROM forum_berichten WHERE verwijderd = 0) berichten,
-      (SELECT COUNT(*) FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0) leden,
-      (SELECT gebruikersnaam FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 ORDER BY id DESC LIMIT 1) nieuwste`).first();
+      (SELECT COUNT(*) FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 AND verwijderd_op IS NULL) leden,
+      (SELECT gebruikersnaam FROM leden WHERE gebruikersnaam IS NOT NULL AND geblokkeerd = 0 ORDER BY id DESC LIMIT 1) nieuwste`).first(),
+    nieuwsteBerichten(env, 8),
+    (async () => {
+      try {
+        const n = await db.prepare(`${WAGEN_BASIS} ORDER BY w.aangemaakt DESC LIMIT 3`).all().then((r) => r.results || []);
+        const nids = n.map((w) => w.id);
+        const r = await db.prepare(`${WAGEN_BASIS}${nids.length ? ` AND w.id NOT IN (${nids.map(() => "?").join(",")})` : ""} ORDER BY RANDOM() LIMIT 3`).bind(...nids).all().then((x) => x.results || []);
+        const tot = (await db.prepare(`SELECT COUNT(*) n FROM (${WAGEN_BASIS})`).first())?.n || 0;
+        return { lijst: [...n, ...r], tot };
+      } catch { return { lijst: [], tot: 0 }; }
+    })(),
+    db.prepare(`SELECT b.nr, k.naam, COUNT(*) n, MAX(b.aangemaakt) laatst FROM cb_berichten b LEFT JOIN cb_kanalen k ON k.nr = b.nr
+      WHERE b.verwijderd = 0 AND b.aangemaakt > ? GROUP BY b.nr ORDER BY laatst DESC LIMIT 3`).bind(etmaal).all().then((r) => r.results || []).catch(() => []),
+    komendeKalender(env, 92).catch(() => []),
+    db.prepare("SELECT COUNT(*) n FROM gids_zaken WHERE zichtbaar = 1").first().then((r) => r?.n || 0).catch(() => 0),
+  ]);
 
-  const FOTO = CAT_FOTO;
-  const nieuwste = await nieuwsteBerichten(env, 8);
   let groep = "", kaarten = "";
   for (const c of cats) {
     if (c.groep !== groep) { if (groep) kaarten += "</div>"; groep = c.groep; kaarten += `<h2 class="fc-groep">${esc(groep)}</h2><div class="fc-grid">`; }
     const t = laatste[c.laatste_topic];
     const nieuw = t && isNieuw(lid, t, gelezen);
-    kaarten += `<a class="fc" href="/forum/c/${c.slug}"><img src="/assets/img/${FOTO[c.slug] || "968"}-s.webp" alt="" loading="lazy">
+    kaarten += `<a class="fc" href="/forum/c/${c.slug}"><img src="/assets/img/${CAT_FOTO[c.slug] || "968"}-s.webp" alt="" loading="lazy">
       <div class="fc-b">${nieuw ? '<span class="tegel-label" style="position:static;display:inline-block;margin-bottom:8px">Nieuw</span>' : ""}<b>${esc(c.naam)}</b><span>${esc(c.omschrijving || "")}</span>
       <small>${c.topics} ${c.topics === 1 ? "topic" : "topics"} · ${c.berichten} ${c.berichten === 1 ? "bericht" : "berichten"}${t ? ` · laatst: ${esc(t.titel)}` : ""}</small></div></a>`;
   }
   if (groep) kaarten += "</div>";
-  const toonStats = stats.leden >= 25;
-  return pagina(env, request, {
-    titel: "Kampvuur, het forum van Rover & Co", pad: "/forum", desc: "Kampvuur, het forum van Rover & Co: techniek, onderdelen, ritten en alles over Land Rover. Lezen kan iedereen, posten met een gratis account.",
-    inhoud: sjabloonBanner("Het forum van Rover & Co", "Kampvuur", "Techniek, ritten en praat over Land Rover. Lezen kan iedereen, posten met een gratis account.", [["Kampvuur"]], "leden-lightweight-110") + `
-    <div class="wrap waarom-kaarten">
+
+  const getal = (n, een, veel) => `<div><b>${n}</b><span>${n === 1 ? een : veel}</span></div>`;
+  const kop = `<div class="wrap com-kop"><div class="com-cijfers">${getal(stats.leden || 0, "lid", "leden")}${getal(stats.topics || 0, "topic", "topics")}${getal(wagens.tot, "Landy", "Landy's")}${getal(cbLive.length, "kanaal live op de CB", "kanalen live op de CB")}</div>
+    <div class="com-acties"><a class="btn btn-solid" href="${lid ? "#kampvuur" : "/account/registreren?terug=/forum"}">${ico("plus")}${lid ? "Nieuw topic" : "Doe mee"}</a><a class="btn" href="/account/garage">${ico("auto")}Zet je Landy erbij</a><a class="btn" href="/cb">${ico("cb")}Op de CB</a></div></div>`;
+
+  const landys = wagens.lijst.length ? `<section class="wrap com-landys"><div class="com-sec-kop"><h2>Landy's van leden</h2><a href="/landys">Bekijk alle ${wagens.tot} →</a></div>
+    <div class="com-landys-rij">${wagens.lijst.map(wagenKaart).join("")}</div></section>` : "";
+
+  const cbKaart = `<div class="zij-kaart"><h3>${ico("cb")} Op de CB</h3>${cbLive.length
+    ? `<ul class="com-lijst">${cbLive.map((k) => `<li><a href="/cb"><b>Kanaal ${k.nr}</b>${k.naam ? ` · ${esc(k.naam)}` : ""}</a><small>${k.n} ${k.n === 1 ? "bericht" : "berichten"} vandaag</small></li>`).join("")}</ul>`
+    : "<p>Stil op de CB. Zet de eerste stap en roep een kanaal op.</p>"}<a class="zij-meer" href="/cb">Naar de CB →</a></div>`;
+
+  const dag = (d) => { const [, m, dd] = d.split("-"); return `<span class="com-dag"><b>${+dd}</b>${MAANDEN_KORT[+m - 1]}</span>`; };
+  const kalKaart = `<div class="zij-kaart"><h3>${ico("kalender")} De komende maanden</h3>${kal.length
+    ? `<ul class="com-kal">${kal.slice(0, 6).map((k, i) => `<li class="${k.ons ? "ons" : ""}${i === 0 ? " eerst" : ""}"><a href="${esc(k.link || "/kalender")}"${k.ons ? "" : ' target="_blank" rel="noopener"'}>${dag(k.datum)}<span><b>${esc(k.titel)}</b><small>${k.ons ? "Rover &amp; Co" : esc(k.club || "")}${k.plaats ? " · " + esc(String(k.plaats).split(" · ")[0]) : ""}</small></span></a></li>`).join("")}</ul>`
+    : "<p>Nog niets gepland.</p>"}<a class="zij-meer" href="/kalender">Hele kalender →</a></div>`;
+
+  const gidsKaart = `<div class="zij-kaart com-gids"><h3>${ico("pin")} Garage nodig?</h3><p>${gidsN} onafhankelijke Land Rover-garages, onderdelen en ombouw in België en Nederland.</p>
+    <a class="btn btn-solid" href="/gids?hier=1">${ico("locatie")}Dichtst bij mij</a><a class="zij-meer" href="/gids">Naar de gids →</a></div>`;
+
+  const blog = BLOG_NIEUWS.length ? `<section class="wrap com-blog"><div class="com-sec-kop"><h2>Uit de blog</h2><a href="/blog">Alle artikels →</a></div>
+    <div class="com-blog-rij">${BLOG_NIEUWS.slice(0, 4).map((n) => `<a href="/blog/${n.slug}"><img src="/assets/img/${n.foto}-s.webp" alt="" loading="lazy"><small>${esc(n.rubriek)} · ${esc(n.datum)}</small><b>${esc(n.titel)}</b></a>`).join("")}</div></section>` : "";
+
+  const waarom = lid ? "" : `<div class="wrap waarom-kaarten">
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="m6.5 6.5 11 11"/></svg><b>Geen algoritme, geen reclame</b><span>Niemand verdient aan jouw foto's. Gewoon delen en elkaar helpen.</span></div>
       <div>${ico("pin")}<b>Spreek af om samen te rijden</b><span>Zin in een roadbook zaterdag? Post het, wie meewil reageert.</span></div>
       <div><svg class="ico" viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><b>Je berichten blijven van jou</b><span>Zet je Land Rovers bij <a href="/account/garage">Mijn Landy</a>, volg topics en #hashtags.</span></div>
-    </div>
-    <section class="wrap f-sectie forum-layout">
-      <div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
-      <aside class="forum-zij"><div class="zij-kaart zij-nieuws"><h3>Laatste nieuws</h3>${BLOG_NIEUWS.map((n) => `<a href="/blog/${n.slug}"><img src="/assets/img/${n.foto}-s.webp" alt="" loading="lazy"><span><b>${esc(n.titel)}</b><small>${esc(n.rubriek)} · ${esc(n.datum)}</small></span></a>`).join("")}<a class="zij-meer" href="/blog">Alle artikels →</a></div>
-        <div class="zij-kaart"><h3>Garage of onderdelen nodig?</h3><p>Onafhankelijke Land Rover-garages, onderdelen en ombouw in België en Nederland, op een kaart.</p><a class="zij-meer" href="/gids">Naar de gids →</a></div>
-        ${lid ? "" : `<div class="zij-kaart groen"><h3>Doe mee</h3><p>Met één gratis account post je op het forum, bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-wit" href="/account/registreren?terug=/forum">Account maken</a></div>`}
+    </div>`;
+
+  return pagina(env, request, {
+    titel: "Community: Kampvuur, Landy's en CB van Rover & Co", pad: "/forum", desc: "De community van Rover & Co: het Kampvuur (forum), Land Rovers van leden, de CB, de kalender en de gids met Land Rover-garages. Lezen kan iedereen, meedoen met een gratis account.",
+    inhoud: sjabloonBanner("Rover & Co", "Community", "Het Kampvuur, de Landy's van leden, de CB en wat er de komende maanden te doen is. Lezen kan iedereen, meedoen met een gratis account.", [["Community"]], "leden-lightweight-110")
+      + kop + landys + `
+    <section class="wrap f-sectie forum-layout com-midden">
+      <div><div class="com-sec-kop" id="kampvuur"><h2>Het Kampvuur</h2><a href="/forum/nieuw">Alles wat nieuw is →</a></div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
+      <aside class="forum-zij">${cbKaart}${kalKaart}${gidsKaart}
         ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
-    </section>`,
+    </section>` + blog + waarom,
   });
 }
 

@@ -153,6 +153,7 @@
     }
     var hier = $("#gd-hier");
     if (hier) {
+      if (/[?&]hier=1/.test(location.search) && navigator.geolocation) setTimeout(function () { hier.click(); }, 300);
       if (!navigator.geolocation) hier.hidden = true;
       hier.addEventListener("click", function () {
         fout.hidden = true; hier.classList.add("bezig");
