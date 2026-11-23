@@ -13,8 +13,8 @@ import { verstuur } from "./mail.js";
 
 export const CATEGORIEEN = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 export const SOORTEN = ["bekeken", "bel", "route", "website", "mail", "meerinfo", "zoek"];
-const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=3">';
-const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=3" defer></script>';
+const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=4">';
+const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=4" defer></script>';
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
 const maand = () => vandaag().slice(0, 7);
 const nu = () => new Date().toISOString();
@@ -93,7 +93,6 @@ const KORT = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdele
 async function overzicht(env, request) {
   const lijst = volgorde(await zaken(env));
   if (!isBot(request)) await tel(env, "_gids", "bekeken");
-  const regios = [...new Set(lijst.filter((z) => z.land === "BE").map((z) => z.provincie).filter(Boolean))].sort((a, b) => a.localeCompare(b, "nl"));
   const punten = lijst.filter((z) => z.lat != null).map((z) => ({ s: z.slug, n: z.naam, la: z.lat, lo: z.lon, g: z.gemeente, sp: isSponsor(z) ? 1 : 0 }));
   const chip = (w, t, i) => `<button type="button" class="gd-chip" data-cat="${e(w)}" aria-pressed="${i === 0}">${e(t)}</button>`;
   return pagina(env, request, {
@@ -108,8 +107,7 @@ async function overzicht(env, request) {
     <button type="button" class="gd-hier" id="gd-hier" title="Gebruik mijn locatie">${ico("locatie")}<span>Mijn locatie</span></button>
     <button class="gd-zoekknop" type="submit">Zoek</button></form>
   <p class="gd-fout" id="gd-fout" hidden></p>
-  <div class="gd-filters"><div class="gd-chips" role="group" aria-label="Soort">${[["", "Alles"], ["garage", "Garage"], ["onderdelen", "Onderdelen"], ["accessoires", "Accessoires en ombouw"]].map(([w, t], i) => chip(w, t, i)).join("")}</div>
-    <label class="gd-regio"><span class="sr-only">Regio</span><select id="gd-regio"><option value="">Alle regio's</option>${regios.map((r) => `<option value="${e(r)}">${e(r)}</option>`).join("")}<option value="NL">Nederland</option></select></label></div>
+  <div class="gd-filters"><div class="gd-chips" role="group" aria-label="Soort">${[["", "Alles"], ["garage", "Garage"], ["onderdelen", "Onderdelen"], ["accessoires", "Accessoires en ombouw"]].map(([w, t], i) => chip(w, t, i)).join("")}</div></div>
   <div class="gd-balk"><span id="gd-telling" aria-live="polite">${lijst.length} adressen</span>
     <div class="gd-wissel" role="group" aria-label="Weergave"><button type="button" data-weergave="lijst" aria-pressed="true">${ico("lijst")}Lijst</button><button type="button" data-weergave="kaart" aria-pressed="false">${ico("kaart")}Kaart</button></div></div>
   <div class="gd-indeling" data-weergave="lijst"><div class="gd-kaart" id="gd-kaart" aria-label="Kaart met alle adressen"></div>
