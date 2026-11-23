@@ -427,6 +427,7 @@ async function registratieLijsten(env, lid) {
 }
 
 const ACC_IC = {
+  zaak: '<path d="M4 10h16l-1-5H5l-1 5Z"/><path d="M5 10v10h14V10"/><path d="M10 20v-5h4v5"/>',
   bon: '<path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z"/><path d="M9 8h6M9 12h6"/>',
   auto: '<path d="M3 16V9l2-4h9l2 4h4v7H3Z"/><path d="M5 9h11"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>',
   bewaar: '<path d="M6 4h12v17l-6-4-6 4V4Z"/>',
@@ -440,11 +441,12 @@ const accTegel = (href, ic, titel, sub) => `<a class="acc-tegel" href="${href}">
 
 async function overzicht(request, env, url, lid) {
   const db = env.SHOP_DB;
-  const [reg, wagens, bewaard, nieuw] = await Promise.all([
+  const [reg, wagens, bewaard, nieuw, zaken] = await Promise.all([
     db.prepare("SELECT COUNT(*) n FROM registraties WHERE lid_id = ?1 OR (?2 = 1 AND email = ?3 COLLATE NOCASE)").bind(lid.id, lid.bevestigd_op ? 1 : 0, lid.email).first(),
     db.prepare("SELECT COUNT(*) n FROM lid_wagens WHERE lid_id = ?").bind(lid.id).first(),
     db.prepare("SELECT COUNT(*) n FROM lid_bewaard WHERE lid_id = ?").bind(lid.id).first().catch(() => ({ n: 0 })),
     aantalOngelezen(env, lid.id),
+    db.prepare("SELECT COUNT(*) n FROM gids_zaken WHERE eigenaar_lid_id = ?").bind(lid.id).first().catch(() => ({ n: 0 })),
   ]);
   const meer = (n, een, veel) => `${n} ${n === 1 ? een : veel}`;
   const m = url.searchParams.has("welkom") ? melding("Welkom! Je account is klaar. Bevestig nog je mailadres via de mail die we je stuurden.", "ok")
@@ -464,6 +466,7 @@ async function overzicht(request, env, url, lid) {
         ${accTegel("/account/meldingen", "bel", "Meldingen", nieuw ? `<b class="acc-nieuw">${nieuw} nieuw</b>` : "Geen nieuwe meldingen")}
         ${accTegel("/account/bewaard", "bewaar", "Bewaard", bewaard.n ? meer(bewaard.n, "item", "items") : "Berichten en foto's om terug te vinden")}
         ${lid.gebruikersnaam ? accTegel(`/forum/lid/${encodeURIComponent(lid.gebruikersnaam)}`, "profiel", "Mijn profiel", "Zo zien anderen je op het forum") : ""}
+        ${zaken?.n ? accTegel("/account/zaak", "zaak", zaken.n === 1 ? "Mijn zaak" : "Mijn zaken", "Je pagina in de gids aanpassen") : ""}
         ${accTegel("/account/gegevens", "instel", "Gegevens en wachtwoord", esc(lid.email))}
         ${accTegel("/cb", "cb", "Op de CB", "Live praten met andere leden")}
         ${lid.kassa || lid.beheerder ? accTegel("/scan", "kassa", "Scan", "Tickets scannen aan de ingang") : ""}

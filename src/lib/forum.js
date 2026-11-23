@@ -176,6 +176,7 @@ async function index(request, env, url, lid) {
     <section class="wrap f-sectie forum-layout">
       <div>${balk(lid, "/forum")}${nieuwStrook(nieuwste)}${kaarten}</div>
       <aside class="forum-zij"><div class="zij-kaart zij-nieuws"><h3>Laatste nieuws</h3>${BLOG_NIEUWS.map((n) => `<a href="/blog/${n.slug}"><img src="/assets/img/${n.foto}-s.webp" alt="" loading="lazy"><span><b>${esc(n.titel)}</b><small>${esc(n.rubriek)} · ${esc(n.datum)}</small></span></a>`).join("")}<a class="zij-meer" href="/blog">Alle artikels →</a></div>
+        <div class="zij-kaart"><h3>Garage of onderdelen nodig?</h3><p>Onafhankelijke Land Rover-garages, onderdelen en ombouw in België en Nederland, op een kaart.</p><a class="zij-meer" href="/gids">Naar de gids →</a></div>
         ${lid ? "" : `<div class="zij-kaart groen"><h3>Doe mee</h3><p>Met één gratis account post je op het forum, bestel je in de shop en schrijf je je in voor activiteiten.</p><a class="btn btn-wit" href="/account/registreren?terug=/forum">Account maken</a></div>`}
         ${stats.nieuwste ? `<p class="f-stats">Nieuwste lid: ${lidLink(stats.nieuwste)}</p>` : ""}</aside>
     </section>`,

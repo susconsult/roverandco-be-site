@@ -40,7 +40,7 @@ export function schoonHtml(h) {
 
 /* ---------------- opmaak ---------------- */
 
-const STIJL = `<style>
+export const STIJL = `<style>
 .form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px 16px}.form-grid .breed{grid-column:1/-1}
 .veld label{display:block;font-weight:600;font-size:13px;margin-bottom:4px}.veld input,.veld select,.veld textarea{width:100%}
 .veld small{display:block;color:var(--m);font-size:12px;margin-top:3px}

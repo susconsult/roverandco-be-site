@@ -4,6 +4,7 @@
 // en vult de delen in op statische pagina's die erop steunen (HTMLRewriter):
 //   / (eerstvolgende, activiteiten, shop), /kalender (Rover & Co-activiteiten), /afrekenen (ophalen op activiteit), /sitemap.xml
 // Ook de prijscontrole bij afrekenen en inschrijven (laadCatalogus) leest uit de database.
+import { gidsAdressen } from "./gids.js";
 import { esc as e, pagina, kruimel, willekeurigeBanner } from "./sjabloon.js";
 import { nieuwsteBerichten, nieuwLijst } from "./forum-nieuw.js";
 import kalenderAnderen from "../../data/kalender.json";
@@ -330,9 +331,9 @@ async function afrekenen(env, request) {
 }
 
 async function sitemap(env, request) {
-  const [acts, prods, r] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request)]);
-  let xml = (await r.text()).replace(/<url><loc>[^<]*\/(shop|activiteiten)\/[^<]*<\/loc><\/url>\s*/g, "");
-  const extra = ["/landys", ...prods.map((p) => `/shop/${p.slug}`), ...acts.filter((a) => !a.verborgen && !a.extern_url).map((a) => `/activiteiten/${a.slug}`)]
+  const [acts, prods, r, gd] = await Promise.all([activiteiten(env), producten(env), env.ASSETS.fetch(request), gidsAdressen(env)]);
+  let xml = (await r.text()).replace(/<url><loc>[^<]*\/(shop|activiteiten|gids)(\/[^<]*)?<\/loc><\/url>\s*/g, "");
+  const extra = ["/landys", ...gd, ...prods.map((p) => `/shop/${p.slug}`), ...acts.filter((a) => !a.verborgen && !a.extern_url).map((a) => `/activiteiten/${a.slug}`)]
     .map((p) => `<url><loc>${DOMEIN}${p}</loc></url>`).join("\n");
   xml = xml.replace("</urlset>", extra + "\n</urlset>");
   return new Response(xml, { headers: { "content-type": "application/xml; charset=utf-8", "cache-control": "public, max-age=3600" } });

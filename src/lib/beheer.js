@@ -5,6 +5,7 @@
 import { verstuur, htmlMail, alinea } from "./mail.js";
 import { eur, leveringTekst, artikelTekst, lijnTekst, adres } from "./opslag.js";
 import { beheerAanbod } from "./beheer-aanbod.js";
+import { beheerGids } from "./beheer-gids.js";
 import { beheerTestmail } from "./beheer-testmail.js";
 import { beheerVersturen } from "./beheer-versturen.js";
 import { zetOnderhoud } from "./onderhoud.js";
@@ -163,9 +164,10 @@ const MENU = [
   ["", [["home", "Overzicht", "/beheer", "home"]]],
   ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["scan", "Scan (tickets)", "/scan", "ticket"]]],
   ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
-  ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"]]],
+  ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"], ["g", "Gids", "/beheer/gids", "pin", "gids"]]],
 ];
 const I = {
+  pin: '<path d="M12 21s-6-5.4-6-11a6 6 0 0 1 12 0c0 5.6-6 11-6 11Z"/><circle cx="12" cy="10" r="2.2"/>',
   home: '<path d="M4 11l8-7 8 7v9h-5v-6H9v6H4z"/>',
   zak: '<path d="M5 8h14l-1 12H6L5 8Z"/><path d="M9 8V6a3 3 0 0 1 6 0v2"/>',
   ticket: '<path d="M4 7h16v4a2 2 0 0 0 0 4v4H4v-4a2 2 0 0 0 0-4Z"/><path d="M14 7v12" stroke-dasharray="2 2"/>',
@@ -395,6 +397,8 @@ export async function beheer(request, env, url) {
   if (ld) return ld;
   const ab = await beheerAanbod(request, env, url, w.email);
   if (ab) return ab;
+  const gd = await beheerGids(request, env, url, w.email);
+  if (gd) return gd;
   const tm = await beheerTestmail(request, env, url, w.email);
   if (tm) return tm;
   const vs = await beheerVersturen(request, env, url, w.email);

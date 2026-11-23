@@ -407,7 +407,8 @@ async function meldingActie(request, env, email) {
 async function tellers(env) {
   const r = await env.SHOP_DB.prepare(`SELECT
     (SELECT COUNT(*) FROM forum_meldingen WHERE afgehandeld = 0) meldingen,
-    (SELECT COUNT(*) FROM leden WHERE aangemaakt > ? AND verwijderd_op IS NULL) leden`).bind(new Date(Date.now() - 7 * 86400_000).toISOString()).first();
+    (SELECT COUNT(*) FROM leden WHERE aangemaakt > ? AND verwijderd_op IS NULL) leden,
+    (SELECT COUNT(*) FROM gids_aanvragen WHERE status = 'open') gids`).bind(new Date(Date.now() - 7 * 86400_000).toISOString()).first();
   return new Response(JSON.stringify(r), { headers: { "content-type": "application/json", "cache-control": "no-store" } });
 }
 
