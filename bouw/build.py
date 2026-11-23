@@ -1016,8 +1016,12 @@ pages.append("/forum")
 home = home.replace("__BLOGHOME__", '<section class="blog-home"><div class="wrap"><div class="sec-head"><div><div class="eyebrow">Blog</div><h2>Kennis en verhalen</h2></div><a href="/blog" class="btn btn-solid">Alle artikels</a></div><div class="blogfeed">' + "".join(kaart(x) for x in gepubliceerd[:3]) + '</div></div></section>')
 write("/", "Home", "Rover & Co VZW brengt Land Rover-liefhebbers samen: ritten, roadbooks, een forum, een shop en verhalen over Land Rover.", home, hero=True)
 
+# Gids: de zaken uit data/gids-zaken.json (zaken die later in /beheer/gids bijkomen, staan erin na de volgende build)
+import datetime as _dt
+VANDAAG = _dt.date.today().isoformat()
+GIDS = ["/gids"] + [f"/gids/{z['slug']}" for z in json.load(open(os.path.join(DATA, "gids-zaken.json"), encoding="utf-8"))]
 sm = '<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n' + \
-     "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VERSIE}</lastmod></url>\n" for p in pages + ["/landys"]) + "</urlset>\n"  # /landys = live Worker-pagina
+     "".join(f"  <url><loc>{site['domein']}{p}</loc><lastmod>{VANDAAG}</lastmod></url>\n" for p in pages + ["/landys"] + GIDS) + "</urlset>\n"  # /landys en /gids = live Worker-pagina's
 open(os.path.join(PUB, "sitemap.xml"), "w").write(sm)
 open(os.path.join(PUB, "robots.txt"), "w").write(f"User-agent: *\nAllow: /\nDisallow: /planner\nDisallow: /account\nDisallow: /forum/nieuw\nDisallow: /forum/lid/\nSitemap: {site['domein']}/sitemap.xml\n")
 print(f"{len(pages)} pagina's gebouwd + 404, sitemap en robots.txt")
