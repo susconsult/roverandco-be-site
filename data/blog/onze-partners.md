@@ -5,7 +5,7 @@ volgorde: 0
 cornerstone: ja
 auteur: pieter
 datum: 2026-11-15
-beschrijving: Zonder partners geen evenementen. Een overzicht van de bedrijven die Rover & Co steunen: The Wolfgarage, P&P Hekwerk, EPC Verbeteraars, SUS Consult, Pakawi, Kerkhofs Grondwerken en ElektroFix.
+beschrijving: Zonder partners geen evenementen. Een overzicht van de bedrijven die Rover & Co steunen: The Wolfgarage, P&P Hekwerk, EPC Verbeteraars, SUS Consult, Pakawi, Kerkhofs Grondwerken, ElektroFix, Hobbyland en Keurslager Van Hoof.
 foto: blog/onze-partners
 foto_alt: Logo van Rover & Co op een groene achtergrond
 ---
@@ -18,7 +18,7 @@ In dit overzicht stellen we onze partners voor, en vertellen we wat ze voor ons 
 
 Een evenement als Wool & Wheels of Wild & Wheels vraagt veel: een terrein, materiaal, communicatie en mensen die meehelpen. Voor een vzw zonder winstoogmerk is steun van lokale bedrijven onmisbaar.
 
-Onze partners zijn geen grote merken van ver. Het zijn bedrijven uit onze eigen streek, rond Ham, Tessenderlo, Laakdal, Olmen en Bocholt, die Land Rovers, het buitenleven of gewoon onze werking een warm hart toedragen.
+Onze partners zijn geen grote merken van ver. Het zijn bedrijven uit onze eigen streek, rond Ham, Tessenderlo, Laakdal, Olmen, Mol en Bocholt, die Land Rovers, het buitenleven of gewoon onze werking een warm hart toedragen.
 
 ## The Wolfgarage
 
@@ -69,6 +69,22 @@ Lees meer in [Partner in de kijker: Kerkhofs Grondwerken uit Bocholt](/blog/part
 ElektroFix uit Tessenderlo-Ham doet elektriciteit, HVAC en sanitair, voor nieuwbouw en renovatie. Stef Geukens en zijn team zorgen ervoor dat de elektriciteit op onze evenementen veilig verloopt.
 
 Lees meer in [Partner in de kijker: ElektroFix, veilige stroom op onze evenementen](/blog/partner-elektrofix).
+
+## Hobbyland
+
+Hobbyland in Mol is sinds 1975 een doe-het-zelfzaak die uitgroeide tot een begrip in de streek. Je vindt er gereedschap, verf, hout en glas op maat, nummerplaten en sleutels terwijl je wacht, en ook brandstoffen, tuin en dierenvoeding. De zaak is zeven dagen op zeven open.
+
+Hobbyland sponsorde de kolen voor onze vuurkorven, en vorig jaar een kilometer touw.
+
+Lees meer in [Partner in de kijker: Hobbyland, de doe-het-zelfzaak uit Mol](/blog/partner-hobbyland).
+
+## Keurslager Van Hoof
+
+Keurslager Van Hoof is een familieslagerij in Mol-Ginderbuiten. In oktober 2026 werden drie van hun producten erkend als Vlaams streekproduct: Kempens smout, Kempense zwarte pens en rundvet.
+
+Keurslager Van Hoof sponsorde de soep op Church of Rover.
+
+Lees meer in [Partner in de kijker: Keurslager Van Hoof uit Mol](/blog/partner-keurslager-van-hoof).
 
 [[foto: standen | Rally-Defenders op het festivalterrein]]
 

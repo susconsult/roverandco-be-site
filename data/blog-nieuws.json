@@ -1,5 +1,19 @@
 [
  {
+  "slug": "partner-hobbyland",
+  "titel": "Partner in de kijker: Hobbyland, de doe-het-zelfzaak uit Mol",
+  "foto": "blog/partner-hobbyland",
+  "rubriek": "Partners",
+  "datum": "24 november 2026"
+ },
+ {
+  "slug": "partner-keurslager-van-hoof",
+  "titel": "Partner in de kijker: Keurslager Van Hoof uit Mol",
+  "foto": "blog/partner-keurslager-van-hoof",
+  "rubriek": "Partners",
+  "datum": "24 november 2026"
+ },
+ {
   "slug": "range-rover-classic-begin",
   "titel": "De Range Rover Classic: hoe het begon",
   "foto": "blog/range-rover-classic-begin",
@@ -12,19 +26,5 @@
   "foto": "blog/road-rover-1955",
   "rubriek": "Geschiedenis",
   "datum": "19 november 2026"
- },
- {
-  "slug": "trommelremmen-series-afstellen-ontluchten",
-  "titel": "Remmen van een Series: trommelremmen afstellen en ontluchten",
-  "foto": "blog/trommelremmen-series-afstellen-ontluchten",
-  "rubriek": "Onderhoud",
-  "datum": "17 november 2026"
- },
- {
-  "slug": "partner-elektrofix",
-  "titel": "Partner in de kijker: ElektroFix, veilige stroom op onze evenementen",
-  "foto": "blog/partner-elektrofix",
-  "rubriek": "Partners",
-  "datum": "16 november 2026"
  }
 ]
