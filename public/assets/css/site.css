@@ -188,7 +188,7 @@ fieldset.opt{border:0;padding:0;min-width:0}
 
 /* footer */
 footer.site{background:var(--ink);color:var(--white);padding:80px 0 30px}
-.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr;gap:40px}
+.foot{display:grid;grid-template-columns:1.4fr 1fr 1fr 1fr 1fr;gap:40px}
 .foot h4{font-family:var(--head);font-size:var(--fs-h3);text-transform:uppercase;margin-bottom:14px;letter-spacing:1px}
 .foot p,.foot li{font-family:var(--body);font-size:var(--fs-ui);opacity:.82;list-style:none;margin-bottom:6px}
 .foot a{text-decoration:none}

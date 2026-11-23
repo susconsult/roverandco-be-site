@@ -451,6 +451,7 @@
       profiel: '<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>', instel: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>',
       beheer: '<rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/>',
       kassa: '<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M14 14h3v3h-3zM20 14v1M14 20h1M18 18h3v3h-3z"/>',
+      cb: '<rect x="7" y="7" width="10" height="15" rx="2"/><path d="M10 7V2M10 12h4M10 15h4M10 18h4"/>',
       uit: '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/>'
     };
     function item(href, ic, label, extra) { return '<a href="' + href + '"><svg viewBox="0 0 24 24" aria-hidden="true">' + I[ic] + "</svg><span>" + label + "</span>" + (extra || "") + "</a>"; }
@@ -458,7 +459,7 @@
     m.id = "acc-menu"; m.className = "acc-menu"; m.hidden = true; m.setAttribute("role", "menu");
     m.innerHTML = '<div class="acc-menu-kop"><b>' + esc(ik.gebruikersnaam || "Mijn account") + "</b><small>" + esc(ik.email || "") + "</small></div>" +
       item("/account", "home", "Mijn account") + item("/account/bestellingen", "bon", "Bestellingen en inschrijvingen") +
-      item("/account/garage", "auto", "Mijn Landy") + item("/account/bewaard", "bewaar", "Bewaard") +
+      item("/account/garage", "auto", "Mijn Landy") + item("/account/bewaard", "bewaar", "Bewaard") + item("/cb", "cb", "Op de CB") +
       item("/account/meldingen", "bel", "Meldingen", ik.meldingen ? '<em>' + (ik.meldingen > 99 ? "99+" : ik.meldingen) + "</em>" : "") +
       (ik.gebruikersnaam ? item("/forum/lid/" + encodeURIComponent(ik.gebruikersnaam), "profiel", "Mijn profiel op het forum") : "") +
       item("/account/gegevens", "instel", "Gegevens en wachtwoord") + "<hr>" +

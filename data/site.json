@@ -21,28 +21,16 @@
       "/kalender"
     ],
     [
-      "Shop",
-      "/shop"
+      "Community",
+      "/forum"
     ],
     [
       "Blog",
       "/blog"
     ],
     [
-      "Kampvuur",
-      "/forum"
-    ],
-    [
-      "CB",
-      "/cb"
-    ],
-    [
-      "Over ons",
-      "/over-ons"
-    ],
-    [
-      "Contact",
-      "/contact"
+      "Shop",
+      "/shop"
     ]
   ]
 }

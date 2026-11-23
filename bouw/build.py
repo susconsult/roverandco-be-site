@@ -117,8 +117,12 @@ def layout(path, title, desc, body, hero=False, noindex=False):
         <p>{'<br>'.join(e(x) for x in site['adres'])}</p>
       </div>
       <div>
-        <h4>Site</h4>
-        <ul>{''.join(f'<li><a href="{h}">{e(l)}</a></li>' for l, h in site['menu'])}<li><a href="/gids">Garages en zaken</a></li></ul>
+        <h4>Rover &amp; Co</h4>
+        <ul><li><a href="/activiteiten">Activiteiten</a></li><li><a href="/kalender">Kalender</a></li><li><a href="/shop">Shop</a></li><li><a href="/over-ons">Over ons</a></li><li><a href="/contact">Contact</a></li></ul>
+      </div>
+      <div>
+        <h4>Ontdek</h4>
+        <ul><li><a href="/forum">Community</a></li><li><a href="/blog">Blog</a></li><li><a href="/landys">Landy's van leden</a></li><li><a href="/gids">Garages en zaken</a></li></ul>
       </div>
       <div>
         <h4>Volg ons</h4>
