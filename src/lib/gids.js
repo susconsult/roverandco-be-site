@@ -13,8 +13,8 @@ import { verstuur } from "./mail.js";
 
 export const CATEGORIEEN = { garage: "Garage", accessoires: "Accessoires en ombouw", onderdelen: "Onderdelen" };
 export const SOORTEN = ["bekeken", "bel", "route", "website", "mail", "meerinfo", "zoek"];
-const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=1">';
-const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=1" defer></script>';
+const CSS = '<link rel="stylesheet" href="/assets/vendor/leaflet/leaflet.css"><link rel="stylesheet" href="/assets/css/gids.css?v=2">';
+const JS = '<script src="/assets/vendor/leaflet/leaflet.js" defer></script><script src="/assets/js/gids.js?v=2" defer></script>';
 const vandaag = () => new Date().toLocaleDateString("sv-SE", { timeZone: "Europe/Brussels" });
 const maand = () => vandaag().slice(0, 7);
 const nu = () => new Date().toISOString();
@@ -61,10 +61,17 @@ const domein = (u) => String(u || "").replace(/^https?:\/\//, "").replace(/\/$/,
 const catLabels = (z) => (z.categorieen || []).map((c) => `<span class="gd-cat gd-cat-${e(c)}">${e(CATEGORIEEN[c] || c)}</span>`).join("");
 const plaats = (z) => `${e(z.gemeente)}${z.provincie ? " · " + e(z.provincie) : ""}${z.land === "NL" ? " (NL)" : ""}`;
 
+const mediaOk = (u) => (/^\/media\/\d{1,10}$/.test(u || "") ? u : "");
+export const ENKELE_FOTO = { logo: "Logo", omslag: "Omslagfoto" };
+// Zolang een zaak geen eigen logo of omslagfoto heeft: initialen als logo en een willekeurige foto van de site als omslag.
+const omslagVan = (z) => mediaOk(z.omslag) || null;
+const initialen = (naam) => (String(naam).replace(/\(.*?\)/g, "").match(/[A-Za-z0-9À-ÿ&]+/g) || ["?"]).filter((w) => !/^(de|het|van|der|en|the|bv|b\.v\.|nv|bvba)$/i.test(w)).slice(0, 2).map((w) => w[0].toUpperCase()).join("") || "?";
+const logoHtml = (z, klas) => mediaOk(z.logo) ? `<img class="${klas}" src="${e(z.logo)}" alt="Logo ${e(z.naam)}" loading="lazy">` : `<span class="${klas} gd-logo-dummy" aria-hidden="true">${e(initialen(z.naam))}</span>`;
+
 function kaartItem(z) {
   const sp = isSponsor(z);
-  return `<li class="gd-item${sp ? " gd-sponsor" : ""}" data-slug="${e(z.slug)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}" data-cat="${e((z.categorieen || []).join(" "))}" data-regio="${e(z.provincie || "")}" data-land="${e(z.land || "")}">
-  <a class="gd-titel" href="/gids/${e(z.slug)}" data-klik="meerinfo">${e(z.naam)}</a>${sp ? '<span class="gd-label">Gesponsord</span>' : ""}<span class="gd-afstand" hidden></span>
+  return `<li class="gd-item${sp ? " gd-sponsor" : ""} met-logo" data-slug="${e(z.slug)}" data-lat="${z.lat ?? ""}" data-lon="${z.lon ?? ""}" data-cat="${e((z.categorieen || []).join(" "))}" data-regio="${e(z.provincie || "")}" data-land="${e(z.land || "")}">
+  ${logoHtml(z, "gd-logo-klein")}<a class="gd-titel" href="/gids/${e(z.slug)}" data-klik="meerinfo">${e(z.naam)}</a>${sp ? '<span class="gd-label">Gesponsord</span>' : ""}<span class="gd-afstand" hidden></span>
   <div class="gd-plaats">${plaats(z)}</div><div class="gd-cats">${catLabels(z)}</div>
   <div class="gd-acties">${z.telefoon ? `<a href="${e(telLink(z.telefoon))}" data-klik="bel">${ico("telefoon")}Bel</a>` : ""}${z.website ? `<a href="${e(z.website)}" target="_blank" rel="noopener" data-klik="website">${ico("wereld")}Website</a>` : ""}<a href="${e(googleRoute(z))}" target="_blank" rel="noopener" data-klik="route">${ico("route")}Route</a><a href="/gids/${e(z.slug)}" data-klik="meerinfo">Meer info</a></div></li>`;
 }
@@ -141,9 +148,9 @@ async function detail(env, request, url, slug) {
   return pagina(env, request, {
     titel: `${z.naam}, ${z.gemeente.replace(/\s*\(.*\)/, "")}`, pad: `/gids/${slug}`,
     desc: `${z.naam} in ${z.gemeente}: ${(z.categorieen || []).map((c) => CATEGORIEEN[c]).join(", ").toLowerCase()} voor Land Rover. ${z.omschrijving || ""}`.slice(0, 300),
-    inhoud: CSS + banner("Gids", z.naam, `${z.gemeente}${z.provincie ? " · " + z.provincie : ""}${z.land === "NL" ? " · Nederland" : ""}`, [["Gids", "/gids"], [z.naam]])
-      + `<section class="wrap gd-sec gd-detail" data-slug="${e(slug)}">${melding}
-  <div class="gd-detail-kop"><div class="gd-cats">${catLabels(z)}${isSponsor(z) ? '<span class="gd-label">Gesponsord</span>' : ""}</div>
+    inhoud: CSS + banner("Gids", z.naam, `${z.gemeente}${z.provincie ? " · " + z.provincie : ""}${z.land === "NL" ? " · Nederland" : ""}`, [["Gids", "/gids"], [z.naam]], omslagVan(z))
+      + `<section class="wrap gd-sec gd-detail" data-slug="${e(slug)}">
+  <div class="gd-detail-kop">${logoHtml(z, "gd-logo")}${melding}<div class="gd-cats">${catLabels(z)}${isSponsor(z) ? '<span class="gd-label">Gesponsord</span>' : ""}</div>
   ${z.omschrijving ? `<p class="gd-oms">${e(z.omschrijving)}</p>` : ""}
   <div class="gd-knoppen">${z.telefoon ? `<a class="btn btn-solid" href="${e(telLink(z.telefoon))}" data-klik="bel">${ico("telefoon")} Bel</a>` : ""}<a class="btn" href="${e(googleRoute(z))}" target="_blank" rel="noopener" data-klik="route">${ico("route")} Route</a>${z.website ? `<a class="btn" href="${e(z.website)}" target="_blank" rel="noopener" data-klik="website">${ico("wereld")} Website</a>` : ""}${z.email ? `<a class="btn" href="mailto:${e(z.email)}" data-klik="mail">${ico("mail")} Mail</a>` : ""}</div></div>
   <div class="gd-detail-grid"><div class="gd-info">
@@ -275,7 +282,8 @@ async function zaakBewerken(request, env, url, lid, slug) {
       omschrijving: tekst(f.get("omschrijving"), 1200), telefoon: tekst(f.get("telefoon"), 40), email: tekst(f.get("email"), 160),
       website: web && !/^https?:\/\//.test(web) ? "https://" + web : web, openingsuren: tekst(f.get("openingsuren"), 300),
       adres: tekst(f.get("adres"), 160), postcode: tekst(f.get("postcode"), 10), gemeente: tekst(f.get("gemeente"), 80) || z.gemeente,
-      fotos: (() => { try { return JSON.parse(f.get("fotos") || "[]").filter((x) => /^\/media\/\d{1,10}$/.test(x)).slice(0, 6); } catch { return z.fotos || []; } })() };
+      fotos: (() => { try { return JSON.parse(f.get("fotos") || "[]").filter((x) => /^\/media\/\d{1,10}$/.test(x)).slice(0, 6); } catch { return z.fotos || []; } })(),
+      logo: mediaOk(tekst(f.get("logo"), 20)), omslag: mediaOk(tekst(f.get("omslag"), 20)) };
     let { lat, lon } = z;
     if ([nieuw.adres, nieuw.postcode, nieuw.gemeente].join("|") !== oudAdres) {
       const loc = await zoekLocatie(nieuw);
@@ -295,10 +303,22 @@ async function zaakBewerken(request, env, url, lid, slug) {
   ${v("telefoon", "Telefoon", 'maxlength="40"')}${v("email", "Mail", 'type="email" maxlength="160"')}${v("website", "Website", 'maxlength="200"')}
   <label>Openingsuren<textarea name="openingsuren" rows="2" maxlength="300">${e(z.openingsuren || "")}</textarea></label>
   ${v("adres", "Straat en nummer", 'maxlength="160"')}<div class="gd-twee">${v("postcode", "Postcode", 'maxlength="10"')}${v("gemeente", "Gemeente", 'maxlength="80"')}</div>
+  ${enkeleFoto("logo", z.logo, "/account/zaak/foto", "Vierkant of liggend, liefst met een witte of doorzichtige achtergrond. Staat naast je naam op je pagina en in de lijst.")}
+  ${enkeleFoto("omslag", z.omslag, "/account/zaak/foto", "Een brede foto van je zaak of werkplaats (liggend). Komt bovenaan je pagina, achter je naam.")}
   <div class="gd-fotoveld"><b>Foto's (max. 6)</b><div class="gd-fotolijst" data-fotolijst></div><input type="hidden" name="fotos" value="${e(JSON.stringify((z.fotos || []).filter((f) => /^\/media\/\d+$/.test(f))))}">
   <label class="btn">+ Foto toevoegen<input type="file" accept="image/*" multiple hidden data-fotokies></label><small>Foto's worden in je browser verkleind voor ze worden opgeladen.</small></div>
   <div class="gd-knoppen"><button class="btn btn-solid" type="submit">Bewaren</button><a class="btn" href="/gids/${e(slug)}">Bekijk je pagina</a></div></form></section>` + JS,
   });
+}
+
+// Eén foto (logo of omslagfoto) met voorbeeld, opladen en weghalen. Ook gebruikt in /beheer/gids (met een ander opladen-adres).
+export function enkeleFoto(soort, waarde, opladen, hulp) {
+  const u = mediaOk(waarde);
+  return `<div class="gd-fotoveld gd-enkel" data-enkel="${soort}" data-opladen="${e(opladen)}"><b>${ENKELE_FOTO[soort]}</b>
+  <div class="gd-enkel-voorbeeld gd-enkel-${soort}">${u ? `<img src="${e(u)}" alt="">` : "<span>Nog geen " + ENKELE_FOTO[soort].toLowerCase() + "</span>"}</div>
+  <input type="hidden" name="${soort}" value="${e(u)}">
+  <div class="gd-enkel-knoppen"><label class="btn knop klein">${u ? "Vervangen" : "Kiezen"}<input type="file" accept="image/*" hidden data-enkelkies></label><button type="button" class="linkknop" data-enkelweg${u ? "" : " hidden"}>Weghalen</button></div>
+  <small>${hulp}</small></div>`;
 }
 
 async function zaakFoto(request, env, lid) {

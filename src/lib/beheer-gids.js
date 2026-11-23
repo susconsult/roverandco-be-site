@@ -8,7 +8,7 @@
 import { hoofdTabs } from "./beheer-leden.js";
 import { pagina, esc } from "./beheer.js";
 import { STIJL } from "./beheer-aanbod.js";
-import { zaken, zaak, isSponsor, CATEGORIEEN, zoekLocatie } from "./gids.js";
+import { zaken, zaak, isSponsor, CATEGORIEEN, zoekLocatie, enkeleFoto } from "./gids.js";
 import { verstuur } from "./mail.js";
 
 const nu = () => new Date().toISOString();
@@ -73,6 +73,8 @@ async function formulier(env, z, email, melding = "") {
     ${veld("provincie", "Provincie", z.provincie, { hulp: "Voor de regiofilter. In Nederland: de provincie" })}
     <div class="veld"><label for="v-land">Land</label><select id="v-land" name="land"><option value="BE"${z.land !== "NL" ? " selected" : ""}>België</option><option value="NL"${z.land === "NL" ? " selected" : ""}>Nederland</option></select></div>
     ${veld("zoektermen", "Zoektermen voor het Kampvuur", (z.zoektermen || []).join(", "), { hulp: "Andere namen waaronder leden de zaak noemen, met komma's. De naam zelf zoekt altijd mee." })}
+    <div class="veld breed"><link rel="stylesheet" href="/assets/css/gids.css?v=2"><div class="gd-twee-foto">${enkeleFoto("logo", z.logo, "/beheer/gids/foto", "Staat naast de naam op de pagina en in de lijst. Leeg = initialen.")}
+      ${enkeleFoto("omslag", z.omslag, "/beheer/gids/foto", "Bovenaan de pagina. Leeg = een willekeurige foto van de site.")}</div><script src="/assets/js/gids.js?v=2" defer></script></div>
     <div class="veld breed"><label>Foto's</label><small>${(z.fotos || []).length} foto('s). De eigenaar laadt ze op via Mijn account › Mijn zaak.</small>${(z.fotos || []).map((f) => `<img src="${esc(f)}" alt="" style="width:80px;height:60px;object-fit:cover;border-radius:6px;margin:4px 4px 0 0">`).join("")}
       <input type="hidden" name="fotos" value="${esc(JSON.stringify(z.fotos || []))}">${(z.fotos || []).length ? vink("fotos_weg", "Alle foto's weghalen", false) : ""}</div>
   </div></div>
@@ -109,6 +111,8 @@ async function bewaar(request, env, slugOud, email) {
     adres: g("adres", 160), postcode: g("postcode", 10), gemeente: g("gemeente", 80), provincie: g("provincie", 60), land: f.get("land") === "NL" ? "NL" : "BE",
     zoektermen: g("zoektermen", 300).split(",").map((x) => x.trim()).filter(Boolean).slice(0, 6),
     fotos: f.get("fotos_weg") ? [] : (oud?.fotos || []),
+    logo: /^\/media\/\d{1,10}$/.test(f.get("logo") || "") ? f.get("logo") : "",
+    omslag: /^\/media\/\d{1,10}$/.test(f.get("omslag") || "") ? f.get("omslag") : "",
     sponsor: { van: datumOk(g("sponsor_van", 10)), tot: datumOk(g("sponsor_tot", 10)), notitie: g("sponsor_notitie", 500), taken: Object.fromEntries(TAKEN.map(([k]) => [k, !!f.get(`taak_${k}`)])) },
     locatie_bron: oud?.locatie_bron || "handmatig",
   };
@@ -254,6 +258,16 @@ async function cijfers(env, email, url) {
   </tbody></table>`, email);
 }
 
+async function foto(request, env, email) {
+  const type = (request.headers.get("content-type") || "").split(";")[0].trim();
+  const antw = (o, st = 200) => new Response(JSON.stringify(o), { status: st, headers: { "content-type": "application/json", "cache-control": "no-store" } });
+  if (!["image/jpeg", "image/webp", "image/png"].includes(type)) return antw({ ok: false, fout: "Alleen foto's (JPG, PNG of WebP)." }, 415);
+  const data = await request.arrayBuffer();
+  if (!data.byteLength || data.byteLength > 1_900_000) return antw({ ok: false, fout: "Deze foto is te groot." }, 413);
+  const r = await env.SHOP_DB.prepare("INSERT INTO media (type, data, grootte, naam, aangemaakt) VALUES (?, ?, ?, ?, ?)").bind(type, data, data.byteLength, `gids beheer ${email}`, nu()).run();
+  return antw({ ok: true, url: `/media/${r.meta.last_row_id}` });
+}
+
 /* ---------------- router ---------------- */
 
 export async function gidsTeller(env) { return openAanvragen(env); }
@@ -264,6 +278,7 @@ export async function beheerGids(request, env, url, email) {
   const post = request.method === "POST";
   if (p === "/beheer/gids") return lijst(env, email, url);
   if (p === "/beheer/gids/locaties" && post) return locaties(env);
+  if (p === "/beheer/gids/foto" && post) return foto(request, env, email);
   if (p === "/beheer/gids/aanvragen") return post ? aanvraagActie(request, env, url, email) : aanvragen(env, email, url);
   if (p === "/beheer/gids/ervaringen") return ervaringen(request, env, url, email);
   if (p === "/beheer/gids/cijfers") return cijfers(env, email, url);

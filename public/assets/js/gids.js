@@ -168,4 +168,40 @@
     });
     teken();
   }
+
+  /* ---- logo en omslagfoto (eigen zaak en /beheer/gids) ---- */
+  [].forEach.call(document.querySelectorAll("[data-enkel]"), function (blok) {
+    var soort = blok.dataset.enkel, veld = blok.querySelector('input[type="hidden"]'), kies = blok.querySelector("[data-enkelkies]"),
+      weg = blok.querySelector("[data-enkelweg]"), vb = blok.querySelector(".gd-enkel-voorbeeld");
+    var toon = function (u) {
+      veld.value = u || ""; vb.textContent = "";
+      if (u) { var im = document.createElement("img"); im.src = u; im.alt = ""; vb.appendChild(im); }
+      else { var sp = document.createElement("span"); sp.textContent = "Nog geen " + (soort === "logo" ? "logo" : "omslagfoto"); vb.appendChild(sp); }
+      weg.hidden = !u;
+    };
+    weg.addEventListener("click", function () { toon(""); });
+    kies.addEventListener("change", function () {
+      var f = kies.files[0]; if (!f) return;
+      var png = soort === "logo" && /png|svg|webp|gif/.test(f.type), max = soort === "logo" ? 600 : 1920;
+      var img = new Image();
+      img.onload = function () {
+        var s = Math.min(1, max / Math.max(img.width, img.height)), c = document.createElement("canvas");
+        c.width = Math.round(img.width * s) || max; c.height = Math.round(img.height * s) || max;
+        var g = c.getContext("2d"); if (!png) { g.fillStyle = "#fff"; g.fillRect(0, 0, c.width, c.height); }
+        g.drawImage(img, 0, 0, c.width, c.height);
+        var type = png ? "image/png" : "image/jpeg";
+        c.toBlob(function (b) {
+          if (!b) return alert("Opladen mislukt.");
+          vb.classList.add("bezig");
+          fetch(blok.dataset.opladen, { method: "POST", body: b, headers: { "content-type": type }, credentials: "same-origin" })
+            .then(function (r) { return r.json(); })
+            .then(function (d) { if (d.ok) toon(d.url); else alert(d.fout || "Opladen mislukt."); })
+            .catch(function () { alert("Opladen mislukt."); })
+            .then(function () { vb.classList.remove("bezig"); kies.value = ""; });
+        }, type, 0.85);
+      };
+      img.onerror = function () { alert("Dit bestand kan niet als foto gelezen worden."); };
+      img.src = URL.createObjectURL(f);
+    });
+  });
 })();

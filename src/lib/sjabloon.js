@@ -18,7 +18,7 @@ export { ROTATIE };
 export const willekeurigeBanner = () => ROTATIE[crypto.getRandomValues(new Uint32Array(1))[0] % ROTATIE.length];
 export const bannerFoto = (naam) => naam.startsWith("/") ? `<img src="${esc(naam)}" alt="" fetchpriority="high">` : `<img src="/assets/img/${naam}-s.webp" srcset="/assets/img/${naam}-s.webp 800w, /assets/img/${naam}.webp 1600w" sizes="100vw" alt="" fetchpriority="high">`;
 export function banner(eyebrow, titel, intro = "", kruim = null, foto = null) {
-  return `<section class="banner banner-foto">${bannerFoto(foto && foto.startsWith("/") ? foto : willekeurigeBanner())}<div class="wrap">${kruimel(kruim || [[eyebrow === "Rover & Co" ? titel : eyebrow]])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
+  return `<section class="banner banner-foto">${bannerFoto(foto && (foto.startsWith("/") || ROTATIE.includes(foto)) ? foto : willekeurigeBanner())}<div class="wrap">${kruimel(kruim || [[eyebrow === "Rover & Co" ? titel : eyebrow]])}<div class="eyebrow">${esc(eyebrow)}</div><h1>${esc(titel)}</h1>${intro ? `<p>${esc(intro)}</p>` : ""}</div></section>`;
 }
 
 let cache = null;

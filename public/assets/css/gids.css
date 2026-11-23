@@ -74,3 +74,21 @@
   .gd-afstand{position:static;display:block;margin-top:2px}
   .gd-zoekrij input,.gd-form input,.gd-form textarea{font-size:16px}
 }
+
+/* logo en omslagfoto */
+.gd-item.met-logo{padding-left:80px;min-height:84px}
+.gd-logo-klein{position:absolute;left:16px;top:16px;width:48px;height:48px;border-radius:10px;object-fit:contain;background:#fff;border:1px solid var(--sand-2,#e6dfcf)}
+.gd-logo-dummy{display:flex;align-items:center;justify-content:center;background:var(--green,#1e3a2b);color:#fff;border-color:transparent;font-weight:800;letter-spacing:.02em}
+span.gd-logo-klein{font-size:17px}
+.gd-detail-kop{position:relative}
+.gd-logo{display:block;width:104px;height:104px;border-radius:18px;object-fit:contain;background:#fff;border:1px solid var(--sand-2,#e6dfcf);margin:-74px 0 16px;box-shadow:0 4px 14px rgba(0,0,0,.12);position:relative;z-index:2}
+span.gd-logo{font-size:36px}
+.gd-enkel{margin:18px 0}
+.gd-enkel-voorbeeld{display:flex;align-items:center;justify-content:center;background:#fff;border:1px dashed var(--sand-2,#d9cfb8);border-radius:12px;overflow:hidden;margin:8px 0;color:#777;font-size:14px}
+.gd-enkel-voorbeeld.bezig{opacity:.5}
+.gd-enkel-logo{width:120px;height:120px}.gd-enkel-logo img{width:100%;height:100%;object-fit:contain}
+.gd-enkel-omslag{width:100%;max-width:520px;aspect-ratio:16/6}.gd-enkel-omslag img{width:100%;height:100%;object-fit:cover}
+.gd-enkel-knoppen{display:flex;gap:14px;align-items:center}
+@media(max-width:600px){.gd-logo{width:84px;height:84px;margin-top:-60px}span.gd-logo{font-size:28px}}
+.gd-twee-foto{display:flex;gap:28px;flex-wrap:wrap}.gd-twee-foto .gd-enkel{flex:1;min-width:240px;margin:0}
+.gd-logo.gd-logo-dummy,.gd-logo-klein.gd-logo-dummy{display:flex;align-items:center;justify-content:center;font-weight:800;background:var(--green,#1F3B2A);color:#fff;border-color:transparent;font-family:inherit}
