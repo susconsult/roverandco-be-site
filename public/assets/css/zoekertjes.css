@@ -69,3 +69,5 @@
 .gd-foto button+button{margin-left:8px}
 @media(max-width:1000px){.zk-raster{grid-template-columns:repeat(3,minmax(0,1fr))}.zk-detail-grid{grid-template-columns:1fr}}
 @media(max-width:700px){.zk-raster{grid-template-columns:1fr 1fr;gap:10px}.zk-plaats{margin-left:0;width:100%;justify-content:center}.zk-detail{padding-top:96px}.zk-b{padding:10px 12px}.zk-prijs{font-size:16px}}
+.zk-dfoto.groot{aspect-ratio:auto;height:min(70vh,620px);background:var(--white);cursor:zoom-in}
+.zk-dfoto.groot img{object-fit:contain}
