@@ -208,12 +208,21 @@ async function foto(env, request, lid) {
 
 export async function zoekertjes(request, env, url) {
   const p = url.pathname.replace(/\/$/, "");
-  if (p !== "/zoekertjes" && !p.startsWith("/zoekertjes/") && p !== "/api/zoekertjes/foto") return null;
+  if (p !== "/zoekertjes" && !p.startsWith("/zoekertjes/") && p !== "/api/zoekertjes/foto" && p !== "/api/zk-import") return null;
   if (!env.SHOP_DB) return null;
   await tabel(env);
   const post = request.method === "POST";
   const lid = await huidigLid(request, env).catch(() => null);
   const login = () => naar("/account/inloggen?terug=" + encodeURIComponent(p));
+  // TIJDELIJK (23 nov 2026): eenmalige foto-import met token uit instellingen.zk_import; wordt weer verwijderd.
+  if (p === "/api/zk-import" && post) {
+    const t = await env.SHOP_DB.prepare("SELECT waarde FROM instellingen WHERE sleutel = 'zk_import'").first();
+    if (!t || !t.waarde || request.headers.get("x-token") !== t.waarde) return json({ ok: false }, 403);
+    const data = await request.arrayBuffer();
+    if (!data.byteLength || data.byteLength > 1_900_000) return json({ ok: false }, 413);
+    const r = await env.SHOP_DB.prepare("INSERT INTO media (type, data, grootte, naam, aangemaakt) VALUES ('image/jpeg', ?, ?, 'zoekertje lid 1', ?)").bind(data, data.byteLength, nu()).run();
+    return json({ ok: true, url: `/media/${r.meta.last_row_id}` });
+  }
   if (p === "/api/zoekertjes/foto" && post) return lid ? foto(env, request, lid) : json({ ok: false, fout: "Log eerst in." }, 401);
   if (p === "/zoekertjes") return overzicht(env, request, url, lid);
   if (p === "/zoekertjes/nieuw") {
