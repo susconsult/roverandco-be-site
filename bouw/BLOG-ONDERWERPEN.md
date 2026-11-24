@@ -30,7 +30,7 @@ Neem telkens het eerste onderwerp dat nog niet afgevinkt is, in de lijst van die
 ## Onderwerpen Dolf (technisch)
 
 - [x] Remmen van een Series: trommelremmen afstellen en ontluchten
-- [ ] Het koelsysteem van een klassieke Land Rover
+- [x] Het koelsysteem van een klassieke Land Rover
 - [ ] 200Tdi en 300Tdi: de verschillen
 - [ ] De distributieriem van een Tdi
 - [ ] 12 of 24 volt: de elektriciteit van een ex-legerwagen

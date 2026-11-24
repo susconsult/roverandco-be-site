@@ -1,5 +1,12 @@
 [
  {
+  "slug": "koelsysteem-klassieke-land-rover",
+  "titel": "Het koelsysteem van een klassieke Land Rover",
+  "foto": "blog/koelsysteem-klassieke-land-rover",
+  "rubriek": "Onderhoud",
+  "datum": "24 november 2026"
+ },
+ {
   "slug": "camel-trophy",
   "titel": "Camel Trophy: de Olympische Spelen van het modderwerk",
   "foto": "blog/camel-trophy",
@@ -18,13 +25,6 @@
   "titel": "De Pink Panther: waarom het SAS een roze Land Rover reed",
   "foto": "blog/pink-panther-land-rover",
   "rubriek": "Geschiedenis",
-  "datum": "24 november 2026"
- },
- {
-  "slug": "partner-keurslager-van-hoof",
-  "titel": "Partner in de kijker: Keurslager Van Hoof uit Mol",
-  "foto": "blog/partner-keurslager-van-hoof",
-  "rubriek": "Partners",
   "datum": "24 november 2026"
  }
 ]
