@@ -1,9 +1,23 @@
 [
  {
+  "slug": "camel-trophy",
+  "titel": "Camel Trophy: de Olympische Spelen van het modderwerk",
+  "foto": "blog/camel-trophy",
+  "rubriek": "Geschiedenis",
+  "datum": "24 november 2026"
+ },
+ {
   "slug": "partner-hobbyland",
   "titel": "Partner in de kijker: Hobbyland, de doe-het-zelfzaak uit Mol",
   "foto": "blog/partner-hobbyland",
   "rubriek": "Partners",
+  "datum": "24 november 2026"
+ },
+ {
+  "slug": "pink-panther-land-rover",
+  "titel": "De Pink Panther: waarom het SAS een roze Land Rover reed",
+  "foto": "blog/pink-panther-land-rover",
+  "rubriek": "Geschiedenis",
   "datum": "24 november 2026"
  },
  {
@@ -12,19 +26,5 @@
   "foto": "blog/partner-keurslager-van-hoof",
   "rubriek": "Partners",
   "datum": "24 november 2026"
- },
- {
-  "slug": "range-rover-classic-begin",
-  "titel": "De Range Rover Classic: hoe het begon",
-  "foto": "blog/range-rover-classic-begin",
-  "rubriek": "Geschiedenis",
-  "datum": "20 november 2026"
- },
- {
-  "slug": "road-rover-1955",
-  "titel": "De Road Rover: de Rover die er nooit kwam",
-  "foto": "blog/road-rover-1955",
-  "rubriek": "Geschiedenis",
-  "datum": "19 november 2026"
  }
 ]
