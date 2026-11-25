@@ -6,7 +6,7 @@ import { onderhoud } from "./lib/onderhoud.js";
 import { huidigLid, stopBekijkAls } from "./lib/leden.js";
 import { veiligheid } from "./lib/veiligheid.js";
 import { druppel, druppelMaandmail } from "./lib/beheer-versturen.js";
-import { maandmailCron } from "./lib/maandmail.js";
+import { maandmailCron, meting } from "./lib/maandmail.js";
 import { wolfOpvolging } from "./lib/wolf.js";
 
 export default {
@@ -15,6 +15,11 @@ export default {
     if (u.hostname === "www.roverandco.be") {
       u.hostname = "roverandco.be";
       return Response.redirect(u.href, 301);
+    }
+    // Meting maandmail (pixel en kliks): altijd open, ook tijdens onderhoud.
+    if (u.pathname.startsWith("/m/")) {
+      const r = await meting(request, env, u);
+      if (r) return r;
     }
     // "Bekijk als" (vanuit /beheer/leden): alleen lezen, met een balk bovenaan om te stoppen.
     const als = /(?:^|;\s*)rc_als=1/.test(request.headers.get("cookie") || "");

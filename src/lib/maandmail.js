@@ -185,7 +185,67 @@ export async function maandMailVoor(env, rij) {
   const lid = await env.SHOP_DB.prepare("SELECT id, naam, gebruikersnaam, maandmail FROM leden WHERE id = ? AND verwijderd_op IS NULL").bind(rij.lid_id).first();
   if (!lid) throw new Error("lid niet gevonden");
   if (lid.maandmail === 0) throw new Error("afgemeld");
-  return maandMail(lid, editie, { afmeld: await afmeldLink(env, SITE, lid.id) });
+  const afmeld = await afmeldLink(env, SITE, lid.id);
+  return metMeting(env, maandMail(lid, editie, { afmeld }), rij.id, afmeld);
+}
+
+/* ---------- eigen meting: opens (pixel) en kliks (doorverwijzing), alleen in de maandmail ---------- */
+// Elke link wordt /m/k/<wachtrij-id>/<handtekening>?u=<doel>; de handtekening (HMAC) maakt van /m/k geen open doorverwijzer.
+// Opens zijn een schatting: Apple Mail laadt afbeeldingen vooraf, andere mailprogramma's blokkeren ze.
+async function sleutel(env) {
+  return crypto.subtle.importKey("raw", new TextEncoder().encode("maandmail|" + (env.RESEND_API_KEY || "rc")), { name: "HMAC", hash: "SHA-256" }, false, ["sign"]);
+}
+async function teken(env, tekst) {
+  const s = await crypto.subtle.sign("HMAC", await sleutel(env), new TextEncoder().encode(tekst));
+  return [...new Uint8Array(s)].slice(0, 12).map((b) => b.toString(16).padStart(2, "0")).join("");
+}
+async function metMeting(env, m, id, afmeld) {
+  const urls = [...new Set([...m.html.matchAll(/href="(https?:\/\/[^"]+)"/g)].map((x) => x[1].replace(/&amp;/g, "&")))].filter((u) => u !== afmeld);
+  const kaart = {};
+  for (const u of urls) kaart[u] = `${SITE}/m/k/${id}/${await teken(env, id + "|" + u)}?u=${encodeURIComponent(u)}`;
+  m.html = m.html.replace(/href="(https?:\/\/[^"]+)"/g, (h, u) => { const k = kaart[u.replace(/&amp;/g, "&")]; return k ? `href="${esc(k)}"` : h; })
+    .replace("</body>", `<img src="${SITE}/m/o/${id}/${await teken(env, id + "|open")}.gif" width="1" height="1" alt="" style="display:block;border:0;width:1px;height:1px"></body>`);
+  return m;
+}
+const GIF = Uint8Array.from(atob("R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7"), (c) => c.charCodeAt(0));
+let metingKlaar = false;
+async function zorgMeting(env) {
+  if (metingKlaar) return;
+  await env.SHOP_DB.prepare("CREATE TABLE IF NOT EXISTS mail_meting (id INTEGER PRIMARY KEY, wachtrij_id INTEGER NOT NULL, soort TEXT NOT NULL, link TEXT, op TEXT NOT NULL)").run();
+  await env.SHOP_DB.prepare("CREATE INDEX IF NOT EXISTS idx_mail_meting ON mail_meting(wachtrij_id, soort)").run();
+  metingKlaar = true;
+}
+// Route /m/o/<id>/<sig>.gif en /m/k/<id>/<sig>?u=... (in src/worker.ts vóór de onderhoudspoort).
+export async function meting(request, env, url) {
+  const m = url.pathname.match(/^\/m\/(o|k)\/(\d{1,10})\/([0-9a-f]{24})(\.gif)?$/);
+  if (!m) return null;
+  const [, soort, id, sig] = m;
+  const doel = soort === "k" ? url.searchParams.get("u") || "" : "";
+  const geldig = sig === (await teken(env, id + "|" + (soort === "o" ? "open" : doel)));
+  if (geldig) {
+    try {
+      await zorgMeting(env);
+      // Per ontvanger hoogstens 1 open per uur en 1 klik per link per minuut in de tabel (dubbele laadbeurten).
+      const grens = new Date(Date.now() - (soort === "o" ? 3600000 : 60000)).toISOString();
+      const dubbel = await env.SHOP_DB.prepare("SELECT 1 FROM mail_meting WHERE wachtrij_id = ? AND soort = ? AND COALESCE(link, '') = ? AND op > ?").bind(+id, soort === "o" ? "open" : "klik", doel, grens).first();
+      if (!dubbel) await env.SHOP_DB.prepare("INSERT INTO mail_meting (wachtrij_id, soort, link, op) VALUES (?, ?, ?, ?)").bind(+id, soort === "o" ? "open" : "klik", doel || null, new Date().toISOString()).run();
+    } catch {}
+  }
+  if (soort === "o") return new Response(GIF, { headers: { "content-type": "image/gif", "cache-control": "no-store, private" } });
+  return Response.redirect(geldig && /^https?:\/\//.test(doel) ? doel : SITE, 302);
+}
+
+async function cijfers(env, code) {
+  await zorgMeting(env);
+  const db = env.SHOP_DB, pat = code + "-%";
+  const een = async (sql) => (await db.prepare(sql).bind(pat).first())?.n || 0;
+  const verzonden = await een("SELECT COUNT(*) n FROM mail_wachtrij WHERE campagne = 'maandmail' AND sleutel LIKE ? AND status = 'verzonden'");
+  const open = await een("SELECT COUNT(DISTINCT m.wachtrij_id) n FROM mail_meting m JOIN mail_wachtrij w ON w.id = m.wachtrij_id WHERE w.campagne = 'maandmail' AND w.sleutel LIKE ? AND m.soort = 'open'");
+  const klik = await een("SELECT COUNT(DISTINCT m.wachtrij_id) n FROM mail_meting m JOIN mail_wachtrij w ON w.id = m.wachtrij_id WHERE w.campagne = 'maandmail' AND w.sleutel LIKE ? AND m.soort = 'klik'");
+  const kliks = await een("SELECT COUNT(*) n FROM mail_meting m JOIN mail_wachtrij w ON w.id = m.wachtrij_id WHERE w.campagne = 'maandmail' AND w.sleutel LIKE ? AND m.soort = 'klik'");
+  const links = ((await db.prepare(`SELECT m.link, COUNT(*) n, COUNT(DISTINCT m.wachtrij_id) mensen FROM mail_meting m JOIN mail_wachtrij w ON w.id = m.wachtrij_id
+    WHERE w.campagne = 'maandmail' AND w.sleutel LIKE ? AND m.soort = 'klik' GROUP BY m.link ORDER BY n DESC LIMIT 10`).bind(pat).all()).results) || [];
+  return { verzonden, open, klik, kliks, links };
 }
 
 async function stuurTest(env, editie, aan = TESTADRES) {
@@ -212,6 +272,20 @@ export async function maandmailCron(env) {
 const STIJL = `<style>.mm-rij{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:12px 0}.mm-voorbeeld{width:100%;max-width:620px;height:900px;border:1px solid #DED5BF;border-radius:12px;background:#ECE6D6}
 .mm-kaart{background:#fff;border:1px solid #DED5BF;border-radius:12px;padding:16px 18px;margin:0 0 16px;max-width:620px}.mm-kaart textarea{width:100%;min-height:110px;font:inherit;padding:10px;border:1px solid #cfc6b0;border-radius:8px;box-sizing:border-box}
 .mm-cijfers{display:flex;gap:16px;flex-wrap:wrap;margin:8px 0 0;font-size:14px}.mm-cijfers b{font-size:20px;display:block}.mm-ok{background:#E6F2E8;color:#1F3B2A;padding:10px 14px;border-radius:8px}.mm-fout{background:#FBE9E7;color:#8A1F11;padding:10px 14px;border-radius:8px}</style>`;
+
+const pct = (a, b) => (b ? `${Math.round((a / b) * 1000) / 10}%` : "–");
+async function statsHtml(env, code, editie) {
+  const c = await cijfers(env, code);
+  const afgemeld = (await env.SHOP_DB.prepare("SELECT COUNT(*) n FROM lid_log WHERE tekst IN ('Afgemeld voor nieuwsmails', 'Afgemeld voor maandnieuws') AND aangemaakt >= ?").bind(editie.vastgelegd).first().catch(() => null))?.n || 0;
+  const titels = {};
+  const d = editie.data || {};
+  for (const x of [...(d.kal || []), ...(d.zk || []), ...(d.blog || []), ...(d.vuur || []), ...(d.landys || [])]) titels[x.link] = x.titel;
+  const naam = (u) => titels[u] || u.replace(/^https?:\/\/(www\.)?/, "").replace(/^roverandco\.be/, "") || "/";
+  return `<div class="mm-cijfers" style="margin-top:14px"><span><b>${pct(c.open, c.verzonden)}</b>open rate (${c.open})</span><span><b>${pct(c.klik, c.verzonden)}</b>CTR (${c.klik})</span>
+<span><b>${pct(c.klik, c.open)}</b>klik na openen</span><span><b>${c.kliks}</b>kliks totaal</span><span><b>${afgemeld}</b>afgemeld</span></div>
+${c.links.length ? `<table style="width:100%;font-size:14px;margin-top:12px;border-collapse:collapse"><tr><th style="text-align:left">Meest geklikt</th><th>kliks</th><th>mensen</th></tr>${c.links.map((l) => `<tr style="border-top:1px solid #DED5BF"><td style="padding:5px 0">${esc(naam(l.link))}</td><td style="text-align:center">${l.n}</td><td style="text-align:center">${l.mensen}</td></tr>`).join("")}</table>` : ""}
+<p style="font-size:12px;color:#5B625C">Open rate is een schatting: Apple Mail opent mails vooraf (te hoog), andere programma's blokkeren afbeeldingen (te laag). CTR = unieke klikkers / verzonden.</p>`;
+}
 
 export async function beheerMaandmail(request, env, url, email) {
   if (url.pathname !== "/beheer/maandmail") return null;
@@ -254,6 +328,7 @@ export async function beheerMaandmail(request, env, url, email) {
 <div class="mm-kaart">${al
     ? `<b>Maandnieuws van ${esc(ed.maandNaam)}: klaargezet</b> op ${esc(new Date(vorige.vastgelegd).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}.
 <div class="mm-cijfers"><span><b>${telling.verzonden || 0}</b>verzonden</span><span><b>${(telling.wacht || 0) + (telling.bezig || 0)}</b>wachten</span><span><b>${telling.fout || 0}</b>mislukt</span><span><b>${aantal}</b>ontvangers</span></div>
+${await statsHtml(env, e.code, vorige)}
 <p style="font-size:14px;color:#5B625C">De mails vertrekken automatisch via de wachtrij (elk kwartier een paar, tussen 8 en 21 u). Mislukte mails zet je opnieuw klaar op <a href="/beheer/versturen">Versturen</a>.</p>`
     : `<form method="post"><label for="intro"><b>Nieuw op het platform</b> <small>(mag leeg blijven, dan valt het blok weg)</small></label>
 <textarea id="intro" name="intro" maxlength="2000" placeholder="Bijvoorbeeld: Vanaf nu kan je zoekertjes plaatsen.">${esc(ed.intro)}</textarea>
