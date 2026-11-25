@@ -105,9 +105,9 @@ const kalRijen = (items) => `<table role="presentation" width="100%" cellpadding
 // lid = { naam, gebruikersnaam }; editie = { maandNaam, intro, data }
 export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
   const { kal = [], zk = [], vuur = [], landys = [], blog = [] } = editie.data || {};
-  const vn = voornaam(lid.naam) || lid.gebruikersnaam || "";
   const intro = String(editie.intro || "").trim();
-  const titel = `Nieuws van ${editie.maandNaam}`;
+  const titel = "Rover & Co maandoverzicht";
+  const periode = `${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
   const voorkop = [zk.length && "nieuwe zoekertjes", landys.length && "Landy's van leden", kal.length && "wat er op de kalender staat"].filter(Boolean).join(", ") || "Het nieuws van de maand";
 
   const blokken = [
@@ -125,9 +125,8 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ECE6D6"><tr><td align="center" style="padding:24px 10px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden">
 <tr><td align="center" style="background:${GROEN};padding:18px 20px 20px;font-family:${FONT}"><a href="${SITE}"><img src="cid:rc-logo" width="70" height="70" alt="Rover &amp; Co" style="display:block;border:0;width:70px;height:70px;margin:0 auto 10px"></a>
-<div style="font-size:12px;letter-spacing:2px;font-weight:700;color:${LICHTGROEN};text-transform:uppercase">Maandnieuws</div>
-<h1 style="margin:4px 0 6px;font-size:26px;line-height:1.2;color:#ffffff;font-weight:800">${esc(titel)}</h1>
-<div style="font-size:15px;color:#ffffff">${vn ? `Hoi ${esc(vn)}, dit` : "Dit"} gebeurde er op roverandco.be.</div></td></tr>
+<div style="font-size:12px;letter-spacing:2px;font-weight:700;color:${LICHTGROEN};text-transform:uppercase">${esc(periode)}</div>
+<h1 style="margin:4px 0 0;font-size:26px;line-height:1.2;color:#ffffff;font-weight:800">${esc(titel)}</h1></td></tr>
 <tr><td style="padding:26px 24px 4px">${blokken}</td></tr>
 <tr><td align="center" style="background:${GROEN};padding:18px 20px 6px;font-family:${FONT}">
 <a href="https://www.facebook.com/roverandcobe/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Facebook</a>
@@ -138,7 +137,7 @@ ${afmeld ? `Geen maandnieuws meer? <a href="${esc(afmeld)}" style="color:#ffffff
 
   const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
   const tekst = [
-    `${vn ? `Hoi ${vn}, dit` : "Dit"} gebeurde er in ${editie.maandNaam} op roverandco.be.`, "",
+    `Rover & Co maandoverzicht, ${periode}`, "",
     ...(intro ? ["Nieuw op het platform:", intro, ""] : []),
     ...lijst("Op de kalender", kal, SITE + "/kalender"),
     ...lijst("Nieuwste zoekertjes", zk, SITE + "/zoekertjes"),
@@ -151,7 +150,7 @@ ${afmeld ? `Geen maandnieuws meer? <a href="${esc(afmeld)}" style="color:#ffffff
   ].join("\n");
 
   return {
-    onderwerp: `${test ? "[TEST] " : ""}Rover & Co: ${titel.toLowerCase()}`,
+    onderwerp: `${test ? "[TEST] " : ""}Rover & Co maandoverzicht – ${editie.maandNaam}`,
     tekst, html, bijlagen: [],
     headers: afmeld ? { "List-Unsubscribe": `<${afmeld}&klik=1>, <mailto:info@roverandco.be?subject=Afmelden>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined,
   };
@@ -326,14 +325,14 @@ export async function beheerMaandmail(request, env, url, email) {
 
   const inhoud = `<!--aan:maandmail-->${STIJL}${ms}
 <div class="mm-kaart">${al
-    ? `<b>Maandnieuws van ${esc(ed.maandNaam)}: klaargezet</b> op ${esc(new Date(vorige.vastgelegd).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}.
+    ? `<b>Maandoverzicht ${esc(ed.maandNaam)}: klaargezet</b> op ${esc(new Date(vorige.vastgelegd).toLocaleString("nl-BE", { timeZone: "Europe/Brussels" }))}.
 <div class="mm-cijfers"><span><b>${telling.verzonden || 0}</b>verzonden</span><span><b>${(telling.wacht || 0) + (telling.bezig || 0)}</b>wachten</span><span><b>${telling.fout || 0}</b>mislukt</span><span><b>${aantal}</b>ontvangers</span></div>
 ${await statsHtml(env, e.code, vorige)}
 <p style="font-size:14px;color:#5B625C">De mails vertrekken automatisch via de wachtrij (elk kwartier een paar, tussen 8 en 21 u). Mislukte mails zet je opnieuw klaar op <a href="/beheer/versturen">Versturen</a>.</p>`
     : `<form method="post"><label for="intro"><b>Nieuw op het platform</b> <small>(mag leeg blijven, dan valt het blok weg)</small></label>
 <textarea id="intro" name="intro" maxlength="2000" placeholder="Bijvoorbeeld: Vanaf nu kan je zoekertjes plaatsen.">${esc(ed.intro)}</textarea>
 <div class="mm-rij"><button class="btn" name="actie" value="bewaar">Bewaren</button><button class="btn" name="actie" value="test">Testmail naar mij</button>
-<button class="btn btn-solid" name="actie" value="versturen" onclick="return confirm('Maandnieuws van ${esc(ed.maandNaam)} versturen naar ${aantal} leden?')">Versturen naar ${aantal} leden</button></div>
+<button class="btn btn-solid" name="actie" value="versturen" onclick="return confirm('Maandoverzicht ${esc(ed.maandNaam)} versturen naar ${aantal} leden?')">Versturen naar ${aantal} leden</button></div>
 <p style="font-size:14px;color:#5B625C;margin:0">Gaat naar alle actieve accounts, behalve wie zich afmeldde. Op de 1ste van elke maand krijg je automatisch een testmail op ${TESTADRES}.</p></form>`}</div>
 <iframe class="mm-voorbeeld" title="Voorbeeld van de maandmail" sandbox srcdoc="${esc(voorbeeld)}"></iframe>`;
   return pagina(`Maandmail`, inhoud, email);
