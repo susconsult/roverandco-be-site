@@ -21,7 +21,9 @@ const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli",
 // dus de foto moet vooraf op maat zijn. Het bijsnijden gebeurt in de browser op /beheer/maandmail (canvas), niet in de Worker:
 // dat kost te veel rekentijd voor een Worker. Zolang een foto niet bijgesneden is, toont de mail het origineel.
 const MAAT = { tegel: [600, 450], klein: [128, 128], hero: [1280, 640], kaart: [1200, 600] };
-const fotoSleutel = (pad, soort) => `${soort}-${MAAT[soort].join("x")}:${pad}`;
+// VERSIE ophogen als de bewerking van een soort verandert (bv. donkerder filter), dan wordt alles opnieuw bijgesneden.
+const VERSIE = { hero: 2 };
+const fotoSleutel = (pad, soort) => `${soort}-${MAAT[soort].join("x")}${VERSIE[soort] ? "-v" + VERSIE[soort] : ""}:${pad}`;
 const BREED = 640;
 const origineel = (pad) => (!pad ? "" : /^https?:/.test(pad) ? pad : SITE + pad);
 let fotoKlaar = false;
@@ -422,7 +424,7 @@ ${!al && ed.ontbreekt?.length ? `<p id="mm-fotos" class="mm-ok">Foto's bijsnijde
 <script>(function(){var lijst=JSON.parse(document.getElementById("mm-nodig").textContent),klaar=0,mis=0,m=document.getElementById("mm-fotos");
 function een(n){return new Promise(function(ok){var i=new Image();i.onload=function(){var r=n.b/n.h,w=i.naturalWidth,h=i.naturalHeight,cw=w,ch=w/r;if(ch>h){ch=h;cw=h*r}
 var c=document.createElement("canvas");c.width=n.b;c.height=n.h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,n.b,n.h);x.imageSmoothingQuality="high";
-x.drawImage(i,(w-cw)/2,(h-ch)/2,cw,ch,0,0,n.b,n.h);if(n.soort==="hero"){var g=x.createLinearGradient(0,0,0,n.h);g.addColorStop(0,"rgba(20,30,22,.55)");g.addColorStop(1,"rgba(20,30,22,.35)");x.fillStyle=g;x.fillRect(0,0,n.b,n.h)}c.toBlob(function(b){fetch("/beheer/maandmail/foto?pad="+encodeURIComponent(n.pad)+"&soort="+n.soort,{method:"POST",body:b,credentials:"same-origin"}).then(function(r){r.ok?klaar++:mis++;ok()}).catch(function(){mis++;ok()})},"image/jpeg",0.82)};
+x.drawImage(i,(w-cw)/2,(h-ch)/2,cw,ch,0,0,n.b,n.h);if(n.soort==="hero"){var g=x.createLinearGradient(0,0,0,n.h);g.addColorStop(0,"rgba(15,24,17,.75)");g.addColorStop(1,"rgba(15,24,17,.6)");x.fillStyle=g;x.fillRect(0,0,n.b,n.h)}c.toBlob(function(b){fetch("/beheer/maandmail/foto?pad="+encodeURIComponent(n.pad)+"&soort="+n.soort,{method:"POST",body:b,credentials:"same-origin"}).then(function(r){r.ok?klaar++:mis++;ok()}).catch(function(){mis++;ok()})},"image/jpeg",0.82)};
 i.onerror=function(){mis++;ok()};i.src=n.pad})}
 lijst.reduce(function(p,n){return p.then(function(){return een(n)})},Promise.resolve()).then(function(){if(klaar&&!mis)location.reload();else m.textContent=klaar+" foto's bijgesneden, "+mis+" mislukt.";});})();</script>` : ""}`;
   return pagina(`Maandmail`, inhoud, email);
