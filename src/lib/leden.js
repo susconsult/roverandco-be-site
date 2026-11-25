@@ -16,6 +16,7 @@ import { log } from "./log.js";
 import { anonimiseer } from "./anoniem.js";
 import { aantalOngelezen, garageKaarten } from "./forum-extra.js";
 import { ticketPdf } from "./ticket.js";
+import { zorgKolom } from "./maandmail.js";
 
 const COOKIE = "rc_lid";
 const SESSIE_DAGEN = 90;
@@ -142,7 +143,8 @@ async function afmelden(request, env, url) {
   if (!lid) return pagina(env, request, { titel: "Link verlopen", noindex: true, status: 400,
     inhoud: banner("Nieuwsmails", "Link verlopen") + kader(`<p>Deze afmeldlink werkt niet meer. Log in en zet de nieuwsmails uit bij je gegevens, of mail naar <a href="mailto:info@roverandco.be">info@roverandco.be</a>.</p>`) });
   if (request.method === "POST") {
-    await env.SHOP_DB.prepare("UPDATE leden SET marketing = 0 WHERE id = ?").bind(lid.id).run();
+    await zorgKolom(env);
+    await env.SHOP_DB.prepare("UPDATE leden SET marketing = 0, maandmail = 0 WHERE id = ?").bind(lid.id).run();
     await log(env, lid.id, "account", "Afgemeld voor nieuwsmails");
     if (url.searchParams.has("klik") || !(request.headers.get("content-type") || "").includes("form")) return new Response("Afgemeld.", { status: 200 });
     return pagina(env, request, { titel: "Afgemeld", noindex: true,
@@ -514,6 +516,7 @@ async function gegevens(request, env, url, lid) {
         <div class="veld2">${veld("postcode", "Postcode", { waarde: w.postcode, auto: "postal-code" })}${veld("gemeente", "Gemeente", { waarde: w.gemeente || w.woonplaats, auto: "address-level2" })}</div>
         <p>Je Land Rovers zet je bij <a href="/account/garage">Mijn Landy</a>.</p>
         <div class="veld"><label>Profielfoto</label><div class="avatar-kies">${avatar(w, 64)}<input type="file" accept="image/*" data-avatar><input type="hidden" name="avatar_id" value="${esc(w.avatar_id || "")}"></div><small class="hulp">Bijvoorbeeld een foto van je Land Rover.</small></div>
+        <label class="vink"><input type="checkbox" name="maandmail" value="1"${w.maandmail === 0 ? "" : " checked"}><span>Stuur me het maandnieuws van Rover &amp; Co</span></label>
         <p>E-mailadres: <b>${esc(lid.email)}</b> <small>(wijzigen? Mail naar info@roverandco.be)</small></p>
         <button class="btn btn-solid" type="submit">Bewaren</button> <a class="btn" href="/account">Annuleren</a>
       </form><p class="acc-links"><a href="/account/nieuw-wachtwoord">Wachtwoord wijzigen</a> · <a href="/account/mijn-gegevens.json" download>Download al mijn gegevens</a> · <a href="/account/verwijderen">Account verwijderen</a></p><script src="/assets/js/forum.js" defer></script>`),
@@ -522,12 +525,18 @@ async function gegevens(request, env, url, lid) {
   const f = await request.formData();
   const w = { gebruikersnaam: tekst(f.get("gebruikersnaam"), 20), naam: tekst(f.get("naam"), 120), telefoon: tekst(f.get("telefoon"), 40), straat: tekst(f.get("straat"), 120), postcode: tekst(f.get("postcode"), 10), gemeente: tekst(f.get("gemeente"), 80), landrover: lid.landrover, avatar_id: parseInt(f.get("avatar_id"), 10) || null };
   w.woonplaats = w.gemeente;
+  w.maandmail = f.get("maandmail") ? 1 : 0;
   if (!naamOk(w.gebruikersnaam)) return toon("Kies een gebruikersnaam van 3 tot 20 tekens: letters, cijfers, punt, streepje of underscore.", { ...lid, ...w });
   if (await env.SHOP_DB.prepare("SELECT 1 FROM leden WHERE gebruikersnaam = ? AND id <> ?").bind(w.gebruikersnaam, lid.id).first()) return toon("Die gebruikersnaam is al bezet.", { ...lid, ...w });
   if (w.avatar_id && !(await env.SHOP_DB.prepare("SELECT 1 FROM forum_fotos WHERE id = ? AND lid_id = ?").bind(w.avatar_id, lid.id).first())) w.avatar_id = lid.avatar_id;
   await env.SHOP_DB.prepare("UPDATE leden SET gebruikersnaam = ?, naam = ?, telefoon = ?, woonplaats = ?, straat = ?, postcode = ?, gemeente = ?, landrover = ?, avatar_id = ? WHERE id = ?")
     .bind(w.gebruikersnaam, w.naam || null, w.telefoon || null, w.woonplaats || null, w.straat || null, w.postcode || null, w.gemeente || null, w.landrover || null, w.avatar_id, lid.id).run();
   await log(env, lid.id, "profiel", w.gebruikersnaam !== lid.gebruikersnaam ? `Gegevens gewijzigd (gebruikersnaam ${lid.gebruikersnaam || "-"} → ${w.gebruikersnaam})` : w.avatar_id !== lid.avatar_id ? "Gegevens en profielfoto gewijzigd" : "Gegevens gewijzigd");
+  await zorgKolom(env);
+  if (w.maandmail !== (lid.maandmail === 0 ? 0 : 1)) {
+    await env.SHOP_DB.prepare("UPDATE leden SET maandmail = ? WHERE id = ?").bind(w.maandmail, lid.id).run();
+    await log(env, lid.id, "account", w.maandmail ? "Maandnieuws aangezet" : "Afgemeld voor maandnieuws");
+  }
   return naar("/account?opgeslagen=1");
 }
 

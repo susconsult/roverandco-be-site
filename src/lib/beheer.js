@@ -8,6 +8,7 @@ import { beheerAanbod } from "./beheer-aanbod.js";
 import { beheerGids } from "./beheer-gids.js";
 import { beheerTestmail } from "./beheer-testmail.js";
 import { beheerVersturen } from "./beheer-versturen.js";
+import { beheerMaandmail } from "./maandmail.js";
 import { zetOnderhoud } from "./onderhoud.js";
 import { beheerLeden, hoofdTabs, thuis } from "./beheer-leden.js";
 import { naarWolf, wolfInfo, zetWolf } from "./wolf.js";
@@ -163,7 +164,7 @@ html{touch-action:pan-x pan-y}`;
 const MENU = [
   ["", [["home", "Overzicht", "/beheer", "home"]]],
   ["Verkoop", [["bestelling", "Bestellingen", "/beheer?soort=bestelling", "zak", "bestellingen"], ["inschrijving", "Inschrijvingen", "/beheer?soort=inschrijving", "ticket", "inschrijvingen"], ["scan", "Scan (tickets)", "/scan", "ticket"]]],
-  ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"]]],
+  ["Community", [["leden", "Leden", "/beheer/leden", "leden", "leden"], ["meldingen", "Meldingen", "/beheer/meldingen", "vlag", "meldingen"], ["log", "Log", "/beheer/log", "lijst"], ["maandmail", "Maandmail", "/beheer/maandmail", "mail"]]],
   ["Aanbod", [["p", "Producten", "/beheer/producten", "shirt"], ["a", "Activiteiten", "/beheer/activiteiten", "kalender"], ["g", "Gids", "/beheer/gids", "pin", "gids"]]],
 ];
 const I = {
@@ -175,6 +176,7 @@ const I = {
   vlag: '<path d="M5 21V4"/><path d="M5 4h12l-2 4 2 4H5"/>',
   lijst: '<path d="M9 6h11M9 12h11M9 18h11"/><circle cx="4.5" cy="6" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="18" r="1"/>',
   shirt: '<path d="M8 4l-5 3 2 4 3-1v10h8V10l3 1 2-4-5-3c0 2-2 3-4 3S8 6 8 4Z"/>',
+  mail: '<rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/>',
   kalender: '<rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/>',
 };
 export const icoon = (n) => `<svg viewBox="0 0 24 24" aria-hidden="true">${I[n] || ""}</svg>`;
@@ -403,6 +405,8 @@ export async function beheer(request, env, url) {
   if (tm) return tm;
   const vs = await beheerVersturen(request, env, url, w.email);
   if (vs) return vs;
+  const mm = await beheerMaandmail(request, env, url, w.email);
+  if (mm) return mm;
   if (p === "/beheer/export.csv") return exporteer(url, env);
   const m = p.match(/^\/beheer\/r\/([A-Z]{2}-[A-Z0-9]{4,12}(?:-[A-Z0-9]{1,6})?)$/);
   if (m) return request.method === "POST" ? bewaar(request, m[1], env, w.email) : detail(m[1], env, w.email);

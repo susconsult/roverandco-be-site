@@ -8,6 +8,7 @@ import { corTicketMail, aankondigingMail } from "./mails-lancering.js";
 import { wachtwoordLink, afmeldLink } from "./leden.js";
 import { onderhoudAan } from "./onderhoud.js";
 import KALENDER from "../../data/kalender.json";
+import { maandMailVoor } from "./maandmail.js";
 
 // Kort mailtje aan organisatoren van wie we activiteiten in de kalender zetten (tekst goedgekeurd door Pieter 20 nov 2026).
 // mail_wachtrij: sleutel = waarde van "org" in data/kalender.json, naam = aanspreking.
@@ -38,6 +39,7 @@ const CAMPAGNES = {
   "cor-ticket": { titel: "Ticket Church of Rover", uitleg: "Voor iedereen die zich via de vorige webshop inschreef. Met QR-code en PDF-ticket. Vóór zondag versturen." },
   "aankondiging": { titel: "Aankondiging nieuwe site", uitleg: "Voor alle klanten uit de vorige webshop. Liefst in een paar rondes, niet alles tegelijk." },
   "kalender": { titel: "Organisatoren kalender", uitleg: "Kort mailtje aan clubs van wie we activiteiten in de kalender zetten. Van info@roverandco.be." },
+  "maandmail": { titel: "Maandnieuws", uitleg: "Maandelijkse nieuwsmail voor alle leden. Klaarzetten op /beheer/maandmail; vertrekt automatisch tussen 8 en 21 u." },
   "los": { titel: "Losse mails", uitleg: "Losse mails van info@roverandco.be, tekst vooraf goedgekeurd door Pieter." },
 };
 
@@ -65,10 +67,12 @@ const SITE = "https://roverandco.be";
 const wacht = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function bouw(env, campagne, rij) {
+  if (campagne === "maandmail") return maandMailVoor(env, rij);
   const lid = rij.lid_id ? await env.SHOP_DB.prepare("SELECT * FROM leden WHERE id = ?").bind(rij.lid_id).first() : null;
   const ww = lid && !lid.wachtwoord ? await wachtwoordLink(env, SITE, lid.id, { behoud: true }) : "";
   if (campagne === "kalender") return kalenderMail(rij);
   if (campagne === "los") return losMail(rij);
+  if (campagne === "maandmail") return maandMailVoor(env, rij);
   if (campagne === "cor-ticket") {
     const r = await env.SHOP_DB.prepare("SELECT nummer, naam, email, totaal, data FROM registraties WHERE nummer = ?").bind(rij.sleutel).first();
     if (!r) throw new Error("inschrijving niet gevonden");
@@ -117,6 +121,12 @@ export async function druppel(env) {
   await verstuurRonde(env, "los", "automatisch");
   const u = uurBrussel();
   if (u >= 8 && u < 21) await verstuurRonde(env, "aankondiging", "automatisch");
+}
+// Maandnieuws: altijd druppelsgewijs (ook als de knop voor de overstapmails uit staat), alleen 8–21 u.
+export async function druppelMaandmail(env) {
+  if (await onderhoudAan(env)) return;
+  const u = uurBrussel();
+  if (u >= 8 && u < 21) await verstuurRonde(env, "maandmail", "automatisch");
 }
 
 export async function beheerVersturen(request, env, url, email) {

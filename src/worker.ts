@@ -5,7 +5,8 @@ import { handle } from "@astrojs/cloudflare/handler";
 import { onderhoud } from "./lib/onderhoud.js";
 import { huidigLid, stopBekijkAls } from "./lib/leden.js";
 import { veiligheid } from "./lib/veiligheid.js";
-import { druppel } from "./lib/beheer-versturen.js";
+import { druppel, druppelMaandmail } from "./lib/beheer-versturen.js";
+import { maandmailCron } from "./lib/maandmail.js";
 import { wolfOpvolging } from "./lib/wolf.js";
 
 export default {
@@ -43,6 +44,8 @@ export default {
   // Cron Trigger (wrangler.jsonc, elk kwartier): overstapmails druppelsgewijs versturen + Wolf-bestellingen opvolgen.
   async scheduled(_event: any, env: any, ctx: any) {
     ctx.waitUntil(druppel(env));
+    ctx.waitUntil(druppelMaandmail(env).catch((e: any) => console.log("maandmail", String(e))));
+    ctx.waitUntil(maandmailCron(env).catch((e: any) => console.log("maandmailCron", String(e))));
     ctx.waitUntil(wolfOpvolging(env).catch((e: any) => console.log("wolfOpvolging", String(e))));
   },
 };
