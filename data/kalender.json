@@ -171,6 +171,17 @@
   "soort": "club"
  },
  {
+  "club": "RoadtripME",
+  "soort": "4x4",
+  "titel": "RoadtripME afsluiter 2026",
+  "datum": "2026-12-19",
+  "einde": "2026-12-20",
+  "plaats": "Plaats volgt",
+  "link": "https://www.roadtripme.be/events",
+  "org": "RoadtripME",
+  "info": "Het jaar afsluiten aan het kampvuur, met koffie."
+ },
+ {
   "club": "Xrover Belgium",
   "titel": "Kerstroadbook",
   "datum": "2026-12-26",
@@ -343,6 +354,17 @@
   "link": "https://rangerovertrust.nl/evenementen/",
   "org": "Vereniging Range Rover Trust Nederland",
   "info": "Kampeerweek van de Range Rover Trust. Info en inschrijving via hun agenda."
+ },
+ {
+  "club": "RoadtripME",
+  "soort": "4x4",
+  "titel": "RoadtripME Offroad Festival 2027",
+  "datum": "2027-06-04",
+  "einde": "2027-06-06",
+  "plaats": "Plaats volgt",
+  "link": "https://www.roadtripme.be/events",
+  "org": "RoadtripME",
+  "info": "Drie dagen offroad, avontuur en modder. De editie van 2026 telde meer dan 100 wagens."
  },
  {
   "club": "LRCH",
