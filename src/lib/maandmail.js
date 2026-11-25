@@ -248,7 +248,7 @@ async function cijfers(env, code) {
   return { verzonden, open, klik, kliks, links };
 }
 
-async function stuurTest(env, editie, aan = TESTADRES) {
+export async function stuurTest(env, editie, aan = TESTADRES) {
   const m = maandMail({ naam: "Pieter" }, editie, { afmeld: `${SITE}/account/afmelden?t=test`, test: true });
   m.html = m.html.replace(`<tr><td style="padding:26px 24px 4px">`, `<tr><td style="background:#FFF4D6;padding:12px 24px;font-family:${FONT};font-size:14px;color:${INKT}"><b>Testmail.</b> Pas aan en verstuur op <a href="${SITE}/beheer/maandmail" style="color:${GROEN3};font-weight:700">roverandco.be/beheer/maandmail</a>. Er gaat niets naar de leden zolang jij niet op Versturen klikt.</td></tr><tr><td style="padding:26px 24px 4px">`);
   m.tekst = `TESTMAIL. Pas aan en verstuur op ${SITE}/beheer/maandmail\n\n` + m.tekst;
