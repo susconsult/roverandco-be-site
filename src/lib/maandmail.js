@@ -158,7 +158,10 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
   const periode = `${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
   const voorkop = [zk.length && "nieuwe zoekertjes", landys.length && "Landy's van leden", kal.length && "wat er op de kalender staat"].filter(Boolean).join(", ") || "Het nieuws van de maand";
 
+  const vn = voornaam(lid.naam) || lid.gebruikersnaam || "";
+  const groet = `Hallo${vn ? " " + vn : ""},`;
   const blokken = [
+    `<div style="font-family:${FONT};font-size:18px;font-weight:700;color:${INKT};margin:0 0 20px">${esc(groet)}</div>`,
     intro && `${kopje("Nieuw op het platform")}<div style="background:${ZACHT};border-radius:12px;padding:16px 18px;margin:0 0 24px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INKT}">${intro.split(/\n{2,}/).map((a) => `<p style="margin:0 0 8px">${esc(a).replace(/\n/g, "<br>")}</p>`).join("")}</div>`,
     volgende && `${kopje("Eerstvolgende activiteit")}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${ZAND2};border-radius:12px;overflow:hidden;margin:0 0 24px">
 ${volgende.mini ? `<tr><td style="padding:0"><a href="${esc(volgende.link)}"><img src="${esc(volgende.mini)}" width="${BREED - 50}" alt="${esc(volgende.titel)}" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
@@ -196,7 +199,7 @@ ${afmeld ? `Geen maandoverzicht meer? <a href="${esc(afmeld)}" style="color:#fff
 
   const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum}${x.org ? `, organisator: ${x.org}` : ""})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
   const tekst = [
-    `Rover & Co maandoverzicht, ${periode}`, "",
+    groet, "", `Rover & Co maandoverzicht, ${periode}`, "",
     ...(intro ? ["Nieuw op het platform:", intro, ""] : []),
     ...lijst("Op de kalender", kal, SITE + "/kalender"),
     ...lijst("Nieuwste zoekertjes", zk, SITE + "/zoekertjes"),
