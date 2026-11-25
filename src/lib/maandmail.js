@@ -7,7 +7,8 @@
 import { esc } from "./mail.js";
 import { verstuur } from "./mail.js";
 import { pagina } from "./beheer.js";
-import { komendeKalender } from "./aanbod.js";
+import { komendeKalender, activiteit, inschrijvingOpen } from "./aanbod.js";
+import BANNERS from "../../data/banners.json";
 import { afmeldLink } from "./leden.js";
 import BLOG from "../../data/blog-nieuws.json";
 
@@ -19,8 +20,9 @@ const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli",
 // Foto's in de mail: netjes bijgesneden JPG's (tabel mail_foto). Mailprogramma's kennen geen object-fit en Outlook geen WebP,
 // dus de foto moet vooraf op maat zijn. Het bijsnijden gebeurt in de browser op /beheer/maandmail (canvas), niet in de Worker:
 // dat kost te veel rekentijd voor een Worker. Zolang een foto niet bijgesneden is, toont de mail het origineel.
-const MAAT = { tegel: [480, 360], klein: [128, 128] };
-const fotoSleutel = (pad, soort) => `${soort}:${pad}`;
+const MAAT = { tegel: [600, 450], klein: [128, 128], hero: [1280, 560], kaart: [1200, 600] };
+const fotoSleutel = (pad, soort) => `${soort}-${MAAT[soort].join("x")}:${pad}`;
+const BREED = 640;
 const origineel = (pad) => (!pad ? "" : /^https?:/.test(pad) ? pad : SITE + pad);
 let fotoKlaar = false;
 async function zorgFotoTabel(env) {
@@ -32,7 +34,10 @@ async function zorgFotoTabel(env) {
 export async function vulFotos(env, data) {
   await zorgFotoTabel(env);
   const nodig = [];
-  for (const [blok, soort] of [["zk", "tegel"], ["landys", "tegel"], ["blog", "klein"]]) for (const x of data[blok] || []) if (x.foto && !/^https?:/.test(x.foto)) nodig.push({ x, soort, sleutel: fotoSleutel(x.foto, soort) });
+  const lijsten = [["zk", "tegel"], ["landys", "tegel"], ["blog", "klein"]].map(([b, s]) => [data[b] || [], s]);
+  if (data.hero) lijsten.push([[data.hero], "hero"]);
+  if (data.volgende) lijsten.push([[data.volgende], "kaart"]);
+  for (const [items, soort] of lijsten) for (const x of items) if (x.foto && !/^https?:/.test(x.foto)) nodig.push({ x, soort, sleutel: fotoSleutel(x.foto, soort) });
   if (!nodig.length) return [];
   const rijen = ((await env.SHOP_DB.prepare(`SELECT id, sleutel FROM mail_foto WHERE sleutel IN (${nodig.map(() => "?").join(",")})`).bind(...nodig.map((n) => n.sleutel)).all()).results) || [];
   const ids = Object.fromEntries(rijen.map((r) => [r.sleutel, r.id]));
@@ -76,7 +81,19 @@ export async function verzamel(env, sinds) {
   const db = env.SHOP_DB;
   const q = async (sql, ...b) => ((await db.prepare(sql).bind(...b).all().catch(() => ({ results: [] }))).results || []);
 
-  const kal = (await komendeKalender(env, 60).catch(() => [])).slice(0, 6).map((k) => ({
+  // Eerstvolgende activiteit van Rover & Co als grote kaart (met foto en inschrijfknop); de rest van de kalender compact eronder.
+  const alleKal = await komendeKalender(env, 120).catch(() => []);
+  const eerst = alleKal.find((k) => k.ons && k.slug);
+  let volgende = null;
+  if (eerst) {
+    const a = await activiteit(env, eerst.slug).catch(() => null);
+    if (a) {
+      const f = a.foto ? (String(a.foto).startsWith("/") ? a.foto : `/assets/img/${a.foto}.webp`) : "";
+      volgende = { titel: a.titel, datum: a.datum_label || datumKort(a.datum), plaats: a.locatie || "", kort: a.kort || "", foto: f,
+        link: a.extern_url || `${SITE}/activiteiten/${a.slug}`, knop: inschrijvingOpen(a) || a.inschrijven_url ? "Schrijf je in" : "Meer info" };
+    }
+  }
+  const kal = alleKal.filter((k) => !(volgende && k.slug === eerst.slug) && k.datum <= new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10)).slice(0, 5).map((k) => ({
     titel: k.titel, datum: k.einde && k.einde !== k.datum ? `${datumKort(k.datum)} – ${datumKort(k.einde)}` : datumKort(k.datum),
     plaats: String(k.plaats || "").split(" · ")[0], ons: !!k.ons, org: k.ons ? "Rover & Co" : (k.club || k.org || ""), link: /^https?:/.test(k.link || "") ? k.link : SITE + (k.link || "/kalender"),
   }));
@@ -102,7 +119,7 @@ export async function verzamel(env, sinds) {
   // Blog: de 4 nieuwste artikels (data/blog-nieuws.json, gemaakt door bouw/build.py).
   const blog = BLOG.slice(0, 4).map((b) => ({ titel: b.titel, sub: `${b.rubriek} · ${b.datum}`, foto: b.foto ? `/assets/img/${b.foto}-s.webp` : "", link: `${SITE}/blog/${b.slug}` }));
 
-  return { kal, zk, vuur, landys, blog };
+  return { volgende, kal, zk, vuur, landys, blog };
 }
 
 /* ---------- de mail ---------- */
@@ -113,8 +130,8 @@ const meer = (t, href) => `<div style="text-align:right;margin:2px 0 24px"><a hr
 // 2 x 2 kleine tegels (zoekertjes, Landy's), elke foto bijgesneden tot 4:3.
 function tegels(items) {
   const cel = (x) => !x ? `<td width="50%" style="padding:5px"></td>` : `<td width="50%" valign="top" style="padding:5px">
-<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.mini ? `<img src="${esc(x.mini)}" width="240" height="180" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
-    : x.foto ? `<img src="${esc(origineel(x.foto))}" width="240" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
+<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.mini ? `<img src="${esc(x.mini)}" width="290" height="218" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:290px;height:auto;border-radius:8px;background:${ZACHT}">`
+    : x.foto ? `<img src="${esc(origineel(x.foto))}" width="290" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:290px;height:auto;border-radius:8px;background:${ZACHT}">`
     : `<div style="background:${ZACHT};border-radius:8px;padding:30px 8px;text-align:center;font-family:${FONT};font-size:12px;color:${GRIJS}">Geen foto</div>`}
 <div style="font-family:${FONT};font-size:14px;font-weight:700;line-height:1.3;color:${INKT};margin:6px 0 1px">${esc(x.titel)}</div>
 <div style="font-family:${FONT};font-size:12px;color:${GROEN3}">${esc(x.sub)}</div></a></td>`;
@@ -133,7 +150,7 @@ ${k.org ? `<div style="font-size:13px;color:${GROEN3};margin-top:2px">Organisato
 
 // lid = { naam, gebruikersnaam }; editie = { maandNaam, intro, data }
 export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
-  const { kal = [], zk = [], vuur = [], landys = [], blog = [] } = editie.data || {};
+  const { hero = null, volgende = null, kal = [], zk = [], vuur = [], landys = [], blog = [] } = editie.data || {};
   const intro = String(editie.intro || "").trim();
   const titel = "Rover & Co maandoverzicht";
   const periode = `${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
@@ -141,7 +158,13 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
 
   const blokken = [
     intro && `${kopje("Nieuw op het platform")}<div style="background:${ZACHT};border-radius:12px;padding:16px 18px;margin:0 0 24px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INKT}">${intro.split(/\n{2,}/).map((a) => `<p style="margin:0 0 8px">${esc(a).replace(/\n/g, "<br>")}</p>`).join("")}</div>`,
-    kal.length && `${kopje("Op de kalender")}${kalRijen(kal)}${meer("Hele kalender", SITE + "/kalender")}`,
+    volgende && `${kopje("Eerstvolgende activiteit")}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${ZAND2};border-radius:12px;overflow:hidden;margin:0 0 24px">
+${volgende.mini ? `<tr><td style="padding:0"><a href="${esc(volgende.link)}"><img src="${esc(volgende.mini)}" width="${BREED - 50}" alt="${esc(volgende.titel)}" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
+<tr><td style="padding:16px 18px 18px;font-family:${FONT}"><div style="font-size:13px;font-weight:700;color:${GROEN3};margin-bottom:2px">${esc(volgende.datum)}${volgende.plaats ? " &middot; " + esc(volgende.plaats) : ""}</div>
+<a href="${esc(volgende.link)}" style="font-size:21px;line-height:1.25;font-weight:800;color:${INKT};text-decoration:none">${esc(volgende.titel)}</a>
+${volgende.kort ? `<div style="font-size:15px;line-height:1.55;color:${GRIJS};margin:8px 0 0">${esc(volgende.kort)}</div>` : ""}
+<a href="${esc(volgende.link)}" style="display:inline-block;margin-top:14px;padding:11px 20px;background:${GROEN};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px">${esc(volgende.knop)}</a></td></tr></table>`,
+    kal.length && `${kopje(volgende ? "Ook op de kalender" : "Op de kalender")}${kalRijen(kal)}${meer("Hele kalender", SITE + "/kalender")}`,
     zk.length && `${kopje("Nieuwste zoekertjes")}${tegels(zk)}${meer("Alle zoekertjes", SITE + "/zoekertjes")}`,
     blog.length && `${kopje("Op de blog")}${rijen(blog, true)}${meer("Alle artikels", SITE + "/blog")}`,
     vuur.length && `${kopje("Rond het Kampvuur")}${rijen(vuur)}${meer("Naar het Kampvuur", SITE + "/forum")}`,
@@ -157,10 +180,11 @@ ${meer("Alle Landy's", SITE + "/landys")}`,
 <body style="margin:0;padding:0;background:#ECE6D6">
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ECE6D6">${esc(voorkop[0].toUpperCase() + voorkop.slice(1))}.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ECE6D6"><tr><td align="center" style="padding:24px 10px">
-<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:560px;background:#ffffff;border-radius:14px;overflow:hidden">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:${BREED}px;background:#ffffff;border-radius:14px;overflow:hidden">
 <tr><td align="center" style="background:${GROEN};padding:18px 20px 20px;font-family:${FONT}"><a href="${SITE}"><img src="cid:rc-logo" width="70" height="70" alt="Rover &amp; Co" style="display:block;border:0;width:70px;height:70px;margin:0 auto 10px"></a>
 <div style="font-size:12px;letter-spacing:2px;font-weight:700;color:${LICHTGROEN};text-transform:uppercase">${esc(periode)}</div>
 <h1 style="margin:4px 0 0;font-size:26px;line-height:1.2;color:#ffffff;font-weight:800">${esc(titel)}</h1></td></tr>
+${hero?.mini ? `<tr><td style="padding:0;background:${GROEN}"><a href="${SITE}"><img src="${esc(hero.mini)}" width="${BREED}" alt="Land Rovers van Rover &amp; Co" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
 <tr><td style="padding:26px 24px 4px">${blokken}</td></tr>
 <tr><td align="center" style="background:${GROEN};padding:18px 20px 6px;font-family:${FONT}">
 <a href="https://www.facebook.com/roverandcobe/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Facebook</a>
@@ -203,6 +227,8 @@ export async function concept(env) {
   const vorige = await vorigeVerzending(env);
   const sinds = vorige?.code !== e.code && vorige?.vastgelegd ? vorige.vastgelegd : new Date(Date.now() - 31 * 86400000).toISOString();
   const data = await verzamel(env, sinds);
+  // Sfeerfoto bovenaan: elke maand een andere uit de bannerfoto's van de site (vast per editie).
+  data.hero = { foto: `/assets/img/${BANNERS[[...e.code].reduce((t, c) => t + c.charCodeAt(0), 0) % BANNERS.length]}.webp` };
   const ontbreekt = await vulFotos(env, data);
   return { ...e, intro: (await instelling(env, "maandmail_intro")) || "", data, ontbreekt };
 }
