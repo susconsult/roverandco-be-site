@@ -20,7 +20,7 @@ const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli",
 // Foto's in de mail: netjes bijgesneden JPG's (tabel mail_foto). Mailprogramma's kennen geen object-fit en Outlook geen WebP,
 // dus de foto moet vooraf op maat zijn. Het bijsnijden gebeurt in de browser op /beheer/maandmail (canvas), niet in de Worker:
 // dat kost te veel rekentijd voor een Worker. Zolang een foto niet bijgesneden is, toont de mail het origineel.
-const MAAT = { tegel: [600, 450], klein: [128, 128], hero: [1280, 560], kaart: [1200, 600] };
+const MAAT = { tegel: [600, 450], klein: [128, 128], hero: [1280, 640], kaart: [1200, 600] };
 const fotoSleutel = (pad, soort) => `${soort}-${MAAT[soort].join("x")}:${pad}`;
 const BREED = 640;
 const origineel = (pad) => (!pad ? "" : /^https?:/.test(pad) ? pad : SITE + pad);
@@ -181,10 +181,9 @@ ${meer("Alle Landy's", SITE + "/landys")}`,
 <div style="display:none;max-height:0;overflow:hidden;opacity:0;color:#ECE6D6">${esc(voorkop[0].toUpperCase() + voorkop.slice(1))}.&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;&#847;&zwnj;&nbsp;</div>
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#ECE6D6"><tr><td align="center" style="padding:24px 10px">
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="max-width:${BREED}px;background:#ffffff;border-radius:14px;overflow:hidden">
-<tr><td align="center" style="background:${GROEN};padding:18px 20px 20px;font-family:${FONT}"><a href="${SITE}"><img src="cid:rc-logo" width="70" height="70" alt="Rover &amp; Co" style="display:block;border:0;width:70px;height:70px;margin:0 auto 10px"></a>
-<div style="font-size:12px;letter-spacing:2px;font-weight:700;color:${LICHTGROEN};text-transform:uppercase">${esc(periode)}</div>
-<h1 style="margin:4px 0 0;font-size:26px;line-height:1.2;color:#ffffff;font-weight:800">${esc(titel)}</h1></td></tr>
-${hero?.mini ? `<tr><td style="padding:0;background:${GROEN}"><a href="${SITE}"><img src="${esc(hero.mini)}" width="${BREED}" alt="Land Rovers van Rover &amp; Co" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
+<tr><td align="center"${hero?.mini ? ` background="${esc(hero.mini)}"` : ""} style="background-color:${GROEN};${hero?.mini ? `background-image:url('${esc(hero.mini)}');background-size:cover;background-position:center;padding:56px 20px 60px;` : "padding:18px 20px 20px;"}font-family:${FONT}"><a href="${SITE}"><img src="cid:rc-logo" width="70" height="70" alt="Rover &amp; Co" style="display:block;border:0;width:70px;height:70px;margin:0 auto 10px"></a>
+<div style="font-size:12px;letter-spacing:2px;font-weight:700;color:#ffffff;text-transform:uppercase;text-shadow:0 1px 3px rgba(0,0,0,.6)">${esc(periode)}</div>
+<h1 style="margin:4px 0 0;font-size:30px;line-height:1.2;color:#ffffff;font-weight:800;text-shadow:0 2px 6px rgba(0,0,0,.6)">${esc(titel)}</h1></td></tr>
 <tr><td style="padding:26px 24px 4px">${blokken}</td></tr>
 <tr><td align="center" style="background:${GROEN};padding:18px 20px 6px;font-family:${FONT}">
 <a href="https://www.facebook.com/roverandcobe/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Facebook</a>
@@ -423,7 +422,7 @@ ${!al && ed.ontbreekt?.length ? `<p id="mm-fotos" class="mm-ok">Foto's bijsnijde
 <script>(function(){var lijst=JSON.parse(document.getElementById("mm-nodig").textContent),klaar=0,mis=0,m=document.getElementById("mm-fotos");
 function een(n){return new Promise(function(ok){var i=new Image();i.onload=function(){var r=n.b/n.h,w=i.naturalWidth,h=i.naturalHeight,cw=w,ch=w/r;if(ch>h){ch=h;cw=h*r}
 var c=document.createElement("canvas");c.width=n.b;c.height=n.h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,n.b,n.h);x.imageSmoothingQuality="high";
-x.drawImage(i,(w-cw)/2,(h-ch)/2,cw,ch,0,0,n.b,n.h);c.toBlob(function(b){fetch("/beheer/maandmail/foto?pad="+encodeURIComponent(n.pad)+"&soort="+n.soort,{method:"POST",body:b,credentials:"same-origin"}).then(function(r){r.ok?klaar++:mis++;ok()}).catch(function(){mis++;ok()})},"image/jpeg",0.82)};
+x.drawImage(i,(w-cw)/2,(h-ch)/2,cw,ch,0,0,n.b,n.h);if(n.soort==="hero"){var g=x.createLinearGradient(0,0,0,n.h);g.addColorStop(0,"rgba(20,30,22,.55)");g.addColorStop(1,"rgba(20,30,22,.35)");x.fillStyle=g;x.fillRect(0,0,n.b,n.h)}c.toBlob(function(b){fetch("/beheer/maandmail/foto?pad="+encodeURIComponent(n.pad)+"&soort="+n.soort,{method:"POST",body:b,credentials:"same-origin"}).then(function(r){r.ok?klaar++:mis++;ok()}).catch(function(){mis++;ok()})},"image/jpeg",0.82)};
 i.onerror=function(){mis++;ok()};i.src=n.pad})}
 lijst.reduce(function(p,n){return p.then(function(){return een(n)})},Promise.resolve()).then(function(){if(klaar&&!mis)location.reload();else m.textContent=klaar+" foto's bijgesneden, "+mis+" mislukt.";});})();</script>` : ""}`;
   return pagina(`Maandmail`, inhoud, email);
