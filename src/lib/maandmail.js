@@ -16,6 +16,9 @@ const TESTADRES = "pieter@susconsult.be";
 const GROEN = "#1F3B2A", GROEN3 = "#3E7350", LICHTGROEN = "#9FC5A8", ZACHT = "#F6F3EA", ZAND2 = "#DED5BF", INKT = "#141815", GRIJS = "#5B625C";
 const FONT = "Inter,'Helvetica Neue',Arial,sans-serif";
 const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
+// Foto's altijd netjes bijgesneden (fit=cover) en als JPG (Outlook kent geen WebP), via Cloudflare Image Transformations.
+// Vereist: Images > Transformations aan voor roverandco.be (gratis tot 5.000 unieke per maand).
+const bijgesneden = (pad, b, h) => !pad ? "" : /^https?:/.test(pad) ? pad : `${SITE}/cdn-cgi/image/width=${b},height=${h},fit=cover,gravity=auto,format=jpeg,quality=80,onerror=redirect${pad}`;
 const slugify = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 const voornaam = (n) => { const v = String(n || "").trim().split(/\s+/)[0] || ""; return v ? v[0].toUpperCase() + v.slice(1) : ""; };
 const nuBrussel = () => {
@@ -51,12 +54,12 @@ export async function verzamel(env, sinds) {
 
   const kal = (await komendeKalender(env, 60).catch(() => [])).slice(0, 6).map((k) => ({
     titel: k.titel, datum: k.einde && k.einde !== k.datum ? `${datumKort(k.datum)} – ${datumKort(k.einde)}` : datumKort(k.datum),
-    plaats: String(k.plaats || "").split(" · ")[0], ons: !!k.ons, link: /^https?:/.test(k.link || "") ? k.link : SITE + (k.link || "/kalender"),
+    plaats: String(k.plaats || "").split(" · ")[0], ons: !!k.ons, org: k.ons ? "Rover & Co" : (k.club || k.org || ""), link: /^https?:/.test(k.link || "") ? k.link : SITE + (k.link || "/kalender"),
   }));
 
   const zk = (await q(`SELECT id, soort, titel, prijs, prijs_soort, plaats, fotos FROM zoekertjes WHERE status = 'actief' ORDER BY aangemaakt DESC LIMIT 4`)).map((z) => {
     let f = ""; try { f = (JSON.parse(z.fotos || "[]").find((u) => /^\/media\/\d+$/.test(u)) || ""); } catch {}
-    return { titel: z.titel, sub: z.soort === "zoek" ? "Gezocht" : prijsTekst(z), foto: f ? SITE + f : "", link: `${SITE}/zoekertjes/${z.id}-${slugify(z.titel) || "zoekertje"}` };
+    return { titel: z.titel, sub: z.soort === "zoek" ? "Gezocht" : prijsTekst(z), foto: f, link: `${SITE}/zoekertjes/${z.id}-${slugify(z.titel) || "zoekertje"}` };
   });
 
   const vuur = (await q(`SELECT t.id, t.titel, c.naam cnaam, COUNT(b.id) n FROM forum_berichten b JOIN forum_topics t ON t.id = b.topic_id
@@ -68,12 +71,12 @@ export async function verzamel(env, sinds) {
 
   const landys = (await q(`SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
       WHERE w.foto_id IS NOT NULL AND l.verwijderd_op IS NULL AND COALESCE(l.geblokkeerd, 0) = 0 ORDER BY w.id DESC LIMIT 4`)).map((w) => ({
-    titel: w.naam || w.type, sub: `${w.naam ? w.type + " · " : ""}van ${w.gebruikersnaam || "een lid"}`, foto: `${SITE}/forum/foto/${w.foto_id}`,
+    titel: w.naam || w.type, sub: `${w.naam ? w.type + " · " : ""}van ${w.gebruikersnaam || "een lid"}`, foto: `/forum/foto/${w.foto_id}`,
     link: `${SITE}/forum/lid/${encodeURIComponent(w.gebruikersnaam || "")}#wagen-${w.id}`,
   }));
 
   // Blog: de 4 nieuwste artikels (data/blog-nieuws.json, gemaakt door bouw/build.py).
-  const blog = BLOG.slice(0, 4).map((b) => ({ titel: b.titel, sub: `${b.rubriek} · ${b.datum}`, foto: b.foto ? `${SITE}/assets/img/${b.foto}-s.webp` : "", link: `${SITE}/blog/${b.slug}` }));
+  const blog = BLOG.slice(0, 4).map((b) => ({ titel: b.titel, sub: `${b.rubriek} · ${b.datum}`, foto: b.foto ? `/assets/img/${b.foto}-s.webp` : "", link: `${SITE}/blog/${b.slug}` }));
 
   return { kal, zk, vuur, landys, blog };
 }
@@ -83,10 +86,10 @@ export async function verzamel(env, sinds) {
 const kopje = (t) => `<div style="font-family:${FONT};font-size:12px;letter-spacing:2px;font-weight:700;color:${GROEN3};text-transform:uppercase;margin:0 0 10px">${esc(t)}</div>`;
 const meer = (t, href) => `<div style="text-align:right;margin:2px 0 24px"><a href="${esc(href)}" style="font-family:${FONT};font-size:14px;font-weight:700;color:${GROEN3};text-decoration:none">${esc(t)} &rarr;</a></div>`;
 
-// 2 x 2 kleine tegels (zoekertjes, Landy's). Foto's houden hun eigen verhouding: Gmail kent geen object-fit.
+// 2 x 2 kleine tegels (zoekertjes, Landy's), elke foto bijgesneden tot 4:3.
 function tegels(items) {
   const cel = (x) => !x ? `<td width="50%" style="padding:5px"></td>` : `<td width="50%" valign="top" style="padding:5px">
-<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.foto ? `<img src="${esc(x.foto)}" width="240" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
+<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.foto ? `<img src="${esc(bijgesneden(x.foto, 480, 360))}" width="240" height="180" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
     : `<div style="background:${ZACHT};border-radius:8px;padding:30px 8px;text-align:center;font-family:${FONT};font-size:12px;color:${GRIJS}">Geen foto</div>`}
 <div style="font-family:${FONT};font-size:14px;font-weight:700;line-height:1.3;color:${INKT};margin:6px 0 1px">${esc(x.titel)}</div>
 <div style="font-family:${FONT};font-size:12px;color:${GROEN3}">${esc(x.sub)}</div></a></td>`;
@@ -94,13 +97,14 @@ function tegels(items) {
 <tr>${cel(items[0])}${cel(items[1])}</tr>${items.length > 2 ? `<tr>${cel(items[2])}${cel(items[3])}</tr>` : ""}</table>`;
 }
 const rijen = (items, metFoto = false) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT}">` + items.map((x) =>
-  `<tr>${metFoto && x.foto ? `<td width="76" style="padding:8px 12px 8px 0;vertical-align:middle"><a href="${esc(x.link)}"><img src="${esc(x.foto)}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px;border-radius:8px"></a></td>` : ""}
+  `<tr>${metFoto && x.foto ? `<td width="76" style="padding:8px 12px 8px 0;vertical-align:middle"><a href="${esc(x.link)}"><img src="${esc(bijgesneden(x.foto, 128, 128))}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px;border-radius:8px"></a></td>` : ""}
 <td style="padding:9px 0;vertical-align:middle;border-bottom:1px solid ${ZAND2}"><a href="${esc(x.link)}" style="font-size:15px;font-weight:700;color:${INKT};text-decoration:none">${esc(x.titel)}</a>
 <div style="font-size:13px;color:${GROEN3};margin-top:2px">${esc(x.sub)}</div></td></tr>`).join("") + `</table>`;
 const kalRijen = (items) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT}">` + items.map((k) =>
   `<tr><td width="92" style="padding:8px 12px 8px 0;vertical-align:middle"><div style="background:${k.ons ? GROEN : ZACHT};color:${k.ons ? "#ffffff" : GROEN};border-radius:8px;padding:7px 4px;text-align:center;font-size:13px;font-weight:700;white-space:nowrap">${esc(k.datum)}</div></td>
 <td style="padding:8px 0;vertical-align:middle;border-bottom:1px solid ${ZAND2}"><a href="${esc(k.link)}" style="font-size:15px;font-weight:700;color:${INKT};text-decoration:none">${esc(k.titel)}</a>
-<div style="font-size:13px;color:${GRIJS};margin-top:2px">${k.ons ? `<b style="color:${GROEN3}">Rover &amp; Co</b>${k.plaats ? " · " : ""}` : ""}${esc(k.plaats)}</div></td></tr>`).join("") + `</table>`;
+${k.org ? `<div style="font-size:13px;color:${GROEN3};margin-top:2px">Organisator: <b>${esc(k.org)}</b></div>` : ""}
+<div style="font-size:13px;color:${GRIJS};margin-top:1px">${esc(k.plaats)}</div></td></tr>`).join("") + `</table>`;
 
 // lid = { naam, gebruikersnaam }; editie = { maandNaam, intro, data }
 export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
@@ -135,7 +139,7 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
 ${afmeld ? `Geen maandnieuws meer? <a href="${esc(afmeld)}" style="color:#ffffff;font-weight:700">Schrijf je hier uit</a>.<br>` : ""}<span style="color:${LICHTGROEN};font-size:12px">Rover &amp; Co VZW &middot; Je krijgt deze mail omdat je een account hebt op roverandco.be.</span></td></tr>
 </table></td></tr></table></body></html>`;
 
-  const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
+  const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum}${x.org ? `, organisator: ${x.org}` : ""})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
   const tekst = [
     `Rover & Co maandoverzicht, ${periode}`, "",
     ...(intro ? ["Nieuw op het platform:", intro, ""] : []),

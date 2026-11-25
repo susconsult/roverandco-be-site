@@ -348,7 +348,7 @@ a.kal-kaart:hover{transform:translateY(-2px);box-shadow:0 8px 22px rgba(0,0,0,.1
 .kal-datum b{font-family:var(--head);font-weight:900;font-size:var(--fs-h2);line-height:.9;letter-spacing:0}
 .kal-wd{opacity:.7;font-size:var(--fs-sm)}
 .kal-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:6px;padding:16px 18px}
-.kal-org{font-size:var(--fs-sm);font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.kal-org{font-size:var(--fs-sm);font-weight:400;color:var(--muted)}.kal-org b{font-weight:700;color:var(--ink)}
 .kal-kaart.ons .kal-org{color:var(--green)}
 .kal-titel{font-family:var(--head);font-weight:800;font-size:var(--fs-h3);line-height:1;text-transform:uppercase;margin:0;letter-spacing:.3px}
 .kal-meta{list-style:none;margin:2px 0 0;padding:0;display:flex;flex-direction:column;gap:3px;font-size:var(--fs-ui);font-weight:700}

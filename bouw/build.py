@@ -495,7 +495,7 @@ function teken(){{var vandaag=new Date();vandaag.setHours(0,0,0,0);lijst.textCon
     var dt=d(a.datum),m=MAANDEN[dt.getMonth()]+" "+dt.getFullYear();if(m!==maand){{maand=m;var blok=el("div","kal-blok");blok.append(el("h3","kal-maand",m));grid=el("div","kal-grid");blok.append(grid);lijst.append(blok)}}
     var r=el(a.link?"a":"div","kal-kaart"+(a.ons?" ons":""));if(a.link){{r.href=a.link;if(!a.ons)r.rel="noopener"}}
     var dag=el("div","kal-datum");dag.append(el("span","kal-wd",DAGEN[dt.getDay()]),el("b",null,dt.getDate()),el("span",null,KORT[dt.getMonth()]));
-    var b=el("div","kal-body");b.append(el("div","kal-org",a.org||a.club),el("h4","kal-titel",a.titel));
+    var b=el("div","kal-body");var og=el("div","kal-org","Organisator: ");og.append(el("b","",a.org||a.club));b.append(og,el("h4","kal-titel",a.titel));
     var meta=el("ul","kal-meta");var li=el("li");li.innerHTML=PIN;li.append(a.plaats);meta.append(li);
     if(a.einde&&a.einde!==a.datum){{var e=d(a.einde),li2=el("li");li2.innerHTML=KAL;li2.append(dt.getDate()+" "+KORT[dt.getMonth()]+" – "+e.getDate()+" "+KORT[e.getMonth()]);meta.append(li2)}}
     b.append(meta);if(a.info)b.append(el("p","kal-info",a.info));
