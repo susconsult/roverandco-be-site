@@ -16,9 +16,33 @@ const TESTADRES = "pieter@susconsult.be";
 const GROEN = "#1F3B2A", GROEN3 = "#3E7350", LICHTGROEN = "#9FC5A8", ZACHT = "#F6F3EA", ZAND2 = "#DED5BF", INKT = "#141815", GRIJS = "#5B625C";
 const FONT = "Inter,'Helvetica Neue',Arial,sans-serif";
 const MAANDEN = ["januari", "februari", "maart", "april", "mei", "juni", "juli", "augustus", "september", "oktober", "november", "december"];
-// Foto's altijd netjes bijgesneden (fit=cover) en als JPG (Outlook kent geen WebP), via Cloudflare Image Transformations.
-// Vereist: Images > Transformations aan voor roverandco.be (gratis tot 5.000 unieke per maand).
-const bijgesneden = (pad, b, h) => !pad ? "" : /^https?:/.test(pad) ? pad : `${SITE}/cdn-cgi/image/width=${b},height=${h},fit=cover,gravity=auto,format=jpeg,quality=80,onerror=redirect${pad}`;
+// Foto's in de mail: netjes bijgesneden JPG's (tabel mail_foto). Mailprogramma's kennen geen object-fit en Outlook geen WebP,
+// dus de foto moet vooraf op maat zijn. Het bijsnijden gebeurt in de browser op /beheer/maandmail (canvas), niet in de Worker:
+// dat kost te veel rekentijd voor een Worker. Zolang een foto niet bijgesneden is, toont de mail het origineel.
+const MAAT = { tegel: [480, 360], klein: [128, 128] };
+const fotoSleutel = (pad, soort) => `${soort}:${pad}`;
+const origineel = (pad) => (!pad ? "" : /^https?:/.test(pad) ? pad : SITE + pad);
+let fotoKlaar = false;
+async function zorgFotoTabel(env) {
+  if (fotoKlaar) return;
+  await env.SHOP_DB.prepare("CREATE TABLE IF NOT EXISTS mail_foto (id INTEGER PRIMARY KEY, sleutel TEXT NOT NULL UNIQUE, data BLOB NOT NULL, aangemaakt TEXT NOT NULL)").run();
+  fotoKlaar = true;
+}
+// Zet x.mini (URL van de bijgesneden JPG) bij elk item waarvoor er al een is; geeft de lijst terug van wat nog ontbreekt.
+export async function vulFotos(env, data) {
+  await zorgFotoTabel(env);
+  const nodig = [];
+  for (const [blok, soort] of [["zk", "tegel"], ["landys", "tegel"], ["blog", "klein"]]) for (const x of data[blok] || []) if (x.foto && !/^https?:/.test(x.foto)) nodig.push({ x, soort, sleutel: fotoSleutel(x.foto, soort) });
+  if (!nodig.length) return [];
+  const rijen = ((await env.SHOP_DB.prepare(`SELECT id, sleutel FROM mail_foto WHERE sleutel IN (${nodig.map(() => "?").join(",")})`).bind(...nodig.map((n) => n.sleutel)).all()).results) || [];
+  const ids = Object.fromEntries(rijen.map((r) => [r.sleutel, r.id]));
+  const ontbreekt = [];
+  for (const n of nodig) {
+    if (ids[n.sleutel]) n.x.mini = `${SITE}/m/foto/${ids[n.sleutel]}.jpg`;
+    else ontbreekt.push({ pad: n.x.foto, soort: n.soort, b: MAAT[n.soort][0], h: MAAT[n.soort][1] });
+  }
+  return ontbreekt;
+}
 const slugify = (s) => String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 60);
 const voornaam = (n) => { const v = String(n || "").trim().split(/\s+/)[0] || ""; return v ? v[0].toUpperCase() + v.slice(1) : ""; };
 const nuBrussel = () => {
@@ -89,7 +113,8 @@ const meer = (t, href) => `<div style="text-align:right;margin:2px 0 24px"><a hr
 // 2 x 2 kleine tegels (zoekertjes, Landy's), elke foto bijgesneden tot 4:3.
 function tegels(items) {
   const cel = (x) => !x ? `<td width="50%" style="padding:5px"></td>` : `<td width="50%" valign="top" style="padding:5px">
-<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.foto ? `<img src="${esc(bijgesneden(x.foto, 480, 360))}" width="240" height="180" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
+<a href="${esc(x.link)}" style="text-decoration:none;color:${INKT}">${x.mini ? `<img src="${esc(x.mini)}" width="240" height="180" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
+    : x.foto ? `<img src="${esc(origineel(x.foto))}" width="240" alt="${esc(x.titel)}" style="display:block;border:0;width:100%;max-width:240px;height:auto;border-radius:8px;background:${ZACHT}">`
     : `<div style="background:${ZACHT};border-radius:8px;padding:30px 8px;text-align:center;font-family:${FONT};font-size:12px;color:${GRIJS}">Geen foto</div>`}
 <div style="font-family:${FONT};font-size:14px;font-weight:700;line-height:1.3;color:${INKT};margin:6px 0 1px">${esc(x.titel)}</div>
 <div style="font-family:${FONT};font-size:12px;color:${GROEN3}">${esc(x.sub)}</div></a></td>`;
@@ -97,7 +122,7 @@ function tegels(items) {
 <tr>${cel(items[0])}${cel(items[1])}</tr>${items.length > 2 ? `<tr>${cel(items[2])}${cel(items[3])}</tr>` : ""}</table>`;
 }
 const rijen = (items, metFoto = false) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT}">` + items.map((x) =>
-  `<tr>${metFoto && x.foto ? `<td width="76" style="padding:8px 12px 8px 0;vertical-align:middle"><a href="${esc(x.link)}"><img src="${esc(bijgesneden(x.foto, 128, 128))}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px;border-radius:8px"></a></td>` : ""}
+  `<tr>${metFoto && x.foto ? `<td width="76" style="padding:8px 12px 8px 0;vertical-align:middle"><a href="${esc(x.link)}">${x.mini ? `<img src="${esc(x.mini)}" width="64" height="64" alt="" style="display:block;border:0;width:64px;height:64px;border-radius:8px">` : `<img src="${esc(origineel(x.foto))}" width="64" alt="" style="display:block;border:0;width:64px;height:auto;border-radius:8px">`}</a></td>` : ""}
 <td style="padding:9px 0;vertical-align:middle;border-bottom:1px solid ${ZAND2}"><a href="${esc(x.link)}" style="font-size:15px;font-weight:700;color:${INKT};text-decoration:none">${esc(x.titel)}</a>
 <div style="font-size:13px;color:${GROEN3};margin-top:2px">${esc(x.sub)}</div></td></tr>`).join("") + `</table>`;
 const kalRijen = (items) => `<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="font-family:${FONT}">` + items.map((k) =>
@@ -171,7 +196,9 @@ export async function concept(env) {
   const e = editieNu();
   const vorige = await vorigeVerzending(env);
   const sinds = vorige?.code !== e.code && vorige?.vastgelegd ? vorige.vastgelegd : new Date(Date.now() - 31 * 86400000).toISOString();
-  return { ...e, intro: (await instelling(env, "maandmail_intro")) || "", data: await verzamel(env, sinds) };
+  const data = await verzamel(env, sinds);
+  const ontbreekt = await vulFotos(env, data);
+  return { ...e, intro: (await instelling(env, "maandmail_intro")) || "", data, ontbreekt };
 }
 
 // Wie krijgt de maandmail: alle actieve accounts, behalve wie zich afmeldde (maandmail = 0).
@@ -220,6 +247,13 @@ async function zorgMeting(env) {
 }
 // Route /m/o/<id>/<sig>.gif en /m/k/<id>/<sig>?u=... (in src/worker.ts vóór de onderhoudspoort).
 export async function meting(request, env, url) {
+  const fm = url.pathname.match(/^\/m\/foto\/(\d{1,10})\.jpg$/);
+  if (fm) {
+    await zorgFotoTabel(env);
+    const r = await env.SHOP_DB.prepare("SELECT data FROM mail_foto WHERE id = ?").bind(+fm[1]).first();
+    if (!r) return new Response("Niet gevonden.", { status: 404 });
+    return new Response(r.data instanceof ArrayBuffer ? r.data : new Uint8Array(r.data), { headers: { "content-type": "image/jpeg", "cache-control": "public, max-age=31536000, immutable" } });
+  }
   const m = url.pathname.match(/^\/m\/(o|k)\/(\d{1,10})\/([0-9a-f]{24})(\.gif)?$/);
   if (!m) return null;
   const [, soort, id, sig] = m;
@@ -291,6 +325,16 @@ ${c.links.length ? `<table style="width:100%;font-size:14px;margin-top:12px;bord
 }
 
 export async function beheerMaandmail(request, env, url, email) {
+  if (url.pathname === "/beheer/maandmail/foto" && request.method === "POST") {
+    const pad = url.searchParams.get("pad") || "", soort = url.searchParams.get("soort") || "";
+    if (!MAAT[soort] || !/^\/(media\/\d+|forum\/foto\/\d+|assets\/img\/[\w\/.-]+)$/.test(pad)) return new Response("nee", { status: 400 });
+    const data = new Uint8Array(await request.arrayBuffer());
+    if (data.length < 200 || data.length > 400000 || data[0] !== 0xff || data[1] !== 0xd8) return new Response("geen jpg", { status: 400 });
+    await zorgFotoTabel(env);
+    await env.SHOP_DB.prepare("INSERT INTO mail_foto (sleutel, data, aangemaakt) VALUES (?, ?, ?) ON CONFLICT(sleutel) DO UPDATE SET data = excluded.data, aangemaakt = excluded.aangemaakt")
+      .bind(fotoSleutel(pad, soort), data, new Date().toISOString()).run();
+    return new Response("ok");
+  }
   if (url.pathname !== "/beheer/maandmail") return null;
   await zorgKolom(env);
   const e = editieNu();
@@ -338,6 +382,14 @@ ${await statsHtml(env, e.code, vorige)}
 <div class="mm-rij"><button class="btn" name="actie" value="bewaar">Bewaren</button><button class="btn" name="actie" value="test">Testmail naar mij</button>
 <button class="btn btn-solid" name="actie" value="versturen" onclick="return confirm('Maandoverzicht ${esc(ed.maandNaam)} versturen naar ${aantal} leden?')">Versturen naar ${aantal} leden</button></div>
 <p style="font-size:14px;color:#5B625C;margin:0">Gaat naar alle actieve accounts, behalve wie zich afmeldde. Op de 1ste van elke maand krijg je automatisch een testmail op ${TESTADRES}.</p></form>`}</div>
-<iframe class="mm-voorbeeld" title="Voorbeeld van de maandmail" sandbox srcdoc="${esc(voorbeeld)}"></iframe>`;
+<iframe class="mm-voorbeeld" title="Voorbeeld van de maandmail" sandbox srcdoc="${esc(voorbeeld)}"></iframe>
+${!al && ed.ontbreekt?.length ? `<p id="mm-fotos" class="mm-ok">Foto's bijsnijden voor de mail… (${ed.ontbreekt.length})</p>
+<script type="application/json" id="mm-nodig">${JSON.stringify(ed.ontbreekt).replace(/</g, "\\u003c")}</script>
+<script>(function(){var lijst=JSON.parse(document.getElementById("mm-nodig").textContent),klaar=0,mis=0,m=document.getElementById("mm-fotos");
+function een(n){return new Promise(function(ok){var i=new Image();i.onload=function(){var r=n.b/n.h,w=i.naturalWidth,h=i.naturalHeight,cw=w,ch=w/r;if(ch>h){ch=h;cw=h*r}
+var c=document.createElement("canvas");c.width=n.b;c.height=n.h;var x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,n.b,n.h);x.imageSmoothingQuality="high";
+x.drawImage(i,(w-cw)/2,(h-ch)/2,cw,ch,0,0,n.b,n.h);c.toBlob(function(b){fetch("/beheer/maandmail/foto?pad="+encodeURIComponent(n.pad)+"&soort="+n.soort,{method:"POST",body:b,credentials:"same-origin"}).then(function(r){r.ok?klaar++:mis++;ok()}).catch(function(){mis++;ok()})},"image/jpeg",0.82)};
+i.onerror=function(){mis++;ok()};i.src=n.pad})}
+lijst.reduce(function(p,n){return p.then(function(){return een(n)})},Promise.resolve()).then(function(){if(klaar&&!mis)location.reload();else m.textContent=klaar+" foto's bijgesneden, "+mis+" mislukt.";});})();</script>` : ""}`;
   return pagina(`Maandmail`, inhoud, email);
 }
