@@ -145,7 +145,12 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
     zk.length && `${kopje("Nieuwste zoekertjes")}${tegels(zk)}${meer("Alle zoekertjes", SITE + "/zoekertjes")}`,
     blog.length && `${kopje("Op de blog")}${rijen(blog, true)}${meer("Alle artikels", SITE + "/blog")}`,
     vuur.length && `${kopje("Rond het Kampvuur")}${rijen(vuur)}${meer("Naar het Kampvuur", SITE + "/forum")}`,
-    landys.length && `${kopje("Nieuwe Landy's")}${tegels(landys)}${meer("Alle Landy's", SITE + "/landys")}`,
+    landys.length && `${kopje("Nieuwe Landy's van leden")}${tegels(landys)}
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${ZACHT};border-radius:12px;margin:12px 0 8px"><tr><td style="padding:14px 16px;font-family:${FONT}">
+<div style="font-size:15px;font-weight:700;color:${INKT};margin-bottom:2px">Jouw Landy staat er nog niet bij?</div>
+<div style="font-size:14px;color:${GRIJS};margin-bottom:10px">Zet hem erbij met een foto, dan zien de andere leden hem ook.</div>
+<a href="${SITE}/account/garage" style="display:inline-block;padding:10px 18px;background:${GROEN};color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px">Voeg je Landy toe</a></td></tr></table>
+${meer("Alle Landy's", SITE + "/landys")}`,
   ].filter(Boolean).join("");
 
   const html = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${esc(titel)}</title></head>
@@ -161,7 +166,7 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
 <a href="https://www.facebook.com/roverandcobe/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Facebook</a>
 <a href="https://www.instagram.com/roverandco.be/" style="display:inline-block;margin:0 5px 8px;padding:9px 16px;border:1px solid ${LICHTGROEN};border-radius:8px;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none">Instagram</a></td></tr>
 <tr><td align="center" style="background:${GROEN};padding:8px 24px 20px;font-family:${FONT};font-size:13px;line-height:1.7;color:#ffffff">Vragen? Antwoord op deze mail of mail naar <a href="mailto:info@roverandco.be" style="color:#ffffff">info@roverandco.be</a>.<br>
-${afmeld ? `Geen maandnieuws meer? <a href="${esc(afmeld)}" style="color:#ffffff;font-weight:700">Schrijf je hier uit</a>.<br>` : ""}<span style="color:${LICHTGROEN};font-size:12px">Rover &amp; Co VZW &middot; Je krijgt deze mail omdat je een account hebt op roverandco.be.</span></td></tr>
+${afmeld ? `Geen maandoverzicht meer? <a href="${esc(afmeld)}" style="color:#ffffff;font-weight:700">Schrijf je hier uit</a>.<br>` : ""}<span style="color:${LICHTGROEN};font-size:12px">Rover &amp; Co VZW &middot; Je krijgt deze mail omdat je een account hebt op roverandco.be.</span></td></tr>
 </table></td></tr></table></body></html>`;
 
   const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum}${x.org ? `, organisator: ${x.org}` : ""})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
@@ -172,10 +177,11 @@ ${afmeld ? `Geen maandnieuws meer? <a href="${esc(afmeld)}" style="color:#ffffff
     ...lijst("Nieuwste zoekertjes", zk, SITE + "/zoekertjes"),
     ...lijst("Op de blog", blog, SITE + "/blog"),
     ...lijst("Rond het Kampvuur", vuur, SITE + "/forum"),
-    ...lijst("Nieuwe Landy's", landys, SITE + "/landys"),
+    ...lijst("Nieuwe Landy's van leden", landys, SITE + "/landys"),
+    ...(landys.length ? [`Jouw Landy staat er nog niet bij? Voeg hem toe: ${SITE}/account/garage`, ""] : []),
     "Facebook: https://www.facebook.com/roverandcobe/", "Instagram: https://www.instagram.com/roverandco.be/", "",
     "Vragen? Antwoord op deze mail of mail naar info@roverandco.be.", "Rover & Co VZW",
-    ...(afmeld ? ["", `Geen maandnieuws meer? Schrijf je hier uit: ${afmeld}`] : []),
+    ...(afmeld ? ["", `Geen maandoverzicht meer? Schrijf je hier uit: ${afmeld}`] : []),
   ].join("\n");
 
   return {
