@@ -116,9 +116,9 @@
   "titel": "Offroaddag Oss",
   "datum": "2026-12-06",
   "plaats": "Circuit de Witte Ruysheuvel, Aengelbertlaan 60, Oss (NL) · 10u–16u",
-  "link": "https://terrein.nu/event/off-road-evenement-van-jeebee-12/",
+  "link": "https://www.jeebee.nl",
   "org": "Jeebee",
-  "info": "Vrij rijden op het circuit. Voorwaarden en inschrijven via de organisator."
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
  },
  {
   "club": "LRCH",
@@ -284,6 +284,16 @@
   "soort": "club"
  },
  {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Offroaddag Well",
+  "datum": "2027-02-14",
+  "plaats": "Well (NL)",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
   "club": "Xrover Belgium",
   "titel": "Valentijnsroadbook",
   "datum": "2027-02-21",
@@ -313,6 +323,16 @@
   "link": "https://matsch-und-piste.de/en/category/events-expos/",
   "org": "4x4 rhein-waal",
   "info": "Offroadbeurs voor Duitsland, Nederland en België: wagens, daktenten, trailers en reisuitrusting, met kampeerzone."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Offroaddag Boxmeer",
+  "datum": "2027-03-14",
+  "plaats": "Boxmeer (NL)",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
  },
  {
   "club": "Xrover Belgium",
@@ -345,6 +365,27 @@
   "info": "Vrij rijden. Plaats nog niet bekend, zie de site van de ANVT."
  },
  {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Offroaddag Venlo",
+  "datum": "2027-04-11",
+  "plaats": "Venlo (NL)",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee Hemelvaartweekend",
+  "datum": "2027-05-06",
+  "einde": "2027-05-09",
+  "plaats": "Mammut (DE)",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
   "club": "Range Rover Trust",
   "soort": "club",
   "titel": "Kampeerweek Zuid-Limburg",
@@ -367,6 +408,16 @@
   "info": "Drie dagen offroad, avontuur en modder. De editie van 2026 telde meer dan 100 wagens."
  },
  {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroaddag",
+  "datum": "2027-06-13",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
   "club": "LRCH",
   "titel": "Allroadrit 3 – Midzomer",
   "datum": "2027-06-20",
@@ -385,6 +436,16 @@
   "link": "https://rangerovertrust.nl/evenementen/",
   "org": "Autojumble Waalwijk",
   "info": "Onderdelenmarkt voor klassieke Britse auto's. De Range Rover Trust is erbij."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroaddag",
+  "datum": "2027-07-14",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
  },
  {
   "club": "LRCH",
@@ -428,6 +489,17 @@
   "soort": "club"
  },
  {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroadweekend",
+  "datum": "2027-09-11",
+  "einde": "2027-09-12",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
   "club": "LRCH",
   "soort": "beurs",
   "titel": "Dé 4x4 Vakantiebeurs",
@@ -437,6 +509,16 @@
   "link": "https://www.4x4vakantiebeurs.nl/",
   "org": "LRCH – Land Rover Club Holland",
   "info": "22e editie van de beurs voor 4x4-reizen, daktenten en uitrusting. Alle merken welkom."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroaddag",
+  "datum": "2027-10-10",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
  },
  {
   "club": "British Car Club Day",
@@ -457,6 +539,26 @@
   "org": "Xrover Belgium",
   "info": "Activiteit van Xrover Belgium. Uur, vertrekplaats en inschrijving vind je in hun agenda.",
   "soort": "club"
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroaddag",
+  "datum": "2027-11-14",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
+ },
+ {
+  "club": "Jeebee",
+  "soort": "4x4",
+  "titel": "Jeebee offroaddag",
+  "datum": "2027-12-12",
+  "plaats": "Locatie volgt",
+  "link": "https://www.jeebee.nl",
+  "org": "Jeebee",
+  "info": "Offroaddag van Jeebee. Locaties zijn nog niet definitief: kijk altijd op de site van Jeebee voor de laatste info en inschrijving."
  },
  {
   "club": "Xrover Belgium",
