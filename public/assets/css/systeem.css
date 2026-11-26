@@ -480,3 +480,15 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .nt-meer>div{display:grid;gap:10px;margin-top:10px}
 .nt-meer .nt-lv{margin-left:4px}
 .cb-bericht.nt-hulp>div{background:#e8eef7}
+.nt-vg{position:absolute;left:12px;right:12px;bottom:5px;height:3px;border-radius:99px;background:rgba(0,0,0,.06);overflow:hidden;pointer-events:none}
+.nt-vg i{display:block;height:100%;width:0;background:#e0a93a;border-radius:99px;transition:width .5s}
+.nt-plus{position:absolute;right:14px;top:-4px;font:700 12px var(--body);color:#2f7a4a;pointer-events:none;animation:nt-plus 1.2s ease forwards}
+@keyframes nt-plus{from{opacity:1;transform:translateY(0)}to{opacity:0;transform:translateY(-22px)}}
+.nt-hintknop{flex:none;align-self:center;border:1px solid #6b6f6b;background:none;color:#e9e6dc;border-radius:99px;padding:8px 14px;font:600 13px var(--body);cursor:pointer}
+.nt-hintknop:hover:not(:disabled){border-color:#ffb547;color:#ffb547}.nt-hintknop:disabled{opacity:.35;cursor:default}
+.cb-bericht.nt-uitleg>div{background:#eef1e8;border:1px solid #d6dccb}
+.nt-keuzes{display:grid;gap:6px;margin-top:8px}
+.nt-keuze{text-align:left;font:600 14px var(--body);color:var(--ink);background:#fff;border:2px solid #d8d1bf;border-radius:10px;padding:8px 12px;cursor:pointer}
+.nt-keuze:hover:not(:disabled){border-color:var(--green)}.nt-keuze:disabled{cursor:default;opacity:.6}.nt-keuze.gekozen{opacity:1;border-color:var(--green);background:#dcefe2}
+.nt-combo{color:#c8891a}
+@media(max-width:640px){.nt-hintknop{padding:6px 10px;font-size:12px}}

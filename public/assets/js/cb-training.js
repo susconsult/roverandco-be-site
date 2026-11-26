@@ -113,9 +113,11 @@
     ])(),
   };
 
+  let nieuwLevel = 0;
   let niveau = data.mijn?.niveau || 1, vraag = null, teller = 0, herhaal = [], bezig = false;
   function nieuweVraag() {
     teller++;
+    if (nieuwLevel > 0) { nieuwLevel--; return MAKER[niveau](); } // na een level-up eerst het nieuwe level
     const klaar = herhaal.findIndex((h) => h.na <= teller);
     if (klaar >= 0) { const q = herhaal.splice(klaar, 1)[0].q; return { ...q, herhaling: true, vervolg: undefined }; }
     // Meestal je eigen level, af en toe een herhaling van een lager level.
@@ -143,8 +145,45 @@
     if (opslaan) { geschiedenis.push({ ...b, t: t.toISOString() }); geschiedenis = geschiedenis.slice(-30); bewaar.zet("log", geschiedenis); }
   }
   const later = (f, ms) => setTimeout(f, ms);
+
+  // Uitleg bij de start van elk level, met een voorbeeld.
+  const UITLEG = {
+    1: "<b>Level 1: letters.</b> Elke letter heeft een vast woord: A = Alfa, B = Bravo, C = Charlie. Ik zeg een letter, jij zegt het woord. Typ het, of houd PTT ingedrukt en zeg het in het Engels. Weet je het niet? Tik op <b>Hint</b> voor 3 keuzes. 8 op 10 juist = level omhoog.",
+    2: "<b>Level 2: cijfers.</b> Op de radio zeg je elk cijfer apart. Vier klinken anders: 3 = tree, 4 = <b>fower</b>, 5 = fife, 9 = <b>niner</b>. 349 wordt dus: tree, fower, niner. Fower en niner moeten echt zo.",
+    3: "<b>Level 3: woorden spellen.</b> Spel elk woord letter per letter met de NATO-woorden. KOFFIE = Kilo Oscar Foxtrot Foxtrot India Echo.",
+    4: "<b>Level 4: nummerplaten.</b> Zeg <b>“Figures”</b> voor de cijfers en <b>“I spell”</b> voor de letters, één keer per groep. 1-ABC-349 = Figures one, I spell Alfa Bravo Charlie, Figures tree fower niner. Nooit “number”.",
+    5: "<b>Level 5: echte oproepen.</b> Een oproep gaat zo: wie je roept, “this is”, wie jij bent, “over”. Bv. “Rover Convoy, this is " + esc(naam) + ", over.” <b>Over</b> = ik wacht op antwoord. <b>Out</b> = gedaan. <b>Roger</b> = ontvangen. <b>Wilco</b> = begrepen en ik doe het. <b>Say again</b> = herhaal.",
+  };
+  let gezien = bewaar.lees("uitleg", {});
+  function legUit(n, altijd) {
+    if (!altijd && gezien[n]) return false;
+    bericht({ wie: "Rover Base", html: UITLEG[n], soort: "uitleg" });
+    gezien[n] = 1; bewaar.zet("uitleg", gezien);
+    return true;
+  }
+
+  // Hint: 3 keuzes, waarvan 1 juist. Foute keuzes verschillen telkens op één punt.
+  function foutVariant(tok) {
+    const t = tok.slice(), idx = (f) => t.map((x, i) => (f(x) ? i : -1)).filter((i) => i >= 0);
+    const opties = [];
+    const ls = idx((x) => /^[A-Z]$/.test(x)); if (ls.length) opties.push(() => { const i = kies(ls); t[i] = "~" + kies(FOUT[t[i]]); });
+    const cs = idx((x) => /^[49]$/.test(x)); if (cs.length) opties.push(() => { const i = kies(cs); t[i] = "~" + (t[i] === "4" ? "Four" : "Nine"); });
+    const fs = idx((x) => x === "FIG"); if (fs.length) opties.push(() => { t[kies(fs)] = "NUMBER"; });
+    const sp = idx((x) => x === "SPELL"); if (sp.length) opties.push(() => { t.splice(sp[0], 1); });
+    const ov = idx((x) => x === "OVER"); if (ov.length) opties.push(() => { t[ov[0]] = "OUT"; });
+    if (t.length > 1) opties.push(() => { const i = Math.floor(Math.random() * (t.length - 1)); [t[i], t[i + 1]] = [t[i + 1], t[i]]; });
+    if (!opties.length) opties.push(() => { t[0] = kies(["ROGER", "WILCO", "OUT", "OVER"].filter((x) => x !== t[0])); });
+    kies(opties)();
+    return t;
+  }
+  function hintOpties(q) {
+    if (q.verwacht.length === 1 && /^[A-Z]$/.test(q.verwacht[0])) return schud([WOORD[q.verwacht[0]], ...lokvogels(q.verwacht[0], 2)]);
+    const goed = zin(q.verwacht), uit = new Set([goed]);
+    for (let k = 0; uit.size < 3 && k < 30; k++) uit.add(zin(foutVariant(q.verwacht)));
+    return schud([...uit]);
+  }
   function stel(q) {
-    vraag = q;
+    vraag = q; hintGebruikt = false; zetHintKnop();
     bericht({ wie: q.wie || "Rover Base", html: q.vraag + (q.herhaling ? ' <small class="nt-klein">(nog eens)</small>' : "") });
     zetLv();
   }
@@ -156,7 +195,8 @@
     if (pop) { lv.classList.remove("pop"); void lv.offsetWidth; lv.classList.add("pop"); }
   }
 
-  function beantwoord(tekst, spraak) {
+  let hintGebruikt = false, combo = 0;
+  function beantwoord(tekst, spraak, metHint) {
     if (!vraag || bezig) return;
     tekst = String(tekst || "").trim();
     if (!tekst) return;
@@ -177,10 +217,12 @@
     const gezegd = tokens(tekst);
     const v = vergelijk(q.verwacht, gezegd, q.streng);
     const juist = v.juist;
+    combo = juist && !metHint ? combo + 1 : 0;
+    if (juist && !metHint) plusXp(10); else if (juist) plusXp(5);
     (q.letters || []).forEach((l) => { zwak[l] = Math.max(0, (zwak[l] || 0) + (juist ? -1 : 2)); });
     bewaar.zet("zwak", zwak);
     let html;
-    if (juist) html = kies(["Roger, juist.", "Luid en duidelijk.", "Roger.", "Juist, goed zo."]);
+    if (juist) html = kies(["Roger, juist.", "Luid en duidelijk.", "Roger.", "Juist, goed zo."]) + (metHint ? " <small>(met hint: +5 XP, telt niet mee voor je level)</small>" : [3, 5, 10, 15, 20, 30, 50].includes(combo) ? ` <b class="nt-combo">${combo} op rij!</b>` : "");
     else {
       const fout = gezegd.filter((x) => x.t[0] === "?").map((x) => `“${esc(x.w)}” bestaat niet, dat is ${WOORD[x.t.slice(1)]}.`).join(" ")
         + (gezegd.some((x) => x.t.endsWith("*")) ? ` Op de radio zeg je ${[...new Set(gezegd.filter((x) => x.t.endsWith("*")).map((x) => `“${CIJFER[+x.t[0]]}”, niet “${esc(x.w)}”`))].join(", ")}.` : "");
@@ -188,16 +230,16 @@
         (fout ? `<br><small>${fout}</small>` : "") + (q.tip && !gezegd.some((x) => x.t.endsWith("*")) ? `<br><small>${esc(q.tip)}</small>` : "");
       if (!q.herhaling) herhaal.push({ q, na: teller + 3 });
     }
-    fetch("/api/cb/40/antwoord", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ juist, niveau: q.niveau }) })
-      .then((r) => r.json()).then((d) => { if (d && d.ok) { data = { ...data, ...d }; if (d.mijn.niveau !== niveau) { const omhoog = d.mijn.niveau > niveau; niveau = d.mijn.niveau; if (omhoog) volgendeExtra = `★ Level ${niveau} gehaald! Vanaf nu: ${NIVEAUS[niveau]}.`; zetLv(true); } tekenMeer(); } })
+    fetch("/api/cb/40/antwoord", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ juist, niveau: q.niveau, hint: !!metHint }) })
+      .then((r) => r.json()).then((d) => { if (d && d.ok) { data = { ...data, ...d }; if (d.mijn.niveau !== niveau) { const omhoog = d.mijn.niveau > niveau; niveau = d.mijn.niveau; if (omhoog) { nieuwLevel = 3; herhaal = []; } if (omhoog) volgendeExtra = `★ Level ${niveau} gehaald! Vanaf nu: ${NIVEAUS[niveau]}.`; zetLv(true); } tekenMeer(); zetVoortgang(); } })
       .catch(() => { /* score bewaren mislukt: oefenen gaat door */ })
       .then(() => {
         later(() => {
           bericht({ wie: q.wie || "Rover Base", html, soort: juist ? "goed" : "fout" });
           later(() => {
-            if (volgendeExtra) { bericht({ wie: "Rover Base", html: `<b>${volgendeExtra}</b>`, soort: "level" }); volgendeExtra = ""; }
-            bezig = false;
-            stel(juist && q.vervolg ? q.vervolg() : nieuweVraag());
+            let wacht = 0;
+            if (volgendeExtra) { bericht({ wie: "Rover Base", html: `<b>${volgendeExtra}</b>`, soort: "level" }); volgendeExtra = ""; if (legUit(niveau, true)) wacht = 1500; }
+            later(() => { bezig = false; stel(juist && q.vervolg ? q.vervolg() : nieuweVraag()); }, wacht);
           }, 700);
         }, 350);
       });
@@ -207,6 +249,31 @@
   /* ---------------- invoer: typen of PTT ---------------- */
   const form = document.getElementById("nt-zend"), veld = document.getElementById("nt-tekst"), ptt = document.getElementById("nt-ptt"), hint = document.getElementById("nt-hint");
   const zegHint = (t, fout) => { if (hint) { hint.innerHTML = t; hint.classList.toggle("fout", !!fout); } };
+  const hintKnop = document.getElementById("nt-hintknop");
+  function zetHintKnop() { if (hintKnop) hintKnop.disabled = !vraag || hintGebruikt; }
+  hintKnop?.addEventListener("click", () => {
+    if (!vraag || hintGebruikt || bezig) return;
+    hintGebruikt = true; zetHintKnop();
+    const opts = hintOpties(vraag);
+    bericht({ wie: "Rover Base", soort: "uitleg", html: `Kies het juiste antwoord:<span class="nt-keuzes">${opts.map((o) => `<button type="button" class="nt-keuze" data-keuze="${esc(o)}">${esc(o)}</button>`).join("")}</span>` }, false);
+  });
+  logEl.addEventListener("click", (e) => {
+    const b = e.target.closest("[data-keuze]"); if (!b || !vraag || bezig) return;
+    b.closest(".nt-keuzes").querySelectorAll("button").forEach((x) => { x.disabled = true; });
+    b.classList.add("gekozen");
+    beantwoord(b.dataset.keuze, false, true);
+  });
+  function plusXp(n) {
+    const lv = document.getElementById("nt-lv"); if (!lv) return;
+    const f = document.createElement("span"); f.className = "nt-plus"; f.textContent = "+" + n;
+    lv.parentNode.appendChild(f); setTimeout(() => f.remove(), 1200);
+  }
+  function zetVoortgang() {
+    const bar = document.getElementById("nt-voortgang"); if (!bar) return;
+    const v = (data.mijn && data.mijn.venster) || "", j = [...v].filter((x) => x === "1").length;
+    bar.style.width = niveau >= 5 ? "100%" : Math.min(100, Math.round((j / 8) * 100)) + "%";
+    bar.parentNode.title = niveau >= 5 ? "Hoogste level" : `Naar level ${niveau + 1}: ${j} van de 8 juist (laatste 10 vragen)`;
+  }
   form.addEventListener("submit", (e) => { e.preventDefault(); if (veld.value.trim()) { beantwoord(veld.value, false); veld.value = ""; } });
 
   let stroom = null, mime = "";
@@ -275,8 +342,9 @@
   if (geschiedenis.length) { const s = document.createElement("p"); s.className = "nt-scheiding"; s.textContent = "nieuwe sessie"; logEl.appendChild(s); }
   tekenMeer(); zetLv();
   const welkom = niveau === 1 && !(data.mijn && data.mijn.totaal)
-    ? `${esc(naam)}, this is Rover Base. Welkom op kanaal 40! We oefenen het NATO-alfabet, net als op de radio. Ik zeg een letter, jij zegt het woord. Typ het, of houd PTT ingedrukt en zeg het. Bij 8 op 10 juist ga je een level hoger. Daar gaan we, over.`
+    ? `${esc(naam)}, this is Rover Base. Welkom op kanaal 40! We oefenen het NATO-alfabet, net als op de radio. Daar gaan we, over.`
     : `${esc(naam)}, this is Rover Base. Je zit op <b>level ${niveau}: ${NIVEAUS[niveau]}</b>. Daar gaan we, over.`;
   bericht({ wie: "Rover Base", html: welkom });
-  later(() => stel(nieuweVraag()), 600);
+  zetVoortgang();
+  later(() => { const w = legUit(niveau) ? 1200 : 0; later(() => stel(nieuweVraag()), w); }, 600);
 })();

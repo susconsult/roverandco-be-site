@@ -55,18 +55,18 @@ export const MAX_NIVEAU = 5;
 const laatsteAntwoord = new Map();
 async function antwoord(request, env, lid) {
   let d = {}; try { d = await request.json(); } catch { /* leeg */ }
-  const juist = d.juist === true, vraagNiveau = Math.round(Number(d.niveau)) || 1;
+  const juist = d.juist === true, hint = d.hint === true, vraagNiveau = Math.round(Number(d.niveau)) || 1;
   if (Date.now() - (laatsteAntwoord.get(lid.id) || 0) < 800) return json({ ok: false, fout: "Rustig aan." }, 429);
   laatsteAntwoord.set(lid.id, Date.now());
   const oud = await env.SHOP_DB.prepare("SELECT * FROM nato_score WHERE lid_id = ?").bind(lid.id).first();
   const vandaag = dagVan(), t = new Date().toISOString();
   const reeks = oud?.laatste_dag === vandaag ? oud.reeks : oud?.laatste_dag === plusDagen(vandaag, -1) ? oud.reeks + 1 : 1;
   let niveau = oud?.niveau || 1, venster = oud?.venster || "", omhoog = false;
-  if (vraagNiveau === niveau) {
+  if (vraagNiveau === niveau && !hint) { // met hint telt niet mee voor het level
     venster = (venster + (juist ? "1" : "0")).slice(-10);
     if (niveau < MAX_NIVEAU && venster.length >= 10 && [...venster].filter((x) => x === "1").length >= 8) { niveau++; venster = ""; omhoog = true; }
   }
-  const xp = juist ? 10 : 0;
+  const xp = juist ? (hint ? 5 : 10) : 0;
   await env.SHOP_DB.batch([
     env.SHOP_DB.prepare(`INSERT INTO nato_score (lid_id, xp, reeks, langste, laatste_dag, sessies, juist, totaal, bijgewerkt, niveau, venster) VALUES (?1, ?2, ?3, ?3, ?4, 0, ?5, 1, ?6, ?7, ?8)
       ON CONFLICT (lid_id) DO UPDATE SET xp = xp + ?2, reeks = ?3, langste = MAX(langste, ?3), laatste_dag = ?4, juist = juist + ?5, totaal = totaal + 1, bijgewerkt = ?6, niveau = ?7, venster = ?8`).bind(lid.id, xp, reeks, vandaag, juist ? 1 : 0, t, niveau, venster),
@@ -136,11 +136,12 @@ export async function trainingScherm(env, lid) {
   return `<p class="cb-oms">${esc(TRAINING_KANAAL[2])}</p>
     <div class="cb-log" id="nt-log" aria-live="polite"></div>
     <form class="cb-zend" id="nt-zend" autocomplete="off">
-      <div class="nt-veld"><input id="nt-tekst" maxlength="200" placeholder="Jouw antwoord…" aria-label="Jouw antwoord"><span class="nt-lv" id="nt-lv" title="Jouw level">★ L${s.mijn.niveau}</span></div>
+      <div class="nt-veld"><input id="nt-tekst" maxlength="200" placeholder="Jouw antwoord…" aria-label="Jouw antwoord"><span class="nt-lv" id="nt-lv" title="Jouw level">★ L${s.mijn.niveau}</span><span class="nt-vg" aria-hidden="true"><i id="nt-voortgang"></i></span></div>
+      <button type="button" class="nt-hintknop" id="nt-hintknop" disabled>Hint</button>
       <button class="cb-ptt" type="submit" id="nt-ptt" aria-label="Zenden. Houd ingedrukt om te praten."><span>PTT</span><small>Zenden</small></button>
     </form>
     <p class="cb-hint" id="nt-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> en spreek in het Engels.</p>
     <details class="nt-meer"><summary>Ranglijst en spiekbriefje</summary><div id="nt-meer"></div></details>
     <script type="application/json" id="nt-data">${JSON.stringify({ ...s, naam: lid.gebruikersnaam || "" }).replace(/</g, "\\u003c")}</script>
-    <script src="/assets/js/cb-training.js?v=5" defer></script>`;
+    <script src="/assets/js/cb-training.js?v=6" defer></script>`;
 }
