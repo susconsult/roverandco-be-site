@@ -57,10 +57,13 @@ const nuBrussel = () => {
     .formatToParts(new Date()).map((p) => [p.type, p.value]));
   return { jaar: +d.year, maand: +d.month, dag: +d.day, uur: +d.hour % 24 };
 };
-// De mail van begin december gaat over november: we noemen de vorige maand.
 export function editieNu() {
-  const { jaar, maand } = nuBrussel();
-  // Beslist 26 nov 2026: de mail heet naar de maand waarin hij vertrekt ("December bij Rover & Co") en kijkt vooral vooruit.
+  const nu = nuBrussel();
+  // Beslist 26 nov 2026: de mail gaat over de komende maand ("December bij Rover & Co").
+  // Vanaf de 15de van de maand is dat al de volgende maand (klaarzetten op 26 november = december).
+  const volgende = nu.dag >= 15;
+  const maand = volgende ? (nu.maand === 12 ? 1 : nu.maand + 1) : nu.maand;
+  const jaar = volgende && nu.maand === 12 ? nu.jaar + 1 : nu.jaar;
   return { code: `${jaar}-${String(maand).padStart(2, "0")}`, maandNaam: MAANDEN[maand - 1], jaarVan: jaar, maandEinde: new Date(Date.UTC(jaar, maand, 0)).toISOString().slice(0, 10) };
 }
 
@@ -347,6 +350,7 @@ export async function maandmailCron(env) {
   if (dag !== 1 || uur < 9) return;
   const e = editieNu();
   if ((await instelling(env, "maandmail_test")) === e.code) return;
+  if ((await vorigeVerzending(env))?.code === e.code) return; // deze maand al vooraf klaargezet en verstuurd
   await zet(env, "maandmail_test", e.code);
   const r = await stuurTest(env, await concept(env));
   await env.SHOP_DB.prepare("INSERT INTO lid_log (lid_id, soort, tekst, link, aangemaakt) VALUES (0, 'beheer', ?, '/beheer/maandmail', ?)")
