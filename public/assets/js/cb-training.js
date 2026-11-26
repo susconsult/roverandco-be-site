@@ -31,10 +31,10 @@
   zet("M", "mike", "mic", "mik", "mikes"); zet("N", "november"); zet("O", "oscar", "oskar"); zet("P", "papa", "pappa"); zet("Q", "quebec", "kebec", "kebek", "québec");
   zet("R", "romeo"); zet("S", "sierra", "siera", "cierra"); zet("T", "tango"); zet("U", "uniform", "uniforms"); zet("V", "victor", "viktor");
   zet("W", "whiskey", "whisky"); zet("X", "xray", "x-ray"); zet("Y", "yankee", "yankees", "yanky", "yankie"); zet("Z", "zulu", "zoeloe");
-  zet("0", "zero", "nul"); zet("1", "one", "won", "wun"); zet("2", "two", "to", "too", "tu"); zet("3", "tree", "tri", "trie"); zet("3*", "three", "free");
-  zet("4", "fower", "fowr", "fouwer", "fauer", "power", "flower"); zet("4*", "four", "for", "fore"); zet("5", "fife", "fyfe", "fyf"); zet("5*", "five", "fiver", "fifer"); zet("6", "six", "sicks");
+  zet("0", "zero", "nul"); zet("1", "one", "won", "wun"); zet("2", "two", "to", "too", "tu"); zet("3", "tree", "tri", "trie", "three", "free");
+  zet("4", "fower", "fowr", "fouwer", "fauer", "power", "flower"); zet("4*", "four", "for", "fore"); zet("5", "fife", "fyfe", "fyf", "five"); zet("5*", "fiver", "fifer"); zet("6", "six", "sicks");
   zet("7", "seven"); zet("8", "eight", "ate"); zet("9", "niner", "nyner", "niener", "nina"); zet("9*", "nine", "nein");
-  // Streng (keuze Pieter): 3, 4, 5 en 9 tellen alleen in de radiovorm. "three/four/five/nine" worden "3*" enz. en zijn fout.
+  // Streng (keuze Pieter): 4 en 9 tellen alleen als "fower" en "niner" (dat hoort Whisper). Tree/three en fife/five klinken voor Whisper hetzelfde, die mogen allebei. "Fiver" blijft fout.
   for (let d = 0; d <= 9; d++) SYN[String(d)] = String(d); // herkenning schrijft cijfers vaak als "578"
   zet("FIG", "figures", "figure", "figgers", "figuers"); zet("SPELL", "spell", "ispell", "spel", "spells");
   zet("OVER", "over", "ova"); zet("OUT", "out"); zet("ROGER", "roger"); zet("WILCO", "wilco"); zet("SAY", "say"); zet("AGAIN", "again");
@@ -185,7 +185,7 @@
       const fout = gezegd.filter((x) => x.t[0] === "?").map((x) => `“${esc(x.w)}” bestaat niet, dat is ${WOORD[x.t.slice(1)]}.`).join(" ")
         + (gezegd.some((x) => x.t.endsWith("*")) ? ` Op de radio zeg je ${[...new Set(gezegd.filter((x) => x.t.endsWith("*")).map((x) => `“${CIJFER[+x.t[0]]}”, niet “${esc(x.w)}”`))].join(", ")}.` : "");
       html = `Bijna. Juist is: <b>${esc(zin(q.verwacht))}</b>` + (q.verwacht.length > 1 ? `<span class="nt-chips">${q.verwacht.map((t, i) => `<span class="${v.ok[i] ? "ok" : "mis"}">${esc(toon(t))}</span>`).join("")}</span>` : "") +
-        (fout ? `<br><small>${fout}</small>` : "") + (q.tip ? `<br><small>${esc(q.tip)}</small>` : "");
+        (fout ? `<br><small>${fout}</small>` : "") + (q.tip && !gezegd.some((x) => x.t.endsWith("*")) ? `<br><small>${esc(q.tip)}</small>` : "");
       if (!q.herhaling) herhaal.push({ q, na: teller + 3 });
     }
     fetch("/api/cb/40/antwoord", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ juist, niveau: q.niveau }) })
