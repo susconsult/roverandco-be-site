@@ -99,8 +99,8 @@
   // Elke oefening: { soort: kies|tegels|spreek, vraag, uitleg, opties|tegels, verwacht (tokens of antwoord), streng, letter, tip }
   function oefLetter() {
     const l = letter(), r = Math.random();
-    if (r < 0.4) return { soort: "kies", niveau: 1, vraag: `Welk woord hoort bij <b class="nt-groot">${l}</b>?`, opties: schud([WOORD[l], ...lokvogels(l, 3)]), antwoord: WOORD[l], letters: [l], tip: TIP[l] };
-    if (r < 0.65) return { soort: "kies", niveau: 1, vraag: `Welke letter is <b class="nt-groot">${WOORD[l]}</b>?`, opties: schud([l, ...schud(LETTERS.filter((x) => x !== l)).slice(0, 3)]), antwoord: l, letters: [l] };
+    if (r < 0.65) return { soort: "kies", niveau: 1, vraag: `Welk woord hoort bij <b class="nt-groot">${l}</b>?`, opties: schud([WOORD[l], ...lokvogels(l, 3)]), antwoord: WOORD[l], letters: [l], tip: TIP[l] };
+    // (Geen "welke letter is Charlie?": dat is gewoon de eerste letter, te makkelijk.)
     return { soort: "spreek", niveau: 1, vraag: `Zeg de letter <b class="nt-groot">${l}</b>`, verwacht: [l], streng: true, letters: [l], tip: TIP[l] };
   }
   function oefWoord() {
