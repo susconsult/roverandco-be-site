@@ -1,0 +1,82 @@
+// CB-kanaal 40: privé NATO-training. Geen berichten, alleen oefenen zoals Duolingo:
+// tikken, kiezen of spreken met PTT (spraak naar tekst in de browser). Scores, dagreeks en ranglijst in D1.
+import { esc } from "./sjabloon.js";
+import { log } from "./log.js";
+
+export const TRAINING = 40;
+export const TRAINING_KANAAL = [TRAINING, "NATO-training", "Privé: alleen jij hoort jezelf. Oefen het NATO-alfabet zoals op de radio."];
+
+const json = (d, status = 200) => new Response(JSON.stringify(d), { status, headers: { "content-type": "application/json; charset=utf-8", "cache-control": "no-store" } });
+const dagVan = (d = new Date()) => new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Brussels", year: "numeric", month: "2-digit", day: "2-digit" }).format(d);
+const plusDagen = (dag, n) => { const d = new Date(dag + "T12:00:00Z"); d.setUTCDate(d.getUTCDate() + n); return d.toISOString().slice(0, 10); };
+const maandag = (dag) => { const w = new Date(dag + "T12:00:00Z").getUTCDay(); return plusDagen(dag, -((w + 6) % 7)); };
+
+let klaar = false;
+export async function zorgTraining(env) {
+  if (klaar) return;
+  const db = env.SHOP_DB;
+  await db.batch([
+    db.prepare("CREATE TABLE IF NOT EXISTS nato_score (lid_id INTEGER PRIMARY KEY, xp INTEGER NOT NULL DEFAULT 0, reeks INTEGER NOT NULL DEFAULT 0, langste INTEGER NOT NULL DEFAULT 0, laatste_dag TEXT, sessies INTEGER NOT NULL DEFAULT 0, juist INTEGER NOT NULL DEFAULT 0, totaal INTEGER NOT NULL DEFAULT 0, bijgewerkt TEXT)"),
+    db.prepare("CREATE TABLE IF NOT EXISTS nato_dagen (lid_id INTEGER NOT NULL, dag TEXT NOT NULL, xp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lid_id, dag))"),
+    // Kanaal 40 is vast en privé. Had een lid het als eigen kanaal geopend, dan wordt het nu de training.
+    db.prepare("INSERT INTO cb_kanalen (nr, naam, omschrijving, lid_id, vast, aangemaakt) VALUES (?, ?, ?, NULL, 1, ?) ON CONFLICT (nr) DO UPDATE SET naam = excluded.naam, omschrijving = excluded.omschrijving, lid_id = NULL, vast = 1").bind(...TRAINING_KANAAL, new Date().toISOString()),
+    db.prepare("DELETE FROM cb_berichten WHERE nr = ?").bind(TRAINING),
+  ]);
+  klaar = true;
+}
+
+async function mijnScore(env, lid) {
+  const s = await env.SHOP_DB.prepare("SELECT * FROM nato_score WHERE lid_id = ?").bind(lid.id).first();
+  const vandaag = dagVan();
+  const reeks = s && (s.laatste_dag === vandaag || s.laatste_dag === plusDagen(vandaag, -1)) ? s.reeks : 0;
+  const week = (await env.SHOP_DB.prepare("SELECT COALESCE(SUM(xp), 0) n FROM nato_dagen WHERE lid_id = ? AND dag >= ?").bind(lid.id, maandag(vandaag)).first()).n;
+  return { xp: s?.xp || 0, week, reeks, langste: s?.langste || 0, sessies: s?.sessies || 0, juist: s?.juist || 0, totaal: s?.totaal || 0, vandaag: s?.laatste_dag === vandaag };
+}
+
+async function ranglijst(env, lid) {
+  const actief = "l.geblokkeerd = 0 AND l.verwijderd_op IS NULL AND l.gebruikersnaam IS NOT NULL";
+  const week = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, SUM(d.xp) xp FROM nato_dagen d JOIN leden l ON l.id = d.lid_id WHERE d.dag >= ? AND ${actief} GROUP BY l.id HAVING xp > 0 ORDER BY xp DESC, MIN(d.dag) LIMIT 10`).bind(maandag(dagVan())).all()).results || [];
+  const altijd = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, s.xp, s.langste FROM nato_score s JOIN leden l ON l.id = s.lid_id WHERE s.xp > 0 AND ${actief} ORDER BY s.xp DESC, s.bijgewerkt LIMIT 10`).all()).results || [];
+  const zet = (r) => r.map((x, i) => ({ plaats: i + 1, naam: x.naam, xp: x.xp, ik: x.id === lid.id }));
+  return { week: zet(week), altijd: zet(altijd) };
+}
+
+async function stand(env, lid) {
+  return { ok: true, mijn: await mijnScore(env, lid), ...(await ranglijst(env, lid)) };
+}
+
+// Na elke les: aantal juist bij de eerste poging. 10 XP per juist antwoord, 20 extra voor een foutloze les.
+async function sessie(request, env, lid) {
+  let d = {}; try { d = await request.json(); } catch { /* leeg */ }
+  const totaal = Math.round(Number(d.totaal)), juist = Math.round(Number(d.juist));
+  if (!(totaal >= 5 && totaal <= 15 && juist >= 0 && juist <= totaal)) return json({ ok: false, fout: "Ongeldige les." }, 400);
+  const oud = await env.SHOP_DB.prepare("SELECT * FROM nato_score WHERE lid_id = ?").bind(lid.id).first();
+  if (oud?.bijgewerkt && Date.now() - Date.parse(oud.bijgewerkt) < 20_000) return json({ ok: false, fout: "Die les was wel heel snel. Probeer opnieuw." }, 429);
+  const xp = juist * 10 + (juist === totaal ? 20 : 0);
+  const vandaag = dagVan(), t = new Date().toISOString();
+  const reeks = oud?.laatste_dag === vandaag ? oud.reeks : oud?.laatste_dag === plusDagen(vandaag, -1) ? oud.reeks + 1 : 1;
+  await env.SHOP_DB.batch([
+    env.SHOP_DB.prepare(`INSERT INTO nato_score (lid_id, xp, reeks, langste, laatste_dag, sessies, juist, totaal, bijgewerkt) VALUES (?1, ?2, ?3, ?3, ?4, 1, ?5, ?6, ?7)
+      ON CONFLICT (lid_id) DO UPDATE SET xp = xp + ?2, reeks = ?3, langste = MAX(langste, ?3), laatste_dag = ?4, sessies = sessies + 1, juist = juist + ?5, totaal = totaal + ?6, bijgewerkt = ?7`).bind(lid.id, xp, reeks, vandaag, juist, totaal, t),
+    env.SHOP_DB.prepare("INSERT INTO nato_dagen (lid_id, dag, xp) VALUES (?1, ?2, ?3) ON CONFLICT (lid_id, dag) DO UPDATE SET xp = xp + ?3").bind(lid.id, vandaag, xp),
+  ]);
+  if (!oud) await log(env, lid.id, "cb", "Eerste NATO-training gedaan op CB-kanaal 40", "/cb/40");
+  return json({ ...(await stand(env, lid)), verdiend: xp });
+}
+
+export async function trainingApi(request, env, url, lid, pad) {
+  await zorgTraining(env);
+  if (pad === "stand" && request.method === "GET") return json(await stand(env, lid));
+  if (pad === "sessie" && request.method === "POST") return sessie(request, env, lid);
+  return json({ ok: false, fout: "Kanaal 40 is privé: hier kan je alleen oefenen." }, 403);
+}
+
+// Het scherm van de radio op kanaal 40. Alles daarbinnen bouwt /assets/js/cb-training.js op.
+export async function trainingScherm(env, lid) {
+  await zorgTraining(env);
+  const s = await stand(env, lid);
+  return `<p class="cb-oms">${esc(TRAINING_KANAAL[2])}</p>
+    <div class="nt" id="nt" aria-live="polite"><p class="cb-stil">Training laden…</p></div>
+    <script type="application/json" id="nt-data">${JSON.stringify({ ...s, naam: lid.gebruikersnaam || "" }).replace(/</g, "\\u003c")}</script>
+    <script src="/assets/js/cb-training.js" defer></script>`;
+}

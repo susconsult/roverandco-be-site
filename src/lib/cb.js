@@ -4,6 +4,7 @@ import { esc, banner, pagina, naar, eigenOrigin, mail } from "./sjabloon.js";
 import { huidigLid } from "./leden.js";
 import { meld } from "./forum-extra.js";
 import { log } from "./log.js";
+import { TRAINING, TRAINING_KANAAL, zorgTraining, trainingScherm, trainingApi } from "./cb-training.js";
 
 export const CB_UREN = 24;
 const MAX_KANAAL = 40;
@@ -18,6 +19,7 @@ const VAST = [
   [19, "Algemeen", "Het hoofdkanaal: alles wat nergens anders past"],
   [22, "Overland en kamperen", "Daktenten, routes en kampeerplekken"],
   [27, "Café", "Over koetjes en kalfjes, met of zonder Land Rover"],
+  TRAINING_KANAAL,
 ];
 
 const nu = () => new Date().toISOString();
@@ -28,6 +30,7 @@ let klaar = false;
 async function zaai(env) {
   if (klaar) return;
   await env.SHOP_DB.batch(VAST.map(([nr, naam, oms]) => env.SHOP_DB.prepare("INSERT OR IGNORE INTO cb_kanalen (nr, naam, omschrijving, vast, aangemaakt) VALUES (?, ?, ?, 1, ?)").bind(nr, naam, oms, nu())));
+  await zorgTraining(env);
   klaar = true;
 }
 
@@ -141,7 +144,8 @@ async function radio(request, env, url, lid, nr) {
   const lijst = await kanalen(env, lid);
   const k = lijst.find((x) => x.nr === nr);
   if (!k) return naar("/cb/19");
-  const eerste = await berichten(env, nr, lid);
+  const training = nr === TRAINING;
+  const eerste = training ? [] : await berichten(env, nr, lid);
   await gelezen(env, lid, nr, eerste.at(-1)?.id);
   await aanwezig(env, lid);
   const n = await online(env);
@@ -171,13 +175,13 @@ async function radio(request, env, url, lid, nr) {
         <span class="cb-s">S</span><span class="cb-bars" id="cb-bars" data-n="${n}">${Array.from({ length: 9 }, (_, i) => `<i class="${i < Math.min(9, n) ? "aan" : ""}"></i>`).join("")}</span><small id="cb-online">${n} op de CB</small>
       </div>
     </div>
-    <p class="cb-oms">${esc(k.omschrijving || "")}${!k.vast ? ` · eigen kanaal van een lid, verdwijnt over ${Math.max(1, Math.ceil((Date.parse(k.aangemaakt) + CB_UREN * 3600_000 - Date.now()) / 3600_000))} uur` : ""}</p>
-    <div class="cb-log" id="cb-log" aria-live="polite">${eerste.length ? "" : `<p class="cb-stil">Stilte op kanaal ${nr}. Breek de stilte!</p>`}</div>
+    ${training ? "" : `<p class="cb-oms">${esc(k.omschrijving || "")}${!k.vast ? ` · eigen kanaal van een lid, verdwijnt over ${Math.max(1, Math.ceil((Date.parse(k.aangemaakt) + CB_UREN * 3600_000 - Date.now()) / 3600_000))} uur` : ""}</p>`}
+    ${training ? await trainingScherm(env, lid) : `<div class="cb-log" id="cb-log" aria-live="polite">${eerste.length ? "" : `<p class="cb-stil">Stilte op kanaal ${nr}. Breek de stilte!</p>`}</div>
     <form class="cb-zend" id="cb-zend" autocomplete="off">
       ${mag(lid) ? `<input id="cb-tekst" maxlength="500" placeholder="${albert ? "Zeg iets, Albert" : `Bericht op kanaal ${nr}`}" aria-label="Bericht" required>
       <button class="cb-ptt" type="submit" id="cb-ptt" aria-label="Zenden. Houd ingedrukt om een spraakbericht op te nemen."><span>PTT</span><small>Zenden</small></button>` : `<p>Bevestig eerst je mailadres om te zenden. <a href="/account">Naar mijn account</a></p>`}
     </form>
-    ${mag(lid) ? `<p class="cb-hint" id="cb-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> om te praten (max. 20 s).</p>` : ""}
+    ${mag(lid) ? `<p class="cb-hint" id="cb-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> om te praten (max. 20 s).</p>` : ""}`}
   </div>
   <aside class="cb-paneel" aria-label="Alle kanalen"><div class="cb-paneel-kop">Kanalen <small><i class="cb-lamp aan"></i> actief</small></div>
     <nav class="cb-lijst" id="cb-lijst">${lijst.map((x) => kanaalRij(x, nr)).join("")}</nav></aside>
@@ -194,7 +198,7 @@ async function radio(request, env, url, lid, nr) {
       <button class="btn btn-solid" type="submit">Kanaal openen</button>
     </form><small>Je kan zelf 2 kanalen openen. Een eigen kanaal verdwijnt na ${CB_UREN} uur, handig voor een rit of een dag.</small></details>` : ""}
   ${magOpheffen ? `<form method="post" action="/cb/${nr}/opheffen" class="cb-op" data-bevestig="Kanaal ${nr} opheffen?"><button class="linkknop rood" type="submit">Kanaal ${nr} opheffen</button></form>` : ""}
-</section><script src="/assets/js/cb.js" defer></script>`,
+</section>${training ? "" : `<script src="/assets/js/cb.js" defer></script>`}`,
   });
 }
 
@@ -303,6 +307,8 @@ export async function cb(request, env, url) {
   if ((m = p.match(/^\/cb\/(\d{1,2})$/))) return radio(request, env, url, lid, +m[1]);
   if (p === "/cb/nieuw" && request.method === "POST") return nieuwKanaal(request, env, lid);
   if ((m = p.match(/^\/cb\/(\d{1,2})\/opheffen$/)) && request.method === "POST") return opheffen(env, lid, +m[1]);
+  if ((m = p.match(/^\/api\/cb\/40\/(stand|sessie)$/))) return trainingApi(request, env, url, lid, m[1]);
+  if ((m = p.match(/^\/api\/cb\/(\d{1,2})(\/audio)?$/)) && +m[1] === TRAINING) return trainingApi(request, env, url, lid, "");
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})$/))) return request.method === "POST" ? zenden(request, env, url, lid, +m[1]) : ophalen(env, url, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})\/audio$/)) && request.method === "POST") return zendAudio(request, env, lid, +m[1]);
   if ((m = p.match(/^\/cb\/audio\/(\d{1,10})$/))) return audioTonen(env, +m[1]);

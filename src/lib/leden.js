@@ -650,6 +650,7 @@ async function export_(env, lid) {
     bewaard: await alle("SELECT soort, sleutel, aangemaakt FROM lid_bewaard WHERE lid_id = ?", lid.id),
     cb_berichten_laatste_24u: await alle("SELECT nr AS kanaal, tekst, audio_id, aangemaakt FROM cb_berichten WHERE lid_id = ?", lid.id),
     meldingen: await alle("SELECT tekst, link, gelezen, aangemaakt FROM lid_meldingen WHERE lid_id = ?", lid.id),
+    nato_training: { score: (await alle("SELECT xp, reeks, langste, laatste_dag, sessies, juist, totaal FROM nato_score WHERE lid_id = ?", lid.id).catch(() => []))[0] || null, per_dag: await alle("SELECT dag, xp FROM nato_dagen WHERE lid_id = ? ORDER BY dag", lid.id).catch(() => []) },
     activiteit_laatste_90_dagen: await alle("SELECT soort, tekst, aangemaakt FROM lid_log WHERE lid_id = ? ORDER BY id", lid.id),
     fotos: "Je foto's staan op /forum/foto/<foto_id> (zie Mijn Landy en forumberichten).",
   };

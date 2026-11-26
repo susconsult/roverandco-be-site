@@ -394,3 +394,68 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .zij-kaart .zk-zij b{display:block;font-size:var(--fs-sm);line-height:1.25}
 .zk-zij em{font-style:normal;font-weight:700;color:var(--green);font-size:13px}
 .zk-zijknop{display:block;text-align:center;margin:10px 0 4px}
+
+/* ---------- CB-kanaal 40: NATO-training ---------- */
+.nt{background:#f4f1e8;color:var(--ink);border-radius:10px;min-height:min(52vh,480px);padding:18px;box-shadow:inset 0 2px 6px rgba(0,0,0,.25);display:flex;flex-direction:column;gap:14px}
+.nt .btn{cursor:pointer}
+.nt-klein{margin:0;color:var(--muted);font-size:var(--fs-sm)}
+.nt-groot{font:800 clamp(34px,6vw,52px)/1 var(--head);color:var(--green);letter-spacing:1px}
+.nt-h{margin:8px 0 0;font:800 20px/1.1 var(--head);text-transform:uppercase;letter-spacing:1px}
+.nt-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.nt-stats div{background:#fff;border-radius:10px;padding:10px 12px;display:grid;gap:2px}
+.nt-stats b{font:800 30px/1 var(--head);color:var(--green);font-variant-numeric:tabular-nums}.nt-stats small{color:var(--muted);font-size:12px;line-height:1.3}
+.nt-lessen{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:8px}
+.nt-les{display:flex;gap:12px;align-items:center;text-align:left;background:#fff;border:2px solid transparent;border-radius:12px;padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.06);transition:transform .15s,border-color .15s}
+.nt-les:hover{transform:translateY(-2px);border-color:var(--green)}
+.nt-les b{flex:none;width:40px;height:40px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;font:800 20px/1 var(--head)}
+.nt-les span{display:grid;font-weight:700}.nt-les small{font-weight:400;color:var(--muted);font-size:var(--fs-sm)}
+.nt-tabs{display:flex;gap:6px}
+.nt-tabs button{border:0;border-radius:99px;padding:6px 14px;font:600 var(--fs-sm) var(--body);cursor:pointer;background:#e6e1d3;color:var(--ink)}
+.nt-tabs button[aria-selected=true]{background:var(--green);color:#fff}
+.nt-rang{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.nt-rang li{display:grid;grid-template-columns:28px 1fr auto;gap:10px;align-items:center;background:#fff;border-radius:8px;padding:8px 12px}
+.nt-rang li b{font:800 18px/1 var(--head);color:var(--muted)}.nt-rang li:nth-child(-n+3) b{color:#c8891a}
+.nt-rang li em{font-style:normal;font-weight:700;font-variant-numeric:tabular-nums}
+.nt-rang li.ik{background:#dcefe2;font-weight:700}
+.nt-spiek summary{cursor:pointer;font-weight:700;color:var(--green)}
+.nt-tabel{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:4px;margin:10px 0}
+.nt-tabel span{background:#fff;border-radius:6px;padding:5px 8px;font-size:var(--fs-sm)}.nt-tabel b{display:inline-block;width:18px;color:var(--green)}
+.nt-kop{display:flex;align-items:center;gap:12px;font:700 var(--fs-sm) var(--body);color:var(--muted)}
+.nt-stop{border:0;background:none;font-size:26px;line-height:1;cursor:pointer;color:var(--muted);padding:0 4px}
+.nt-balk{flex:1;height:12px;border-radius:99px;background:#e0dacb;overflow:hidden}.nt-balk i{display:block;height:100%;background:var(--green);border-radius:99px;transition:width .3s}
+.nt-vraag{font-size:20px;line-height:1.5;font-weight:600}
+.nt-radio{font-style:italic;color:var(--green-3, var(--green))}
+.nt-plaat{display:block;width:max-content;margin:10px 0 2px;padding:6px 16px;border:3px solid #b3202a;border-radius:6px;background:#fff;color:#b3202a;font:800 32px/1.1 var(--head);letter-spacing:3px}
+.nt-opties{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:8px}
+.nt-optie,.nt-tegel{font:600 17px var(--body);color:var(--ink);background:#fff;border:2px solid #d8d1bf;border-bottom-width:4px;border-radius:12px;padding:12px 14px;cursor:pointer;text-align:center}
+.nt-optie:hover:not(:disabled),.nt-tegel:hover:not(:disabled){border-color:var(--green)}
+.nt-optie.gekozen{border-color:var(--green);background:#dcefe2}
+.nt-optie.juist{border-color:var(--green);background:var(--green);color:#fff}
+.nt-optie:disabled,.nt-tegel:disabled{cursor:default}
+.nt-lijn{min-height:58px;border-bottom:2px solid #d8d1bf;display:flex;flex-wrap:wrap;gap:6px;align-content:flex-start;padding-bottom:8px}
+.nt-bank{display:flex;flex-wrap:wrap;gap:6px}
+.nt-tegel{padding:8px 12px;font-size:16px}
+.nt-tegel.weg{visibility:hidden}
+.nt-spreek{display:flex;gap:16px;align-items:center;margin:4px 0}
+.nt-spreek .cb-ptt{margin:0}
+.nt-gehoord{flex:1;min-width:0;min-height:72px;background:#fff;border-radius:12px;padding:12px 14px;display:flex;align-items:center}
+.nt-gehoord p{margin:0;font-size:18px;font-weight:600}.nt-gehoord small{color:var(--muted)}.nt-gehoord .fout{color:#b3202a}
+.nt-typ input{width:100%;padding:14px 16px;border-radius:10px;border:2px solid #d8d1bf;font:inherit;background:#fff}
+.nt-chips{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0}.nt-chips span{padding:2px 8px;border-radius:6px;font-size:var(--fs-sm);font-weight:600}
+.nt-chips .ok{background:#dcefe2;color:#1f3b2a}.nt-chips .mis{background:#ffd9d4;color:#8a1c12}
+.nt-voet{margin-top:auto;display:flex;gap:14px;align-items:center;justify-content:space-between;border-radius:12px;padding:12px 14px}
+.nt-voet:not(.goed):not(.fout){justify-content:flex-end;padding:0}
+.nt-voet.goed{background:#dcefe2}.nt-voet.fout{background:#ffe3df}
+.nt-oordeel{display:grid;gap:4px;min-width:0}.nt-oordeel p{margin:0}
+.nt-voet.goed .nt-oordeel>b{color:var(--green)}.nt-voet.fout .nt-oordeel>b{color:#b3202a}
+.nt-einde{margin:auto;text-align:center;display:grid;gap:10px;justify-items:center}.nt-einde p{margin:0}
+.nt-knoppen{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+@media(max-width:640px){
+  .nt{padding:12px}
+  .nt-stats{grid-template-columns:repeat(2,1fr)}
+  .nt-vraag{font-size:18px}
+  .nt-opties{grid-template-columns:1fr 1fr}
+  .nt-voet.goed,.nt-voet.fout{flex-direction:column;align-items:stretch}
+  .nt-spreek .cb-ptt{width:72px;height:72px}
+}
+.nt .btn:disabled{opacity:.45;cursor:default}

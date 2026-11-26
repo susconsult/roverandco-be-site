@@ -138,3 +138,7 @@ CREATE TABLE IF NOT EXISTS zoekertjes (id INTEGER PRIMARY KEY AUTOINCREMENT, lid
   fotos TEXT NOT NULL DEFAULT '[]', telefoon TEXT, toon_tel INTEGER NOT NULL DEFAULT 0, toon_mail INTEGER NOT NULL DEFAULT 0, status TEXT NOT NULL DEFAULT 'actief',
   bekeken INTEGER NOT NULL DEFAULT 0, aangemaakt TEXT NOT NULL, bijgewerkt TEXT, afgesloten_op TEXT);
 CREATE INDEX IF NOT EXISTS idx_zoekertjes_status ON zoekertjes(status, aangemaakt);
+
+-- NATO-training op CB-kanaal 40 (26 nov 2026). Wordt ook vanzelf aangemaakt door src/lib/cb-training.js.
+CREATE TABLE IF NOT EXISTS nato_score (lid_id INTEGER PRIMARY KEY, xp INTEGER NOT NULL DEFAULT 0, reeks INTEGER NOT NULL DEFAULT 0, langste INTEGER NOT NULL DEFAULT 0, laatste_dag TEXT, sessies INTEGER NOT NULL DEFAULT 0, juist INTEGER NOT NULL DEFAULT 0, totaal INTEGER NOT NULL DEFAULT 0, bijgewerkt TEXT);
+CREATE TABLE IF NOT EXISTS nato_dagen (lid_id INTEGER NOT NULL, dag TEXT NOT NULL, xp INTEGER NOT NULL DEFAULT 0, PRIMARY KEY (lid_id, dag));
