@@ -190,7 +190,7 @@ async function radio(request, env, url, lid, nr) {
   <script type="application/json" id="cb-reacties">${JSON.stringify(await reacties(env, nr, lid))}</script>
 
 
-  ${mag(lid) && vrij.length && eigenKanalen < 2 ? `<details class="cb-nieuw"><summary>Zelf een kanaal openen</summary>
+  ${!training && mag(lid) && vrij.length && eigenKanalen < 2 ? `<details class="cb-nieuw"><summary>Zelf een kanaal openen</summary>
     <form method="post" action="/cb/nieuw">
       <label>Kanaal<select name="nr">${vrij.map((i) => `<option>${i}</option>`).join("")}</select></label>
       <label>Naam<input name="naam" maxlength="30" required placeholder="Defender-rijders Limburg"></label>

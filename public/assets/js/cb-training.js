@@ -122,6 +122,9 @@
     return MAKER[n]();
   }
 
+  const WEET_NIET = /\b(i )?(do ?n'?o?t|dunno)( really)? know\b|\bdunno\b|no idea|not sure|\bpass\b|\bskip\b|\bhelp\b|weet (het |dat )?niet|geen (idee|flauw)|\bbeu\b|ik weet het niet|^\s*\?+\s*$|^\s*\.{2,}\s*$/i;
+  const EZEL = { A: "Als in alfabet.", B: "Bravo, zoals applaus.", C: "Charlie, een jongensnaam.", D: "Delta, zoals de Deltawerken.", E: "Echo, het geluid dat terugkomt.", F: "Foxtrot, een dans.", G: "Golf, de sport.", H: "Hotel, waar je slaapt.", I: "India, het land.", J: "Juliett, van Romeo en Juliet, met dubbele t.", K: "Kilo, zoals een kilo.", L: "Lima, de hoofdstad van Peru.", M: "Mike, een jongensnaam.", N: "November, de maand.", O: "Oscar, de filmprijs.", P: "Papa, zoals je vader.", Q: "Quebec, de Canadese provincie.", R: "Romeo, van Romeo en Juliet.", S: "Sierra, de bergketen.", T: "Tango, een dans.", U: "Uniform, wat een soldaat draagt.", V: "Victor, zoals victorie.", W: "Whiskey, het drankje.", X: "X-ray, een röntgenfoto.", Y: "Yankee, een Amerikaan.", Z: "Zulu, het volk in Zuid-Afrika." };
+
   /* ---------------- het gesprek ---------------- */
   let geschiedenis = bewaar.lees("log", []);
   function bericht(b, opslaan = true) {
@@ -158,6 +161,18 @@
     if (!tekst) return;
     bericht({ wie: "ik", html: esc(tekst), spraak });
     const q = vraag; vraag = null; bezig = true;
+    // "Ik weet het niet": geen afstraffing, gewoon het antwoord met een ezelsbruggetje. Telt als fout en komt terug.
+    if (WEET_NIET.test(tekst) && !tokens(tekst).length) {
+      (q.letters || []).forEach((l) => { zwak[l] = (zwak[l] || 0) + 2; });
+      bewaar.zet("zwak", zwak);
+      if (!q.herhaling) herhaal.push({ q, na: teller + 3 });
+      const l = q.verwacht.length === 1 && /^[A-Z]$/.test(q.verwacht[0]) ? q.verwacht[0] : null;
+      const html = l ? `Geen probleem. ${l} is <b>${WOORD[l]}</b>. ${esc(EZEL[l] || "")} Die komt straks nog eens terug.`
+        : `Geen probleem, zo zeg je het: <b>${esc(zin(q.verwacht))}</b>${q.tip ? `<br><small>${esc(q.tip)}</small>` : ""}<br><small>Die komt straks nog eens terug.</small>`;
+      fetch("/api/cb/40/antwoord", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ juist: false, niveau: q.niveau }) }).catch(() => {});
+      later(() => { bericht({ wie: q.wie || "Rover Base", html, soort: "hulp" }); later(() => { bezig = false; stel(nieuweVraag()); }, 900); }, 350);
+      return;
+    }
     const gezegd = tokens(tekst);
     const v = vergelijk(q.verwacht, gezegd, q.streng);
     const juist = v.juist;

@@ -479,3 +479,4 @@ html{touch-action:pan-x pan-y;-webkit-text-size-adjust:100%;text-size-adjust:100
 .nt-meer summary{cursor:pointer;font-weight:700;color:var(--green)}
 .nt-meer>div{display:grid;gap:10px;margin-top:10px}
 .nt-meer .nt-lv{margin-left:4px}
+.cb-bericht.nt-hulp>div{background:#e8eef7}
