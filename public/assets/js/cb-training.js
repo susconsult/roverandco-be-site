@@ -1,18 +1,16 @@
-/* CB-kanaal 40: NATO-training. Lessen van 10 oefeningen: kiezen, tegels tikken of spreken met PTT.
-   Spraak naar tekst op onze eigen server (Cloudflare Workers AI, Whisper). Fouten komen achteraan terug, zoals bij Duolingo. */
+/* CB-kanaal 40: NATO-training als CB-gesprek. "Rover Base" stelt vragen, jij antwoordt met tekst of PTT (spraak via Whisper).
+   Levels: 1 letters, 2 cijfers, 3 woorden, 4 nummerplaten, 5 oproepen. Level omhoog bij 8 juist op de laatste 10 (server beslist). */
 (function () {
   "use strict";
-  const doos = document.getElementById("nt");
-  if (!doos) return;
+  const logEl = document.getElementById("nt-log");
+  if (!logEl) return;
   let data = {};
   try { data = JSON.parse(document.getElementById("nt-data").textContent); } catch (e) { /* leeg */ }
-  const lcdNaam = document.querySelector(".cb-naam"), rx = document.getElementById("cb-rx");
-  const lcd = (t) => { if (lcdNaam) { lcdNaam.dataset.oud ||= lcdNaam.textContent; lcdNaam.textContent = t || lcdNaam.dataset.oud; } };
+  const rx = document.getElementById("cb-rx");
   const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
   const kies = (a) => a[Math.floor(Math.random() * a.length)];
   const schud = (a) => { a = a.slice(); for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; };
   const bewaar = { lees(k, d) { try { return JSON.parse(localStorage.getItem("nt-" + k)) ?? d; } catch (e) { return d; } }, zet(k, v) { try { localStorage.setItem("nt-" + k, JSON.stringify(v)); } catch (e) { /* geen opslag */ } } };
-
   /* ---------------- het alfabet ---------------- */
   const WOORD = { A: "Alfa", B: "Bravo", C: "Charlie", D: "Delta", E: "Echo", F: "Foxtrot", G: "Golf", H: "Hotel", I: "India", J: "Juliett", K: "Kilo", L: "Lima", M: "Mike", N: "November", O: "Oscar", P: "Papa", Q: "Quebec", R: "Romeo", S: "Sierra", T: "Tango", U: "Uniform", V: "Victor", W: "Whiskey", X: "X-ray", Y: "Yankee", Z: "Zulu" };
   const CIJFER = ["Zero", "One", "Two", "Tree", "Fower", "Fife", "Six", "Seven", "Eight", "Niner"];
@@ -92,270 +90,176 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   };
 
-  const kanPraten = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
-  let stil = bewaar.lees("stil", false); // "ik kan nu niet praten"
-  const spreken = () => kanPraten && !stil;
+  /* ---------------- vragen per level ---------------- */
+  const NIVEAUS = { 1: "letters", 2: "cijfers", 3: "woorden spellen", 4: "nummerplaten", 5: "echte oproepen" };
+  const naam = data.naam || "Rover";
+  const TIP_CIJFER = "Op de radio zeg je cijfers één voor één: tree, fower, fife, niner.";
+  const TIP_PLAAT = "Zeg “Figures” voor de cijfers en “I spell” voor de letters, één keer per groep. Geen “number”.";
+  function getal() { const n = 2 + Math.floor(Math.random() * 3); let g = String(1 + Math.floor(Math.random() * 9)); while (g.length < n) g += Math.floor(Math.random() * 10); return g; }
+  const MAKER = {
+    1: () => { const l = letter(); return { niveau: 1, vraag: `${l}?`, verwacht: [l], streng: true, letters: [l], tip: TIP[l] }; },
+    2: () => { const g = getal(); return { niveau: 2, vraag: `Zeg dit getal op de radio: <b>${g}</b>`, verwacht: g.split(""), streng: true, tip: TIP_CIJFER }; },
+    3: () => { const w = kies(WOORDEN); return { niveau: 3, vraag: `Spel: <b>${w}</b>`, verwacht: spelTok(w), streng: true, letters: spelTok(w) }; },
+    4: () => { const p = plaat().tekst; return { niveau: 4, vraag: `Geef deze plaat door: <b class="nt-plaatje">${p}</b>`, verwacht: plaatTok(p), streng: true, letters: p.split("-")[1].split(""), tip: TIP_PLAAT }; },
+    5: () => kies([
+      () => ({ niveau: 5, vraag: "Je staat stil met pech. Roep het konvooi op.", verwacht: ["ROVER", "CONVOY", "THIS", "IS", "OVER"], streng: false, tip: "Een oproep: wie je roept, “this is”, wie jij bent, “over”.",
+        vervolg: () => { const p = plaat().tekst; return { niveau: 5, wie: "Rover Convoy", vraag: `${esc(naam)}, this is Rover Convoy, send your message, over.<br><small>Geef de plaat van je wagen door en sluit af: <b class="nt-plaatje">${p}</b></small>`, verwacht: [...plaatTok(p), "OVER"], streng: false, tip: TIP_PLAAT + " Sluit af met “over”." }; } }),
+      () => ({ niveau: 5, wie: "Rover Convoy", vraag: `${esc(naam)}, this is Rover Convoy, wacht aan de volgende afslag, over.<br><small>Zeg dat je het begrepen hebt en het doet.</small>`, verwacht: ["WILCO", "OVER"], streng: false, tip: "“Wilco” = begrepen en ik doe het. Sluit af met “over”." }),
+      () => ({ niveau: 5, wie: "Rover Convoy", vraag: `${esc(naam)}, this is Rover Convoy, kshhh… afslag… kshhh, over.<br><small>Je verstond het niet. Vraag om herhaling.</small>`, verwacht: ["SAY", "AGAIN", "OVER"], streng: false, tip: "“Say again, over.” Zeg nooit “repeat”." }),
+      () => ({ niveau: 5, vraag: "Je bent klaar met praten en verwacht een antwoord. Welk woord zeg je?", verwacht: ["OVER"], streng: false }),
+      () => ({ niveau: 5, vraag: "Het gesprek is gedaan, je verwacht geen antwoord. Welk woord?", verwacht: ["OUT"], streng: false }),
+      () => ({ niveau: 5, vraag: "Je hebt het bericht goed ontvangen. Welk woord?", verwacht: ["ROGER"], streng: false }),
+    ])(),
+  };
 
-  // Elke oefening: { soort: kies|tegels|spreek, vraag, uitleg, opties|tegels, verwacht (tokens of antwoord), streng, letter, tip }
-  function oefLetter() {
-    const l = letter(), r = Math.random();
-    if (r < 0.65) return { soort: "kies", niveau: 1, vraag: `Welk woord hoort bij <b class="nt-groot">${l}</b>?`, opties: schud([WOORD[l], ...lokvogels(l, 3)]), antwoord: WOORD[l], letters: [l], tip: TIP[l] };
-    // (Geen "welke letter is Charlie?": dat is gewoon de eerste letter, te makkelijk.)
-    return { soort: "spreek", niveau: 1, vraag: `Zeg de letter <b class="nt-groot">${l}</b>`, verwacht: [l], streng: true, letters: [l], tip: TIP[l] };
-  }
-  function oefWoord() {
-    const w = kies(WOORDEN), tok = spelTok(w), r = Math.random();
-    if (r < 0.2) {
-      const andere = schud(WOORDEN.filter((x) => x !== w && x.length === w.length)).slice(0, 3);
-      while (andere.length < 3) andere.push(schud(WOORDEN.filter((x) => x !== w && !andere.includes(x)))[0]);
-      return { soort: "kies", niveau: 2, vraag: `Je hoort op de radio:<br><i class="nt-radio">“${esc(zin(tok))}”</i><br>Welk woord is dat?`, opties: schud([w, ...andere]), antwoord: w, letters: tok };
-    }
-    const vraag = `Spel <b class="nt-groot">${w}</b>`;
-    if (r < 0.6) return { soort: "tegels", niveau: 2, vraag, verwacht: tok, tegels: schud([...tok, ...tegelsVoor(tok)]), letters: tok };
-    return { soort: "spreek", niveau: 2, vraag, verwacht: tok, streng: true, letters: tok };
-  }
-  function oefPlaat() {
-    const p = plaat().tekst, tok = plaatTok(p), r = Math.random(), letters = p.split("-")[1].split("");
-    const tip = "Zeg “Figures” voor cijfers en “I spell” voor letters, telkens één keer per groep. Niet “number” voor elk cijfer.";
-    if (r < 0.2) {
-      const opties = new Set([p]); while (opties.size < 4) { const q = p.split(""); const i = kies([0, 2, 3, 4, 6, 7, 8]); q[i] = /\d/.test(q[i]) ? String((+q[i] + 1 + Math.floor(Math.random() * 8)) % 10) : kies(LETTERS); opties.add(q.join("")); }
-      return { soort: "kies", niveau: 3, vraag: `Je hoort:<br><i class="nt-radio">“${esc(zin(tok))}”</i><br>Welke nummerplaat is het?`, opties: schud([...opties]), antwoord: p, letters, plaat: true };
-    }
-    const vraag = `Geef de nummerplaat door:<span class="nt-plaat">${p}</span>`;
-    if (r < 0.6) {
-      const cijfers = [...new Set(tok.filter((t) => /^\d$/.test(t)))];
-      const extra = schud(["NUMBER", ...LETTERS.filter((x) => !letters.includes(x)).slice(0, 8), ...["3", "4", "5", "9"].filter((x) => !cijfers.includes(x))]).slice(0, 3);
-      return { soort: "tegels", niveau: 3, vraag, verwacht: tok, tegels: schud([...tok, ...extra.slice(0, 2), ...tegelsVoor(tok, 2)]), letters, tip };
-    }
-    return { soort: "spreek", niveau: 3, vraag, verwacht: tok, streng: true, letters, tip };
-  }
-  const PROWORDS = [
-    ["Over", "Ik ben klaar en wacht op antwoord"], ["Out", "Gesprek afgelopen, geen antwoord nodig"], ["Roger", "Ik heb je bericht goed ontvangen"], ["Wilco", "Begrepen, ik doe het"],
-    ["Say again", "Herhaal je laatste bericht"], ["Wait", "Even wachten, ik kom terug"], ["I spell", "Nu volgt een woord in letters"], ["Figures", "Nu volgen cijfers"],
-  ];
-  function oefRadio() {
-    const roep = ["ROVER", String(1 + Math.floor(Math.random() * 9)), String(Math.floor(Math.random() * 10))];
-    const roepTxt = zin(roep), r = Math.random();
-    const oproep = ["ROVER", "CONVOY", "THIS", "IS", ...roep, "OVER"];
-    const dist = schud(["OUT", "ROGER", "BASE", "WILCO", "WAIT"]).slice(0, 3);
-    if (r < 0.3) {
-      const [w, b] = kies(PROWORDS);
-      return Math.random() < 0.5
-        ? { soort: "kies", niveau: 4, vraag: `Wat betekent <b class="nt-groot">${w}</b> op de radio?`, opties: schud([b, ...schud(PROWORDS.filter((x) => x[0] !== w)).slice(0, 3).map((x) => x[1])]), antwoord: b }
-        : { soort: "kies", niveau: 4, vraag: `Wat zeg je als je wil zeggen: <b>${b.toLowerCase()}</b>?`, opties: schud([w, ...schud(PROWORDS.filter((x) => x[0] !== w)).slice(0, 3).map((x) => x[0])]), antwoord: w };
-    }
-    const situaties = [
-      { vraag: `Je roepnaam is <b>${roepTxt}</b>. Roep het konvooi op.`, verwacht: oproep },
-      { vraag: `Je roepnaam is <b>${roepTxt}</b>. Je hoorde het konvooi niet goed. Vraag om herhaling.`, verwacht: ["ROVER", "CONVOY", "THIS", "IS", ...roep, "SAY", "AGAIN", "OVER"] },
-      { vraag: `Je roepnaam is <b>${roepTxt}</b>. Het konvooi vraagt je te wachten aan de afslag. Zeg dat je het begrepen hebt en het doet.`, verwacht: ["ROVER", "CONVOY", "THIS", "IS", ...roep, "WILCO", "OVER"] },
-    ];
-    if (r < 0.55) {
-      const p = plaat().tekst;
-      const s = { vraag: `Het konvooi vraagt de plaat van de wagen met pech. Zeg ze, en sluit af zodat ze kunnen antwoorden:<span class="nt-plaat">${p}</span>`, verwacht: [...plaatTok(p), "OVER"], letters: p.split("-")[1].split("") };
-      return Math.random() < 0.5 && spreken() ? { soort: "spreek", niveau: 4, ...s, streng: false } : { soort: "tegels", niveau: 4, ...s, tegels: schud([...s.verwacht, "OUT", "NUMBER", ...tegelsVoor(s.verwacht, 2)]) };
-    }
-    const s = kies(situaties);
-    const tip = "Een oproep gaat altijd zo: wie je roept, “this is”, wie jij bent, en “over”.";
-    return Math.random() < 0.5 && spreken() ? { soort: "spreek", niveau: 4, ...s, streng: false, tip } : { soort: "tegels", niveau: 4, ...s, tegels: schud([...s.verwacht, ...dist]), tip, roep };
-  }
-  const MAKER = { 1: oefLetter, 2: oefWoord, 3: oefPlaat, 4: oefRadio };
-  const LESSEN = [
-    [1, "Letters", "Van Alfa tot Zulu"], [2, "Woorden spellen", "Defender, snorkel, jerrycan…"], [3, "Nummerplaten", "Met Figures en I spell"], [4, "Radio-oproepen", "Rover Convoy, this is…"], [0, "Alles door elkaar", "Een mix van alles"],
-  ];
-
-  /* ---------------- les ---------------- */
-  const LENGTE = 10;
-  let les = null;
-  function startLes(niveau) {
-    const lijst = [];
-    for (let i = 0; i < LENGTE; i++) {
-      const n = niveau || 1 + (i % 4);
-      let o = MAKER[n]();
-      if (o.soort === "spreek" && !spreken()) o = { ...o, soort: o.verwacht.length > 1 ? "tegels" : "kies", ...(o.verwacht.length > 1 ? { tegels: schud([...o.verwacht, ...tegelsVoor(o.verwacht)]) } : { opties: schud([WOORD[o.verwacht[0]], ...lokvogels(o.verwacht[0], 3)]), antwoord: WOORD[o.verwacht[0]] }) };
-      lijst.push(o);
-    }
-    les = { niveau, lijst: niveau ? lijst : schud(lijst), i: 0, juist: 0, eerste: LENGTE, herhaald: 0, start: Date.now() };
-    oefening();
+  let niveau = data.mijn?.niveau || 1, vraag = null, teller = 0, herhaal = [], bezig = false;
+  function nieuweVraag() {
+    teller++;
+    const klaar = herhaal.findIndex((h) => h.na <= teller);
+    if (klaar >= 0) { const q = herhaal.splice(klaar, 1)[0].q; return { ...q, herhaling: true, vervolg: undefined }; }
+    // Meestal je eigen level, af en toe een herhaling van een lager level.
+    const n = niveau > 1 && Math.random() < 0.2 ? 1 + Math.floor(Math.random() * (niveau - 1)) : niveau;
+    return MAKER[n]();
   }
 
-  let keuze = null, gelegd = [];
-  function voortgang() { return `<div class="nt-kop"><button type="button" class="nt-stop" data-stop aria-label="Les stoppen">×</button><div class="nt-balk"><i style="width:${Math.round((les.i / les.lijst.length) * 100)}%"></i></div><span>${Math.min(les.i + 1, les.lijst.length)}/${les.lijst.length}</span></div>`; }
-
-  function oefening() {
-    const o = les.lijst[les.i]; keuze = null; gelegd = [];
-    lcd(`LES ${les.i + 1}/${les.lijst.length}`);
-    let antwoord = "";
-    if (o.soort === "kies") antwoord = `<div class="nt-opties">${o.opties.map((x) => `<button type="button" class="nt-optie" data-optie="${esc(x)}">${esc(x)}</button>`).join("")}</div>`;
-    if (o.soort === "tegels") antwoord = `<div class="nt-lijn" id="nt-lijn" aria-label="Jouw antwoord"></div><div class="nt-bank" id="nt-bank">${o.tegels.map((t, i) => `<button type="button" class="nt-tegel" data-tegel="${i}">${esc(toon(t))}</button>`).join("")}</div>`;
-    if (o.soort === "spreek") antwoord = `<div class="nt-spreek"><button type="button" class="cb-ptt" id="nt-ptt" aria-label="Houd ingedrukt en spreek"><span>PTT</span><small>Houd in</small></button>
-      <div class="nt-gehoord" id="nt-gehoord"><small>Houd PTT ingedrukt, spreek in het Engels, laat los.</small></div></div>
-      <p class="nt-klein"><button type="button" class="linkknop" data-stil>Ik kan nu niet praten</button> · <button type="button" class="linkknop" data-typ>Liever typen</button></p>`;
-    doos.innerHTML = voortgang() + `<div class="nt-vraag">${o.vraag}</div>${o.uitleg ? `<p class="nt-klein">${o.uitleg}</p>` : ""}${antwoord}
-      <div class="nt-voet" id="nt-voet"><button type="button" class="btn btn-solid nt-controleer" id="nt-controleer" disabled>Controleer</button></div>`;
-    if (o.soort === "spreek") koppelPtt(o);
+  /* ---------------- het gesprek ---------------- */
+  let geschiedenis = bewaar.lees("log", []);
+  function bericht(b, opslaan = true) {
+    const stil = logEl.querySelector(".cb-stil"); if (stil) stil.remove();
+    const d = document.createElement("div");
+    const eigen = b.wie === "ik";
+    d.className = "cb-bericht" + (eigen ? " eigen" : "") + (b.soort ? " nt-" + b.soort : "");
+    const wie = eigen ? naam : b.wie || "Rover Base";
+    const t = b.t ? new Date(b.t) : new Date();
+    d.innerHTML = `<span class="cb-av">${esc(eigen ? (naam[0] || "?").toUpperCase() : wie === "Rover Convoy" ? "RC" : "RB")}</span>
+      <div><span class="cb-wie"><b>${esc(wie)}</b> <time>${t.toLocaleTimeString("nl-BE", { hour: "2-digit", minute: "2-digit" })}</time>${b.spraak ? ' <small class="nt-spraak">spraak</small>' : ""}</span><p>${b.html}</p></div>`;
+    logEl.appendChild(d);
+    logEl.scrollTop = logEl.scrollHeight;
+    if (!eigen && rx) { rx.classList.add("aan"); setTimeout(() => rx.classList.remove("aan"), 600); }
+    if (opslaan) { geschiedenis.push({ ...b, t: t.toISOString() }); geschiedenis = geschiedenis.slice(-30); bewaar.zet("log", geschiedenis); }
+  }
+  const later = (f, ms) => setTimeout(f, ms);
+  function stel(q) {
+    vraag = q;
+    bericht({ wie: q.wie || "Rover Base", html: q.vraag + (q.herhaling ? ' <small class="nt-klein">(nog eens)</small>' : "") });
+    zetLv();
+  }
+  function zetLv(pop) {
+    const lv = document.getElementById("nt-lv");
+    if (!lv) return;
+    lv.textContent = "★ L" + niveau;
+    lv.title = `Level ${niveau}: ${NIVEAUS[niveau]}`;
+    if (pop) { lv.classList.remove("pop"); void lv.offsetWidth; lv.classList.add("pop"); }
   }
 
-  function legTegels(o) {
-    const lijn = document.getElementById("nt-lijn"), bank = document.getElementById("nt-bank");
-    lijn.innerHTML = gelegd.map((i, k) => `<button type="button" class="nt-tegel" data-terug="${k}">${esc(toon(o.tegels[i]))}</button>`).join("");
-    bank.querySelectorAll("[data-tegel]").forEach((b) => b.classList.toggle("weg", gelegd.includes(+b.dataset.tegel)));
-    document.getElementById("nt-controleer").disabled = !gelegd.length;
-  }
-
-  function controleer(gesproken) {
-    const o = les.lijst[les.i];
-    let juist = false, detail = "";
-    if (o.soort === "kies") juist = keuze === o.antwoord;
-    else {
-      const gezegd = o.soort === "tegels" ? gelegd.map((i) => ({ t: o.tegels[i], w: toon(o.tegels[i]) })) : tokens(gesproken || "");
-      const v = vergelijk(o.verwacht, gezegd, o.streng);
-      juist = o.soort === "tegels" ? gezegd.map((x) => x.t).join(" ") === o.verwacht.join(" ") : v.juist;
-      if (o.soort === "spreek") {
-        const fout = gezegd.filter((x) => x.t[0] === "?");
-        detail = `<p class="nt-klein">Ik hoorde: “${esc(gesproken || "niets")}”</p>` + (fout.length ? `<p class="nt-klein">${fout.map((x) => `“${esc(x.w)}” is niet juist, dat is ${esc(WOORD[x.t.slice(1)])}.`).join(" ")}</p>` : "");
-        if (!juist && !v.juist) detail += `<p class="nt-chips">${o.verwacht.map((t, i) => `<span class="${v.ok[i] ? "ok" : "mis"}">${esc(toon(t))}</span>`).join("")}</p>`;
-      }
-    }
-    (o.letters || []).forEach((l) => { zwak[l] = Math.max(0, (zwak[l] || 0) + (juist ? -1 : 2)); });
+  function beantwoord(tekst, spraak) {
+    if (!vraag || bezig) return;
+    tekst = String(tekst || "").trim();
+    if (!tekst) return;
+    bericht({ wie: "ik", html: esc(tekst), spraak });
+    const q = vraag; vraag = null; bezig = true;
+    const gezegd = tokens(tekst);
+    const v = vergelijk(q.verwacht, gezegd, q.streng);
+    const juist = v.juist;
+    (q.letters || []).forEach((l) => { zwak[l] = Math.max(0, (zwak[l] || 0) + (juist ? -1 : 2)); });
     bewaar.zet("zwak", zwak);
-    if (les.i < les.eerste && juist) les.juist++;
-    if (!juist && les.herhaald < 3 && !o.herhaling) { les.lijst.push({ ...o, herhaling: true, opties: o.opties && schud(o.opties), tegels: o.tegels && schud(o.tegels) }); les.herhaald++; }
-    if (rx) { rx.classList.add("aan"); setTimeout(() => rx.classList.remove("aan"), 700); }
-    const goed = o.antwoord ?? zin(o.verwacht);
-    const voet = document.getElementById("nt-voet");
-    voet.className = "nt-voet " + (juist ? "goed" : "fout");
-    voet.innerHTML = `<div class="nt-oordeel"><b>${juist ? kies(["Roger, juist!", "Helemaal juist!", "Luid en duidelijk!", "Perfect!"]) : "Niet helemaal."}</b>
-      ${juist ? "" : `<p>Juist antwoord: <b>${esc(goed)}</b></p>`}${detail}${o.tip && !juist ? `<p class="nt-klein">${esc(o.tip)}</p>` : ""}${!juist && !o.herhaling && les.herhaald <= 3 ? `<p class="nt-klein">Deze komt straks nog eens terug.</p>` : ""}</div>
-      <button type="button" class="btn btn-solid" id="nt-verder" autofocus>Verder</button>`;
-    doos.querySelectorAll(".nt-optie,.nt-tegel,#nt-ptt,[data-stil],[data-typ]").forEach((b) => { b.disabled = true; if (o.soort === "kies" && b.dataset.optie) b.classList.toggle("juist", b.dataset.optie === o.antwoord); });
-    document.getElementById("nt-verder").focus();
-  }
-
-  function verder() {
-    les.i++;
-    if (les.i < les.lijst.length) return oefening();
-    einde();
-  }
-
-  function einde() {
-    lcd(""); micUit();
-    const { juist, eerste } = les;
-    doos.innerHTML = `<div class="nt-einde"><p class="nt-groot">${juist}/${eerste}</p><p>${juist === eerste ? "Foutloos! Over and out." : juist >= eerste * 0.7 ? "Goed bezig, bijna radiovast." : "Blijven oefenen, dan zit het er zo in."}</p><p class="nt-klein" id="nt-xp">Score bewaren…</p>
-      <div class="nt-knoppen"><button type="button" class="btn btn-solid" data-les="${les.niveau}">Nog een les</button><button type="button" class="btn" data-start>Naar het overzicht</button></div></div>`;
-    fetch("/api/cb/40/sessie", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ niveau: les.niveau, juist, totaal: eerste }) })
-      .then((r) => r.json()).then((d) => {
-        const el = document.getElementById("nt-xp");
-        if (d.ok) { data = { ...data, ...d }; if (el) el.innerHTML = `+${d.verdiend} XP · reeks: <b>${d.mijn.reeks} ${d.mijn.reeks === 1 ? "dag" : "dagen"}</b> · deze week ${d.mijn.week} XP`; }
-        else if (el) el.textContent = d.fout || "Score bewaren lukte niet.";
-      }).catch(() => { const el = document.getElementById("nt-xp"); if (el) el.textContent = "Score bewaren lukte niet. Controleer je verbinding."; });
-  }
-
-  /* ---------------- PTT: opnemen, op de server omzetten naar tekst (Whisper) ---------------- */
-  // De microfoon blijft open tijdens een les, zodat het eerste woord niet verloren gaat en je niet telkens toestemming moet geven.
-  let stroom = null, mime = "";
-  if (kanPraten) ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"].some((m) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m) && (mime = m));
-  function micUit() { if (stroom) { stroom.getTracks().forEach((t) => t.stop()); stroom = null; } }
-  function mic() {
-    if (stroom && stroom.getTracks().some((t) => t.readyState === "live")) return Promise.resolve(stroom);
-    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then((s) => (stroom = s));
-  }
-  function koppelPtt(o) {
-    const ptt = document.getElementById("nt-ptt"), uit = document.getElementById("nt-gehoord");
-    let rec = null, stuks = [], begin = 0, los = false, klok = null;
-    const zeg = (t, fout) => { uit.innerHTML = `<small class="${fout ? "fout" : ""}">${t}</small>`; };
-    const stop = () => { los = true; clearInterval(klok); ptt.classList.remove("tx"); if (rec && rec.state === "recording") setTimeout(() => rec.state === "recording" && rec.stop(), 250); };
-    ptt.addEventListener("pointerdown", (e) => {
-      e.preventDefault(); if (ptt.disabled || (rec && rec.state === "recording")) return;
-      ptt.setPointerCapture && ptt.setPointerCapture(e.pointerId);
-      los = false;
-      mic().then((s) => {
-        if (los) { zeg("Microfoon staat klaar. Houd PTT nu ingedrukt terwijl je praat."); return; }
-        stuks = []; rec = new MediaRecorder(s, mime ? { mimeType: mime } : undefined);
-        rec.ondataavailable = (ev) => { if (ev.data.size) stuks.push(ev.data); };
-        rec.onstop = () => {
-          if (Date.now() - begin < 600) { zeg("Te kort. Houd PTT ingedrukt zolang je praat."); return; }
-          const type = (rec.mimeType || mime || "audio/webm").split(";")[0];
-          ptt.disabled = true; zeg("Even luisteren…");
-          fetch("/api/cb/40/spraak", { method: "POST", credentials: "same-origin", headers: { "content-type": type }, body: new Blob(stuks, { type }) })
-            .then((r) => r.json())
-            .then((d) => {
-              ptt.disabled = false;
-              if (!d.ok) return zeg(esc(d.fout || "Omzetten lukte niet. Probeer opnieuw of typ je antwoord."), true);
-              if (!d.tekst) return zeg("Ik hoorde niets. Houd PTT ingedrukt en spreek duidelijk.", true);
-              uit.innerHTML = `<p>${esc(d.tekst)}</p>`;
-              controleer(d.tekst);
-            })
-            .catch(() => { ptt.disabled = false; zeg("Omzetten lukte niet. Controleer je verbinding of typ je antwoord.", true); });
-        };
-        rec.start(); begin = Date.now(); ptt.classList.add("tx");
-        zeg("Je zendt… laat PTT los als je klaar bent.");
-        klok = setInterval(() => { if (Date.now() - begin > 15000) stop(); }, 250);
-      }).catch(() => zeg("Geen toegang tot je microfoon. Sta die toe in je browser, of kies “Ik kan nu niet praten”.", true));
-    });
-    ptt.addEventListener("pointerup", stop); ptt.addEventListener("pointercancel", stop);
-    ptt.addEventListener("contextmenu", (e) => e.preventDefault());
-    ptt.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") e.preventDefault(); });
-  }
-  function typVeld() {
-    const o = les.lijst[les.i];
-    const plek = doos.querySelector(".nt-spreek");
-    plek.outerHTML = `<form class="nt-typ" id="nt-typ"><input id="nt-typtekst" autocomplete="off" placeholder="${o.verwacht.length > 1 ? "Bv. Kilo Tango Whiskey" : "Bv. Kilo"}" aria-label="Typ wat je zou zeggen"></form>`;
-    doos.querySelector(".nt-klein [data-typ]")?.parentNode.remove();
-    const veld = document.getElementById("nt-typtekst"), knop = document.getElementById("nt-controleer");
-    veld.focus(); veld.addEventListener("input", () => { knop.disabled = !veld.value.trim(); });
-    document.getElementById("nt-typ").addEventListener("submit", (e) => { e.preventDefault(); if (veld.value.trim()) controleer(veld.value); });
-  }
-
-  /* ---------------- overzicht ---------------- */
-  let tab = bewaar.lees("tab", "week");
-  function lijstHtml(rij) {
-    if (!rij || !rij.length) return `<p class="nt-klein">Nog niemand. Wees de eerste!</p>`;
-    return `<ol class="nt-rang">${rij.map((x) => `<li class="${x.ik ? "ik" : ""}"><b>${x.plaats}</b><span>${esc(x.naam)}</span><em>${x.xp} XP</em></li>`).join("")}</ol>`;
-  }
-  function start() {
-    les = null; lcd(""); micUit();
-    const m = data.mijn || { xp: 0, reeks: 0, week: 0, juist: 0, totaal: 0 };
-    const pct = m.totaal ? Math.round((m.juist / m.totaal) * 100) : 0;
-    doos.innerHTML = `<div class="nt-start">
-      <div class="nt-stats"><div><b>${m.reeks}</b><small>${m.reeks === 1 ? "dag" : "dagen"} op rij${m.reeks && !m.vandaag ? ", oefen vandaag!" : ""}</small></div><div><b>${m.week}</b><small>XP deze week</small></div><div><b>${m.xp}</b><small>XP in totaal</small></div><div><b>${pct}%</b><small>juist</small></div></div>
-      <h3 class="nt-h">Kies een les</h3>
-      <div class="nt-lessen">${LESSEN.map(([n, t, s]) => `<button type="button" class="nt-les" data-les="${n}"><b>${n || "★"}</b><span>${t}<small>${s}</small></span></button>`).join("")}</div>
-      <p class="nt-klein">${kanPraten ? (stil ? `Spreekoefeningen staan uit. <button type="button" class="linkknop" data-praat>Zet ze aan</button>` : "Bij spreekoefeningen houd je PTT ingedrukt en spreek je in het Engels.") : "Je browser kan niet opnemen. Je tikt of typt je antwoorden."}</p>
-      <h3 class="nt-h">Ranglijst</h3>
-      <div class="nt-tabs" role="tablist"><button type="button" role="tab" data-tab="week" aria-selected="${tab === "week"}">Deze week</button><button type="button" role="tab" data-tab="altijd" aria-selected="${tab === "altijd"}">Altijd</button></div>
-      ${lijstHtml(data[tab])}
-      <details class="nt-spiek"><summary>Spiekbriefje</summary><div class="nt-tabel">${LETTERS.map((l) => `<span><b>${l}</b>${WOORD[l]}</span>`).join("")}${CIJFER.map((w, i) => `<span><b>${i}</b>${w}</span>`).join("")}</div>
-        <p class="nt-klein">Cijfers zeg je één voor één. Zeg “Figures” voor een groep cijfers en “I spell” voor een groep letters. Sluit af met “over” als je antwoord verwacht, met “out” als het gesprek gedaan is.</p></details>
-    </div>`;
-  }
-
-  doos.addEventListener("click", (e) => {
-    const b = e.target.closest("button"); if (!b || b.disabled) return;
-    if (b.dataset.les !== undefined) return startLes(+b.dataset.les);
-    if (b.hasAttribute("data-start") || b.hasAttribute("data-stop")) return start();
-    if (b.dataset.tab) { tab = b.dataset.tab; bewaar.zet("tab", tab); return start(); }
-    if (b.hasAttribute("data-praat")) { stil = false; bewaar.zet("stil", false); return start(); }
-    if (!les) return;
-    const o = les.lijst[les.i];
-    if (b.id === "nt-verder") return verder();
-    if (b.id === "nt-controleer") { if (o.soort === "spreek") { const v = document.getElementById("nt-typtekst"); if (v && v.value.trim()) controleer(v.value); } else controleer(); return; }
-    if (b.dataset.optie !== undefined) { keuze = b.dataset.optie; doos.querySelectorAll(".nt-optie").forEach((x) => x.classList.toggle("gekozen", x === b)); document.getElementById("nt-controleer").disabled = false; return; }
-    if (b.dataset.tegel !== undefined) { const i = +b.dataset.tegel; if (!gelegd.includes(i)) { gelegd.push(i); legTegels(o); } return; }
-    if (b.dataset.terug !== undefined) { gelegd.splice(+b.dataset.terug, 1); legTegels(o); return; }
-    if (b.hasAttribute("data-stil")) {
-      stil = true; bewaar.zet("stil", true);
-      // Deze en de volgende spreekoefeningen worden tik-oefeningen.
-      les.lijst = les.lijst.map((x, k) => k < les.i || x.soort !== "spreek" ? x : x.verwacht.length > 1 ? { ...x, soort: "tegels", tegels: schud([...x.verwacht, ...tegelsVoor(x.verwacht)]) } : { ...x, soort: "kies", opties: schud([WOORD[x.verwacht[0]], ...lokvogels(x.verwacht[0], 3)]), antwoord: WOORD[x.verwacht[0]] });
-      return oefening();
+    let html;
+    if (juist) html = kies(["Roger, juist.", "Luid en duidelijk.", "Roger.", "Juist, goed zo."]);
+    else {
+      const fout = gezegd.filter((x) => x.t[0] === "?").map((x) => `“${esc(x.w)}” bestaat niet, dat is ${WOORD[x.t.slice(1)]}.`).join(" ");
+      html = `Bijna. Juist is: <b>${esc(zin(q.verwacht))}</b>` + (q.verwacht.length > 1 ? `<span class="nt-chips">${q.verwacht.map((t, i) => `<span class="${v.ok[i] ? "ok" : "mis"}">${esc(toon(t))}</span>`).join("")}</span>` : "") +
+        (fout ? `<br><small>${fout}</small>` : "") + (q.tip ? `<br><small>${esc(q.tip)}</small>` : "");
+      if (!q.herhaling) herhaal.push({ q, na: teller + 3 });
     }
-    if (b.hasAttribute("data-typ")) return typVeld();
-  });
-  document.addEventListener("keydown", (e) => {
-    if (e.key !== "Enter" || !les || e.target.id === "nt-typtekst" || e.target.closest("button, a, input, select, textarea, summary")) return;
-    const v = document.getElementById("nt-verder"), c = document.getElementById("nt-controleer");
-    if (v) { e.preventDefault(); verder(); } else if (c && !c.disabled) { e.preventDefault(); c.click(); }
-  });
+    fetch("/api/cb/40/antwoord", { method: "POST", credentials: "same-origin", headers: { "content-type": "application/json" }, body: JSON.stringify({ juist, niveau: q.niveau }) })
+      .then((r) => r.json()).then((d) => { if (d && d.ok) { data = { ...data, ...d }; if (d.mijn.niveau !== niveau) { const omhoog = d.mijn.niveau > niveau; niveau = d.mijn.niveau; if (omhoog) volgendeExtra = `★ Level ${niveau} gehaald! Vanaf nu: ${NIVEAUS[niveau]}.`; zetLv(true); } tekenMeer(); } })
+      .catch(() => { /* score bewaren mislukt: oefenen gaat door */ })
+      .then(() => {
+        later(() => {
+          bericht({ wie: q.wie || "Rover Base", html, soort: juist ? "goed" : "fout" });
+          later(() => {
+            if (volgendeExtra) { bericht({ wie: "Rover Base", html: `<b>${volgendeExtra}</b>`, soort: "level" }); volgendeExtra = ""; }
+            bezig = false;
+            stel(juist && q.vervolg ? q.vervolg() : nieuweVraag());
+          }, 700);
+        }, 350);
+      });
+  }
+  let volgendeExtra = "";
 
-  if (!kanPraten) stil = true;
-  start();
+  /* ---------------- invoer: typen of PTT ---------------- */
+  const form = document.getElementById("nt-zend"), veld = document.getElementById("nt-tekst"), ptt = document.getElementById("nt-ptt"), hint = document.getElementById("nt-hint");
+  const zegHint = (t, fout) => { if (hint) { hint.innerHTML = t; hint.classList.toggle("fout", !!fout); } };
+  form.addEventListener("submit", (e) => { e.preventDefault(); if (veld.value.trim()) { beantwoord(veld.value, false); veld.value = ""; } });
+
+  let stroom = null, mime = "";
+  const kanOpnemen = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
+  if (kanOpnemen) ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"].some((m) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m) && (mime = m));
+  const mic = () => stroom && stroom.getTracks().some((t) => t.readyState === "live") ? Promise.resolve(stroom) : navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then((s) => (stroom = s));
+  let rec = null, stuks = [], begin = 0, los = false, houd = null, klok = null;
+  const HINT = "Typ en druk op PTT, of <b>houd PTT ingedrukt</b> en spreek in het Engels.";
+  function stop() { los = true; clearInterval(klok); ptt.classList.remove("tx"); if (rec && rec.state === "recording") setTimeout(() => rec.state === "recording" && rec.stop(), 250); }
+  function neemOp() {
+    los = false;
+    mic().then((s) => {
+      if (los) { zegHint("Microfoon staat klaar. Houd PTT nu ingedrukt terwijl je praat."); return; }
+      stuks = []; rec = new MediaRecorder(s, mime ? { mimeType: mime } : undefined);
+      rec.ondataavailable = (ev) => { if (ev.data.size) stuks.push(ev.data); };
+      rec.onstop = () => {
+        if (Date.now() - begin < 600) { zegHint("Te kort. Houd PTT ingedrukt zolang je praat."); return; }
+        const type = (rec.mimeType || mime || "audio/webm").split(";")[0];
+        zegHint("Even luisteren…"); ptt.classList.add("zendt");
+        fetch("/api/cb/40/spraak", { method: "POST", credentials: "same-origin", headers: { "content-type": type }, body: new Blob(stuks, { type }) })
+          .then((r) => r.json())
+          .then((d) => {
+            if (!d.ok) return zegHint(esc(d.fout || "Omzetten lukte niet. Probeer opnieuw of typ je antwoord."), true);
+            if (!d.tekst) return zegHint("Ik hoorde niets. Houd PTT ingedrukt en spreek duidelijk.", true);
+            zegHint(HINT); beantwoord(d.tekst, true);
+          })
+          .catch(() => zegHint("Omzetten lukte niet. Controleer je verbinding of typ je antwoord.", true))
+          .then(() => ptt.classList.remove("zendt"));
+      };
+      rec.start(); begin = Date.now(); ptt.classList.add("tx");
+      zegHint("Je zendt… laat PTT los als je klaar bent.");
+      klok = setInterval(() => { if (Date.now() - begin > 15000) stop(); }, 250);
+    }).catch(() => zegHint("Geen toegang tot je microfoon. Sta die toe in je browser, of typ je antwoord.", true));
+  }
+  ptt.type = "button";
+  ptt.addEventListener("click", (e) => { e.preventDefault(); if (ptt.dataset.lang) { delete ptt.dataset.lang; return; } if (veld.value.trim()) { beantwoord(veld.value, false); veld.value = ""; } else zegHint(HINT); });
+  if (kanOpnemen) {
+    ptt.addEventListener("pointerdown", (e) => {
+      if (veld.value.trim()) return;
+      e.preventDefault(); ptt.setPointerCapture && ptt.setPointerCapture(e.pointerId);
+      houd = setTimeout(() => { houd = null; ptt.dataset.lang = "1"; neemOp(); }, 200);
+    });
+    const loslaten = () => { if (houd) { clearTimeout(houd); houd = null; return; } stop(); };
+    ptt.addEventListener("pointerup", loslaten); ptt.addEventListener("pointercancel", loslaten);
+    ptt.addEventListener("contextmenu", (e) => e.preventDefault());
+  } else zegHint("Typ je antwoord en druk op PTT. Opnemen werkt niet in deze browser.");
+  document.addEventListener("visibilitychange", () => { if (document.hidden && stroom) { stroom.getTracks().forEach((t) => t.stop()); stroom = null; } });
+
+  /* ---------------- ranglijst en spiekbriefje ---------------- */
+  let tab = bewaar.lees("tab", "week");
+  function tekenMeer() {
+    const el = document.getElementById("nt-meer"); if (!el) return;
+    const m = data.mijn || {};
+    const rij = data[tab] || [];
+    const juistVenster = [...(m.venster || "")].filter((x) => x === "1").length;
+    el.innerHTML = `<p class="nt-klein">Level ${niveau} (${NIVEAUS[niveau]})${niveau < 5 ? ` · laatste 10: ${juistVenster}/${(m.venster || "").length} juist, 8 nodig` : " · hoogste level"} · ${m.reeks || 0} ${m.reeks === 1 ? "dag" : "dagen"} op rij · ${m.xp || 0} XP</p>
+      <div class="nt-tabs" role="tablist"><button type="button" role="tab" data-tab="week" aria-selected="${tab === "week"}">Deze week</button><button type="button" role="tab" data-tab="altijd" aria-selected="${tab === "altijd"}">Altijd</button></div>
+      ${rij.length ? `<ol class="nt-rang">${rij.map((x) => `<li class="${x.ik ? "ik" : ""}"><b>${x.plaats}</b><span>${esc(x.naam)} <small class="nt-lv">★ L${x.niveau}</small></span><em>${x.xp} XP</em></li>`).join("")}</ol>` : `<p class="nt-klein">Nog niemand. Wees de eerste!</p>`}
+      <div class="nt-tabel">${LETTERS.map((l) => `<span><b>${l}</b>${WOORD[l]}</span>`).join("")}${CIJFER.map((w, i) => `<span><b>${i}</b>${w}</span>`).join("")}</div>
+      <p class="nt-klein">Cijfers één voor één. “Figures” voor een groep cijfers, “I spell” voor een groep letters. “Over” als je antwoord verwacht, “out” als het gesprek gedaan is.</p>`;
+  }
+  document.getElementById("nt-meer")?.addEventListener("click", (e) => { const b = e.target.closest("[data-tab]"); if (b) { tab = b.dataset.tab; bewaar.zet("tab", tab); tekenMeer(); } });
+
+  /* ---------------- start ---------------- */
+  geschiedenis.forEach((b) => bericht(b, false));
+  if (geschiedenis.length) { const s = document.createElement("p"); s.className = "nt-scheiding"; s.textContent = "nieuwe sessie"; logEl.appendChild(s); }
+  tekenMeer(); zetLv();
+  const welkom = niveau === 1 && !(data.mijn && data.mijn.totaal)
+    ? `${esc(naam)}, this is Rover Base. Welkom op kanaal 40! We oefenen het NATO-alfabet, net als op de radio. Ik zeg een letter, jij zegt het woord. Typ het, of houd PTT ingedrukt en zeg het. Bij 8 op 10 juist ga je een level hoger. Daar gaan we, over.`
+    : `${esc(naam)}, this is Rover Base. Je zit op <b>level ${niveau}: ${NIVEAUS[niveau]}</b>. Daar gaan we, over.`;
+  bericht({ wie: "Rover Base", html: welkom });
+  later(() => stel(nieuweVraag()), 600);
 })();

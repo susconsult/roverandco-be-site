@@ -23,6 +23,10 @@ export async function zorgTraining(env) {
     db.prepare("INSERT INTO cb_kanalen (nr, naam, omschrijving, lid_id, vast, aangemaakt) VALUES (?, ?, ?, NULL, 1, ?) ON CONFLICT (nr) DO UPDATE SET naam = excluded.naam, omschrijving = excluded.omschrijving, lid_id = NULL, vast = 1").bind(...TRAINING_KANAAL, new Date().toISOString()),
     db.prepare("DELETE FROM cb_berichten WHERE nr = ?").bind(TRAINING),
   ]);
+  // Levels (26 nov 2026): niveau 1-5 en de laatste antwoorden op dat niveau ("1101…", hoogstens 10).
+  for (const kol of ["niveau INTEGER NOT NULL DEFAULT 1", "venster TEXT NOT NULL DEFAULT ''"]) {
+    try { await db.prepare(`ALTER TABLE nato_score ADD COLUMN ${kol}`).run(); } catch { /* bestaat al */ }
+  }
   klaar = true;
 }
 
@@ -31,14 +35,14 @@ async function mijnScore(env, lid) {
   const vandaag = dagVan();
   const reeks = s && (s.laatste_dag === vandaag || s.laatste_dag === plusDagen(vandaag, -1)) ? s.reeks : 0;
   const week = (await env.SHOP_DB.prepare("SELECT COALESCE(SUM(xp), 0) n FROM nato_dagen WHERE lid_id = ? AND dag >= ?").bind(lid.id, maandag(vandaag)).first()).n;
-  return { xp: s?.xp || 0, week, reeks, langste: s?.langste || 0, sessies: s?.sessies || 0, juist: s?.juist || 0, totaal: s?.totaal || 0, vandaag: s?.laatste_dag === vandaag };
+  return { niveau: s?.niveau || 1, venster: s?.venster || "", xp: s?.xp || 0, week, reeks, langste: s?.langste || 0, sessies: s?.sessies || 0, juist: s?.juist || 0, totaal: s?.totaal || 0, vandaag: s?.laatste_dag === vandaag };
 }
 
 async function ranglijst(env, lid) {
   const actief = "l.geblokkeerd = 0 AND l.verwijderd_op IS NULL AND l.gebruikersnaam IS NOT NULL";
-  const week = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, SUM(d.xp) xp FROM nato_dagen d JOIN leden l ON l.id = d.lid_id WHERE d.dag >= ? AND ${actief} GROUP BY l.id HAVING xp > 0 ORDER BY xp DESC, MIN(d.dag) LIMIT 10`).bind(maandag(dagVan())).all()).results || [];
-  const altijd = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, s.xp, s.langste FROM nato_score s JOIN leden l ON l.id = s.lid_id WHERE s.xp > 0 AND ${actief} ORDER BY s.xp DESC, s.bijgewerkt LIMIT 10`).all()).results || [];
-  const zet = (r) => r.map((x, i) => ({ plaats: i + 1, naam: x.naam, xp: x.xp, ik: x.id === lid.id }));
+  const week = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, SUM(d.xp) xp, (SELECT niveau FROM nato_score s WHERE s.lid_id = l.id) niveau FROM nato_dagen d JOIN leden l ON l.id = d.lid_id WHERE d.dag >= ? AND ${actief} GROUP BY l.id HAVING xp > 0 ORDER BY xp DESC, MIN(d.dag) LIMIT 10`).bind(maandag(dagVan())).all()).results || [];
+  const altijd = (await env.SHOP_DB.prepare(`SELECT l.id, l.gebruikersnaam naam, s.xp, s.langste, s.niveau FROM nato_score s JOIN leden l ON l.id = s.lid_id WHERE s.xp > 0 AND ${actief} ORDER BY s.xp DESC, s.bijgewerkt LIMIT 10`).all()).results || [];
+  const zet = (r) => r.map((x, i) => ({ plaats: i + 1, naam: x.naam, xp: x.xp, niveau: x.niveau || 1, ik: x.id === lid.id }));
   return { week: zet(week), altijd: zet(altijd) };
 }
 
@@ -46,7 +50,34 @@ async function stand(env, lid) {
   return { ok: true, mijn: await mijnScore(env, lid), ...(await ranglijst(env, lid)) };
 }
 
-// Na elke les: aantal juist bij de eerste poging. 10 XP per juist antwoord, 20 extra voor een foutloze les.
+// Na elk antwoord in het gesprek. 10 XP per juist antwoord. Level omhoog bij 8 juist op de laatste 10 vragen van je level.
+export const MAX_NIVEAU = 5;
+const laatsteAntwoord = new Map();
+async function antwoord(request, env, lid) {
+  let d = {}; try { d = await request.json(); } catch { /* leeg */ }
+  const juist = d.juist === true, vraagNiveau = Math.round(Number(d.niveau)) || 1;
+  if (Date.now() - (laatsteAntwoord.get(lid.id) || 0) < 800) return json({ ok: false, fout: "Rustig aan." }, 429);
+  laatsteAntwoord.set(lid.id, Date.now());
+  const oud = await env.SHOP_DB.prepare("SELECT * FROM nato_score WHERE lid_id = ?").bind(lid.id).first();
+  const vandaag = dagVan(), t = new Date().toISOString();
+  const reeks = oud?.laatste_dag === vandaag ? oud.reeks : oud?.laatste_dag === plusDagen(vandaag, -1) ? oud.reeks + 1 : 1;
+  let niveau = oud?.niveau || 1, venster = oud?.venster || "", omhoog = false;
+  if (vraagNiveau === niveau) {
+    venster = (venster + (juist ? "1" : "0")).slice(-10);
+    if (niveau < MAX_NIVEAU && venster.length >= 10 && [...venster].filter((x) => x === "1").length >= 8) { niveau++; venster = ""; omhoog = true; }
+  }
+  const xp = juist ? 10 : 0;
+  await env.SHOP_DB.batch([
+    env.SHOP_DB.prepare(`INSERT INTO nato_score (lid_id, xp, reeks, langste, laatste_dag, sessies, juist, totaal, bijgewerkt, niveau, venster) VALUES (?1, ?2, ?3, ?3, ?4, 0, ?5, 1, ?6, ?7, ?8)
+      ON CONFLICT (lid_id) DO UPDATE SET xp = xp + ?2, reeks = ?3, langste = MAX(langste, ?3), laatste_dag = ?4, juist = juist + ?5, totaal = totaal + 1, bijgewerkt = ?6, niveau = ?7, venster = ?8`).bind(lid.id, xp, reeks, vandaag, juist ? 1 : 0, t, niveau, venster),
+    env.SHOP_DB.prepare("INSERT INTO nato_dagen (lid_id, dag, xp) VALUES (?1, ?2, ?3) ON CONFLICT (lid_id, dag) DO UPDATE SET xp = xp + ?3").bind(lid.id, vandaag, xp),
+  ]);
+  if (!oud) await log(env, lid.id, "cb", "Begonnen met de NATO-training op CB-kanaal 40", "/cb/40");
+  if (omhoog) await log(env, lid.id, "cb", `NATO-training: level ${niveau} gehaald`, "/cb/40");
+  return json({ ...(await stand(env, lid)), omhoog });
+}
+
+// (Oud) na elke les: aantal juist bij de eerste poging. 10 XP per juist antwoord, 20 extra voor een foutloze les.
 async function sessie(request, env, lid) {
   let d = {}; try { d = await request.json(); } catch { /* leeg */ }
   const totaal = Math.round(Number(d.totaal)), juist = Math.round(Number(d.juist));
@@ -93,6 +124,7 @@ export async function trainingApi(request, env, url, lid, pad) {
   await zorgTraining(env);
   if (pad === "stand" && request.method === "GET") return json(await stand(env, lid));
   if (pad === "sessie" && request.method === "POST") return sessie(request, env, lid);
+  if (pad === "antwoord" && request.method === "POST") return antwoord(request, env, lid);
   if (pad === "spraak" && request.method === "POST") return spraak(request, env, lid);
   return json({ ok: false, fout: "Kanaal 40 is privé: hier kan je alleen oefenen." }, 403);
 }
@@ -102,7 +134,13 @@ export async function trainingScherm(env, lid) {
   await zorgTraining(env);
   const s = await stand(env, lid);
   return `<p class="cb-oms">${esc(TRAINING_KANAAL[2])}</p>
-    <div class="nt" id="nt" aria-live="polite"><p class="cb-stil">Training laden…</p></div>
+    <div class="cb-log" id="nt-log" aria-live="polite"></div>
+    <form class="cb-zend" id="nt-zend" autocomplete="off">
+      <div class="nt-veld"><input id="nt-tekst" maxlength="200" placeholder="Jouw antwoord…" aria-label="Jouw antwoord"><span class="nt-lv" id="nt-lv" title="Jouw level">★ L${s.mijn.niveau}</span></div>
+      <button class="cb-ptt" type="submit" id="nt-ptt" aria-label="Zenden. Houd ingedrukt om te praten."><span>PTT</span><small>Zenden</small></button>
+    </form>
+    <p class="cb-hint" id="nt-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> en spreek in het Engels.</p>
+    <details class="nt-meer"><summary>Ranglijst en spiekbriefje</summary><div id="nt-meer"></div></details>
     <script type="application/json" id="nt-data">${JSON.stringify({ ...s, naam: lid.gebruikersnaam || "" }).replace(/</g, "\\u003c")}</script>
-    <script src="/assets/js/cb-training.js" defer></script>`;
+    <script src="/assets/js/cb-training.js?v=2" defer></script>`;
 }

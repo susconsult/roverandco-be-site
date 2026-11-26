@@ -307,7 +307,7 @@ export async function cb(request, env, url) {
   if ((m = p.match(/^\/cb\/(\d{1,2})$/))) return radio(request, env, url, lid, +m[1]);
   if (p === "/cb/nieuw" && request.method === "POST") return nieuwKanaal(request, env, lid);
   if ((m = p.match(/^\/cb\/(\d{1,2})\/opheffen$/)) && request.method === "POST") return opheffen(env, lid, +m[1]);
-  if ((m = p.match(/^\/api\/cb\/40\/(stand|sessie|spraak)$/))) return trainingApi(request, env, url, lid, m[1]);
+  if ((m = p.match(/^\/api\/cb\/40\/(stand|sessie|spraak|antwoord)$/))) return trainingApi(request, env, url, lid, m[1]);
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})(\/audio)?$/)) && +m[1] === TRAINING) return trainingApi(request, env, url, lid, "");
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})$/))) return request.method === "POST" ? zenden(request, env, url, lid, +m[1]) : ophalen(env, url, lid, +m[1]);
   if ((m = p.match(/^\/api\/cb\/(\d{1,2})\/audio$/)) && request.method === "POST") return zendAudio(request, env, lid, +m[1]);
