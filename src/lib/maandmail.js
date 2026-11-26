@@ -60,8 +60,8 @@ const nuBrussel = () => {
 // De mail van begin december gaat over november: we noemen de vorige maand.
 export function editieNu() {
   const { jaar, maand } = nuBrussel();
-  const vj = maand === 1 ? jaar - 1 : jaar, vm = maand === 1 ? 12 : maand - 1;
-  return { code: `${jaar}-${String(maand).padStart(2, "0")}`, maandNaam: MAANDEN[vm - 1], jaarVan: vj };
+  // Beslist 26 nov 2026: de mail heet naar de maand waarin hij vertrekt ("December bij Rover & Co") en kijkt vooral vooruit.
+  return { code: `${jaar}-${String(maand).padStart(2, "0")}`, maandNaam: MAANDEN[maand - 1], jaarVan: jaar, maandEinde: new Date(Date.UTC(jaar, maand, 0)).toISOString().slice(0, 10) };
 }
 
 let kolomKlaar = false;
@@ -95,7 +95,10 @@ export async function verzamel(env, sinds) {
         link: a.extern_url || `${SITE}/activiteiten/${a.slug}`, knop: inschrijvingOpen(a) || a.inschrijven_url ? "Schrijf je in" : "Meer info" };
     }
   }
-  const kal = alleKal.filter((k) => !(volgende && k.slug === eerst.slug) && k.datum <= new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10)).slice(0, 5).map((k) => ({
+  const rest = alleKal.filter((k) => !(volgende && k.slug === eerst.slug));
+  const eindeMaand = editieNu().maandEinde;
+  const dezeMaand = rest.filter((k) => k.datum <= eindeMaand);
+  const kal = (dezeMaand.length >= 2 ? dezeMaand.slice(0, 8) : rest.filter((k) => k.datum <= new Date(Date.now() + 60 * 86400000).toISOString().slice(0, 10)).slice(0, 5)).map((k) => ({
     titel: k.titel, datum: k.einde && k.einde !== k.datum ? `${datumKort(k.datum)} – ${datumKort(k.einde)}` : datumKort(k.datum),
     plaats: String(k.plaats || "").split(" · ")[0], ons: !!k.ons, org: k.ons ? "Rover & Co" : (k.club || k.org || ""), link: /^https?:/.test(k.link || "") ? k.link : SITE + (k.link || "/kalender"),
   }));
@@ -109,7 +112,7 @@ export async function verzamel(env, sinds) {
       JOIN forum_categorieen c ON c.id = t.categorie_id JOIN leden l ON l.id = b.lid_id
       WHERE b.aangemaakt >= ? AND b.verwijderd = 0 AND t.verwijderd = 0 AND COALESCE(l.geblokkeerd, 0) = 0
       GROUP BY t.id ORDER BY n DESC, MAX(b.id) DESC LIMIT 4`, sinds)).map((t) => ({
-    titel: t.titel, sub: `${t.cnaam} · ${t.n} ${t.n === 1 ? "bericht" : "berichten"} deze maand`, link: `${SITE}/forum/t/${t.id}-${slugify(t.titel)}`,
+    titel: t.titel, sub: `${t.cnaam} · ${t.n} ${t.n === 1 ? "bericht" : "berichten"}`, link: `${SITE}/forum/t/${t.id}-${slugify(t.titel)}`,
   }));
 
   const landys = (await q(`SELECT w.id, w.naam, w.type, w.bouwjaar, w.foto_id, l.gebruikersnaam FROM lid_wagens w JOIN leden l ON l.id = w.lid_id
@@ -126,7 +129,7 @@ export async function verzamel(env, sinds) {
 
 /* ---------- de mail ---------- */
 
-const INTRO = "Hier is je maandoverzicht van Rover & Co: de ritten en evenementen die eraan komen, de nieuwste zoekertjes en Landy's, en wat er leefde rond het Kampvuur. Veel leesplezier en tot op de baan!";
+const INTRO = "Dit staat er deze maand op het programma bij Rover & Co, met daaronder wat er nieuw is op de site. Veel leesplezier en tot op de baan!";
 const kopje = (t) => `<div style="font-family:${FONT};font-size:12px;letter-spacing:2px;font-weight:700;color:${GROEN3};text-transform:uppercase;margin:0 0 10px">${esc(t)}</div>`;
 const meer = (t, href) => `<div style="text-align:right;margin:2px 0 24px"><a href="${esc(href)}" style="font-family:${FONT};font-size:14px;font-weight:700;color:${GROEN3};text-decoration:none">${esc(t)} &rarr;</a></div>`;
 
@@ -155,8 +158,10 @@ ${k.org ? `<div style="font-size:13px;color:${GROEN3};margin-top:2px">Organisato
 export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
   const { hero = null, volgende = null, kal = [], zk = [], vuur = [], landys = [], blog = [] } = editie.data || {};
   const intro = String(editie.intro || "").trim();
-  const titel = "Rover & Co maandoverzicht";
-  const periode = `${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
+  const Maand = editie.maandNaam.charAt(0).toUpperCase() + editie.maandNaam.slice(1);
+  const titel = `${Maand} bij Rover & Co`;
+  const periode = `Maandoverzicht ${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
+  const sectie = (t) => `<div style="font-family:${FONT};font-size:22px;font-weight:800;color:${INKT};margin:8px 0 14px;padding-top:6px;border-top:3px solid ${GROEN}">${esc(t)}</div>`;
   const voorkop = [zk.length && "nieuwe zoekertjes", landys.length && "Landy's van leden", kal.length && "wat er op de kalender staat"].filter(Boolean).join(", ") || "Het nieuws van de maand";
 
   const vn = voornaam(lid.naam) || lid.gebruikersnaam || "";
@@ -165,22 +170,24 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
     `<div style="font-family:${FONT};font-size:18px;font-weight:700;color:${INKT};margin:0 0 6px">${esc(groet)}</div>
 <div style="font-family:${FONT};font-size:15px;line-height:1.6;color:${GRIJS};margin:0 0 24px">${esc(INTRO)}</div>`,
     intro && `${kopje("Nieuw op het platform")}<div style="background:${ZACHT};border-radius:12px;padding:16px 18px;margin:0 0 24px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INKT}">${intro.split(/\n{2,}/).map((a) => `<p style="margin:0 0 8px">${esc(a).replace(/\n/g, "<br>")}</p>`).join("")}</div>`,
-    volgende && `${kopje("Eerstvolgende activiteit")}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${ZAND2};border-radius:12px;overflow:hidden;margin:0 0 24px">
+    (volgende || kal.length) && sectie(`Wat komt eraan in ${editie.maandNaam}`),
+    volgende && `${kopje("Eerstvolgende activiteit van Rover & Co")}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${ZAND2};border-radius:12px;overflow:hidden;margin:0 0 24px">
 ${volgende.mini ? `<tr><td style="padding:0"><a href="${esc(volgende.link)}"><img src="${esc(volgende.mini)}" width="${BREED - 50}" alt="${esc(volgende.titel)}" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
 <tr><td style="padding:16px 18px 18px;font-family:${FONT}"><div style="font-size:13px;font-weight:700;color:${GROEN3};margin-bottom:2px">${esc(volgende.datum)}${volgende.plaats ? " &middot; " + esc(volgende.plaats) : ""}</div>
 <a href="${esc(volgende.link)}" style="font-size:21px;line-height:1.25;font-weight:800;color:${INKT};text-decoration:none">${esc(volgende.titel)}</a>
 ${volgende.kort ? `<div style="font-size:15px;line-height:1.55;color:${GRIJS};margin:8px 0 0">${esc(volgende.kort)}</div>` : ""}
 <a href="${esc(volgende.link)}" style="display:inline-block;margin-top:14px;padding:11px 20px;background:${GROEN};color:#ffffff;font-size:15px;font-weight:700;text-decoration:none;border-radius:8px">${esc(volgende.knop)}</a></td></tr></table>`,
     kal.length && `${kopje(volgende ? "Ook op de kalender" : "Op de kalender")}${kalRijen(kal)}${meer("Hele kalender", SITE + "/kalender")}`,
+    (zk.length || landys.length || blog.length) && sectie("Nieuw op de site"),
     zk.length && `${kopje("Nieuwste zoekertjes")}${tegels(zk)}${meer("Alle zoekertjes", SITE + "/zoekertjes")}`,
-    blog.length && `${kopje("Op de blog")}${rijen(blog, true)}${meer("Alle artikels", SITE + "/blog")}`,
-    vuur.length && `${kopje("Rond het Kampvuur")}${rijen(vuur)}${meer("Naar het Kampvuur", SITE + "/forum")}`,
     landys.length && `${kopje("Nieuwe Landy's van leden")}${tegels(landys)}
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:${ZACHT};border-radius:12px;margin:12px 0 8px"><tr><td style="padding:14px 16px;font-family:${FONT}">
 <div style="font-size:15px;font-weight:700;color:${INKT};margin-bottom:2px">Jouw Landy staat er nog niet bij?</div>
 <div style="font-size:14px;color:${GRIJS};margin-bottom:10px">Zet hem erbij met een foto, dan zien de andere leden hem ook.</div>
 <a href="${SITE}/account/garage" style="display:inline-block;padding:10px 18px;background:${GROEN};color:#ffffff;font-size:14px;font-weight:700;text-decoration:none;border-radius:8px">Voeg je Landy toe</a></td></tr></table>
 ${meer("Alle Landy's", SITE + "/landys")}`,
+    blog.length && `${kopje("Op de blog")}${rijen(blog, true)}${meer("Alle artikels", SITE + "/blog")}`,
+    vuur.length && `${kopje("Vorige maand rond het Kampvuur")}${rijen(vuur)}${meer("Naar het Kampvuur", SITE + "/forum")}`,
   ].filter(Boolean).join("");
 
   const html = `<!doctype html><html lang="nl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="color-scheme" content="light only"><title>${esc(titel)}</title></head>
@@ -201,21 +208,22 @@ ${afmeld ? `Geen maandoverzicht meer? <a href="${esc(afmeld)}" style="color:#fff
 
   const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum}${x.org ? `, organisator: ${x.org}` : ""})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
   const tekst = [
-    groet, "", INTRO, "", `Rover & Co maandoverzicht, ${periode}`, "",
+    groet, "", INTRO, "", `${titel} (${periode})`, "",
     ...(intro ? ["Nieuw op het platform:", intro, ""] : []),
-    ...lijst("Op de kalender", kal, SITE + "/kalender"),
+    ...(volgende ? [`Eerstvolgende activiteit van Rover & Co: ${volgende.titel} (${volgende.datum}${volgende.plaats ? ", " + volgende.plaats : ""}): ${volgende.link}`, ""] : []),
+    ...lijst(`Wat komt eraan in ${editie.maandNaam}`, kal, SITE + "/kalender"),
     ...lijst("Nieuwste zoekertjes", zk, SITE + "/zoekertjes"),
-    ...lijst("Op de blog", blog, SITE + "/blog"),
-    ...lijst("Rond het Kampvuur", vuur, SITE + "/forum"),
     ...lijst("Nieuwe Landy's van leden", landys, SITE + "/landys"),
     ...(landys.length ? [`Jouw Landy staat er nog niet bij? Voeg hem toe: ${SITE}/account/garage`, ""] : []),
+    ...lijst("Op de blog", blog, SITE + "/blog"),
+    ...lijst("Vorige maand rond het Kampvuur", vuur, SITE + "/forum"),
     "Facebook: https://www.facebook.com/roverandcobe/", "Instagram: https://www.instagram.com/roverandco.be/", "",
     "Vragen? Antwoord op deze mail of mail naar info@roverandco.be.", "Rover & Co VZW",
     ...(afmeld ? ["", `Geen maandoverzicht meer? Schrijf je hier uit: ${afmeld}`] : []),
   ].join("\n");
 
   return {
-    onderwerp: `${test ? "[TEST] " : ""}Rover & Co maandoverzicht – ${editie.maandNaam}`,
+    onderwerp: `${test ? "[TEST] " : ""}${titel}`,
     tekst, html, bijlagen: [],
     headers: afmeld ? { "List-Unsubscribe": `<${afmeld}&klik=1>, <mailto:info@roverandco.be?subject=Afmelden>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" } : undefined,
   };
