@@ -142,5 +142,5 @@ export async function trainingScherm(env, lid) {
     <p class="cb-hint" id="nt-hint">Typ en druk op PTT, of <b>houd PTT ingedrukt</b> en spreek in het Engels.</p>
     <details class="nt-meer"><summary>Ranglijst en spiekbriefje</summary><div id="nt-meer"></div></details>
     <script type="application/json" id="nt-data">${JSON.stringify({ ...s, naam: lid.gebruikersnaam || "" }).replace(/</g, "\\u003c")}</script>
-    <script src="/assets/js/cb-training.js?v=3" defer></script>`;
+    <script src="/assets/js/cb-training.js?v=4" defer></script>`;
 }
