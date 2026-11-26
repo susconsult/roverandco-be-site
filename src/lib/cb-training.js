@@ -1,3 +1,4 @@
+import { Buffer } from "node:buffer";
 // CB-kanaal 40: privé NATO-training. Geen berichten, alleen oefenen zoals Duolingo:
 // tikken, kiezen of spreken met PTT (spraak naar tekst in de browser). Scores, dagreeks en ranglijst in D1.
 import { esc } from "./sjabloon.js";
@@ -64,10 +65,35 @@ async function sessie(request, env, lid) {
   return json({ ...(await stand(env, lid)), verdiend: xp });
 }
 
+// Spraak naar tekst met Whisper op Cloudflare Workers AI (binding AI). De opname wordt niet bewaard.
+const AUDIO = ["audio/webm", "audio/ogg", "audio/mp4", "audio/mpeg", "audio/aac", "audio/wav", "audio/x-m4a"];
+const PROMPT = "NATO phonetic alphabet on the radio: Alfa, Bravo, Charlie, Delta, Echo, Foxtrot, Golf, Hotel, India, Juliett, Kilo, Lima, Mike, November, Oscar, Papa, Quebec, Romeo, Sierra, Tango, Uniform, Victor, Whiskey, X-ray, Yankee, Zulu. Figures one, two, tree, fower, fife, six, seven, eight, niner, zero. I spell. Rover Convoy, this is Rover two seven, say again, wilco, roger, over.";
+const laatsteSpraak = new Map();
+async function spraak(request, env, lid) {
+  if (!env.AI) return json({ ok: false, fout: "Spraak staat nog niet aan op de server. Typ je antwoord." }, 501);
+  const type = String(request.headers.get("content-type") || "").split(";")[0].trim().toLowerCase();
+  if (!AUDIO.includes(type)) return json({ ok: false, fout: "Dit soort opname wordt niet ondersteund. Typ je antwoord." }, 415);
+  const data = await request.arrayBuffer();
+  if (data.byteLength < 500) return json({ ok: true, tekst: "" });
+  if (data.byteLength > 600_000) return json({ ok: false, fout: "De opname is te lang. Hou het kort." }, 413);
+  if (Date.now() - (laatsteSpraak.get(lid.id) || 0) < 1000) return json({ ok: false, fout: "Rustig aan, probeer opnieuw." }, 429);
+  laatsteSpraak.set(lid.id, Date.now());
+  try {
+    const r = await env.AI.run("@cf/openai/whisper-large-v3-turbo", { audio: Buffer.from(data).toString("base64"), language: "en", vad_filter: true, initial_prompt: PROMPT });
+    let tekst = String(r?.text || "").replace(/\s+/g, " ").trim();
+    if (tekst.length > 300 || /phonetic alphabet/i.test(tekst)) tekst = ""; // Whisper herhaalt soms de prompt bij stilte
+    return json({ ok: true, tekst });
+  } catch (e) {
+    console.log("whisper fout", e?.message || e);
+    return json({ ok: false, fout: "Omzetten lukte niet. Probeer opnieuw of typ je antwoord." }, 502);
+  }
+}
+
 export async function trainingApi(request, env, url, lid, pad) {
   await zorgTraining(env);
   if (pad === "stand" && request.method === "GET") return json(await stand(env, lid));
   if (pad === "sessie" && request.method === "POST") return sessie(request, env, lid);
+  if (pad === "spraak" && request.method === "POST") return spraak(request, env, lid);
   return json({ ok: false, fout: "Kanaal 40 is privé: hier kan je alleen oefenen." }, 403);
 }
 

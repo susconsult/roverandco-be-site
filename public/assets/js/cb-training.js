@@ -1,5 +1,5 @@
 /* CB-kanaal 40: NATO-training. Lessen van 10 oefeningen: kiezen, tegels tikken of spreken met PTT.
-   Spraak naar tekst via de spraakherkenning van de browser (Engels). Fouten komen achteraan terug, zoals bij Duolingo. */
+   Spraak naar tekst op onze eigen server (Cloudflare Workers AI, Whisper). Fouten komen achteraan terug, zoals bij Duolingo. */
 (function () {
   "use strict";
   const doos = document.getElementById("nt");
@@ -92,7 +92,7 @@
     return s.charAt(0).toUpperCase() + s.slice(1);
   };
 
-  const kanPraten = !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  const kanPraten = !!(navigator.mediaDevices && navigator.mediaDevices.getUserMedia && window.MediaRecorder);
   let stil = bewaar.lees("stil", false); // "ik kan nu niet praten"
   const spreken = () => kanPraten && !stil;
 
@@ -238,7 +238,7 @@
   }
 
   function einde() {
-    lcd("");
+    lcd(""); micUit();
     const { juist, eerste } = les;
     doos.innerHTML = `<div class="nt-einde"><p class="nt-groot">${juist}/${eerste}</p><p>${juist === eerste ? "Foutloos! Over and out." : juist >= eerste * 0.7 ? "Goed bezig, bijna radiovast." : "Blijven oefenen, dan zit het er zo in."}</p><p class="nt-klein" id="nt-xp">Score bewaren…</p>
       <div class="nt-knoppen"><button type="button" class="btn btn-solid" data-les="${les.niveau}">Nog een les</button><button type="button" class="btn" data-start>Naar het overzicht</button></div></div>`;
@@ -250,37 +250,51 @@
       }).catch(() => { const el = document.getElementById("nt-xp"); if (el) el.textContent = "Score bewaren lukte niet. Controleer je verbinding."; });
   }
 
-  /* ---------------- PTT met spraakherkenning ---------------- */
+  /* ---------------- PTT: opnemen, op de server omzetten naar tekst (Whisper) ---------------- */
+  // De microfoon blijft open tijdens een les, zodat het eerste woord niet verloren gaat en je niet telkens toestemming moet geven.
+  let stroom = null, mime = "";
+  if (kanPraten) ["audio/webm;codecs=opus", "audio/webm", "audio/mp4", "audio/ogg;codecs=opus"].some((m) => MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(m) && (mime = m));
+  function micUit() { if (stroom) { stroom.getTracks().forEach((t) => t.stop()); stroom = null; } }
+  function mic() {
+    if (stroom && stroom.getTracks().some((t) => t.readyState === "live")) return Promise.resolve(stroom);
+    return navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true } }).then((s) => (stroom = s));
+  }
   function koppelPtt(o) {
     const ptt = document.getElementById("nt-ptt"), uit = document.getElementById("nt-gehoord");
-    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-    let rec = null, tekst = "", tussen = "", bezig = false, los = false;
-    const stop = () => { los = true; ptt.classList.remove("tx"); if (rec && bezig) setTimeout(() => { try { rec.stop(); } catch (e) { /* al gestopt */ } }, 350); };
+    let rec = null, stuks = [], begin = 0, los = false, klok = null;
+    const zeg = (t, fout) => { uit.innerHTML = `<small class="${fout ? "fout" : ""}">${t}</small>`; };
+    const stop = () => { los = true; clearInterval(klok); ptt.classList.remove("tx"); if (rec && rec.state === "recording") setTimeout(() => rec.state === "recording" && rec.stop(), 250); };
     ptt.addEventListener("pointerdown", (e) => {
-      e.preventDefault(); if (ptt.disabled || bezig) return;
+      e.preventDefault(); if (ptt.disabled || (rec && rec.state === "recording")) return;
       ptt.setPointerCapture && ptt.setPointerCapture(e.pointerId);
-      tekst = ""; tussen = ""; los = false;
-      rec = new SR(); rec.lang = "en-US"; rec.continuous = true; rec.interimResults = true; rec.maxAlternatives = 1;
-      rec.onresult = (ev) => {
-        tekst = ""; tussen = "";
-        for (let i = 0; i < ev.results.length; i++) { if (ev.results[i].isFinal) tekst += " " + ev.results[i][0].transcript; else tussen += " " + ev.results[i][0].transcript; }
-        uit.innerHTML = `<p>${esc((tekst + tussen).trim())}</p>`;
-      };
-      rec.onerror = (ev) => {
-        bezig = false; ptt.classList.remove("tx");
-        uit.innerHTML = `<small class="fout">${ev.error === "not-allowed" || ev.error === "service-not-allowed" ? "Geen toegang tot je microfoon. Sta die toe in je browser, of kies “Ik kan nu niet praten”." : ev.error === "no-speech" ? "Ik hoorde niets. Houd PTT ingedrukt terwijl je praat." : "Spraakherkenning lukte niet. Probeer opnieuw of typ je antwoord."}</small>`;
-      };
-      rec.onend = () => {
-        bezig = false; ptt.classList.remove("tx");
-        const gezegd = (tekst + tussen).trim();
-        if (gezegd) controleer(gezegd);
-      };
-      try { rec.start(); bezig = true; ptt.classList.add("tx"); uit.innerHTML = "<small>Je zendt… laat PTT los als je klaar bent.</small>"; } catch (err) { bezig = false; }
-      if (los) stop();
+      los = false;
+      mic().then((s) => {
+        if (los) { zeg("Microfoon staat klaar. Houd PTT nu ingedrukt terwijl je praat."); return; }
+        stuks = []; rec = new MediaRecorder(s, mime ? { mimeType: mime } : undefined);
+        rec.ondataavailable = (ev) => { if (ev.data.size) stuks.push(ev.data); };
+        rec.onstop = () => {
+          if (Date.now() - begin < 600) { zeg("Te kort. Houd PTT ingedrukt zolang je praat."); return; }
+          const type = (rec.mimeType || mime || "audio/webm").split(";")[0];
+          ptt.disabled = true; zeg("Even luisteren…");
+          fetch("/api/cb/40/spraak", { method: "POST", credentials: "same-origin", headers: { "content-type": type }, body: new Blob(stuks, { type }) })
+            .then((r) => r.json())
+            .then((d) => {
+              ptt.disabled = false;
+              if (!d.ok) return zeg(esc(d.fout || "Omzetten lukte niet. Probeer opnieuw of typ je antwoord."), true);
+              if (!d.tekst) return zeg("Ik hoorde niets. Houd PTT ingedrukt en spreek duidelijk.", true);
+              uit.innerHTML = `<p>${esc(d.tekst)}</p>`;
+              controleer(d.tekst);
+            })
+            .catch(() => { ptt.disabled = false; zeg("Omzetten lukte niet. Controleer je verbinding of typ je antwoord.", true); });
+        };
+        rec.start(); begin = Date.now(); ptt.classList.add("tx");
+        zeg("Je zendt… laat PTT los als je klaar bent.");
+        klok = setInterval(() => { if (Date.now() - begin > 15000) stop(); }, 250);
+      }).catch(() => zeg("Geen toegang tot je microfoon. Sta die toe in je browser, of kies “Ik kan nu niet praten”.", true));
     });
     ptt.addEventListener("pointerup", stop); ptt.addEventListener("pointercancel", stop);
     ptt.addEventListener("contextmenu", (e) => e.preventDefault());
-    ptt.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") { e.preventDefault(); } });
+    ptt.addEventListener("keydown", (e) => { if (e.key === " " || e.key === "Enter") e.preventDefault(); });
   }
   function typVeld() {
     const o = les.lijst[les.i];
@@ -299,14 +313,14 @@
     return `<ol class="nt-rang">${rij.map((x) => `<li class="${x.ik ? "ik" : ""}"><b>${x.plaats}</b><span>${esc(x.naam)}</span><em>${x.xp} XP</em></li>`).join("")}</ol>`;
   }
   function start() {
-    les = null; lcd("");
+    les = null; lcd(""); micUit();
     const m = data.mijn || { xp: 0, reeks: 0, week: 0, juist: 0, totaal: 0 };
     const pct = m.totaal ? Math.round((m.juist / m.totaal) * 100) : 0;
     doos.innerHTML = `<div class="nt-start">
       <div class="nt-stats"><div><b>${m.reeks}</b><small>${m.reeks === 1 ? "dag" : "dagen"} op rij${m.reeks && !m.vandaag ? ", oefen vandaag!" : ""}</small></div><div><b>${m.week}</b><small>XP deze week</small></div><div><b>${m.xp}</b><small>XP in totaal</small></div><div><b>${pct}%</b><small>juist</small></div></div>
       <h3 class="nt-h">Kies een les</h3>
       <div class="nt-lessen">${LESSEN.map(([n, t, s]) => `<button type="button" class="nt-les" data-les="${n}"><b>${n || "★"}</b><span>${t}<small>${s}</small></span></button>`).join("")}</div>
-      <p class="nt-klein">${kanPraten ? (stil ? `Spreekoefeningen staan uit. <button type="button" class="linkknop" data-praat>Zet ze aan</button>` : "Bij spreekoefeningen houd je PTT ingedrukt en spreek je in het Engels.") : "Je browser kan geen spraak omzetten (dat lukt wel in Chrome, Edge en Safari). Je tikt of typt je antwoorden."}</p>
+      <p class="nt-klein">${kanPraten ? (stil ? `Spreekoefeningen staan uit. <button type="button" class="linkknop" data-praat>Zet ze aan</button>` : "Bij spreekoefeningen houd je PTT ingedrukt en spreek je in het Engels.") : "Je browser kan niet opnemen. Je tikt of typt je antwoorden."}</p>
       <h3 class="nt-h">Ranglijst</h3>
       <div class="nt-tabs" role="tablist"><button type="button" role="tab" data-tab="week" aria-selected="${tab === "week"}">Deze week</button><button type="button" role="tab" data-tab="altijd" aria-selected="${tab === "altijd"}">Altijd</button></div>
       ${lijstHtml(data[tab])}
