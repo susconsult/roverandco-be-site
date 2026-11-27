@@ -1,5 +1,5 @@
 // Maandelijkse nieuwsmail van Rover & Co (beslist door Pieter, 25 nov 2026):
-// - blokken: Nieuw op het platform (eigen tekst), Activiteiten + kalender, Zoekertjes (4 tegels), Blog, Kampvuur, Landy's (4 tegels)
+// - blokken: intro (AI-voorstel, aanpasbaar), Wat komt eraan (activiteit + kalender), Nieuw op de site (zoekertjes, Landy's, blog), Kampvuur
 // - naar alle actieve accounts; wie zich afmeldt (leden.maandmail = 0) krijgt niets meer
 // - op de 1ste van de maand krijgt Pieter een testmail; versturen pas na zijn klik op /beheer/maandmail
 // - de inhoud wordt bij het klaarzetten vastgelegd (instellingen.maandmail_editie), zodat iedereen dezelfde mail krijgt
@@ -161,6 +161,7 @@ ${k.org ? `<div style="font-size:13px;color:${GROEN3};margin-top:2px">Organisato
 export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
   const { hero = null, volgende = null, kal = [], zk = [], vuur = [], landys = [], blog = [] } = editie.data || {};
   const intro = String(editie.intro || "").trim();
+  const aanhef = String(editie.aanhef || "").trim() || INTRO;
   const Maand = editie.maandNaam.charAt(0).toUpperCase() + editie.maandNaam.slice(1);
   const titel = `${Maand} bij Rover & Co`;
   const periode = `Maandoverzicht ${editie.maandNaam} ${editie.jaarVan || ""}`.trim();
@@ -171,8 +172,7 @@ export function maandMail(lid, editie, { afmeld = "", test = false } = {}) {
   const groet = `Hallo${vn ? " " + vn : ""},`;
   const blokken = [
     `<div style="font-family:${FONT};font-size:18px;font-weight:700;color:${INKT};margin:0 0 6px">${esc(groet)}</div>
-<div style="font-family:${FONT};font-size:15px;line-height:1.6;color:${GRIJS};margin:0 0 24px">${esc(INTRO)}</div>`,
-    intro && `${kopje("Nieuw op het platform")}<div style="background:${ZACHT};border-radius:12px;padding:16px 18px;margin:0 0 24px;font-family:${FONT};font-size:15px;line-height:1.6;color:${INKT}">${intro.split(/\n{2,}/).map((a) => `<p style="margin:0 0 8px">${esc(a).replace(/\n/g, "<br>")}</p>`).join("")}</div>`,
+<div style="font-family:${FONT};font-size:15px;line-height:1.6;color:${INKT};margin:0 0 24px">${aanhef.split(/\n{2,}/).map((a) => `<p style="margin:0 0 10px">${esc(a).replace(/\n/g, "<br>")}</p>`).join("")}</div>`,
     (volgende || kal.length) && sectie(`Wat komt eraan in ${editie.maandNaam}`),
     volgende && `${kopje("Eerstvolgende activiteit van Rover & Co")}<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="border:1px solid ${ZAND2};border-radius:12px;overflow:hidden;margin:0 0 24px">
 ${volgende.mini ? `<tr><td style="padding:0"><a href="${esc(volgende.link)}"><img src="${esc(volgende.mini)}" width="${BREED - 50}" alt="${esc(volgende.titel)}" style="display:block;border:0;width:100%;height:auto"></a></td></tr>` : ""}
@@ -211,8 +211,7 @@ ${afmeld ? `Geen maandoverzicht meer? <a href="${esc(afmeld)}" style="color:#fff
 
   const lijst = (t, items, link) => items.length ? [t + ":", ...items.map((x) => `- ${x.titel}${x.datum ? ` (${x.datum}${x.org ? `, organisator: ${x.org}` : ""})` : x.sub ? ` (${x.sub})` : ""}: ${x.link}`), `Meer: ${link}`, ""] : [];
   const tekst = [
-    groet, "", INTRO, "", `${titel} (${periode})`, "",
-    ...(intro ? ["Nieuw op het platform:", intro, ""] : []),
+    groet, "", aanhef, "", `${titel} (${periode})`, "",
     ...(volgende ? [`Eerstvolgende activiteit van Rover & Co: ${volgende.titel} (${volgende.datum}${volgende.plaats ? ", " + volgende.plaats : ""}): ${volgende.link}`, ""] : []),
     ...lijst(`Wat komt eraan in ${editie.maandNaam}`, kal, SITE + "/kalender"),
     ...lijst("Nieuwste zoekertjes", zk, SITE + "/zoekertjes"),
@@ -232,6 +231,62 @@ ${afmeld ? `Geen maandoverzicht meer? <a href="${esc(afmeld)}" style="color:#fff
   };
 }
 
+/* ---------- aanhef (intro onder "Hallo X,"): voorstel door Workers AI, aanpasbaar op /beheer/maandmail ---------- */
+// Beslist 27 nov 2026: de intro moet weerspiegelen wat er echt in de mail staat, enthousiast en vriendelijk,
+// voorgesteld door een LLM van Cloudflare en aanpasbaar (zelf typen of de AI een opdracht geven).
+const LLM = "@cf/meta/llama-3.3-70b-instruct-fp8-fast";
+function feiten(editie) {
+  const d = editie.data || {}, regels = [`Maand van deze mail: ${editie.maandNaam} ${editie.jaarVan}.`];
+  if (d.volgende) regels.push(`Eerstvolgende activiteit van Rover & Co: ${d.volgende.titel}, ${d.volgende.datum}${d.volgende.plaats ? ", " + d.volgende.plaats : ""}.${d.volgende.kort ? " " + d.volgende.kort : ""}`);
+  if (d.kal?.length) regels.push(`Op de kalender (ook van andere clubs): ${d.kal.map((k) => `${k.titel} (${k.datum}${k.org ? ", " + k.org : ""})`).join("; ")}.`);
+  if (d.zk?.length) regels.push(`Zoekertjes in de mail: ${d.zk.length} (${d.zk.map((z) => z.titel).join(", ")}).`);
+  if (d.landys?.length) regels.push(`Nieuwe Landy's van leden: ${d.landys.length} (${d.landys.map((l) => l.titel).join(", ")}).`);
+  if (d.blog?.length) regels.push(`Nieuwe blogartikels: ${d.blog.map((b) => b.titel).join("; ")}.`);
+  if (d.vuur?.length) regels.push(`Populair op het Kampvuur (het forum): ${d.vuur.map((v) => v.titel).join("; ")}.`);
+  return regels.join("\n");
+}
+export function standaardAanhef(editie) {
+  const d = editie.data || {}, delen = [];
+  const Maand = editie.maandNaam.charAt(0).toUpperCase() + editie.maandNaam.slice(1);
+  let a = `${Maand} staat voor de deur, en er gebeurt weer van alles!`;
+  if (d.volgende) a += ` Op ${d.volgende.datum} staat ${d.volgende.titel}${d.volgende.plaats ? " in " + d.volgende.plaats : ""} op het programma${d.kal?.length ? ", en ook andere clubs hebben mooie ritten gepland" : ""}.`;
+  else if (d.kal?.length) a += ` Op de kalender staan ${d.kal.length} ritten en evenementen.`;
+  if (d.zk?.length) delen.push(`${d.zk.length} ${d.zk.length === 1 ? "zoekertje" : "zoekertjes"}`);
+  if (d.landys?.length) delen.push(`${d.landys.length} ${d.landys.length === 1 ? "Landy" : "Landy's"} van leden`);
+  if (d.blog?.length) delen.push(`${d.blog.length} ${d.blog.length === 1 ? "blogartikel" : "blogartikels"}`);
+  if (delen.length) a += ` Op de site kwamen er ${delen.length > 1 ? delen.slice(0, -1).join(", ") + " en " + delen.slice(-1) : delen[0]} bij${d.vuur?.length ? ", en rond het Kampvuur werd er volop gebabbeld" : ""}.`;
+  return a + "\n\nVeel leesplezier, en hopelijk tot snel op de baan!";
+}
+export async function aiAanhef(env, editie, { opdracht = "", huidig = "" } = {}) {
+  if (!env.AI) return { ok: false, fout: "AI staat niet aan op de server." };
+  const systeem = `Je schrijft de intro van de maandelijkse nieuwsmail van Rover & Co, een gezellige Belgische Land Rover-community uit Oostham (Tessenderlo-Ham).
+Schrijf in vlot, warm Vlaams-Nederlands (geen Hollandse uitdrukkingen), enthousiast en vriendelijk, zoals een clublid dat de andere leden aanspreekt met "je".
+Regels:
+- 2 korte alinea's, samen hoogstens 90 woorden. Gescheiden door een lege regel.
+- Gebruik ALLEEN de feiten die je krijgt. Verzin geen data, plaatsen, aantallen of activiteiten.
+- Noem de eerstvolgende activiteit van Rover & Co als die er is, en geef een indruk van wat er nog in de mail staat (kalender, zoekertjes, Landy's, blog, Kampvuur).
+- Geen aanhef ("Hallo ..." staat er al boven), geen ondertekening, geen emoji, geen opsommingstekens, geen aanhalingstekens rond de tekst.
+- Eindig met een korte, hartelijke afsluitzin (bv. iets met "tot op de baan").
+Geef alleen de tekst terug.`;
+  const vraag = huidig && opdracht
+    ? `Feiten:\n${feiten(editie)}\n\nHuidige intro:\n${huidig}\n\nPas de intro aan volgens deze opdracht van Pieter: ${opdracht}\nHoud je aan de regels.`
+    : `Feiten:\n${feiten(editie)}${opdracht ? `\n\nExtra wens van Pieter: ${opdracht}` : ""}\n\nSchrijf de intro.`;
+  try {
+    const r = await env.AI.run(LLM, { messages: [{ role: "system", content: systeem }, { role: "user", content: vraag }], max_tokens: 400, temperature: 0.8 });
+    let t = String(r?.response ?? r?.choices?.[0]?.message?.content ?? "").trim();
+    t = t.replace(/^["'“”„]+|["'“”„]+$/g, "").replace(/^(hallo|hoi|beste|dag)[^\n]*,\s*\n+/i, "").replace(/\n{3,}/g, "\n\n").trim();
+    if (t.length < 40) return { ok: false, fout: "De AI gaf geen bruikbare tekst terug. Probeer opnieuw." };
+    return { ok: true, tekst: t.slice(0, 1500) };
+  } catch (e) {
+    console.log("maandmail ai", String(e?.message || e));
+    return { ok: false, fout: "De AI antwoordde niet. Probeer opnieuw of pas de tekst zelf aan." };
+  }
+}
+async function bewaardeAanhef(env, code) {
+  try { const v = JSON.parse((await instelling(env, "maandmail_aanhef")) || "null"); return v?.code === code ? String(v.tekst || "") : ""; } catch { return ""; }
+}
+const zetAanhef = (env, code, tekst) => zet(env, "maandmail_aanhef", JSON.stringify({ code, tekst: String(tekst || "").slice(0, 1500) }));
+
 /* ---------- editie: concept (live) of vastgelegd ---------- */
 
 async function vorigeVerzending(env) {
@@ -247,7 +302,9 @@ export async function concept(env) {
   // Sfeerfoto bovenaan: elke maand een andere uit de bannerfoto's van de site (vast per editie).
   data.hero = { foto: `/assets/img/${BANNERS[[...e.code].reduce((t, c) => t + c.charCodeAt(0), 0) % BANNERS.length]}.webp` };
   const ontbreekt = await vulFotos(env, data);
-  return { ...e, intro: (await instelling(env, "maandmail_intro")) || "", data, ontbreekt };
+  const ed = { ...e, intro: "", data, ontbreekt }; // "Nieuw op het platform" vervangen door de intro (27 nov 2026)
+  ed.aanhef = (await bewaardeAanhef(env, e.code)) || standaardAanhef(ed);
+  return ed;
 }
 
 // Wie krijgt de maandmail: alle actieve accounts, behalve wie zich afmeldde (maandmail = 0).
@@ -396,7 +453,13 @@ export async function beheerMaandmail(request, env, url, email) {
     const f = await request.formData();
     const actie = String(f.get("actie") || "");
     if (f.has("intro")) await zet(env, "maandmail_intro", String(f.get("intro") || "").slice(0, 2000));
-    if (actie === "test") {
+    if (f.has("aanhef")) await zetAanhef(env, e.code, f.get("aanhef"));
+    if (actie === "voorstel" || actie === "ai") {
+      const c = await concept(env);
+      const r = await aiAanhef(env, c, actie === "ai" ? { opdracht: String(f.get("opdracht") || "").slice(0, 300), huidig: c.aanhef } : { opdracht: "" });
+      if (r.ok) { await zetAanhef(env, e.code, r.tekst); melding = actie === "ai" ? "Intro aangepast door de AI. Lees hem even na." : "Nieuw voorstel van de AI. Lees het even na."; }
+      else melding = "!" + r.fout;
+    } else if (actie === "test") {
       const r = await stuurTest(env, await concept(env));
       melding = r.ok ? `Testmail verstuurd naar ${TESTADRES}.` : `!Testmail mislukt: ${r.fout || r.status}`;
     } else if (actie === "versturen") {
@@ -418,6 +481,10 @@ export async function beheerMaandmail(request, env, url, email) {
 
   const vorige = await vorigeVerzending(env);
   const al = vorige?.code === e.code;
+  if (!al && request.method === "GET" && !(await bewaardeAanhef(env, e.code))) {
+    const r = await aiAanhef(env, await concept(env));
+    if (r.ok) await zetAanhef(env, e.code, r.tekst);
+  }
   const telling = al ? Object.fromEntries((((await env.SHOP_DB.prepare("SELECT status, COUNT(*) n FROM mail_wachtrij WHERE campagne = 'maandmail' AND sleutel LIKE ? GROUP BY status").bind(e.code + "-%").all()).results) || []).map((r) => [r.status, r.n])) : {};
   const ed = al ? vorige : await concept(env);
   const aantal = al ? vorige.ontvangers : (await ontvangers(env)).length;
@@ -430,8 +497,11 @@ export async function beheerMaandmail(request, env, url, email) {
 <div class="mm-cijfers"><span><b>${telling.verzonden || 0}</b>verzonden</span><span><b>${(telling.wacht || 0) + (telling.bezig || 0)}</b>wachten</span><span><b>${telling.fout || 0}</b>mislukt</span><span><b>${aantal}</b>ontvangers</span></div>
 ${await statsHtml(env, e.code, vorige)}
 <p style="font-size:14px;color:#5B625C">De mails vertrekken automatisch via de wachtrij (elk kwartier een paar, tussen 8 en 21 u). Mislukte mails zet je opnieuw klaar op <a href="/beheer/versturen">Versturen</a>.</p>`
-    : `<form method="post"><label for="intro"><b>Nieuw op het platform</b> <small>(mag leeg blijven, dan valt het blok weg)</small></label>
-<textarea id="intro" name="intro" maxlength="2000" placeholder="Bijvoorbeeld: Vanaf nu kan je zoekertjes plaatsen.">${esc(ed.intro)}</textarea>
+    : `<form method="post"><label for="aanhef"><b>Intro</b> <small>(voorstel van de AI op basis van wat er in de mail staat; pas gerust aan)</small></label>
+<textarea id="aanhef" name="aanhef" maxlength="1500" style="min-height:150px">${esc(ed.aanhef || "")}</textarea>
+<div class="mm-rij"><button class="btn" name="actie" value="voorstel">Nieuw voorstel</button>
+<input name="opdracht" maxlength="300" placeholder="Opdracht voor de AI, bv. korter, of zeg dat we helpers zoeken" style="flex:1;min-width:220px;padding:9px 12px;border:1px solid #cfc6b0;border-radius:8px;font:inherit">
+<button class="btn" name="actie" value="ai">Pas aan met AI</button></div>
 <div class="mm-rij"><button class="btn" name="actie" value="bewaar">Bewaren</button><button class="btn" name="actie" value="test">Testmail naar mij</button>
 <button class="btn btn-solid" name="actie" value="versturen" onclick="return confirm('Maandoverzicht ${esc(ed.maandNaam)} versturen naar ${aantal} leden?')">Versturen naar ${aantal} leden</button></div>
 <p style="font-size:14px;color:#5B625C;margin:0">Gaat naar alle actieve accounts, behalve wie zich afmeldde. Op de 1ste van elke maand krijg je automatisch een testmail op ${TESTADRES}.</p></form>`}</div>
