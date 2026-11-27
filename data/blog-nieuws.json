@@ -1,5 +1,12 @@
 [
  {
+  "slug": "santana-spaanse-land-rover",
+  "titel": "Santana: de Spaanse Land Rover",
+  "foto": "blog/santana-spaanse-land-rover",
+  "rubriek": "Geschiedenis",
+  "datum": "27 november 2026"
+ },
+ {
   "slug": "koelsysteem-klassieke-land-rover",
   "titel": "Het koelsysteem van een klassieke Land Rover",
   "foto": "blog/koelsysteem-klassieke-land-rover",
@@ -18,13 +25,6 @@
   "titel": "Partner in de kijker: Hobbyland, de doe-het-zelfzaak uit Mol",
   "foto": "blog/partner-hobbyland",
   "rubriek": "Partners",
-  "datum": "24 november 2026"
- },
- {
-  "slug": "pink-panther-land-rover",
-  "titel": "De Pink Panther: waarom het SAS een roze Land Rover reed",
-  "foto": "blog/pink-panther-land-rover",
-  "rubriek": "Geschiedenis",
   "datum": "24 november 2026"
  }
 ]
